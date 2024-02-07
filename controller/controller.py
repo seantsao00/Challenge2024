@@ -23,11 +23,10 @@ class Controller:
         """
         self.register_listeners()
 
-    def initialize(self, event: EventInitialize):
+    def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
-        pass
 
-    def handle_every_tick(self, event: EventEveryTick):
+    def handle_every_tick(self, _: EventEveryTick):
         """Do things should be done every tick."""
         key_down_events = []
         ev_manager = get_event_manager()
@@ -57,6 +56,12 @@ class Controller:
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
 
     def ctrl_play(self):
+        """
+        Control the behavior of player characters depending on key input during the game.
+
+        When the method called, controller get what keys is pressed in this tick,
+        and post EventPlayerMove according to the keys pressed.
+        """
         ev_manager = get_event_manager()
         keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)

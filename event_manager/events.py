@@ -18,12 +18,10 @@ class BaseEvent:
 
 class EventInitialize(BaseEvent):
     """Event which will be posted when a new round of game starts."""
-    pass
 
 
 class EventQuit(BaseEvent):
     """Event which will be posted when a game round ends."""
-    pass
 
 
 class EventPauseModel(BaseEvent):
@@ -32,7 +30,6 @@ class EventPauseModel(BaseEvent):
 
     For example, a listener which forcibly pauses all characters can be registered with this event.
     """
-    pass
 
 
 class EventContinueModel(BaseEvent):
@@ -41,12 +38,10 @@ class EventContinueModel(BaseEvent):
 
     For example, a listener which resumes timer of the game can be registered with this event.
     """
-    pass
 
 
 class EventEveryTick(BaseEvent):
     """Event which will be posted every tick."""
-    pass
 
 
 class EventPlayerMove(BaseEvent):

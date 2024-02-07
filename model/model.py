@@ -25,9 +25,11 @@ class Model:
         (e.g., The time that has elapsed in the game, )
         they should be initialized in Model.initialize()
         """
-        pass
+        self.clock: pg.time.Clock
+        self.timer: int
+        self.running: bool = False
 
-    def initialize(self, event: events.EventInitialize):
+    def initialize(self, _: events.EventInitialize):
         """
         Initialize attributes related to a game.
 
@@ -36,7 +38,7 @@ class Model:
         """
         self.clock = pg.time.Clock()
 
-    def handle_every_tick(self, event: events.EventEveryTick):
+    def handle_every_tick(self, _: events.EventEveryTick):
         """
         Do things should be done every tick.
 
@@ -44,7 +46,6 @@ class Model:
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
         """
-        pass
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
