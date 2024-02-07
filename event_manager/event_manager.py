@@ -1,33 +1,35 @@
-from typing import Type
+"""
+The module define EventManager.
+"""
 
+from typing import Callable, TypeAlias
 
-class BaseEvent:
-    """
-    The superclass of all events.
-    """
+from event_manager.events import BaseEvent
 
-    def __init__(self):
-        pass
+# The type of callback function listeners use
+# It is a function accept one "Class" parameter which is subclass of BaseEvent and return None
+ListenerCallback: TypeAlias = Callable[[type[BaseEvent]], None]
 
 
 class EventManager:
     """
-    It coordinates communication between the model, view, and controller.
+    Manager of all events and their callback function.
 
-    Each of these components, namely the Model, View, and Controller,
-    acts as a listener,
-    and events are broadcasted to them by the event_manager via the post() method.
+    The object coordinates the model, view, and controller.
+
+    To be precise, a listener is registered by providing a specific event and a callback function.
+    When the event is actually posted, all callback function bound to that event will be executed.
     """
 
     def __init__(self):
-        self.listeners = dict()
+        self.listeners: dict[type[BaseEvent], list[ListenerCallback]] = {}
 
-    def register_listener(self, event_class: type[BaseEvent], listener: function):
+    def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback):
         """
         Register a listener by adding it to the event's listener list.
 
-        When the event is posted, all registered listeners associated
-        with that event will be invoked.
+        When the event is posted, 
+        all registered listeners associated with that event will be invoked.
         """
         if event_class not in self.listeners:
             self.listeners[event_class] = []

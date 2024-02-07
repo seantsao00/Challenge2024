@@ -1,7 +1,11 @@
+"""
+The module define the main game engine.
+"""
+
 import pygame as pg
 
 import const
-import event_manager.events as events
+from event_manager import events
 from instances_manager import get_event_manager
 
 
@@ -14,29 +18,42 @@ class Model:
 
     def __init__(self):
         """
-        This function is called when the model is created.
+        Initialize the Model object.
 
+        This function is called when the model is created.
         For more specific objects related to a game instance,
+        (e.g., The time that has elapsed in the game, )
         they should be initialized in Model.initialize()
         """
         pass
 
-    def initialize(self, event):
+    def initialize(self, event: events.EventInitialize):
         """
-        This method is called when a new game is instantiated.
+        Initialize attributes related to a game.
+
+        This method should be called when a new game is about to start,
+        even for the second or more rounds of the game.
         """
         self.clock = pg.time.Clock()
 
-    def handle_every_tick(self, event):
+    def handle_every_tick(self, event: events.EventEveryTick):
         """
+        Do things should be done every tick.
+
+
         This method is called every tick.
+        For example, if players will get point every tick, it might be done here. 
         """
         pass
 
+    def register_listeners(self):
+        """Register every listeners of this object into the event manager."""
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(events.EventInitialize, self.initialize)
+        ev_manager.register_listener(events.EventEveryTick, self.handle_every_tick)
+
     def run(self):
-        """
-        The main loop of the game.
-        """
+        """Run the main loop of the game."""
         self.running = True
 
         # Tell every one to start
