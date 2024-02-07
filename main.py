@@ -2,10 +2,13 @@ import argparse
 
 import pygame as pg
 
-from event_manager.event_manager import eventManager
-from model.model import GameEngine
+import const
+import event_manager.events
+import instances_manager
 from controller.controller import Controller
-from view.view import GraphicalView
+from event_manager.event_manager import EventManager
+from model.model import GameEngine
+from view import view
 
 def main():
     # Initialization
@@ -15,11 +18,14 @@ def main():
     parser = argparse.ArgumentParser(prog='Challenge2023')
     args = parser.parse_args()
     
-    # EventManager listen to events and notice model, controller, view
     ev_manager = EventManager()
-    model      = GameEngine(ev_manager)
-    controller = Controller(ev_manager, model)
-    view       = GraphicalView(ev_manager, model)
+    instances_manager.register_event_manager(ev_manager)
+
+    model = GameEngine()
+    instances_manager.register_game_engine(model)
+
+    Controller()
+    view()
 
     # Main loop
     model.run()
