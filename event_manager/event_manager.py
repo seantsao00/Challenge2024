@@ -2,13 +2,14 @@
 The module define EventManager.
 """
 
+from collections import defaultdict
 from typing import Callable, TypeAlias
 
 from event_manager.events import BaseEvent
 
 # The type of callback function listeners use
 # It is a function accept one "Class" parameter which is subclass of BaseEvent and return None
-ListenerCallback: TypeAlias = Callable[[type[BaseEvent]], None]
+ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
 
 
 class EventManager:
@@ -22,7 +23,7 @@ class EventManager:
     """
 
     def __init__(self):
-        self.listeners: dict[type[BaseEvent], list[ListenerCallback]] = {}
+        self.listeners: defaultdict[type[BaseEvent], list[ListenerCallback]] = defaultdict(list)
 
     def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback):
         """
@@ -31,15 +32,11 @@ class EventManager:
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        if event_class not in self.listeners:
-            self.listeners[event_class] = []
         self.listeners[event_class].append(listener)
 
     def post(self, event: BaseEvent):
         """
         Invoke all registered listeners associated with the event.
         """
-        if type(event) not in self.listeners:
-            return
         for listener in self.listeners[type(event)]:
             listener(event)
