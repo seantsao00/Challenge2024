@@ -1,5 +1,5 @@
 """
-The module define EventManager.
+The module defines EventManager.
 """
 
 from collections import defaultdict
@@ -7,19 +7,23 @@ from typing import Callable, TypeAlias
 
 from event_manager.events import BaseEvent
 
-# The type of callback function listeners use
-# It is a function accept one "Class" parameter which is subclass of BaseEvent and return None
 ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
+"""
+The type of callback function used by listeners.
+
+It is a function accepts one "Class" parameter,
+which is a subclass of BaseEvent, and returns None
+"""
 
 
 class EventManager:
     """
-    Manager of all events and their callback function.
+    Manager overseeing all events and their associated callback functions.
 
-    The object coordinates the model, view, and controller.
+    This object serves as the coordinator between the model, view, and controller.
 
     To be precise, a listener is registered by providing a specific event and a callback function.
-    When the event is actually posted, all callback function bound to that event will be executed.
+    When the event is actually posted, all callback functions bound to that event will be executed.
     """
 
     def __init__(self):
