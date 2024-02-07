@@ -5,14 +5,9 @@ class BaseEvent:
     """
     The superclass of all events.
     """
-    name = 'Generic event'
 
     def __init__(self):
         pass
-
-    def __str__(self):
-        # For Debug
-        return self.name
 
 
 class EventManager:

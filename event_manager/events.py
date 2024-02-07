@@ -4,24 +4,24 @@ from event_manager.event_manager import BaseEvent
 
 
 class EventInitialize(BaseEvent):
-    name = "Initialize event"
+    pass
 
 
 class EventQuit(BaseEvent):
-    name = "Quit event"
+    pass
 
 
 class EventPauseModel(BaseEvent):
-    name = 'PauseModel event'
+    pass
 
 
 class EventContinueModel(BaseEvent):
-    name = 'ContinueModel event'
+    pass
 
 
 class EventEveryTick(BaseEvent):
-    name = "Tick event"
+    pass
 
 
 class EventPlayerMove(BaseEvent):
-    name = "PlayerMove event"
+    pass
