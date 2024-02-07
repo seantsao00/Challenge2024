@@ -3,7 +3,7 @@ This manager manages global instances.
 """
 
 __event_manager = None
-__game_engine = None
+__model = None
 
 
 def register_event_manager(event_manager):
@@ -17,12 +17,12 @@ def get_event_manager():
     return event_manager
 
 
-def register_game_engine(game_engine):
-    global __game_engine
-    __game_engine = game_engine
+def register_model(model):
+    global __model
+    __model = model
 
 
-def get_game_engine():
-    from model.model import GameEngine
-    game_engine: GameEngine = __game_engine
-    return game_engine
+def get_model():
+    from model.model import Model
+    model: Model = __model
+    return model
