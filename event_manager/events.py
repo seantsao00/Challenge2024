@@ -4,6 +4,8 @@ The module defines events would be used by EventManager.
 
 import pygame as pg
 
+import const
+
 
 class BaseEvent:
     """
@@ -51,6 +53,15 @@ class EventPlayerMove(BaseEvent):
     """
     Event which will be posted when a user input to move a character is detected.
 
-    For example, a listener which actually changes position of characters can be registered with this event.
+    For example, a listener which draws position of characters can be registered with this event.
+
+    EventPlayerMove.direction is the displacement vector of that movement.
+    The length of this vector corresponds to the player's movement speed.
     """
-    pass
+
+    def __init__(self, direction: pg.Vector2):
+        super().__init__()
+        self.direction = direction.normalize() * const.PLAYER_SPEED
+
+    def __str__(self):
+        return f"Player move {self.direction}"
