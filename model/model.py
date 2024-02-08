@@ -1,14 +1,10 @@
 """
-The module define the main game engine.
+The module defines the main game engine.
 """
-
 import pygame as pg
 
-import const.const as const
-from event_manager.events import (
-    EventInitialize,
-    EventEveryTick,
-)
+import const
+from event_manager import EventEveryTick, EventInitialize
 from instances_manager import get_event_manager
 from model.player import Player
 

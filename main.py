@@ -2,13 +2,11 @@ import argparse
 
 import pygame as pg
 
-import const.const as const
-import event_manager.events
 import instances_manager
-from controller.controller import Controller
-from event_manager.event_manager import EventManager
-from model.model import Model
-from view.view import View
+from controller import Controller
+from event_manager import EventManager
+from model import Model
+from view import View
 
 
 def main():

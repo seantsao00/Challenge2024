@@ -14,7 +14,7 @@ class ObjectBase:
     def init_convert(cls):
         """
         Load images into self.images.
-    
+
         To avoid loading the same image multiple times,
         once first instance is created and init_convert is called,
         image_initialized within the class will be set to True.

@@ -1,3 +1,6 @@
+"""
+This module defines constants associated with controller.
+"""
 import pygame as pg
 
 PLAYER_KEYS = {

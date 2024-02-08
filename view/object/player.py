@@ -1,9 +1,8 @@
 import pygame as pg
 
 from view.object.object_base import ObjectBase
-from instances_manager import get_event_manager, get_model
-import const.const as const
-import model.player
+import const
+import model
 from util import crop_image
 
 
@@ -20,7 +19,7 @@ class Player(ObjectBase):
     initialized only once in init_convert.
     """
 
-    def __init__(self, player: model.player.Player):
+    def __init__(self, player: model.Player):
         super().__init__()
         self.player = player
         self.position = self.player.position.copy()

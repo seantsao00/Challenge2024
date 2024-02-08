@@ -1,5 +1,9 @@
-from const.model import FPS
+"""
+This module defines constants associated with player.
+"""
 from enum import Enum, IntEnum, auto
+
+from const.model import FPS
 
 PLAYER_RADIUS = 30
 
@@ -17,7 +21,6 @@ class PlayerSpeeds(IntEnum):
 
 
 # image path
-
 PLAYER_IMAGE_PATH = {
     PlayerIds.PLAYER0: "player/player0/",
     PlayerSpeeds.WALK: "walk.png",

@@ -1,12 +1,9 @@
-import const.const as const
 import pygame as pg
 
+import const
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager, get_model
-from event_manager.events import (
-    EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
-)
-from view.object.object_base import ObjectBase
-from view.object.player import Player
+from view.object import ObjectBase, Player
 
 
 class View:

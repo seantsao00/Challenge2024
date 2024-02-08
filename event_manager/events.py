@@ -4,7 +4,7 @@ The module defines events used by EventManager.
 
 import pygame as pg
 
-import const.const as const
+import const
 
 
 class BaseEvent:
@@ -54,7 +54,7 @@ class EventPlayerMove(BaseEvent):
 
     def __init__(self, direction: pg.Vector2):
         super().__init__()
-        self.direction = direction.normalize() * const.PLAYER_SPEED
+        self.direction = direction.normalize() * const.PlayerSpeeds.WALK
 
     def __str__(self):
         return f"Player move {self.direction}"

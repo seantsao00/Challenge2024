@@ -1,5 +1,9 @@
-import const.const as const
+"""
+The module defines Player class.
+"""
 import pygame as pg
+
+import const
 
 
 class Player:
