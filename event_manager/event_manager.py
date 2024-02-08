@@ -5,7 +5,7 @@ The module defines EventManager.
 from collections import defaultdict
 from typing import Callable, TypeAlias
 
-from event_manager import BaseEvent
+from event_manager.events import BaseEvent
 
 ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
 """
