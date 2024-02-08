@@ -10,7 +10,15 @@
 
 ## Format
 
-請使用 [PEP 8](https://peps.python.org/pep-0008/) 統一格式。VScode 使用者推薦使用這個 [extension](https://marketplace.visualstudio.com/items?itemName=ms-python.autopep8) 為預設 formatter。
+請使用 [PEP 8](https://peps.python.org/pep-0008/) 統一格式。範例使用如下：
+
+```sh
+autopep8 --in-place --recursive .
+```
+
+這會在不改變行為的前提下修復大部分 PEP 8 問題。
+
+VScode 使用者推薦使用這個 [extension](https://marketplace.visualstudio.com/items?itemName=ms-python.autopep8) 為預設 formatter。
 
 ## Virtual Environment
 
