@@ -1,0 +1,9 @@
+from enum import Enum, IntEnum, auto
+FPS = 60
+
+
+class State(Enum):
+    """States of the game."""
+    MENU = auto()
+    PLAY = auto()
+    PAUSE = auto()

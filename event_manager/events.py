@@ -1,16 +1,14 @@
 """
-The module defines events would be used by EventManager.
+The module defines events used by EventManager.
 """
 
 import pygame as pg
 
-import const
+import const.const as const
 
 
 class BaseEvent:
-    """
-    The superclass of all events.
-    """
+    """The superclass of all events."""
 
     def __init__(self):
         pass

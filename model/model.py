@@ -4,7 +4,7 @@ The module define the main game engine.
 
 import pygame as pg
 
-import const
+import const.const as const
 from event_manager import events
 from instances_manager import get_event_manager
 

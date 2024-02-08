@@ -2,13 +2,13 @@ import argparse
 
 import pygame as pg
 
-import const
+import const.const as const
 import event_manager.events
 import instances_manager
 from controller.controller import Controller
 from event_manager.event_manager import EventManager
 from model.model import Model
-from view import view
+from view.view import View
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
     instances_manager.register_model(model)
 
     Controller()
-    view()
+    View()
 
     # Main loop
     model.run()
