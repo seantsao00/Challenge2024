@@ -42,5 +42,7 @@ class EventManager:
         """
         Invoke all registered listeners associated with the event.
         """
+        if type(event) not in self.listeners:
+            return
         for listener in self.listeners[type(event)]:
             listener(event)

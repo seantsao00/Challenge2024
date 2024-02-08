@@ -1,1 +1,0 @@
-PLAYER_SPEED = 100

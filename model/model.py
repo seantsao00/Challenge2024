@@ -10,6 +10,7 @@ from event_manager.events import (
     EventEveryTick,
 )
 from instances_manager import get_event_manager
+from model.player import Player
 
 
 class Model:
@@ -31,6 +32,10 @@ class Model:
         self.clock: pg.time.Clock
         self.timer: int
         self.running: bool = False
+        self.state = const.State.PAUSE
+        self.clock = pg.time.Clock()
+        self.players: list[Player] = []
+        self.register_listeners()
 
     def initialize(self, _: EventInitialize):
         """
@@ -39,7 +44,8 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        self.clock = pg.time.Clock()
+        self.players = [Player(player_id) for player_id in const.PlayerIds]
+        self.state = const.State.PLAY
 
     def handle_every_tick(self, _: EventEveryTick):
         """
