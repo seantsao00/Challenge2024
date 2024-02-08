@@ -3,7 +3,7 @@ The module defines Controller class.
 """
 import pygame as pg
 
-import const
+import const.const as const
 from event_manager.events import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager, get_model
 
