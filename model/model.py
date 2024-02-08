@@ -5,7 +5,10 @@ The module define the main game engine.
 import pygame as pg
 
 import const.const as const
-from event_manager import events
+from event_manager.events import (
+    EventInitialize,
+    EventEveryTick,
+)
 from instances_manager import get_event_manager
 
 
@@ -29,7 +32,7 @@ class Model:
         self.timer: int
         self.running: bool = False
 
-    def initialize(self, _: events.EventInitialize):
+    def initialize(self, _: EventInitialize):
         """
         Initialize attributes related to a game.
 
@@ -38,7 +41,7 @@ class Model:
         """
         self.clock = pg.time.Clock()
 
-    def handle_every_tick(self, _: events.EventEveryTick):
+    def handle_every_tick(self, _: EventEveryTick):
         """
         Do things should be done every tick.
 
@@ -50,8 +53,8 @@ class Model:
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
-        ev_manager.register_listener(events.EventInitialize, self.initialize)
-        ev_manager.register_listener(events.EventEveryTick, self.handle_every_tick)
+        ev_manager.register_listener(EventInitialize, self.initialize)
+        ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
 
     def run(self):
         """Run the main loop of the game."""
@@ -59,8 +62,8 @@ class Model:
 
         # Tell every one to start
         ev_manager = get_event_manager()
-        ev_manager.post(events.EventInitialize())
+        ev_manager.post(EventInitialize())
         self.timer = 0
         while self.running:
-            ev_manager.post(events.EventEveryTick())
+            ev_manager.post(EventEveryTick())
             self.clock.tick(const.FPS)
