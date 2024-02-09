@@ -19,7 +19,7 @@ class EventInitialize(BaseEvent):
 
 
 class EventQuit(BaseEvent):
-    """Event which will be posted when a game round ends."""
+    """Event posted upon quitting the game (closing the program)."""
 
 
 class EventPauseModel(BaseEvent):
