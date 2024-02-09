@@ -4,7 +4,7 @@ The module defines the main game engine.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize
+from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager
 from model.player import Player
 
@@ -52,11 +52,18 @@ class Model:
         For example, if players will get point every tick, it might be done here. 
         """
 
+    def handle_quit(self, _: EventQuit):
+        """
+        Exit the main loop.
+        """
+        self.running = False
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
+        ev_manager.register_listener(EventQuit, self.handle_quit)
 
     def run(self):
         """Run the main loop of the game."""
