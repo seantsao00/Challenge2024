@@ -1,6 +1,7 @@
 """
 The module defines Player class.
 """
+
 import pygame as pg
 
 import const

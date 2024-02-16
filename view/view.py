@@ -1,3 +1,7 @@
+"""
+The module defines View class.
+"""
+
 import pygame as pg
 
 import const

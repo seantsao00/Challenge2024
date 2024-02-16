@@ -1,6 +1,7 @@
 """
-This package exports all constants will be used in project.
+This package exports all constants used in project.
 """
+
 import pygame as pg
 
 from const.controller import *

@@ -2,7 +2,6 @@
 Utility functions that can be utilized across multiple modules.
 """
 
-
 import pygame as pg
 
 

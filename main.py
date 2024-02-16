@@ -1,3 +1,9 @@
+"""
+The program's entry point is the main function in this module.
+
+Import paths should be relative to the location of this file.
+"""
+
 import argparse
 
 import pygame as pg

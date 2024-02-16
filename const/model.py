@@ -1,6 +1,7 @@
 """
 This module defines constants associated with model.
 """
+
 from enum import Enum, IntEnum, auto
 
 FPS = 60

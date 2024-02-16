@@ -1,6 +1,7 @@
 """
 The module defines Controller class.
 """
+
 import pygame as pg
 
 import const

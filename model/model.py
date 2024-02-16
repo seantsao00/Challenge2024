@@ -1,6 +1,7 @@
 """
 The module defines the main game engine.
 """
+
 import pygame as pg
 
 import const
