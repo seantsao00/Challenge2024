@@ -1,6 +1,7 @@
 """
 This module defines constants associated with window.
 """
+
 import pygame as pg
 
 WINDOW_CAPTION = 'Challenge 2024'

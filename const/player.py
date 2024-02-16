@@ -1,6 +1,7 @@
 """
 This module defines constants associated with player.
 """
+
 from enum import Enum, IntEnum, auto
 
 from const.model import FPS
