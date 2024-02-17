@@ -34,12 +34,14 @@ class Controller:
         model = get_model()
         # Called once per game tick. We check our keyboard presses here.
         for event_pg in pg.event.get():
-            # handle window manager closing our window
+            # Handle window manager closing our window
             if event_pg.type == pg.QUIT:
                 ev_manager.post(EventQuit())
+
             if event_pg.type == pg.KEYDOWN:
+                # For orientating
                 key_down_events.append(event_pg)
-            # for orientating
+
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 if event_pg.button == 1:  # Left mouse button
                     mouse_pos = event_pg.pos
@@ -64,10 +66,17 @@ class Controller:
         and post EventPlayerMove according to the keys pressed.
         """
         ev_manager = get_event_manager()
-        keys = pg.key.get_pressed()
-        direction = pg.Vector2(0, 0)
-        for k, v in const.PLAYER_KEYS.items():
-            if keys[k]:
-                direction += v
-        if direction.length() != 0:
-            ev_manager.post(EventPlayerMove(direction))
+        pressed_keys = pg.key.get_pressed()
+
+        for player_id, keys_map in const.PLAYER_KEYS_MAP.items():
+            direction = pg.Vector2(0, 0)
+
+            for k, v in keys_map.items():
+                # If the key is actually pressed
+                if pressed_keys[k]:
+                    direction += v
+
+            if direction.length() != 0:
+                # Try to move as far as player can.
+                displacement = direction.normalize() * max(const.PlayerSpeeds)
+                ev_manager.post(EventPlayerMove(displacement, player_id))

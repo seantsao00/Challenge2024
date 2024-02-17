@@ -5,7 +5,7 @@ The module defines the main game engine.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventQuit
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager
 from model.player import Player
 
@@ -31,7 +31,7 @@ class Model:
         self.running: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
-        self.players: list[Player] = []
+        self.players: dict[const.PlayerIds, Player] = {}
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):
@@ -41,7 +41,7 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        self.players = [Player(player_id) for player_id in const.PlayerIds]
+        self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
 
     def handle_every_tick(self, _: EventEveryTick):
@@ -59,12 +59,20 @@ class Model:
         """
         self.running = False
 
+    def handle_player_move(self, event: EventPlayerMove):
+        """
+        Call Player.move() for each EventPlayerMove.
+        """
+        player = self.players[event.player_id]
+        player.move(event.displacement)
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
+        ev_manager.register_listener(EventPlayerMove, self.handle_player_move)
 
     def run(self):
         """Run the main loop of the game."""

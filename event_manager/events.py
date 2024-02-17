@@ -49,13 +49,13 @@ class EventPlayerMove(BaseEvent):
     For example, a listener which draws position of characters can be registered with this event.
     """
 
-    def __init__(self, direction: pg.Vector2):
+    def __init__(self, displacement: pg.Vector2, player_id: const.PlayerIds):
         super().__init__()
-        self.direction = direction.normalize() * const.PlayerSpeeds.WALK
+        self.displacement = displacement
         """
         The displacement vector representing the movement.
-        The length of this vector corresponds to the player's movement speed.
         """
+        self.player_id = player_id
 
     def __str__(self):
-        return f"Player move {self.direction}"
+        return f"Player move {self.displacement}"
