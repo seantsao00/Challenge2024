@@ -49,4 +49,4 @@ class Player(ObjectBase):
             img = self.images[player.id][const.PlayerSpeeds.RUN]
         else:
             img = self.images[player.id][const.PlayerSpeeds.WALK]
-        screen.blit(img, img.get_rect(midbottom=(player.position)))
+        screen.blit(img, img.get_rect(midbottom=player.position))

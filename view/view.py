@@ -22,6 +22,7 @@ class View:
         For more specific objects related to a game instance, 
         they should be initialized in View.initialize().
         """
+        self.players: list[Player]
         self.screen = pg.display.set_mode(
             size=const.WINDOW_SIZE, flags=pg.DOUBLEBUF)
         pg.display.set_caption(const.WINDOW_CAPTION)
@@ -33,7 +34,7 @@ class View:
         Initialize components that require initialization at the start of every game.
         """
         model = get_model()
-        self.players = [Player(player) for player in model.players]
+        self.players = [Player(player) for _, player in model.players.items()]
 
     def handle_every_tick(self, _: EventEveryTick):
         self.display_fps()
