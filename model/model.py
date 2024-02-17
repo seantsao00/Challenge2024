@@ -46,8 +46,7 @@ class Model:
 
     def handle_every_tick(self, _: EventEveryTick):
         """
-        Do things should be done every tick.
-
+        Do actions that should be executed every tick.
 
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
