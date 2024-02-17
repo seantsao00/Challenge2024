@@ -28,7 +28,7 @@ class Controller:
         """Initialize attributes related to a game."""
 
     def handle_every_tick(self, _: EventEveryTick):
-        """Do things should be done every tick."""
+        """Do actions that should be executed every tick."""
         key_down_events = []
         ev_manager = get_event_manager()
         model = get_model()

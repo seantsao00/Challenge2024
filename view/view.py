@@ -28,14 +28,14 @@ class View:
         Player.init_convert()
         self.register_listeners()
 
-    def initialize(self, event):
+    def initialize(self, _:EventInitialize):
         """
         Initialize components that require initialization at the start of every game.
         """
         model = get_model()
         self.players = [Player(player) for player in model.players]
 
-    def handle_every_tick(self, event):
+    def handle_every_tick(self, _: EventEveryTick):
         self.display_fps()
         self.screen.fill(const.BACKGROUND_COLOR)
         objects: list[ObjectBase] = []
