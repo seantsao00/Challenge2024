@@ -23,13 +23,12 @@ class View:
         they should be initialized in View.initialize().
         """
         self.players: list[Player]
-        self.screen = pg.display.set_mode(
-            size=const.WINDOW_SIZE, flags=pg.DOUBLEBUF)
+        self.screen = pg.display.set_mode(size=const.WINDOW_SIZE)
         pg.display.set_caption(const.WINDOW_CAPTION)
         Player.init_convert()
         self.register_listeners()
 
-    def initialize(self, _:EventInitialize):
+    def initialize(self, _: EventInitialize):
         """
         Initialize components that require initialization at the start of every game.
         """
