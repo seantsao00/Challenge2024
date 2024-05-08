@@ -79,4 +79,4 @@ class Controller:
             if direction.length() != 0:
                 # Try to move as far as player can.
                 displacement = direction.normalize() * max(const.PlayerSpeeds)
-                ev_manager.post(EventPlayerMove(displacement, player_id))
+                ev_manager.post(EventPlayerMove(displacement=displacement, player_id=player_id))

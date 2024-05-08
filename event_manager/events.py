@@ -2,26 +2,29 @@
 The module defines events used by EventManager.
 """
 
+from dataclasses import dataclass
+
 import pygame as pg
 
 import const
 
 
+@dataclass(kw_only=True)
 class BaseEvent:
     """The superclass of all events."""
 
-    def __init__(self):
-        pass
 
-
+@dataclass(kw_only=True)
 class EventInitialize(BaseEvent):
     """Event posted upon a new round of game starts."""
 
 
+@dataclass(kw_only=True)
 class EventQuit(BaseEvent):
     """Event posted upon quitting the game (closing the program)."""
 
 
+@dataclass(kw_only=True)
 class EventPauseModel(BaseEvent):
     """
     Event posted upon pausing the game.
@@ -30,6 +33,7 @@ class EventPauseModel(BaseEvent):
     """
 
 
+@dataclass(kw_only=True)
 class EventContinueModel(BaseEvent):
     """
     Event posted upon resuming the game.
@@ -38,24 +42,23 @@ class EventContinueModel(BaseEvent):
     """
 
 
+@dataclass(kw_only=True)
 class EventEveryTick(BaseEvent):
     """Event posted every tick."""
 
 
+@dataclass(kw_only=True)
 class EventPlayerMove(BaseEvent):
     """
     Event posted upon moving a player.
 
     For example, a listener which draws position of characters can be registered with this event.
     """
-
-    def __init__(self, displacement: pg.Vector2, player_id: const.PlayerIds):
-        super().__init__()
-        self.displacement = displacement
-        """
-        The displacement vector representing the movement.
-        """
-        self.player_id = player_id
+    displacement: pg.Vector2
+    """
+    The displacement vector representing the movement.
+    """
+    player_id: const.PlayerIds
 
     def __str__(self):
-        return f"Player move {self.displacement}"
+        return f"Player {self.player_id} move {self.displacement}"
