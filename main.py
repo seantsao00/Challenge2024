@@ -13,11 +13,20 @@ from controller import Controller
 from event_manager import EventManager
 from model import Model
 from view import View
+import const
 
 
 def main():
     # Initialization
     pg.init()
+
+    # Reset Window/Arena Size, maximum 16 : 9 in current screen
+    size = pg.display.Info()
+    print(size.current_w, size.current_h)
+    window_w = min(size.current_w, size.current_h / 9 * 16)
+    window_h = min(size.current_h, size.current_w / 16 * 9)
+    const.WINDOW_SIZE = (window_w, window_h)
+    const.ARENA_SIZE = (window_w, window_h)
 
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2023')
