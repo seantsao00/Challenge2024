@@ -42,7 +42,7 @@ def main():
     Controller()
     View()
 
-    test_entity = Entity()
+    
 
     # Main loop
     model.run()

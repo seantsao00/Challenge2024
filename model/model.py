@@ -9,6 +9,7 @@ from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, Even
 from instances_manager import get_event_manager
 from model.player import Player
 from model.entity import Entity
+from model.character import Character
 
 
 class Model:
@@ -35,6 +36,8 @@ class Model:
         self.players: dict[const.PlayerIds, Player] = {}
         self.entities: list[Entity] = []
         self.register_listeners()
+        test_entity = Entity(pg.Vector2(400, 300))
+        test_character = Character(pg.Vector2(200, 200), 5, 100, 10, 100, 100)
 
     def initialize(self, _: EventInitialize):
         """

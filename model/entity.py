@@ -19,10 +19,10 @@ class Entity:
 
     entity_id = 0
 
-    def __init__(self):
+    def __init__(self, position):
         Entity.entity_id += 1
         self.id = Entity.entity_id
-        self.position = pg.Vector2(200, 200)
+        self.position = position
         self.type = 'default'
         self.imgstate = 'default'
         self.hidden = False
