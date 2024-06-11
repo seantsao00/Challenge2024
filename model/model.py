@@ -9,6 +9,7 @@ from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, Even
 from instances_manager import get_event_manager
 from model.player import Player
 from model.entity import Entity
+from model.tower import Tower
 
 
 class Model:
