@@ -3,7 +3,9 @@ The module defines events used by EventManager.
 """
 
 from dataclasses import dataclass
+
 import pygame as pg
+
 import const
 # from model.entity import Entity
 
@@ -62,6 +64,9 @@ class EventPlayerMove(BaseEvent):
     def __str__(self):
         return f"Player {self.player_id} move {self.displacement}"
 
+
+@dataclass(kw_only=True)
 class EventCreateEntity(BaseEvent):
+    """Event posted when an entity is created."""
     def __init__(self, entity):
         self.entity = entity
