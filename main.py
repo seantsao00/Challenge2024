@@ -13,7 +13,7 @@ from controller import Controller
 from event_manager import EventManager
 from model import Model
 from view import View
-
+from model.entity import Entity
 
 def main():
     # Initialization
@@ -31,6 +31,8 @@ def main():
 
     Controller()
     View()
+
+    test_entity = Entity()
 
     # Main loop
     model.run()

@@ -5,9 +5,10 @@ The module defines the main game engine.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity
 from instances_manager import get_event_manager
 from model.player import Player
+from model.entity import Entity
 
 
 class Model:
@@ -32,6 +33,7 @@ class Model:
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
         self.players: dict[const.PlayerIds, Player] = {}
+        self.entities: list[Entity] = []
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):
@@ -65,6 +67,9 @@ class Model:
         player = self.players[event.player_id]
         player.move(event.displacement)
 
+    def register_entity(self, event: EventCreateEntity):
+        self.entities.append(event.entity)
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -72,6 +77,7 @@ class Model:
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPlayerMove, self.handle_player_move)
+        ev_manager.register_listener(EventCreateEntity, self.register_entity)
 
     def run(self):
         """Run the main loop of the game."""
