@@ -5,7 +5,7 @@ The module defines the main game engine.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack
 from instances_manager import get_event_manager
 from model.player import Player
 from model.entity import Entity
@@ -37,7 +37,9 @@ class Model:
         self.entities: list[Entity] = []
         self.register_listeners()
         test_entity = Entity(pg.Vector2(400, 300))
-        test_character = Character(pg.Vector2(200, 200), 5, 100, 10, 100, 100)
+        test_character1 = Character(1, pg.Vector2(200, 200), 5, 100, 10, 100, 100)
+        test_character2 = Character(2, pg.Vector2(400, 400), 5, 100, 10, 100, 100)
+        test_character1.attack(test_character2)
 
     def initialize(self, _: EventInitialize):
         """
@@ -73,6 +75,13 @@ class Model:
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
 
+    def character_attack(self, event: EventAttack):
+        attacker = event.attacker
+        victim = event.victim
+        dist = attacker.position.distance_to(victim.position)
+        if (attacker.team != victim.team and dist <= attacker.attack_range):
+            victim.take_damage(attacker.damage)
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -81,6 +90,7 @@ class Model:
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPlayerMove, self.handle_player_move)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
+        ev_manager.register_listener(EventAttack, self.character_attack)
 
     def run(self):
         """Run the main loop of the game."""
