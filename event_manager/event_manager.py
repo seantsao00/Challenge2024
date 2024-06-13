@@ -3,7 +3,7 @@ The module defines EventManager.
 """
 
 from collections import defaultdict
-from typing import Callable, TypeAlias
+from typing import Callable, TypeAlias, Optional
 
 from event_manager.events import BaseEvent
 
@@ -24,25 +24,29 @@ class EventManager:
 
     To be precise, a listener is registered by providing a specific event and a callback function.
     When the event is actually posted, all callback functions bound to that event will be executed.
+
+    There may be several channels for the same event type. Events are posted within the channel and
+    are not shared between different channels. It may be useful when we want some specific recipient
+    to get notified, but there are many listeners for the same type of events.
     """
 
     def __init__(self):
-        self.listeners: defaultdict[type[BaseEvent], list[ListenerCallback]] = defaultdict(list)
+        self.listeners: defaultdict[tuple[type[BaseEvent], Optional[int]], list[ListenerCallback]] = defaultdict(list)
 
-    def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback):
+    def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
         """
         Register a listener by adding it to the event's listener list.
 
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        self.listeners[event_class].append(listener)
+        self.listeners[(event_class, channel_id)].append(listener)
 
-    def post(self, event: BaseEvent):
+    def post(self, event: BaseEvent, channel_id: Optional[int] = None):
         """
         Invoke all registered listeners associated with the event.
         """
-        if type(event) not in self.listeners:
+        if (type(event), channel_id) not in self.listeners:
             return
-        for listener in self.listeners[type(event)]:
+        for listener in self.listeners[(type(event), channel_id)]:
             listener(event)
