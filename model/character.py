@@ -23,6 +23,7 @@ class Character(Entity):
         self.health = health
         self.vision = vision
         self.alive = alive
+        get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
     
     def move(self, direction: pg.Vector2):
         """
