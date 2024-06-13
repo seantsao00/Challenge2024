@@ -1,6 +1,7 @@
 import pygame as pg
 from instances_manager import get_event_manager
 from model.entity import Entity
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack
 class Character(Entity):
     """
     Class for character in the game.
@@ -36,5 +37,9 @@ class Character(Entity):
         if self.health <= 0:
             self.die()
 
+    def attack(self, enemy):
+        get_event_manager().post(EventAttack(self, enemy))
+
     def die(self):
         self.alive = False
+

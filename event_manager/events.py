@@ -31,7 +31,6 @@ class EventPauseModel(BaseEvent):
     For example, a listener which forcibly pauses all characters can be registered with this event.
     """
 
-
 @dataclass(kw_only=True)
 class EventContinueModel(BaseEvent):
     """
@@ -65,3 +64,8 @@ class EventPlayerMove(BaseEvent):
 class EventCreateEntity(BaseEvent):
     def __init__(self, entity):
         self.entity = entity
+
+class EventAttack(BaseEvent):
+    def __init__(self, attacker, victim):
+        self.attacker = attacker
+        self.victim = victim
