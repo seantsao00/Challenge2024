@@ -40,10 +40,8 @@ class Model:
     
         ev_manager = get_event_manager()
         test_character1 = Character(1, pg.Vector2(200, 200), 5, 100, 10, 100, 100)
-        ev_manager.register_listener(EventAttack, test_character1.take_damage, test_character1.id)
+        test_character2 = Character(2, pg.Vector2(301, 201), 5, 100, 10, 100, 100)
 
-        test_character2 = Character(2, pg.Vector2(201, 201), 5, 100, 10, 100, 100)
-        ev_manager.register_listener(EventAttack, test_character2.take_damage, test_character2.id)
         # print(test_character2.health)
         test_character1.attack(test_character2)
         # print(test_character2.health)
