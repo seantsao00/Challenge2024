@@ -5,11 +5,12 @@ The module defines the main game engine.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack, EventMultiAttack
 from instances_manager import get_event_manager
 from model.player import Player
 from model.entity import Entity
 from model.character import Character
+from model.ranged import RangedFighter
 
 
 class Model:
@@ -36,15 +37,6 @@ class Model:
         self.players: dict[const.PlayerIds, Player] = {}
         self.entities: list[Entity] = []
         self.register_listeners()
-        test_entity = Entity(pg.Vector2(400, 300))
-    
-        ev_manager = get_event_manager()
-        test_character1 = Character(1, pg.Vector2(200, 200), 5, 100, 10, 100, 100)
-        test_character2 = Character(2, pg.Vector2(301, 201), 5, 100, 10, 100, 100)
-
-        # print(test_character2.health)
-        test_character1.attack(test_character2)
-        # print(test_character2.health)
 
     def initialize(self, _: EventInitialize):
         """
@@ -79,6 +71,17 @@ class Model:
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
+
+    def multi_attack(self, event: EventMultiAttack):
+        attacker = event.attacker
+        type = event.type
+        if (type == 1):
+            origin: pg.Vector2 = event.target
+            radius = event.radius
+            for victim in self.entities:
+                dist = origin.distance_to(victim.postition)
+                if (attacker.team != victim.team and dist <= radius):
+                    victim.take_damage(attacker.damage)
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

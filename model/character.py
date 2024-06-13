@@ -37,6 +37,7 @@ class Character(Entity):
         self.health -= event.attacker.damage
         if self.health <= 0:
             self.die()
+        print(f"I received {damage} points of damage")
 
     def attack(self, enemy):
         dist = self.position.distance_to(enemy.position)
