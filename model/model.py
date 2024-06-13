@@ -72,13 +72,6 @@ class Model:
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
 
-    def character_attack(self, event: EventAttack):
-        attacker = event.attacker
-        victim = event.victim
-        dist = attacker.position.distance_to(victim.position)
-        if (attacker.team != victim.team and dist <= attacker.attack_range):
-            victim.take_damage(attacker.damage)
-    
     def multi_attack(self, event: EventMultiAttack):
         attacker = event.attacker
         type = event.type
@@ -98,7 +91,6 @@ class Model:
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPlayerMove, self.handle_player_move)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
-        ev_manager.register_listener(EventAttack, self.character_attack)
 
     def run(self):
         """Run the main loop of the game."""

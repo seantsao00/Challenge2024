@@ -20,6 +20,9 @@ autopep8 --in-place --recursive .
 
 VScode 使用者推薦使用這個 [extension](https://marketplace.visualstudio.com/items?itemName=ms-python.autopep8) 為預設 formatter。
 
+## 去年 Challenge Repo
+[Challenge 2023 repo](https://github.com/Ccucumber12/Challenge2023)
+
 ## Virtual Environment
 
 推薦使用 virtual environment。以 bash/zsh 的 Linux 環境下，使用 [Venv](https://docs.python.org/3/library/venv.html) 為例：

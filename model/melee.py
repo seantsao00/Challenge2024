@@ -1,6 +1,7 @@
 import pygame as pg
 from model.character import Character
 from const.melee import MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH, MELEE_SPEED, MELEE_VISION
+from event_manager import EventAttack
 
 class Melee(Character):
     """
@@ -21,8 +22,10 @@ class Melee(Character):
         super().__init__(team, position, MELEE_SPEED, MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH, MELEE_VISION, alive)
         self.defense = defense
 
-    def take_damage(self, damage: int):
-        super(Melee, self).take_damage(damage * 0.5 if self.defense else damage) # set reduced damage to 0.5 of the original one for test
+    def take_damage(self, event: EventAttack):
+        if self.defense:
+            event.attacker.damage *= 0.5 # set reduced damage to 0.5 of the original one for test
+        super(Melee, self).take_damage(event)
     
     def move(self, direction: pg.Vector2):
         if (not self.defense):
