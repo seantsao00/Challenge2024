@@ -36,6 +36,7 @@ class Character(Entity):
         self.health -= damage
         if self.health <= 0:
             self.die()
+        print(f"I received {damage} points of damage")
 
     def attack(self, enemy):
         get_event_manager().post(EventAttack(self, enemy))

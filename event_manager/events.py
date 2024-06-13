@@ -69,3 +69,11 @@ class EventAttack(BaseEvent):
     def __init__(self, attacker, victim):
         self.attacker = attacker
         self.victim = victim
+        
+class EventMultiAttack(BaseEvent):
+    def __init__(self, attacker, type=1, orientation=None, target:pg.Vector2=None, radius=None):
+        self.attacker = attacker
+        self.type = type
+        self.orientation = orientation
+        self.target = target
+        self.raidus = radius
