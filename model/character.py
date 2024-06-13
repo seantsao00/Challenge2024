@@ -13,8 +13,9 @@ class Character(Entity):
      - alive: The character is alive or not.
     """
 
-    def __init__(self, position, speed, attack_range, damage, health, vision, alive = True):
+    def __init__(self, team, position, speed, attack_range, damage, health, vision, alive = True):
         super().__init__(position)
+        self.team = team
         self.speed = speed
         self.attack_range = attack_range
         self.damage = damage
