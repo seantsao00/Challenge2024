@@ -37,9 +37,16 @@ class Model:
         self.entities: list[Entity] = []
         self.register_listeners()
         test_entity = Entity(pg.Vector2(400, 300))
+    
+        ev_manager = get_event_manager()
         test_character1 = Character(1, pg.Vector2(200, 200), 5, 100, 10, 100, 100)
-        test_character2 = Character(2, pg.Vector2(400, 400), 5, 100, 10, 100, 100)
+        ev_manager.register_listener(EventAttack, test_character1.take_damage, test_character1.id)
+
+        test_character2 = Character(2, pg.Vector2(201, 201), 5, 100, 10, 100, 100)
+        ev_manager.register_listener(EventAttack, test_character2.take_damage, test_character2.id)
+        # print(test_character2.health)
         test_character1.attack(test_character2)
+        # print(test_character2.health)
 
     def initialize(self, _: EventInitialize):
         """
@@ -75,13 +82,6 @@ class Model:
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
 
-    def character_attack(self, event: EventAttack):
-        attacker = event.attacker
-        victim = event.victim
-        dist = attacker.position.distance_to(victim.position)
-        if (attacker.team != victim.team and dist <= attacker.attack_range):
-            victim.take_damage(attacker.damage)
-
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -90,7 +90,6 @@ class Model:
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPlayerMove, self.handle_player_move)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
-        ev_manager.register_listener(EventAttack, self.character_attack)
 
     def run(self):
         """Run the main loop of the game."""

@@ -32,13 +32,15 @@ class Character(Entity):
             direction = direction.normalize()
             self.position += direction * self.speed
     
-    def take_damage(self, damage: int):
-        self.health -= damage
+    def take_damage(self, event: EventAttack):
+        self.health -= event.attacker.damage
         if self.health <= 0:
             self.die()
 
     def attack(self, enemy):
-        get_event_manager().post(EventAttack(self, enemy))
+        dist = self.position.distance_to(enemy.position)
+        if (self.team != enemy.team and dist <= self.attack_range):
+            get_event_manager().post(EventAttack(self, enemy), enemy.id)
 
     def die(self):
         self.alive = False
