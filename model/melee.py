@@ -23,9 +23,10 @@ class Melee(Character):
         self.defense = defense
 
     def take_damage(self, event: EventAttack):
-        if self.defense:
-            event.attacker.damage *= 0.5 # set reduced damage to 0.5 of the original one for test
-        super(Melee, self).take_damage(event)
+        new_damage = event.attacker.damage * 0.5 if self.defense else event.attacker.damage
+        self.health -= new_damage
+        if self.health <= 0:
+            self.die()
     
     def move(self, direction: pg.Vector2):
         if (not self.defense):
