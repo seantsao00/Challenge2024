@@ -15,3 +15,6 @@ class Spring(Building):
 
     def __init__(self, health: float, position: pg.Vector2):
         super().__init__(position)
+    def take_damage(self, event: EventAttack):
+        print(f"Tower No. {self.id} is a spring, nothing happened.")
+        return
