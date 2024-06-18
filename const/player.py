@@ -17,8 +17,8 @@ class PlayerIds(IntEnum):
 
 
 class PlayerSpeeds(IntEnum):
-    WALK = 80 / FPS
-    RUN = 120 / FPS
+    WALK = 80
+    RUN = 120
 
 
 # image path

@@ -36,6 +36,7 @@ class Model:
         self.players: dict[const.PlayerIds, Player] = {}
         self.entities: list[Entity] = []
         self.register_listeners()
+        self.dt = 0
 
     def initialize(self, _: EventInitialize):
         """
@@ -66,7 +67,7 @@ class Model:
         Call Player.move() for each EventPlayerMove.
         """
         player = self.players[event.player_id]
-        player.move(event.displacement)
+        player.move(event.displacement, self.dt)
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
@@ -90,4 +91,4 @@ class Model:
         self.timer = 0
         while self.running:
             ev_manager.post(EventEveryTick())
-            self.clock.tick(const.FPS)
+            self.dt = self.clock.tick(const.FPS) / 1000.0

@@ -15,7 +15,7 @@ class Player(Entity):
         self.position = pg.Vector2(100, 100)
         self.speed = const.PlayerSpeeds.WALK
 
-    def move(self, displacement: pg.Vector2):
+    def move(self, displacement: pg.Vector2, dt: float):
         """
         Change the position of object.
 
@@ -26,6 +26,6 @@ class Player(Entity):
 
         # Limit displacement exceeding player's speed
         if displacement.length() > self.speed:
-            displacement = displacement.normalize() * self.speed
+            displacement = displacement.normalize() * self.speed * dt
 
         self.position += displacement
