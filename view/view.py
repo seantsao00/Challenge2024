@@ -7,7 +7,7 @@ import pygame as pg
 import const
 from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager, get_model
-from view.object import ObjectBase, Player, Entity
+from view.object import Entity, ObjectBase, Player
 
 
 class View:
@@ -46,7 +46,7 @@ class View:
         model = get_model()
         for en in model.entities:
             objects.append(Entity(en))
-            
+
         for obj in objects:
             # print(obj.images[obj.player.id][const.PlayerSpeeds.WALK].get_width())
             obj.draw(self.screen)

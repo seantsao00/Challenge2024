@@ -1,8 +1,9 @@
 import pygame as pg
 
-from view.object.object_base import ObjectBase
 import const
 import model
+from view.object.object_base import ObjectBase
+
 
 class Entity(ObjectBase):
     images: dict[str, dict[str, pg.Surface]] = {}
@@ -27,7 +28,7 @@ class Entity(ObjectBase):
                 path = (
                     const.IMAGE_PATH +
                     const.ENTITY_IMAGE_PATH +
-                    str(type) + '/' + 
+                    str(type) + '/' +
                     str(state) + '.png'
                 )
                 img = pg.image.load(path)

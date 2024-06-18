@@ -5,10 +5,11 @@ The module defines the main game engine.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity
+from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventPlayerMove,
+                           EventQuit)
 from instances_manager import get_event_manager
-from model.player import Player
 from model.entity import Entity
+from model.player import Player
 
 
 class Model:

@@ -3,8 +3,10 @@ The module defines Entity class.
 """
 
 import pygame as pg
+
 from event_manager.events import EventCreateEntity
 from instances_manager import get_event_manager
+
 
 class Entity:
     """
@@ -27,4 +29,3 @@ class Entity:
         self.imgstate = 'default'
         self.hidden = False
         get_event_manager().post(EventCreateEntity(self))
-

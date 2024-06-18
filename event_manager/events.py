@@ -68,5 +68,6 @@ class EventPlayerMove(BaseEvent):
 @dataclass(kw_only=True)
 class EventCreateEntity(BaseEvent):
     """Event posted when an entity is created."""
+
     def __init__(self, entity):
         self.entity = entity

@@ -3,7 +3,7 @@ The module defines EventManager.
 """
 
 from collections import defaultdict
-from typing import Callable, TypeAlias, Optional
+from typing import Callable, Optional, TypeAlias
 
 from event_manager.events import BaseEvent
 
@@ -31,7 +31,8 @@ class EventManager:
     """
 
     def __init__(self):
-        self.listeners: defaultdict[tuple[type[BaseEvent], Optional[int]], list[ListenerCallback]] = defaultdict(list)
+        self.listeners: defaultdict[tuple[type[BaseEvent], Optional[int]],
+                                    list[ListenerCallback]] = defaultdict(list)
 
     def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
         """

@@ -1,9 +1,9 @@
 import pygame as pg
 
-from view.object.object_base import ObjectBase
 import const
 import model
 from util import crop_image
+from view.object.object_base import ObjectBase
 
 
 class Player(ObjectBase):
