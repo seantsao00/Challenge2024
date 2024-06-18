@@ -4,7 +4,9 @@ The module defines Tower class.
 
 import pygame as pg
 from model.entity import Entity
-
+from model.melee import Melee
+from model.lookout import Lookout
+from model.ranged import RangedFighter
 
 class Building(Entity):
     """
@@ -23,6 +25,8 @@ class Building(Entity):
         self.position = position
         self.id = Building.tower_total + 1
         Building.tower_total += 1
-    def generate_soldier():
+    def generate_soldier(character_type):
         if self.team is not None:
-            pass
+            return character_type(self.team, self.position)
+        else:
+            return None
