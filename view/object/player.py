@@ -3,10 +3,10 @@ import pygame as pg
 import const
 import model
 from util import crop_image
-from view.object.object_base import ObjectBase
+from view.object.entity import EntityView
 
 
-class Player(ObjectBase):
+class PlayerView(EntityView):
     images: dict[const.PlayerIds, dict[const.PlayerSpeeds, pg.Surface]] = {
         player: {
             state: None for state in const.PlayerSpeeds
@@ -19,8 +19,8 @@ class Player(ObjectBase):
     initialized only once in init_convert.
     """
 
-    def __init__(self, player: model.Player):
-        super().__init__()
+    def __init__(self, player: 'model.Player'):
+        super().__init__(player)
         self.player = player
         self.position = self.player.position.copy()
 
@@ -43,10 +43,11 @@ class Player(ObjectBase):
         cls.image_initialized = True
 
     def draw(self, screen: pg.Surface):
+
         player = self.player
 
         if player.running:
-            img = self.images[player.id][const.PlayerSpeeds.RUN]
+            img = self.images[player.pid][const.PlayerSpeeds.RUN]
         else:
-            img = self.images[player.id][const.PlayerSpeeds.WALK]
+            img = self.images[player.pid][const.PlayerSpeeds.WALK]
         screen.blit(img, img.get_rect(midbottom=player.position))

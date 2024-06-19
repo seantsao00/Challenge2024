@@ -7,7 +7,7 @@ import pygame as pg
 import const
 from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager, get_model
-from view.object import Entity, ObjectBase, Player
+from view.object import EntityView, ObjectBase, PlayerView
 
 
 class View:
@@ -22,34 +22,22 @@ class View:
         For more specific objects related to a game instance, 
         they should be initialized in View.initialize().
         """
-        self.players: list[Player]
-        self.entity: list[Entity]
         self.screen = pg.display.set_mode(size=const.WINDOW_SIZE)
         pg.display.set_caption(const.WINDOW_CAPTION)
-        Player.init_convert()
-        Entity.init_convert()
+        PlayerView.init_convert()
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):
         """
         Initialize components that require initialization at the start of every game.
         """
-        model = get_model()
-        self.players = [Player(player) for _, player in model.players.items()]
-        self.entity = [Entity(player) for _, player in model.players.items()]
 
     def handle_every_tick(self, _: EventEveryTick):
         self.display_fps()
         self.screen.fill(const.BACKGROUND_COLOR)
-        objects: list[ObjectBase] = []
-        objects += self.players
         model = get_model()
         for en in model.entities:
-            objects.append(Entity(en))
-
-        for obj in objects:
-            # print(obj.images[obj.player.id][const.PlayerSpeeds.WALK].get_width())
-            obj.draw(self.screen)
+            en.view.draw(self.screen)
         pg.display.flip()
 
     def register_listeners(self):

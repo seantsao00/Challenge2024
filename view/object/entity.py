@@ -5,7 +5,7 @@ import model
 from view.object.object_base import ObjectBase
 
 
-class Entity(ObjectBase):
+class EntityView(ObjectBase):
     images: dict[str, dict[str, pg.Surface]] = {}
     """
     The static dict that stores entity images.
@@ -14,7 +14,7 @@ class Entity(ObjectBase):
     built from const, and initialized only once in init_convert.
     """
 
-    def __init__(self, entity: model.Entity):
+    def __init__(self, entity: 'model.Entity'):
         super().__init__()
         self.entity = entity
         self.position = self.entity.position.copy()

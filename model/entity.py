@@ -6,14 +6,15 @@ import pygame as pg
 
 from event_manager.events import EventCreateEntity
 from instances_manager import get_event_manager
+import view
 
 
 class Entity:
     """
     Class for entity (object) in the game, including NPCs.
     Each entity has the following property:
-     - id: unique ID for each entity.
-     - position: 
+     - `id`: unique ID for each entity.
+     - `position`: initial position 
      - type: entity type, used for determine the image type
      - imgstate: used for different image for the same type
      - hidden: the entity will not render if it is True.
@@ -23,9 +24,10 @@ class Entity:
 
     def __init__(self):
         Entity.entity_id += 1
-        self.id = Entity.entity_id
-        self.position = pg.Vector2(200, 200)
-        self.type = 'default'
-        self.imgstate = 'default'
-        self.hidden = False
+        self.id: int = Entity.entity_id
+        self.position: pg.Vector2 = pg.Vector2(200, 200)
+        self.type: str = 'default'
+        self.imgstate: str = 'default'
+        self.hidden: bool = False
+        self.view = view.EntityView(self)
         get_event_manager().post(EventCreateEntity(self))
