@@ -27,7 +27,7 @@ class Building(Entity):
         super().__init__(position)
         self.team = team
         self.position = position
-        self.id = Building.tower_total + 1
+        self.id = Building.building_total + 1
         self.log = list()
         self.period=const.building.INITIAL_PERIOD
         Building.tower_total += 1
