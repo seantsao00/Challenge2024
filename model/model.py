@@ -11,7 +11,6 @@ from model.player import Player
 from model.entity import Entity
 from model.character import Character
 from model.ranged import RangedFighter
-from model.building import Building
 
 
 class Model:

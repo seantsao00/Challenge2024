@@ -23,14 +23,14 @@ class Building(Entity):
 
     building_total = 0
 
-    def __init__(self, team=None, position: pg.Vector2):
+    def __init__(self, position: pg.Vector2, team=None):
         super().__init__(position)
         self.team = team
         self.position = position
-        self.id = Building.building_total + 1
+        self.building_id = Building.building_total + 1
         self.log = list()
         self.period=const.building.INITIAL_PERIOD
-        Building.tower_total += 1
+        Building.building_total += 1
     def update_period(self):
         pass
     def generate_soldier(self, character_type, timestamp):
