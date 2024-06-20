@@ -82,3 +82,11 @@ class EventMultiAttack(BaseEvent):
         self.orientation = orientation
         self.target = target
         self.raidus = radius
+
+class EventTeamGainTower(BaseEvent):
+    def __init__(self, tower_id):
+        self.tower_id = tower_id
+
+class EventTeamLoseTower(BaseEvent):
+    def __init__(self, tower_id):
+        self.tower_id = tower_id

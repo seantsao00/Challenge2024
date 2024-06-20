@@ -5,6 +5,8 @@ The module defines Tower class.
 import pygame as pg
 from model.entity import Entity
 from model.building import Building
+from instances_manager import get_event_manager
+from event_manager import EventAttack, EventTeamGainTower, EventTeamLoseTower
 
 class Tower(Building):
     """
@@ -21,9 +23,18 @@ class Tower(Building):
         self.health_init = health
         self.health_now = health
         self.position = position
+        get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
 
-    def take_damage(self, damage: int):
-        if self.health_now - damage <= 0:
-            pass
+    def take_damage(self, event: EventAttack):
+        if self.health_now - event.attacker.damage <= 0:
+            if self.team is None:
+                get_event_manager().post(EventTeamGainTower(self.id), event.attacker.team)
+                self.team = event.attacker.team
+            else:
+                get_event_manager().post(EventTeamLoseTower(self.id), self.team)
+                self.team = None
+            self.health_now = self.health_init
+
         else:
-            self.health_now -= damage
+            self.health_now -= event.attacker.damage
+        print(self.team, self.health_now)

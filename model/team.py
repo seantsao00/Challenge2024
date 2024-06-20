@@ -1,6 +1,8 @@
 import pygame as pg
 import const
 import const.team
+from instances_manager import get_event_manager
+from event_manager import EventTeamGainTower, EventTeamLoseTower
 
 class Team:
 
@@ -18,12 +20,23 @@ class Team:
     total = 0
 
     def __init__(self, spring_position: pg.Vector2, name: str):
-        if total == 4:
+        if Team.total == 4:
             raise Exception('Team size exceeds.')
         self.spring_position = spring_position
         self.name = name
         self.total_towers = 0
         self.points = 0
-        self.id = total + 1
+        self.id = Team.total + 1
         self.gen_gap = const.GENERATE_GAP
-        total += 1
+        Team.total += 1
+        get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
+        get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
+
+
+    def gain_tower(self, event: EventTeamGainTower):
+        self.total_towers += 1
+        print(self.id, " Gained a tower")
+
+    def lose_tower(self, event: EventTeamLoseTower):
+        print(self.id, " Lost a tower")
+        self.total_towers -= 1
