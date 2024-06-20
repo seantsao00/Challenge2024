@@ -2,7 +2,10 @@
 The module defines Tower class.
 """
 
+import const.building
 import pygame as pg
+import const
+from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack, EventMultiAttack
 from model.entity import Entity
 from model.melee import Melee
 from model.lookout import Lookout
@@ -15,18 +18,24 @@ class Building(Entity):
      - team: The owner of this building
      - id: The id of the building.
      - position: The position of the building.
+     - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
     """
 
     building_total = 0
 
-    def __init__(self, team=None, position: pg.Vector2):
+    def __init__(self, position, team=None):
         super().__init__(position)
         self.team = team
         self.position = position
         self.id = Building.tower_total + 1
+        self.log = list()
+        self.period=const.building.INITIAL_PERIOD
         Building.tower_total += 1
-    def generate_soldier(character_type):
-        if self.team is not None:
+    def update_period(self):
+        pass
+    def generate_soldier(self, character_type, timestamp):
+        if self.team is not None and ( len(self.log) == 0 or timestamp-self.log[-1]>=self.period):
+            self.log.append((character_type,timestamp))
             return character_type(self.team, self.position)
         else:
             return None
