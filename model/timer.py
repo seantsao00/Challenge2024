@@ -1,19 +1,22 @@
-import pygame
+from __future__ import annotations 
+from typing import Callable
+
+import pygame as pg
 
 class TimerManager:
-    _timers = {}
+    _timers: dict[int, Timer] = {}
 
     @classmethod
-    def register_timer(cls, timer):
+    def register_timer(cls, timer: Timer):
         cls._timers[timer.event_type] = timer
 
     @classmethod
-    def unregister_timer(cls, event_type):
+    def unregister_timer(cls, event_type: int):
         if event_type in cls._timers:
             del cls._timers[event_type]
 
     @classmethod
-    def handle_event(cls, event) -> bool:
+    def handle_event(cls, event: pg.Event) -> bool:
         """Handle events for all timers. Returns True if handled."""
         timer = cls._timers.get(event.type)
         if timer:
@@ -22,18 +25,18 @@ class TimerManager:
         return False
 
 class Timer:
-    _next_event_type = pygame.USEREVENT + 30
+    _next_event_type = pg.USEREVENT + 30
 
-    def __init__(self, interval, function, once=False, *args, **kwargs):
+    def __init__(self, interval: int, function: Callable, once: bool=False, *args, **kwargs):
         """
         Initialize a Timer object.
 
         Parameters:
-            interval (int):        The interval(ms) at which the function should be called.
-            function (callable):   The function to call at each interval.
-            once (bool):           If True, the timer will execute only once and then stop.
-            *args:                 Variable length argument list for the function.
-            **kwargs:              Arbitrary keyword arguments for the function.
+        - `interval`: The interval(ms) at which the function should be called.
+        - `function`: The function to call at each interval.
+        - `once`: If True, the timer will execute only once and then stop.
+        - `*args`: Variable length argument list for the function.
+        - `**kwargs`: Arbitrary keyword arguments for the function.
         """
         self.interval = interval
         self.function = function
@@ -53,15 +56,15 @@ class Timer:
     def start(self):
         """Start or resume the timer."""
         if not self.running:
-            pygame.time.set_timer(self.event_type, self.interval)
+            pg.time.set_timer(self.event_type, self.interval)
             self.running = True
 
     def stop(self):
         """Stop the timer."""
-        pygame.time.set_timer(self.event_type, 0)
+        pg.time.set_timer(self.event_type, 0)
         self.running = False
 
-    def set_interval(self, interval):
+    def set_interval(self, interval: int):
         """Set a new interval for the timer."""
         self.interval = interval
         if self.running:
@@ -81,7 +84,7 @@ class Timer:
         self.stop()
         TimerManager.unregister_timer(self.event_type)
 
-    def _handle_event(self, event):
+    def _handle_event(self, event: pg.Event):
         if event.type == self.event_type:
             self.count += 1
             self.function(*self.args, **self.kwargs)
