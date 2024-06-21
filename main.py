@@ -27,7 +27,7 @@ def main():
     window_w = min(size.current_w, size.current_h / 9 * 16)
     window_h = min(size.current_h, size.current_w / 16 * 9)
     const.WINDOW_SIZE = (window_w, window_h)
-    const.ARENA_SIZE = (window_w, window_h)
+    const.ARENA_SIZE = (window_h, window_h)
 
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2023')
