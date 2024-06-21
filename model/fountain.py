@@ -7,7 +7,7 @@ from model.entity import Entity
 from model.building import Building
 from event_manager import EventAttack
 
-class Spring(Building):
+class Fountain(Building):
     """
     Class for Sprint (object) in the game.
     Each Tower has the following property:
