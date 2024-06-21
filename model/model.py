@@ -11,6 +11,7 @@ from model.player import Player
 from model.entity import Entity
 from model.character import Character
 from model.ranged_fighter import RangedFighter
+from model.spring import Spring
 
 
 class Model:
@@ -47,6 +48,7 @@ class Model:
         """
         self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
+        self.test_tower = Spring(1, (const.ARENA_SIZE[0]/2, const.ARENA_SIZE[1]/2))
 
     def handle_every_tick(self, _: EventEveryTick):
         """

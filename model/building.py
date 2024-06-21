@@ -23,10 +23,9 @@ class Building(Entity):
 
     building_total = 0
 
-    def __init__(self, position: pg.Vector2, team=None):
-        super().__init__(position)
+    def __init__(self, position: pg.Vector2, team=None, type='default', imgstate='default'):
+        super().__init__(position, type, imgstate)
         self.team = team
-        self.position = position
         self.building_id = Building.building_total + 1
         self.log = list()
         self.period=const.building.INITIAL_PERIOD
