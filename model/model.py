@@ -10,7 +10,7 @@ from instances_manager import get_event_manager
 from model.player import Player
 from model.entity import Entity
 from model.character import Character
-from model.ranged import RangedFighter
+from model.ranged_fighter import RangedFighter
 
 
 class Model:

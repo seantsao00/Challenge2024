@@ -9,7 +9,7 @@ from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, Even
 from model.entity import Entity
 from model.melee import Melee
 from model.lookout import Lookout
-from model.ranged import RangedFighter
+from model.ranged_fighter import RangedFighter
 
 class Building(Entity):
     """
