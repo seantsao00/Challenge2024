@@ -3,7 +3,7 @@ The module defines EventManager.
 """
 
 from collections import defaultdict
-from typing import Callable, Optional, TypeAlias
+from typing import Callable, TypeAlias, Optional
 
 from event_manager.events import BaseEvent
 

@@ -3,6 +3,7 @@ import pygame as pg
 import const
 import model
 from view.object.object_base import ObjectBase
+from util import crop_image
 
 
 class EntityView(ObjectBase):
@@ -32,7 +33,11 @@ class EntityView(ObjectBase):
                     str(state) + '.png'
                 )
                 img = pg.image.load(path)
-                cls.images[type][state] = img.convert_alpha()
+                width = const.ENTITY_RADIUS * 2
+                height = const.ENTITY_RADIUS * 2
+                cls.images[type][state]  = crop_image(
+                    img, width, height
+                ).convert_alpha()
         cls.image_initialized = True
 
     def draw(self, screen: pg.Surface):

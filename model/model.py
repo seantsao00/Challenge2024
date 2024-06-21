@@ -6,10 +6,13 @@ import pygame as pg
 
 import const
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventPlayerMove,
-                           EventQuit)
+                           EventQuit, EventMultiAttack)
 from instances_manager import get_event_manager
-from model.entity import Entity
 from model.player import Player
+from model.entity import Entity
+from model.character import Character
+from model.ranged_fighter import RangedFighter
+from model.fountain import Fountain
 
 
 class Model:
@@ -47,6 +50,7 @@ class Model:
         """
         self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
+        self.test_tower = Fountain(1, (const.ARENA_SIZE[0]/2, const.ARENA_SIZE[1]/2))
 
     def handle_every_tick(self, _: EventEveryTick):
         """
@@ -71,6 +75,17 @@ class Model:
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
+
+    def multi_attack(self, event: EventMultiAttack):
+        attacker = event.attacker
+        type = event.type
+        if (type == 1):
+            origin: pg.Vector2 = event.target
+            radius = event.radius
+            for victim in self.entities:
+                dist = origin.distance_to(victim.postition)
+                if (attacker.team != victim.team and dist <= radius):
+                    victim.take_damage(attacker.damage)
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

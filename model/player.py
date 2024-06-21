@@ -4,6 +4,7 @@ The module defines Player class.
 
 import pygame as pg
 
+from model.entity import Entity
 import const
 from model.entity import Entity
 import view
@@ -16,10 +17,9 @@ class Player(Entity):
     """
 
     def __init__(self, player_id: const.PlayerIds):
-        super().__init__()
+        super().__init__((100, 100))
         self.pid = player_id
         self.running = False
-        self.position = pg.Vector2(100, 100)
         self.speed = const.PlayerSpeeds.WALK
         self.view = view.PlayerView(self)
 

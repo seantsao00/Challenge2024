@@ -1,0 +1,9 @@
+"""
+This module defines constants associated with range fighter.
+"""
+
+LOOKOUT_SPEED=15
+LOOKOUT_ATTACK_RANGE=100
+LOOKOUT_DAMAGE=15
+LOOKOUT_HEALTH=300
+LOOKOUT_VISION=50

@@ -38,6 +38,11 @@ class View:
         model = get_model()
         for en in model.entities:
             en.view.draw(self.screen)
+
+        # For test
+        pg.draw.line(
+            self.screen, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
+        )
         pg.display.flip()
 
     def register_listeners(self):
