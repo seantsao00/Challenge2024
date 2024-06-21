@@ -17,14 +17,14 @@ class Entity:
      - hidden: the entity will not render if it is True.
     """
 
-    entity_id = 0
+    entity_id: int = 0
 
-    def __init__(self, position):
+    def __init__(self, position: pg.Vector2|tuple[float, float]):
         Entity.entity_id += 1
-        self.id = Entity.entity_id
-        self.position = position
-        self.type = 'default'
-        self.imgstate = 'default'
-        self.hidden = False
+        self.id: int = Entity.entity_id
+        self.position: pg.Vector2 = pg.Vector2(position)
+        self.type: str = 'default'
+        self.imgstate: str = 'default'
+        self.hidden: bool = False
         get_event_manager().post(EventCreateEntity(self))
 
