@@ -32,7 +32,6 @@ class Model:
         (e.g., The time that has elapsed in the game, )
         they should be initialized in Model.initialize()
         """
-        self.clock: pg.time.Clock
         self.running: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
