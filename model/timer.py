@@ -51,27 +51,33 @@ class Timer:
         self.start()
 
     def start(self):
+        """Start or resume the timer."""
         if not self.running:
             pygame.time.set_timer(self.event_type, self.interval)
             self.running = True
 
     def stop(self):
+        """Stop the timer."""
         pygame.time.set_timer(self.event_type, 0)
         self.running = False
 
     def set_interval(self, interval):
+        """Set a new interval for the timer."""
         self.interval = interval
         if self.running:
             self.stop()
             self.start()
     
     def get_interval(self):
+        """Get the current interval of the timer."""
         return self.interval
 
     def get_count(self):
+        """Get the count of how many times the timer has triggered."""
         return self.count
 
     def delete(self):
+        """Delete the timer."""
         self.stop()
         TimerManager.unregister_timer(self.event_type)
 
