@@ -24,7 +24,9 @@ class View:
         """
         size = pg.display.Info()
         self.canvas = pg.display.set_mode(size=const.WINDOW_SIZE, flags=pg.RESIZABLE|pg.DOUBLEBUF).copy()
-        self.screen = pg.display.set_mode(size=(size.current_w, size.current_h), flags=pg.RESIZABLE|pg.DOUBLEBUF)
+        window_w = min(size.current_w, size.current_h / 9 * 16)
+        window_h = min(size.current_h, size.current_w / 16 * 9)
+        self.screen = pg.display.set_mode(size=(window_w, window_h), flags=pg.RESIZABLE|pg.DOUBLEBUF)
         # print(self.canvas.get_rect().size)
         # print(self.screen.get_rect().size)
         pg.display.set_caption(const.WINDOW_CAPTION)
