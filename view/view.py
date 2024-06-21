@@ -22,7 +22,11 @@ class View:
         For more specific objects related to a game instance, 
         they should be initialized in View.initialize().
         """
-        self.screen = pg.display.set_mode(size=const.WINDOW_SIZE)
+        size = pg.display.Info()
+        self.canvas = pg.display.set_mode(size=const.WINDOW_SIZE, flags=pg.RESIZABLE|pg.DOUBLEBUF).copy()
+        self.screen = pg.display.set_mode(size=(size.current_w, size.current_h), flags=pg.RESIZABLE|pg.DOUBLEBUF)
+        # print(self.canvas.get_rect().size)
+        # print(self.screen.get_rect().size)
         pg.display.set_caption(const.WINDOW_CAPTION)
         PlayerView.init_convert()
         self.register_listeners()
@@ -34,15 +38,16 @@ class View:
 
     def handle_every_tick(self, _: EventEveryTick):
         self.display_fps()
-        self.screen.fill(const.BACKGROUND_COLOR)
+        self.canvas.fill(const.BACKGROUND_COLOR)
         model = get_model()
         for en in model.entities:
-            en.view.draw(self.screen)
+            en.view.draw(self.canvas)
 
         # For test
         pg.draw.line(
-            self.screen, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
+            self.canvas, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
         )
+        self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
         pg.display.flip()
 
     def register_listeners(self):
