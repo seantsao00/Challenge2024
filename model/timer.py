@@ -13,7 +13,7 @@ class TimerManager:
             del cls._timers[event_type]
 
     @classmethod
-    def handle_event(cls, event):
+    def handle_event(cls, event) -> bool:
         """Handle events for all timers. Returns True if handled."""
         timer = cls._timers.get(event.type)
         if timer:
@@ -24,13 +24,14 @@ class TimerManager:
 class Timer:
     _next_event_type = pygame.USEREVENT + 30
 
-    def __init__(self, interval, function, *args, **kwargs):
+    def __init__(self, interval, function, once=False, *args, **kwargs):
         """
         Initialize a Timer object.
 
         Parameters:
             interval (int):        The interval(ms) at which the function should be called.
             function (callable):   The function to call at each interval.
+            once (bool):           If True, the timer will execute only once and then stop.
             *args:                 Variable length argument list for the function.
             **kwargs:              Arbitrary keyword arguments for the function.
         """
@@ -41,6 +42,7 @@ class Timer:
         self.event_type = Timer._next_event_type
         self.count = 0
         self.running = False
+        self.once = once
         
         Timer._next_event_type += 1
 
@@ -60,6 +62,7 @@ class Timer:
     def set_interval(self, interval):
         self.interval = interval
         if self.running:
+            self.stop()
             self.start()
     
     def get_interval(self):
@@ -74,5 +77,7 @@ class Timer:
 
     def _handle_event(self, event):
         if event.type == self.event_type:
-            self.function(*self.args, **self.kwargs)
             self.count += 1
+            self.function(*self.args, **self.kwargs)
+            if self.once:
+                self.delete()
