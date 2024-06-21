@@ -14,15 +14,16 @@ class Character(Entity):
      - alive: The character is alive or not.
     """
 
-    def __init__(self, team, position, speed, attack_range, damage, health, vision, alive = True):
+    def __init__(self, team, position: pg.Vector2|tuple[float, float], speed: float, attack_range: float, 
+                 damage: float, health: float, vision: float, alive: bool = True):
         super().__init__(position)
         self.team = team
-        self.speed = speed
-        self.attack_range = attack_range
-        self.damage = damage
-        self.health = health
-        self.vision = vision
-        self.alive = alive
+        self.speed: float = speed
+        self.attack_range: float = attack_range
+        self.damage: float = damage
+        self.health: float = health
+        self.vision: float = vision
+        self.alive: bool = alive
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
     
     def move(self, direction: pg.Vector2):
