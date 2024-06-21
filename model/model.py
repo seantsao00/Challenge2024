@@ -10,6 +10,7 @@ from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, E
 from instances_manager import get_event_manager
 from model.player import Player
 from model.entity import Entity
+from model.timer import Timer
 from model.character import Character
 from model.ranged_fighter import RangedFighter
 from model.fountain import Fountain
@@ -32,7 +33,6 @@ class Model:
         they should be initialized in Model.initialize()
         """
         self.clock: pg.time.Clock
-        self.timer: int
         self.running: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
@@ -103,7 +103,6 @@ class Model:
         # Tell every one to start
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
-        self.timer = 0
         while self.running:
             ev_manager.post(EventEveryTick())
             self.dt = self.clock.tick(const.FPS) / 1000.0
