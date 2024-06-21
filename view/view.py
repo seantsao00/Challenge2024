@@ -50,6 +50,11 @@ class View:
         for obj in objects:
             # print(obj.images[obj.player.id][const.PlayerSpeeds.WALK].get_width())
             obj.draw(self.screen)
+        
+        # For test
+        pg.draw.line(
+            self.screen, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
+        )
         pg.display.flip()
 
     def register_listeners(self):
