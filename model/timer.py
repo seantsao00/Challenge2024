@@ -1,7 +1,8 @@
-from __future__ import annotations 
+from __future__ import annotations
 from typing import Callable
 
 import pygame as pg
+
 
 class TimerManager:
     _timers: dict[int, Timer] = {}
@@ -24,10 +25,11 @@ class TimerManager:
             return True
         return False
 
+
 class Timer:
     _next_event_type = pg.USEREVENT + 30
 
-    def __init__(self, interval: int, function: Callable, once: bool=False, *args, **kwargs):
+    def __init__(self, interval: int, function: Callable, once: bool = False, *args, **kwargs):
         """
         Initialize a Timer object.
 
@@ -46,7 +48,7 @@ class Timer:
         self.count = 0
         self.running = False
         self.once = once
-        
+
         Timer._next_event_type += 1
 
         TimerManager.register_timer(self)
@@ -70,7 +72,7 @@ class Timer:
         if self.running:
             self.stop()
             self.start()
-    
+
     def get_interval(self):
         """Get the current interval of the timer."""
         return self.interval
