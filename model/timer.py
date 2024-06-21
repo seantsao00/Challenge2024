@@ -1,37 +1,78 @@
 import pygame
 
-class Timer:
-    def __init__(self, interval: int, once: bool=False):
-        self._interval = interval
-        self._last_time = pygame.time.get_ticks()
-        self._enabled = True
-        self._once = once
-        self._count = 0
+class TimerManager:
+    _timers = {}
 
-    def check(self) -> bool:
-        if not self._enabled:
-            return False
-        current_time = pygame.time.get_ticks()
-        if current_time - self._last_time > self._interval:
-            self._last_time = current_time
-            if self._once:
-                self._enabled = False
-            self._count += 1
+    @classmethod
+    def register_timer(cls, timer):
+        cls._timers[timer.event_type] = timer
+
+    @classmethod
+    def unregister_timer(cls, event_type):
+        if event_type in cls._timers:
+            del cls._timers[event_type]
+
+    @classmethod
+    def handle_event(cls, event):
+        """Handle events for all timers. Returns True if handled."""
+        timer = cls._timers.get(event.type)
+        if timer:
+            timer._handle_event(event)
             return True
         return False
-    
-    def reset(self, interval=None) -> None:
-        if interval:
-            self._interval = interval
-        self._last_time = pygame.time.get_ticks()
-        self._enabled = True
-        self._count = 0
-    
-    def set_interval(self, interval: int) -> None:
-        self._interval = interval
 
-    def stop(self) -> None:
-        self._enabled = False
+class Timer:
+    _next_event_type = pygame.USEREVENT + 30
 
-    def get_count(self) -> int:
-        return self._count
+    def __init__(self, interval, function, *args, **kwargs):
+        """
+        Initialize a Timer object.
+
+        Parameters:
+            interval (int):        The interval(ms) at which the function should be called.
+            function (callable):   The function to call at each interval.
+            *args:                 Variable length argument list for the function.
+            **kwargs:              Arbitrary keyword arguments for the function.
+        """
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.event_type = Timer._next_event_type
+        self.count = 0
+        self.running = False
+        
+        Timer._next_event_type += 1
+
+        TimerManager.register_timer(self)
+
+        self.start()
+
+    def start(self):
+        if not self.running:
+            pygame.time.set_timer(self.event_type, self.interval)
+            self.running = True
+
+    def stop(self):
+        pygame.time.set_timer(self.event_type, 0)
+        self.running = False
+
+    def set_interval(self, interval):
+        self.interval = interval
+        if self.running:
+            self.start()
+    
+    def get_interval(self):
+        return self.interval
+
+    def get_count(self):
+        return self.count
+
+    def delete(self):
+        self.stop()
+        TimerManager.unregister_timer(self.event_type)
+
+    def _handle_event(self, event):
+        if event.type == self.event_type:
+            self.function(*self.args, **self.kwargs)
+            self.count += 1

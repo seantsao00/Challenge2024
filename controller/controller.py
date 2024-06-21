@@ -7,6 +7,7 @@ import pygame as pg
 import const
 from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager, get_model
+from model.timer import TimerManager
 
 
 class Controller:
@@ -47,6 +48,8 @@ class Controller:
                     mouse_pos = event_pg.pos
                     x, y = mouse_pos
                     print(f"Mouse click position: ({x}, {y})")
+
+            TimerManager.handle_event(event_pg)
 
         cur_state = model.state
         if cur_state == const.State.PLAY:
