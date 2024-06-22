@@ -14,7 +14,7 @@ from model.timer import Timer
 from model.character import Character
 from model.ranged_fighter import RangedFighter
 from model.fountain import Fountain
-
+from model.team import Team
 
 class Model:
     """
@@ -49,7 +49,8 @@ class Model:
         """
         self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
-        self.test_tower = Fountain(1, (const.ARENA_SIZE[0]/2, const.ARENA_SIZE[1]/2))
+        team1 = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), "team1")
+        self.test_fountain = team1.fountain
 
     def handle_every_tick(self, _: EventEveryTick):
         """
