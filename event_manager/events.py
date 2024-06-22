@@ -2,12 +2,17 @@
 The module defines events used by EventManager.
 """
 
+from __future__ import annotations
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from model.entity import Entity
+    from model.tower import Tower
+    from model.character import Character
 
 import pygame as pg
 
 import const
-# from model.entity import Entity
 
 
 @dataclass(kw_only=True)
@@ -32,6 +37,7 @@ class EventPauseModel(BaseEvent):
 
     For example, a listener which forcibly pauses all characters can be registered with this event.
     """
+
 
 @dataclass(kw_only=True)
 class EventContinueModel(BaseEvent):
@@ -67,26 +73,31 @@ class EventPlayerMove(BaseEvent):
 @dataclass(kw_only=True)
 class EventCreateEntity(BaseEvent):
     """Event posted when an entity is created."""
-    def __init__(self, entity):
+
+    def __init__(self, entity: Entity):
         self.entity = entity
 
+
 class EventAttack(BaseEvent):
-    def __init__(self, attacker, victim): # reference of two characters 
+    def __init__(self, attacker: Character, victim: Character):  # reference of two characters
         self.attacker = attacker
         self.victim = victim
-        
+
+
 class EventMultiAttack(BaseEvent):
-    def __init__(self, attacker, type=1, orientation=None, target:pg.Vector2=None, radius=None):
+    def __init__(self, attacker: Character, type=1, orientation=None, target: pg.Vector2 = None, radius=None):
         self.attacker = attacker
         self.type = type
         self.orientation = orientation
         self.target = target
         self.raidus = radius
 
+
 class EventTeamGainTower(BaseEvent):
-    def __init__(self, tower_id):
-        self.tower_id = tower_id
+    def __init__(self, tower: Tower):
+        self.tower = tower
+
 
 class EventTeamLoseTower(BaseEvent):
-    def __init__(self, tower_id):
-        self.tower_id = tower_id
+    def __init__(self, tower: Tower):
+        self.tower = tower
