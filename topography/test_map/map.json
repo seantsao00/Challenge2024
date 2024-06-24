@@ -6,7 +6,7 @@
     ],
     "images": {
         "background.png": -1,
-        "mountain1.png": 8
+        "obstacle.png": 8
     },
     "portals": [
         [[360, 360], [90, 90]]
