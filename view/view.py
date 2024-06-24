@@ -4,11 +4,15 @@ The module defines View class.
 
 import pygame as pg
 
+import os
+import cv2
+import numpy as np
+
 import const
+
 from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
 from instances_manager import get_event_manager, get_model
 from view.object import EntityView, ObjectBase, PlayerView
-
 
 class View:
     """
@@ -22,16 +26,39 @@ class View:
         For more specific objects related to a game instance, 
         they should be initialized in View.initialize().
         """
+        model = get_model()
+
         size = pg.display.Info()
         self.canvas = pg.display.set_mode(size=const.WINDOW_SIZE, flags=pg.RESIZABLE|pg.DOUBLEBUF).copy()
         window_w = min(size.current_w, size.current_h / 9 * 16)
         window_h = min(size.current_h, size.current_w / 16 * 9)
         self.screen = pg.display.set_mode(size=(window_w, window_h), flags=pg.RESIZABLE|pg.DOUBLEBUF)
-        # print(self.canvas.get_rect().size)
+        self.background_images = []
         # print(self.screen.get_rect().size)
         pg.display.set_caption(const.WINDOW_CAPTION)
+
+        for i in model.map.images:
+            loaded_image = cv2.imread(
+                os.path.join(model.map.map_dir, i), cv2.IMREAD_UNCHANGED
+            )
+            loaded_image = cv2.resize(
+                loaded_image, const.ARENA_SIZE, interpolation=cv2.INTER_AREA
+            )
+            if loaded_image.shape[2] == 3:
+                alpha_channel = np.ones((loaded_image.shape[0], loaded_image.shape[1]), dtype=loaded_image.dtype) * 255
+                loaded_image = np.dstack((loaded_image, alpha_channel))
+            x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
+            picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
+            picture = pg.transform.scale(picture, const.ARENA_SIZE)
+            picture = picture.subsurface(pg.Rect(x, y, w, h))
+            self.background_images.append((int(model.map.images[i]), picture, (x, y)))
+
+
         PlayerView.init_convert()
         self.register_listeners()
+        
+
+
 
     def initialize(self, _: EventInitialize):
         """
@@ -63,3 +90,5 @@ class View:
         model = get_model()
         pg.display.set_caption(
             f'{const.WINDOW_CAPTION} - FPS: {model.clock.get_fps():.2f}')
+
+    
