@@ -23,7 +23,7 @@ class Team:
         if Team.total == 4:
             raise Exception('Team size exceeds.')
         self.name = name
-        self.total_towers = 0
+        self.total_buildings = 0
         self.points = 0
         self.id = Team.total + 1
         self.fountain = model.fountain.Fountain(fountain_position, self)
@@ -33,9 +33,9 @@ class Team:
 
 
     def gain_tower(self, event: EventTeamGainTower):
-        self.total_towers += 1
+        self.total_buildings += 1
         print(self.id, " Gained a tower")
 
     def lose_tower(self, event: EventTeamLoseTower):
         print(self.id, " Lost a tower")
-        self.total_towers -= 1
+        self.total_buildings -= 1

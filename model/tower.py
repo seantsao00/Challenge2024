@@ -14,6 +14,12 @@ class Tower(Building):
     Each Tower has the following property:
      - health_init: The original health of the tower.
      - health_now: The health of the tower now.
+     - team: The owner of this building
+     - building_id: The id of the building. (Try not to get confused with the id in Entity)
+     - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
+     - spawn_timer: The timer spawning characters.
+     - character_type: The type chose to generate next, melee by default.
+     - period: The period to generate characters, in milliseconds, integer.
     """
 
     def __init__(self, health: float, position: pg.Vector2):

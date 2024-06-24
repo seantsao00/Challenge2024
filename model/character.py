@@ -2,7 +2,7 @@ import pygame as pg
 from instances_manager import get_event_manager
 from model.entity import Entity
 from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack
-
+from model.team import Team
 
 class Character(Entity):
     """
@@ -16,7 +16,7 @@ class Character(Entity):
      - alive: The character is alive or not.
     """
 
-    def __init__(self, team, position: pg.Vector2 | tuple[float, float], speed: float, attack_range: float,
+    def __init__(self, team: Team, position: pg.Vector2 | tuple[float, float], speed: float, attack_range: float,
                  damage: float, health: float, vision: float, alive: bool = True):
         super().__init__(position)
         self.team = team

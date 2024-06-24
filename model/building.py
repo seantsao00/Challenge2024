@@ -1,5 +1,5 @@
 """
-The module defines Tower class.
+The module defines Building class.
 """
 
 import const.building
@@ -37,7 +37,7 @@ class Building(Entity):
         Building.building_total += 1
 
     def update_period(self):
-        self.period = const.building.INITIAL_PERIOD_MS + int(const.building.FORMULA_K * self.team.total_towers ** 0.5)
+        self.period = const.building.INITIAL_PERIOD_MS + int(const.building.FORMULA_K * self.team.total_buildings ** 0.5)
 
     def generate_character(self, character_type, timestamp = pg.time.get_ticks()):
         self.log.append((character_type, timestamp))
