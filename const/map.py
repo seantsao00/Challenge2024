@@ -1,0 +1,2 @@
+MAP_ROAD = 0
+MAP_OBSTACLE = 1
