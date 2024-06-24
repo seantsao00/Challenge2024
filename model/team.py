@@ -56,7 +56,7 @@ class Team:
                 self.controlling = event.clicked
             else:
                 print('clicked on non interactable entity')
-        elif event.input_type == const.INPUT_TYPES.MOVE:
+        elif event.input_type == const.INPUT_TYPES.MOVE and self.controlling != None:
             self.controlling.move(event.displacement)
 
     def set_fountain(self, fountain):
