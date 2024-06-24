@@ -5,6 +5,15 @@ Utility functions that can be utilized across multiple modules.
 import pygame as pg
 
 
+def clamp(v, lo, hi):
+    if v < lo:
+        return lo
+    elif v > hi:
+        return hi
+    else:
+        return v
+
+
 def crop_image(picture: pg.Surface, desire_width: int, desire_height: int,
                large: bool = False, bounding_rect: pg.Rect = None) -> pg.Surface:
     """
