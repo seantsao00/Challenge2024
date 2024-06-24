@@ -8,3 +8,4 @@ pycodestyle==2.11.1
 pygame-ce==2.4.0
 pylint==3.0.3
 tomlkit==0.12.3
+opencv-python==4.10.0.84

@@ -3,6 +3,8 @@
 # road: other (prefer white)
 # be careful that the alpha channel is ignored
 
+# from challenge 2023
+
 import sys
 
 import cv2
@@ -13,7 +15,7 @@ def gen_map_file_from_image(img_path, width, height, threshold=0.8, distance=10)
     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
     image_width = img.shape[1]
     image_height = img.shape[0]
-
+    
     map_list = [[0 for j in range(height)] for i in range(width)]
     for x in range(width):
         for y in range(height):

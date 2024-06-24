@@ -1,10 +1,12 @@
 """
 The module defines the main game engine.
 """
+import os
 
 import pygame as pg
 
 import const
+import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventPlayerMove,
                            EventQuit, EventMultiAttack)
 from instances_manager import get_event_manager
@@ -15,6 +17,7 @@ from model.character import Character
 from model.ranged_fighter import RangedFighter
 from model.fountain import Fountain
 from model.team import Team
+from model.map import load_map
 
 class Model:
     """
@@ -23,7 +26,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self):
+    def __init__(self, map_name):
         """
         Initialize the Model object.
 
@@ -39,6 +42,7 @@ class Model:
         self.entities: list[Entity] = []
         self.register_listeners()
         self.dt = 0
+        self.map = load_map(os.path.join(const.map.MAP_DIR, map_name))
 
     def initialize(self, _: EventInitialize):
         """

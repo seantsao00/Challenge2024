@@ -7,6 +7,7 @@ import random
 import pygame as pg
 
 import const 
+import const.map
 import util
 
 class Map:
@@ -52,6 +53,8 @@ def load_map(map_dir):
     json_file = os.path.join(map_dir, "map.json")
     map_file = os.path.join(map_dir, "map.csv")
 
+    json_file = os.path.abspath(json_file)
+    map_file = os.path.abspath(map_file)
     with open(json_file) as f:
         data = json.load(f)
     images = data["images"]
@@ -65,16 +68,15 @@ def load_map(map_dir):
 
     with open(map_file) as f:
         rows = csv.reader(f)
-
+        print(size)
         map_list = [[0] * size[1] for _ in range(0, size[0])]
         portkey_map = [[-1] * size[1] for _ in range(0, size[0])]
-
         y = 0
         for row in rows:
             for x in range(0, size[0]):
                 map_list[x][y] = int(row[x])
-                if map_list[x][y] >= const.MAP_PORTKEY_MIN:
-                    portkey_map[x][y] = int(row[x]) - const.MAP_PORTKEY_MIN
+                if map_list[x][y] >= const.map.MAP_PORTKEY_MIN:
+                    portkey_map[x][y] = int(row[x]) - const.map.MAP_PORTKEY_MIN
                     portkey_cells[portkey_map[x][y]].append((x, y))
             y += 1
 

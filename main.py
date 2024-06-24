@@ -31,12 +31,16 @@ def main():
 
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2023')
+    parser.add_argument(
+        'map', help='The name of maps. It can be single_map, test_map or river(for test)') 
     args = parser.parse_args()
+    
+
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
 
-    model = Model()
+    model = Model(args.map)
     instances_manager.register_model(model)
 
     Controller()
