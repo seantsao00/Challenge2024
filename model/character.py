@@ -1,7 +1,7 @@
 import pygame as pg
 from instances_manager import get_event_manager
 from model.entity import Entity
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit, EventCreateEntity, EventAttack
+from event_manager import EventEveryTick, EventInitialize, EventQuit, EventCreateEntity, EventAttack
 from model.team import Team
 
 class Character(Entity):

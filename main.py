@@ -33,14 +33,27 @@ def main():
     parser = argparse.ArgumentParser(prog='Challenge2023')
     parser.add_argument(
         'map', help='The name of maps. It can be single_map, test_map or river(for test)') 
-    args = parser.parse_args()
-    
+    parser.add_argument(
+        'team1', help='team1 Use "human" if this team is controlled by human.'
+    )
+    # parser.add_argument(
+    #     'team2', help='team2'
+    # )
+    # parser.add_argument(
+    #     'team3', help='team3'
+    # )
+    # parser.add_argument(
+    #     'team4', help='team4'
+    # )
+    # Here is WIP
 
+    args = parser.parse_args()
+    teams = [args.team1]
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
 
-    model = Model(args.map)
+    model = Model(args.map, teams)
     instances_manager.register_model(model)
 
     Controller()

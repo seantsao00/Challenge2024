@@ -53,21 +53,25 @@ class EventEveryTick(BaseEvent):
     """Event posted every tick."""
 
 
-@dataclass(kw_only=True)
-class EventPlayerMove(BaseEvent):
+class EventHumanInput(BaseEvent):
     """
-    Event posted upon moving a player.
+    Event posted upon moving a human controlled team.
 
     For example, a listener which draws position of characters can be registered with this event.
     """
-    displacement: pg.Vector2
-    """
-    The displacement vector representing the movement.
-    """
-    player_id: const.PlayerIds
+    def __init__(self, input_type: const.INPUT_TYPES, clicked: Character = None, displacement: pg.Vector2 = None):
+        self.input_type = input_type
+        self.clicked = clicked # When INPUT_TYPE is PICK
+        self.displacement = displacement# When INPUT_TYPE is MOVE
+        """
+        The displacement vector representing the movement.
+        """
 
     def __str__(self):
-        return f"Player {self.player_id} move {self.displacement}"
+        if self.input_type == const.INPUT_TYPES.PICK:
+            return f"Clicked at {self.clicked.id}"
+        else:
+            return f"Move {self.displacement}"
 
 
 @dataclass(kw_only=True)

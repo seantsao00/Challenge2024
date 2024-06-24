@@ -5,7 +5,7 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
+from event_manager import EventEveryTick, EventInitialize, EventQuit, EventHumanInput
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -49,6 +49,13 @@ class Controller:
                     x, y = mouse_pos
                     print(f"Mouse click position: ({x}, {y})")
 
+                    clicked = None
+                    for entity in model.entities:
+                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                            clicked = entity
+                    
+                    ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
+
             TimerManager.handle_event(event_pg)
 
         cur_state = model.state
@@ -66,20 +73,19 @@ class Controller:
         Control the behavior of player characters depending on key input during the game.
 
         When the method called, controller get what keys is pressed in this tick,
-        and post EventPlayerMove according to the keys pressed.
+        and post EventHumanInput according to the keys pressed.
         """
         ev_manager = get_event_manager()
         pressed_keys = pg.key.get_pressed()
 
-        for player_id, keys_map in const.PLAYER_KEYS_MAP.items():
-            direction = pg.Vector2(0, 0)
+        direction = pg.Vector2(0, 0)
 
-            for k, v in keys_map.items():
-                # If the key is actually pressed
-                if pressed_keys[k]:
-                    direction += v
+        for k, v in const.HUMAN_KEYS_MAP.items():
+            # If the key is actually pressed
+            if pressed_keys[k]:
+                direction += v
 
-            if direction.length() != 0:
-                # Try to move as far as player can.
-                displacement = direction.normalize() * max(const.PlayerSpeeds)
-                ev_manager.post(EventPlayerMove(displacement=displacement, player_id=player_id))
+        if direction.length() != 0:
+            # Try to move as far as player can.
+            displacement = direction.normalize() * max(const.PlayerSpeeds)
+            ev_manager.post(EventHumanInput(const.INPUT_TYPES.MOVE, displacement=displacement))

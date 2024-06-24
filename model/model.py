@@ -7,7 +7,7 @@ import pygame as pg
 
 import const
 import const.map
-from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventPlayerMove,
+from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
                            EventQuit, EventMultiAttack)
 from instances_manager import get_event_manager
 from model.player import Player
@@ -26,7 +26,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self, map_name):
+    def __init__(self, map_name, teams):
         """
         Initialize the Model object.
 
@@ -43,6 +43,7 @@ class Model:
         self.register_listeners()
         self.dt = 0
         self.map = load_map(os.path.join(const.map.MAP_DIR, map_name))
+        self.teams = teams
 
     def initialize(self, _: EventInitialize):
         """
@@ -53,9 +54,11 @@ class Model:
         """
         self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
-        team1 = Team("team1")
-        self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team1)
-        team1.set_fountain(self.test_fountain)
+
+        for i, team_master in enumerate(self.teams):
+            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), "team" + str(i+1), team_master)
+            self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team)
+            team.set_fountain(self.test_fountain)
         
     def handle_every_tick(self, _: EventEveryTick):
         """
@@ -70,13 +73,6 @@ class Model:
         Exit the main loop.
         """
         self.running = False
-
-    def handle_player_move(self, event: EventPlayerMove):
-        """
-        Call Player.move() for each EventPlayerMove.
-        """
-        player = self.players[event.player_id]
-        player.move(event.displacement, self.dt)
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
@@ -98,7 +94,6 @@ class Model:
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
-        ev_manager.register_listener(EventPlayerMove, self.handle_player_move)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
 
     def run(self):

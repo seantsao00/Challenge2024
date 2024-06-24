@@ -10,7 +10,7 @@ import numpy as np
 
 import const
 
-from event_manager import EventEveryTick, EventInitialize, EventPlayerMove, EventQuit
+from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager, get_model
 from view.object import EntityView, ObjectBase, PlayerView
 
