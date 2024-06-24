@@ -1,0 +1,15 @@
+{
+    "width": 10,
+    "height": 10,
+    "spawn": [
+        [2, 2], [2, 8], [8, 2], [8, 8]
+    ],
+    "images": {
+        "background.png": -1,
+        "8.png": 8
+    },
+    "portals": [
+        [[4, 4], [1, 1]]
+    ],
+    "tower_spawn": [5, 5]
+}
