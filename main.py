@@ -32,7 +32,7 @@ def main():
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2023')
     parser.add_argument(
-        'map', help='The name of tmaps.') 
+        'map', help='The name of maps. It can be single_map, test_map or river(for test)') 
     args = parser.parse_args()
     
 
