@@ -53,9 +53,10 @@ class Model:
         """
         self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
-        team1 = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), "team1")
-        self.test_fountain = team1.fountain
-
+        team1 = Team("team1")
+        self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team1)
+        team1.set_fountain(self.test_fountain)
+        
     def handle_every_tick(self, _: EventEveryTick):
         """
         Do actions that should be executed every tick.

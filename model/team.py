@@ -3,7 +3,6 @@ import const
 import const.team
 from instances_manager import get_event_manager
 from event_manager import EventTeamGainTower, EventTeamLoseTower
-import model.fountain
 
 class Team:
 
@@ -19,18 +18,19 @@ class Team:
 
     total = 0
 
-    def __init__(self, fountain_position: pg.Vector2, name: str):
+    def __init__(self, name: str):
         if Team.total == 4:
             raise Exception('Team size exceeds.')
         self.name = name
         self.total_buildings = 0
         self.points = 0
         self.id = Team.total + 1
-        self.fountain = model.fountain.Fountain(fountain_position, self)
         Team.total += 1
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
         get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
 
+    def set_fountain(self, fountain):
+        self.fountain=fountain
 
     def gain_tower(self, event: EventTeamGainTower):
         self.total_buildings += 1
