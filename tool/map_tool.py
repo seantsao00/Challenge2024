@@ -3,6 +3,8 @@
 # road: other (prefer white)
 # be careful that the alpha channel is ignored
 
+# from challenge 2023
+
 import sys
 
 import cv2
