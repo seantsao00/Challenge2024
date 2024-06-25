@@ -1,7 +1,9 @@
 import pygame as pg
-from model.character import Character
-from const.melee import MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH, MELEE_SPEED, MELEE_VISION
+
+from const.melee import (MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH,
+                         MELEE_SPEED, MELEE_VISION)
 from event_manager import EventAttack
+from model.character import Character
 
 
 class Melee(Character):

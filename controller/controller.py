@@ -5,7 +5,8 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventQuit, EventHumanInput
+from event_manager import (EventEveryTick, EventHumanInput, EventInitialize,
+                           EventQuit)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 

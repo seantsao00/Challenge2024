@@ -8,16 +8,16 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
-                           EventQuit, EventMultiAttack)
+                           EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
-from model.player import Player
-from model.entity import Entity
-from model.timer import Timer
 from model.character import Character
-from model.ranged_fighter import RangedFighter
+from model.entity import Entity
 from model.fountain import Fountain
-from model.team import Team
 from model.map import load_map
+from model.player import Player
+from model.ranged_fighter import RangedFighter
+from model.team import Team
+from model.timer import Timer
 
 
 class Model:

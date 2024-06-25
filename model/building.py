@@ -2,16 +2,18 @@
 The module defines Building class.
 """
 
-import const.building
+from random import choice, randint
+
 import pygame as pg
+
 import const
+import const.building
+from event_manager import EventCreateEntity
+from instances_manager import get_event_manager
+from model import melee
 from model.entity import Entity
 from model.team import Team
 from model.timer import Timer
-from instances_manager import get_event_manager
-from event_manager import EventCreateEntity
-from random import randint, choice
-from model import melee
 
 
 class Building(Entity):

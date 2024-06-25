@@ -3,16 +3,18 @@ The module defines events used by EventManager.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
+
 if TYPE_CHECKING:
+    from model.character import Character
     from model.entity import Entity
     from model.tower import Tower
-    from model.character import Character
 
 
 @dataclass(kw_only=True)

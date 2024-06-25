@@ -3,9 +3,10 @@ The module defines Tower class.
 """
 
 import pygame as pg
-from model.entity import Entity
-from model.building import Building
+
 from event_manager import EventAttack
+from model.building import Building
+from model.entity import Entity
 from model.team import Team
 
 

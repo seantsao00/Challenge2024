@@ -4,9 +4,9 @@ The module defines Entity class.
 
 import pygame as pg
 
+import view
 from event_manager.events import EventCreateEntity
 from instances_manager import get_event_manager
-import view
 
 
 class Entity:

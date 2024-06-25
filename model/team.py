@@ -1,9 +1,11 @@
 import pygame as pg
+
 import const
 import const.team
-from model.entity import Entity
+from event_manager import (EventHumanInput, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager
-from event_manager import EventTeamGainTower, EventTeamLoseTower, EventHumanInput
+from model.entity import Entity
 
 
 class Team:

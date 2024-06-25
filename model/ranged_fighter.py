@@ -1,8 +1,10 @@
 import pygame as pg
+
+from const.ranged import (RANGED_ATTACK_RANGE, RANGED_DAMAGE, RANGED_HEALTH,
+                          RANGED_SPEED, RANGED_VISION)
+from event_manager import EventMultiAttack
 from instances_manager import get_event_manager
 from model.character import Character
-from event_manager import EventMultiAttack
-from const.ranged import RANGED_ATTACK_RANGE, RANGED_DAMAGE, RANGED_HEALTH, RANGED_SPEED, RANGED_VISION
 
 
 class RangedFighter(Character):
