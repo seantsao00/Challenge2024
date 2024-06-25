@@ -62,7 +62,7 @@ class EventHumanInput(BaseEvent):
 
     def __init__(self, input_type: const.INPUT_TYPES, clicked: Character = None, displacement: pg.Vector2 = None):
         self.input_type = input_type
-        self.clicked = clicked  # When INPUT_TYPE is PICK
+        self.clicked = clicked  # When INPUT_TYPE is PICK or ATTACK
         self.displacement = displacement  # When INPUT_TYPE is MOVE
         """
         The displacement vector representing the movement.

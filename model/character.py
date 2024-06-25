@@ -47,6 +47,8 @@ class Character(Entity):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team and dist <= self.attack_range):
             get_event_manager().post(EventAttack(self, enemy), enemy.id)
+        else:
+            print("attack failed")
 
     def die(self):
         self.alive = False

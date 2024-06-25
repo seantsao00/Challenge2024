@@ -55,6 +55,17 @@ class Controller:
                             clicked = entity
 
                     ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
+                if event_pg.button == 1:  # Left mouse button
+                    mouse_pos = event_pg.pos
+                    x, y = mouse_pos
+                    print(f"Right click position: ({x}, {y})")
+
+                    clicked = None
+                    for entity in model.entities:
+                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                            clicked = entity
+
+                    ev_manager.post(EventHumanInput(const.INPUT_TYPES.ATTACK, clicked=clicked))
 
             TimerManager.handle_event(event_pg)
 
