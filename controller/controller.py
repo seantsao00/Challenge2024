@@ -42,6 +42,9 @@ class Controller:
 
             if event_pg.type == pg.KEYDOWN:
                 # For orientating
+                if event_pg.key == pg.K_ESCAPE:
+                    print("Press ESC")
+                    # ev_manager.post(EventQuit())
                 key_down_events.append(event_pg)
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
