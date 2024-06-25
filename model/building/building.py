@@ -21,19 +21,17 @@ class Building(Entity):
     """
     Class for Building (object) in the game.
     Each Building has the following property:
+    - team: The owner of this building
+    - building_id: The id of the building. (Try not to get confused with the id in Entity)
+    - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
+    - spawn_timer: The timer spawning characters.
+    - character_type: The type chose to generate next, melee by default.
+    - period: The period to generate characters, in milliseconds, integer.
     """
 
     building_total = 0
 
     def __init__(self, position: pg.Vector2, team: Team = None, type='default', imgstate='default'):
-        """
-        - team: The owner of this building
-        - building_id: The id of the building. (Try not to get confused with the id in Entity)
-        - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
-        - spawn_timer: The timer spawning characters.
-        - character_type: The type chose to generate next, melee by default.
-        - period: The period to generate characters, in milliseconds, integer.
-        """
         super().__init__(position, type, imgstate)
         self.team = team
         self.building_id = Building.building_total + 1
