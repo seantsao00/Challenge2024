@@ -5,6 +5,7 @@ from model.entity import Entity
 from instances_manager import get_event_manager
 from event_manager import EventTeamGainTower, EventTeamLoseTower, EventHumanInput
 
+
 class Team:
 
     """
@@ -60,7 +61,7 @@ class Team:
             self.controlling.move(event.displacement)
 
     def set_fountain(self, fountain):
-        self.fountain=fountain
+        self.fountain = fountain
 
     def gain_tower(self, event: EventTeamGainTower):
         self.total_buildings += 1

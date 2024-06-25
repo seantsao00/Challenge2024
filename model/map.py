@@ -1,4 +1,4 @@
-import os 
+import os
 import csv
 import json
 from queue import Queue
@@ -6,9 +6,10 @@ import random
 
 import pygame as pg
 
-import const 
+import const
 import const.map
 import util
+
 
 class Map:
     def __init__(
@@ -48,6 +49,7 @@ class Map:
             int(position[1] * self.size[1] / const.ARENA_SIZE[1]), 0, self.size[1] - 1
         )
         return x, y
+
 
 def load_map(map_dir):
     json_file = os.path.join(map_dir, "map.json")

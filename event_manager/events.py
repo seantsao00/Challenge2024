@@ -59,10 +59,11 @@ class EventHumanInput(BaseEvent):
 
     For example, a listener which draws position of characters can be registered with this event.
     """
+
     def __init__(self, input_type: const.INPUT_TYPES, clicked: Character = None, displacement: pg.Vector2 = None):
         self.input_type = input_type
-        self.clicked = clicked # When INPUT_TYPE is PICK
-        self.displacement = displacement# When INPUT_TYPE is MOVE
+        self.clicked = clicked  # When INPUT_TYPE is PICK
+        self.displacement = displacement  # When INPUT_TYPE is MOVE
         """
         The displacement vector representing the movement.
         """

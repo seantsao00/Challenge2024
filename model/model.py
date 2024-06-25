@@ -19,6 +19,7 @@ from model.fountain import Fountain
 from model.team import Team
 from model.map import load_map
 
+
 class Model:
     """
     The main game engine.
@@ -56,10 +57,11 @@ class Model:
         self.state = const.State.PLAY
 
         for i, team_master in enumerate(self.teams):
-            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), "team" + str(i+1), team_master)
+            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2),
+                        "team" + str(i+1), team_master)
             self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team)
             team.set_fountain(self.test_fountain)
-        
+
     def handle_every_tick(self, _: EventEveryTick):
         """
         Do actions that should be executed every tick.

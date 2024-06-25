@@ -4,6 +4,7 @@ from model.entity import Entity
 from event_manager import EventEveryTick, EventInitialize, EventQuit, EventCreateEntity, EventAttack
 from model.team import Team
 
+
 class Character(Entity):
     """
     Class for character in the game.

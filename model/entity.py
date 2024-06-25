@@ -22,8 +22,8 @@ class Entity:
 
     entity_id: int = 0
 
-    def __init__(self, position: pg.Vector2|tuple[float, float],
-                 type: str='default', imgstate: str='default'):
+    def __init__(self, position: pg.Vector2 | tuple[float, float],
+                 type: str = 'default', imgstate: str = 'default'):
         Entity.entity_id += 1
         self.id: int = Entity.entity_id
         self.position: pg.Vector2 = pg.Vector2(position)

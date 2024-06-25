@@ -8,6 +8,7 @@ from model.building import Building
 from instances_manager import get_event_manager
 from event_manager import EventAttack, EventTeamGainTower, EventTeamLoseTower
 
+
 class Tower(Building):
     """
     Class for Tower (object) in the game.

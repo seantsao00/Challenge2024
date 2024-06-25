@@ -53,7 +53,7 @@ class Controller:
                     for entity in model.entities:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
-                    
+
                     ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
 
             TimerManager.handle_event(event_pg)

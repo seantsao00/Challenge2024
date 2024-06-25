@@ -13,6 +13,7 @@ from event_manager import EventCreateEntity
 from random import randint, choice
 from model import melee
 
+
 class Building(Entity):
     """
     Class for Building (object) in the game.
@@ -32,19 +33,21 @@ class Building(Entity):
         self.team = team
         self.building_id = Building.building_total + 1
         self.log = list()
-        self.period=const.building.INITIAL_PERIOD_MS
+        self.period = const.building.INITIAL_PERIOD_MS
         self.character_type = melee.Melee
         Building.building_total += 1
 
     def update_period(self):
-        self.period = const.building.INITIAL_PERIOD_MS + int(const.building.FORMULA_K * self.team.total_buildings ** 0.5)
+        self.period = const.building.INITIAL_PERIOD_MS + \
+            int(const.building.FORMULA_K * self.team.total_buildings ** 0.5)
 
-    def generate_character(self, character_type, timestamp = pg.time.get_ticks()):
+    def generate_character(self, character_type, timestamp=pg.time.get_ticks()):
         self.log.append((character_type, timestamp))
-        new_position = pg.Vector2(choice([1, -1]) * (200 + randint(-50, 50)), choice([1, -1]) * (200 + randint(-50, 50)))
+        new_position = pg.Vector2(
+            choice([1, -1]) * (200 + randint(-50, 50)), choice([1, -1]) * (200 + randint(-50, 50)))
         new_character = character_type(self.team, self.position + new_position)
         self.set_timer()
-        
+
     def set_timer(self):
         self.update_period()
         self.spawn_timer = Timer(self.period, self.generate_character, True, self.character_type)
