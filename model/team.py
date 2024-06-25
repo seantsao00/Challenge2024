@@ -12,7 +12,7 @@ from event_manager import (EventHumanInput, EventSpawnCharacter,
 from instances_manager import get_event_manager
 
 if TYPE_CHECKING:
-    from model.fountain import Fountain
+    from model.building import Fountain
     from model.entity import Entity
 class Team:
 

@@ -10,7 +10,7 @@ import const
 import const.building
 from event_manager import EventSpawnCharacter
 from instances_manager import get_event_manager
-from model import melee
+from model.character import Melee
 from model.entity import Entity
 from model.team import Team
 from model.timer import Timer
@@ -39,7 +39,7 @@ class Building(Entity):
         self.building_id = Building.building_total + 1
         self.log = list()
         self.period = const.building.INITIAL_PERIOD_MS
-        self.character_type = melee.Melee
+        self.character_type = Melee
         Building.building_total += 1
 
     def update_period(self):

@@ -12,14 +12,14 @@ from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
 from instances_manager import get_event_manager
 from model.character import Character
 from model.entity import Entity
-from model.fountain import Fountain
+from model.building import Fountain
 from model.map import load_map
 from model.player import Player
-from model.ranged_fighter import RangedFighter
+from model.character.ranged_fighter import RangedFighter
 from model.team import Team
 from model.timer import Timer
 
-from model.melee import Melee
+from model.character import Melee
 
 
 

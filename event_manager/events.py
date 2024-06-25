@@ -14,7 +14,7 @@ import const
 if TYPE_CHECKING:
     from model.character import Character
     from model.entity import Entity
-    from model.tower import Tower
+    from model.building import Tower
 
 
 @dataclass(kw_only=True)
