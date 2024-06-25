@@ -106,3 +106,7 @@ class EventTeamGainTower(BaseEvent):
 class EventTeamLoseTower(BaseEvent):
     def __init__(self, tower: Tower):
         self.tower = tower
+
+class EventSpawnCharacter(BaseEvent):
+    def __init__(self, character: Character):
+        self.character = character

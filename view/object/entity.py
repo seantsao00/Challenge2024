@@ -45,4 +45,4 @@ class EntityView(ObjectBase):
         if entity.hidden == True:
             return
         img = self.images[entity.type][entity.imgstate]
-        screen.blit(img, img.get_rect(midbottom=entity.position))
+        screen.blit(img, img.get_rect(center=entity.position))

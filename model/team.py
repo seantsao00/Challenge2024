@@ -1,13 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventHumanInput, EventTeamGainTower,
-                           EventTeamLoseTower)
+from event_manager import (EventHumanInput, EventSpawnCharacter,
+                           EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager
-from model.entity import Entity
 
-
+if TYPE_CHECKING:
+    from model.fountain import Fountain
+    from model.entity import Entity
 class Team:
 
     """
@@ -15,10 +20,11 @@ class Team:
     Each Team has the following property:
      - name: The name of the team.
      - master: The controller of the team.
-     - total_towers: The total towers that this team has.
+     - total_buildings: The total buildings that this team has.
      - points: The accumulated points of the team.
      - id: The id of the team.
-     - fountain: The fountain of the team
+     - building_list: list of the building of the team. The first one is the fountain.
+     - character_list: list of the character of the team.
     """
 
     total = 0
@@ -31,6 +37,8 @@ class Team:
         self.points = 0
         self.id = Team.total + 1
         self.master = master
+        self.building_list = []
+        self.character_list = []
         if master == 'human':
             self.controlling = None
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
@@ -64,13 +72,20 @@ class Team:
         elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
             self.controlling.attack(event.clicked)
 
-    def set_fountain(self, fountain):
-        self.fountain = fountain
+    def set_fountain(self, fountain: Fountain):
+        self.building_list.append(fountain)
+
+    def gain_character(self, event: EventSpawnCharacter):
+        self.character_list.append(event.character)
 
     def gain_tower(self, event: EventTeamGainTower):
         self.total_buildings += 1
-        print(self.id, " Gained a tower")
+        if event.tower not in self.building_list:
+            self.building_list.append(event.tower)
+        print(self.id, " gained a tower with id", event.tower.building_id," at", event.tower.position)
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(self.id, " Lost a tower")
+        print(self.id, " lost a tower with id", event.tower.building_id," at", event.tower.position)
+        if event.tower in self.building_list:
+            self.building_list.remove(event.tower)
         self.total_buildings -= 1
