@@ -1,8 +1,8 @@
 import pygame as pg
 
+import model
 import model.tower
 from view.object.entity import Entity
-import model
 
 
 class Tower(Entity):

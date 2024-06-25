@@ -2,14 +2,13 @@
 The module defines View class.
 """
 
-import pygame as pg
-
 import os
+
 import cv2
 import numpy as np
+import pygame as pg
 
 import const
-
 from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager, get_model
 from view.object import EntityView, ObjectBase, PlayerView

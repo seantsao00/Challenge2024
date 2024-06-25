@@ -2,8 +2,8 @@
 import pygame as pg
 
 import const
-from instances_manager import get_event_manager, get_model
 from event_manager import EventShowCoordinate
+from instances_manager import get_event_manager, get_model
 
 
 class Coordinate:

@@ -1,8 +1,8 @@
-import os
 import csv
 import json
-from queue import Queue
+import os
 import random
+from queue import Queue
 
 import pygame as pg
 

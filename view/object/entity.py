@@ -2,8 +2,8 @@ import pygame as pg
 
 import const
 import model
-from view.object.object_base import ObjectBase
 from util import crop_image
+from view.object.object_base import ObjectBase
 
 
 class EntityView(ObjectBase):

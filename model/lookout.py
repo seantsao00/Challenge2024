@@ -1,7 +1,9 @@
 import pygame as pg
-from model.character import Character
-from const.lookout import LOOKOUT_ATTACK_RANGE, LOOKOUT_DAMAGE, LOOKOUT_HEALTH, LOOKOUT_SPEED, LOOKOUT_VISION
+
+from const.lookout import (LOOKOUT_ATTACK_RANGE, LOOKOUT_DAMAGE,
+                           LOOKOUT_HEALTH, LOOKOUT_SPEED, LOOKOUT_VISION)
 from event_manager import EventAttack
+from model.character import Character
 
 
 class Lookout(Character):
