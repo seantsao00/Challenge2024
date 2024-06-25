@@ -11,4 +11,4 @@ ENTITY_STATES = {
     "fountain": ["temporary_blue_nexus"]
 }
 
-ENTITY_RADIUS: float = ARENA_SIZE[0]/10
+ENTITY_RADIUS: float = ARENA_SIZE[0]/50
