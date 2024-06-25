@@ -4,6 +4,7 @@ This package exports all constants used in project.
 
 import pygame as pg
 
+from const.character import *
 from const.controller import *
 from const.entity import *
 from const.model import *

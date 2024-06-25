@@ -1,7 +1,6 @@
 import pygame as pg
 
-from const.melee import (MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH,
-                         MELEE_SPEED, MELEE_VISION)
+import const
 from event_manager import EventAttack
 from model.character import Character
 
@@ -22,8 +21,8 @@ class Melee(Character):
     """
 
     def __init__(self, team, position, alive=True, defense=False):
-        super().__init__(team, position, MELEE_SPEED, MELEE_ATTACK_RANGE,
-                         MELEE_DAMAGE, MELEE_HEALTH, MELEE_VISION, alive)
+        super().__init__(team, position, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
+                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, alive)
         self.defense = defense
 
     def take_damage(self, event: EventAttack):

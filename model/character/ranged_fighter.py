@@ -1,7 +1,6 @@
 import pygame as pg
 
-from const.ranged import (RANGED_ATTACK_RANGE, RANGED_DAMAGE, RANGED_HEALTH,
-                          RANGED_SPEED, RANGED_VISION)
+import const
 from event_manager import EventMultiAttack
 from instances_manager import get_event_manager
 from model.character import Character
@@ -15,8 +14,8 @@ class RangedFighter(Character):
     """
 
     def __init__(self, team, position: pg.Vector2):
-        super().__init__(self, team, position, RANGED_SPEED, RANGED_ATTACK_RANGE,
-                         RANGED_DAMAGE, RANGED_HEALTH, RANGED_VISION, True)
+        super().__init__(self, team, position, const.RANGED_SPEED, const.RANGED_ATTACK_RANGE,
+                         const.RANGED_DAMAGE, const.RANGED_HEALTH, const.RANGED_VISION, True)
 
     def area_attack(self, origin: pg.Vector2, radius: float):
         dist = self.position.distance_to(origin)
