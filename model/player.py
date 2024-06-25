@@ -20,7 +20,7 @@ class Player(Entity):
         self.pid = player_id
         self.running = False
         self.speed = const.PlayerSpeeds.WALK
-        self.view = view.PlayerView(self)
+        self.view: list = [view.PlayerView(self)]
 
     def move(self, displacement: pg.Vector2, dt: float):
         """

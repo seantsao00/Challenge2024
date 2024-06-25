@@ -5,7 +5,7 @@ from event_manager import (EventAttack, EventCreateEntity, EventEveryTick,
 from instances_manager import get_event_manager
 from model.entity import Entity
 from model.team import Team
-
+import view
 
 class Character(Entity):
     """
@@ -29,6 +29,7 @@ class Character(Entity):
         self.health: float = health
         self.vision: float = vision
         self.alive: bool = alive
+        self.view.append(view.HealthView(self))
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
 
     def move(self, direction: pg.Vector2):

@@ -19,6 +19,9 @@ from model.ranged_fighter import RangedFighter
 from model.team import Team
 from model.timer import Timer
 
+from model.melee import Melee
+
+
 
 class Model:
     """

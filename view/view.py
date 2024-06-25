@@ -11,7 +11,7 @@ import pygame as pg
 import const
 from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager, get_model
-from view.object import EntityView, ObjectBase, PlayerView
+from view.object import EntityView, ObjectBase, PlayerView, HealthView
 
 
 class View:
@@ -68,8 +68,11 @@ class View:
         self.display_fps()
         self.canvas.fill(const.BACKGROUND_COLOR)
         model = get_model()
-        for en in model.entities:
-            en.view.draw(self.canvas)
+
+        for i in range(3):
+            for en in model.entities:
+                if len(en.view) > i:
+                    en.view[i].draw(self.canvas)
 
         # the two lines making the arena now in the middle
         pg.draw.line(
