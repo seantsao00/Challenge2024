@@ -10,8 +10,6 @@ class RangedFighter(Character):
     Class for the ranged fighter
     Ranged fighter has the following unique moves:
      - area_attack: Attack a locations and damage all nearby foes.
-     - Pierce attack: Attack in a straight line that pierces enemies. (unimplemented)
-     (to be changed)
     """
 
     def __init__(self, team, position: pg.Vector2):
@@ -21,7 +19,4 @@ class RangedFighter(Character):
     def area_attack(self, origin: pg.Vector2, radius: float):
         dist = self.position.distance_to(origin)
         if (dist <= self.attack_range):
-            get_event_manager().post(EventMultiAttack(self, 1, target=origin, radius=radius))
-
-    # def Pierce(self, location: pg.Vector2, orientation):
-    #    get_event_manager().post(EventMultiAttack(self, 2, orientation=orientation))
+            get_event_manager().post(EventMultiAttack(self, target=origin, radius=radius))

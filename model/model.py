@@ -81,11 +81,10 @@ class Model:
 
     def multi_attack(self, event: EventMultiAttack):
         attacker = event.attacker
-        type = event.type
-        if (type == 1):
-            origin: pg.Vector2 = event.target
-            radius = event.radius
-            for victim in self.entities:
+        origin: pg.Vector2 = event.target
+        radius = event.radius
+        for victim in self.entities:
+            if (isinstance(victim, Character)):
                 dist = origin.distance_to(victim.postition)
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)
@@ -97,6 +96,7 @@ class Model:
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
+        ev_manager.register_listener(EventMultiAttack, self.multi_attack)
 
     def run(self):
         """Run the main loop of the game."""
