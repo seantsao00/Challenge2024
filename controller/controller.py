@@ -56,7 +56,7 @@ class Controller:
                             clicked = entity
 
                     ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
-                if event_pg.button == 1:  # Left mouse button
+                if event_pg.button == 3:  # Right mouse button
                     mouse_pos = event_pg.pos
                     x, y = mouse_pos
                     print(f"Right click position: ({x}, {y})")
