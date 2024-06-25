@@ -47,12 +47,18 @@ class Controller:
                 if event_pg.button == 1:  # Left mouse button
                     mouse_pos = event_pg.pos
                     x, y = mouse_pos
+                    w, h = pg.display.get_surface().get_size()
+                    w_canva_to_screen_ratio = w / const.WINDOW_SIZE[0]
+                    h_canva_to_screen_ratio = h / const.WINDOW_SIZE[1]
+                    x = x / w_canva_to_screen_ratio
+                    y = y / h_canva_to_screen_ratio
                     print(f"Mouse click position: ({x}, {y})")
 
                     clicked = None
                     for entity in model.entities:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
+                            break
                     
                     ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
 
