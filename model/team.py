@@ -1,9 +1,9 @@
 import pygame as pg
 
+
 import const
 import const.team
-from event_manager import (EventHumanInput, EventTeamGainTower,
-                           EventTeamLoseTower)
+from event_manager import EventHumanInput, EventTeamGainTower, EventTeamLoseTower, EventEveryTick
 from instances_manager import get_event_manager
 from model.entity import Entity
 
@@ -63,6 +63,8 @@ class Team:
             self.controlling.move(event.displacement)
         elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
             self.controlling.attack(event.clicked)
+        elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
+            self.controlling.attack(event.clicked)
 
     def set_fountain(self, fountain):
         self.fountain = fountain
@@ -74,3 +76,14 @@ class Team:
     def lose_tower(self, event: EventTeamLoseTower):
         print(self.id, " Lost a tower")
         self.total_buildings -= 1
+
+    def gain_point_kill(self):
+        b = 1
+        self.points += b
+        print(self.id, " gain", b, "points.")
+
+    def gain_point_tower(self, event: EventEveryTick):
+        a = 1
+        self.points += a * self.total_buildings
+        print(self.id, " gain", a * self.total_buildings, "points.")
+
