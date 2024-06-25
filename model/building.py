@@ -8,7 +8,7 @@ import pygame as pg
 
 import const
 import const.building
-from event_manager import EventCreateEntity
+from event_manager import EventSpawnCharacter
 from instances_manager import get_event_manager
 from model import melee
 from model.entity import Entity
@@ -51,6 +51,7 @@ class Building(Entity):
         new_position = pg.Vector2(
             choice([1, -1]) * (200 + randint(-50, 50)), choice([1, -1]) * (200 + randint(-50, 50)))
         new_character = character_type(self.team, self.position + new_position)
+        get_event_manager().post(EventSpawnCharacter(new_character), self.team.id)
         self.set_timer()
 
     def set_timer(self):
