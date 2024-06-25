@@ -1,15 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventHumanInput, EventTeamGainTower,
-                           EventTeamLoseTower)
+from event_manager import (EventHumanInput, EventSpawnCharacter,
+                           EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager
-from event_manager import EventTeamGainTower, EventTeamLoseTower, EventHumanInput, EventSpawnCharacter
-from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from model.fountain import Fountain
-
+    from model.entity import Entity
 class Team:
 
     """
