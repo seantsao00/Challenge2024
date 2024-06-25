@@ -1,9 +1,12 @@
 import pygame as pg
+
 import const
 import const.team
-from model.entity import Entity
+from event_manager import (EventHumanInput, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager
-from event_manager import EventTeamGainTower, EventTeamLoseTower, EventHumanInput
+from model.entity import Entity
+
 
 class Team:
 
@@ -58,9 +61,11 @@ class Team:
                 print('clicked on non interactable entity')
         elif event.input_type == const.INPUT_TYPES.MOVE and self.controlling != None:
             self.controlling.move(event.displacement)
+        elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
+            self.controlling.attack(event.clicked)
 
     def set_fountain(self, fountain):
-        self.fountain=fountain
+        self.fountain = fountain
 
     def gain_tower(self, event: EventTeamGainTower):
         self.total_buildings += 1

@@ -3,16 +3,18 @@ The module defines events used by EventManager.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
+
 if TYPE_CHECKING:
+    from model.character import Character
     from model.entity import Entity
     from model.tower import Tower
-    from model.character import Character
 
 
 @dataclass(kw_only=True)
@@ -59,10 +61,11 @@ class EventHumanInput(BaseEvent):
 
     For example, a listener which draws position of characters can be registered with this event.
     """
+
     def __init__(self, input_type: const.INPUT_TYPES, clicked: Character = None, displacement: pg.Vector2 = None):
         self.input_type = input_type
-        self.clicked = clicked # When INPUT_TYPE is PICK
-        self.displacement = displacement# When INPUT_TYPE is MOVE
+        self.clicked = clicked  # When INPUT_TYPE is PICK or ATTACK
+        self.displacement = displacement  # When INPUT_TYPE is MOVE
         """
         The displacement vector representing the movement.
         """
@@ -89,10 +92,8 @@ class EventAttack(BaseEvent):
 
 
 class EventMultiAttack(BaseEvent):
-    def __init__(self, attacker: Character, type=1, orientation=None, target: pg.Vector2 = None, radius=None):
+    def __init__(self, attacker: Character, target: pg.Vector2, radius):
         self.attacker = attacker
-        self.type = type
-        self.orientation = orientation
         self.target = target
         self.raidus = radius
 

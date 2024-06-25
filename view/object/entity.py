@@ -2,8 +2,8 @@ import pygame as pg
 
 import const
 import model
-from view.object.object_base import ObjectBase
 from util import crop_image
+from view.object.object_base import ObjectBase
 
 
 class EntityView(ObjectBase):
@@ -35,7 +35,7 @@ class EntityView(ObjectBase):
                 img = pg.image.load(path)
                 width = const.ENTITY_RADIUS * 2
                 height = const.ENTITY_RADIUS * 2
-                cls.images[type][state]  = crop_image(
+                cls.images[type][state] = crop_image(
                     img, width, height
                 ).convert_alpha()
         cls.image_initialized = True

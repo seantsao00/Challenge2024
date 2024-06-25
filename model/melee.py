@@ -1,7 +1,10 @@
 import pygame as pg
-from model.character import Character
-from const.melee import MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH, MELEE_SPEED, MELEE_VISION
+
+from const.melee import (MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH,
+                         MELEE_SPEED, MELEE_VISION)
 from event_manager import EventAttack
+from model.character import Character
+
 
 class Melee(Character):
     """
@@ -15,11 +18,12 @@ class Melee(Character):
      - vision: How far the character can see. Set to default const value during constructing.
      - alive: The character is alive or not.
      - defense: Special power of melee that reduce the damage it takes but it becomes immobile, not using the power when first constructed
-    
+
     """
 
-    def __init__(self, team, position, alive = True, defense = False):
-        super().__init__(team, position, MELEE_SPEED, MELEE_ATTACK_RANGE, MELEE_DAMAGE, MELEE_HEALTH, MELEE_VISION, alive)
+    def __init__(self, team, position, alive=True, defense=False):
+        super().__init__(team, position, MELEE_SPEED, MELEE_ATTACK_RANGE,
+                         MELEE_DAMAGE, MELEE_HEALTH, MELEE_VISION, alive)
         self.defense = defense
 
     def take_damage(self, event: EventAttack):
@@ -27,7 +31,7 @@ class Melee(Character):
         self.health -= new_damage
         if self.health <= 0:
             self.die()
-    
+
     def move(self, direction: pg.Vector2):
         if (not self.defense):
             super(Melee, self).move(direction)

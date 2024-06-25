@@ -5,8 +5,8 @@ The module defines Player class.
 import pygame as pg
 
 import const
-from model.entity import Entity
 import view
+from model.entity import Entity
 
 
 class Player(Entity):

@@ -8,8 +8,8 @@ from const.controller import *
 from const.entity import *
 from const.model import *
 from const.player import *
-from const.window import *
 from const.team import *
+from const.window import *
 
 # image path
 

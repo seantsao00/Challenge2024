@@ -1,8 +1,11 @@
 import pygame as pg
+
+from event_manager import (EventAttack, EventCreateEntity, EventEveryTick,
+                           EventInitialize, EventQuit)
 from instances_manager import get_event_manager
 from model.entity import Entity
-from event_manager import EventEveryTick, EventInitialize, EventQuit, EventCreateEntity, EventAttack
 from model.team import Team
+
 
 class Character(Entity):
     """
@@ -42,10 +45,12 @@ class Character(Entity):
             self.die()
         print(f"I received {event.attacker.damage} points of damage")
 
-    def attack(self, enemy):
+    def attack(self, enemy: Entity):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team and dist <= self.attack_range):
             get_event_manager().post(EventAttack(self, enemy), enemy.id)
+        else:
+            print("attack failed")
 
     def die(self):
         self.alive = False

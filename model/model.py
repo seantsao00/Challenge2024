@@ -8,16 +8,17 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
-                           EventQuit, EventMultiAttack)
+                           EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
-from model.player import Player
-from model.entity import Entity
-from model.timer import Timer
 from model.character import Character
-from model.ranged_fighter import RangedFighter
+from model.entity import Entity
 from model.fountain import Fountain
-from model.team import Team
 from model.map import load_map
+from model.player import Player
+from model.ranged_fighter import RangedFighter
+from model.team import Team
+from model.timer import Timer
+
 
 class Model:
     """
@@ -56,10 +57,11 @@ class Model:
         self.state = const.State.PLAY
 
         for i, team_master in enumerate(self.teams):
-            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), "team" + str(i+1), team_master)
+            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2),
+                        "team" + str(i+1), team_master)
             self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team)
             team.set_fountain(self.test_fountain)
-        
+
     def handle_every_tick(self, _: EventEveryTick):
         """
         Do actions that should be executed every tick.
@@ -79,11 +81,10 @@ class Model:
 
     def multi_attack(self, event: EventMultiAttack):
         attacker = event.attacker
-        type = event.type
-        if (type == 1):
-            origin: pg.Vector2 = event.target
-            radius = event.radius
-            for victim in self.entities:
+        origin: pg.Vector2 = event.target
+        radius = event.radius
+        for victim in self.entities:
+            if (isinstance(victim, Character)):
                 dist = origin.distance_to(victim.postition)
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)
@@ -95,6 +96,7 @@ class Model:
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
+        ev_manager.register_listener(EventMultiAttack, self.multi_attack)
 
     def run(self):
         """Run the main loop of the game."""
