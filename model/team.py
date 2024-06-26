@@ -7,7 +7,7 @@ import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventHumanInput, EventSpawnCharacter,
+from event_manager import (EventHumanInput, EventSpawnCharacter, EventEveryTick,
                            EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager
 
