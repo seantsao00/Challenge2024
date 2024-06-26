@@ -2,7 +2,7 @@ import pygame as pg
 
 from event_manager import (EventAttack, EventCreateEntity, EventEveryTick,
                            EventInitialize, EventQuit)
-from instances_manager import get_event_manager
+from instances_manager import get_event_manager, get_model
 from model.entity import Entity
 from model.team import Team
 import view
@@ -31,6 +31,11 @@ class Character(Entity):
         self.health: float = health
         self.vision: float = vision
         self.alive: bool = alive
+        model = get_model()
+        if model.show_view_range:
+            self.view.append(view.ViewRangeView(self))
+        if model.show_attack_range:
+            self.view.append(view.AttackRangeView(self))
         self.view.append(view.HealthView(self))
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
 

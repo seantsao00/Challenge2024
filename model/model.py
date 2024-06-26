@@ -30,7 +30,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self, map_name, teams):
+    def __init__(self, map_name, teams, show_view_range, show_attack_range):
         """
         Initialize the Model object.
 
@@ -48,6 +48,8 @@ class Model:
         self.dt = 0
         self.map = load_map(os.path.join(const.map.MAP_DIR, map_name))
         self.teams = teams
+        self.show_view_range = show_view_range
+        self.show_attack_range = show_attack_range
 
     def initialize(self, _: EventInitialize):
         """

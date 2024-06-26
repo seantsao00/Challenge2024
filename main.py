@@ -47,13 +47,17 @@ def main():
     # )
     # Here is WIP
 
+    parser.add_argument('-v', '--show-view-range', action='store_true', help='If added, the view range of entities will be shown')
+    parser.add_argument('-a', '--show-attack-range', action='store_true', help='If added, the attack range of entities will be shown')
+
     args = parser.parse_args()
     teams = [args.team1]
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
 
-    model = Model(args.map, teams)
+    model = Model(args.map, teams,
+                  args.show_view_range, args.show_attack_range)
     instances_manager.register_model(model)
 
     Controller()

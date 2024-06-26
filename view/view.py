@@ -11,7 +11,7 @@ import pygame as pg
 import const
 from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager, get_model
-from view.object import EntityView, ObjectBase, PlayerView, HealthView
+from view.object import EntityView, ObjectBase, PlayerView, HealthView, AttackRangeView, ViewRangeView
 
 
 class View:
@@ -69,7 +69,7 @@ class View:
         self.canvas.fill(const.BACKGROUND_COLOR)
         model = get_model()
 
-        for i in range(3):
+        for i in range(5):
             for en in model.entities:
                 if len(en.view) > i:
                     en.view[i].draw(self.canvas)
