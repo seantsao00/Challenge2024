@@ -1,13 +1,20 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
-import model
-from view.object.object_base import ObjectBase
 from util import crop_image
+from view.object.object_base import ObjectBase
+
+if TYPE_CHECKING:
+    from model import Character
+
 
 class HealthView:
 
-    def __init__(self, character: 'model.Character'):
+    def __init__(self, character: Character):
         self.character = character
 
     def draw(self, screen: pg.Surface):

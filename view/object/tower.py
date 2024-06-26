@@ -1,11 +1,10 @@
 import pygame as pg
 
-import model
-import model.building.tower
+from model.building import Tower
 from view.object.entity import Entity
 
 
 class Tower(Entity):
-    def __init__(self, tower: model.building.tower):
+    def __init__(self, tower: Tower):
         super().__init__()
         self.tower = tower

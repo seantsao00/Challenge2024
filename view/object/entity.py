@@ -1,9 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
-import model
 from util import crop_image
 from view.object.object_base import ObjectBase
+
+if TYPE_CHECKING:
+    from model import Entity
 
 
 class EntityView(ObjectBase):
@@ -15,7 +21,7 @@ class EntityView(ObjectBase):
     built from const, and initialized only once in init_convert.
     """
 
-    def __init__(self, entity: 'model.Entity'):
+    def __init__(self, entity: Entity):
         super().__init__()
         self.entity = entity
         self.position = self.entity.position.copy()

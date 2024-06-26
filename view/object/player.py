@@ -1,9 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
-import model
 from util import crop_image
 from view.object.entity import EntityView
+
+if TYPE_CHECKING:
+    from model import Player
 
 
 class PlayerView(EntityView):
@@ -19,7 +25,7 @@ class PlayerView(EntityView):
     initialized only once in init_convert.
     """
 
-    def __init__(self, player: 'model.Player'):
+    def __init__(self, player: Player):
         super().__init__(player)
         self.player = player
         self.position = self.player.position.copy()
