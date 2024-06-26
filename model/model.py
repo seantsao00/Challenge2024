@@ -14,7 +14,6 @@ from model.character import Character
 from model.entity import Entity
 from model.building import Fountain
 from model.map import load_map
-from model.player import Player
 from model.character.ranged_fighter import RangedFighter
 from model.team import Team
 from model.timer import Timer
@@ -42,7 +41,6 @@ class Model:
         self.running: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
-        self.players: dict[const.PlayerIds, Player] = {}
         self.entities: list[Entity] = []
         self.register_listeners()
         self.dt = 0
@@ -58,7 +56,6 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
 
         for i, team_master in enumerate(self.teams):

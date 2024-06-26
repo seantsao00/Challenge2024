@@ -11,7 +11,7 @@ import pygame as pg
 import const
 from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager, get_model
-from view.object import EntityView, ObjectBase, PlayerView, HealthView, AttackRangeView, ViewRangeView
+from view.object import EntityView, ObjectBase, HealthView, AttackRangeView, ViewRangeView
 
 
 class View:
@@ -56,7 +56,6 @@ class View:
             picture = picture.subsurface(pg.Rect(x, y, w, h))
             self.background_images.append((int(model.map.images[i]), picture, (x, y)))
 
-        PlayerView.init_convert()
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):

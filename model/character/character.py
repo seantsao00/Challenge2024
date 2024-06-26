@@ -43,7 +43,7 @@ class Character(Entity):
         """
         Move the character in the given direction.
         """
-        if direction.length() > self.speed:
+        if direction.length() != 0:
             direction = direction.normalize()
             self.position += direction * self.speed
 

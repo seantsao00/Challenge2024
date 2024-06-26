@@ -8,7 +8,6 @@ from const.character import *
 from const.controller import *
 from const.entity import *
 from const.model import *
-from const.player import *
 from const.team import *
 from const.window import *
 from const.visual import *
@@ -16,8 +15,3 @@ from const.visual import *
 # image path
 
 IMAGE_PATH = "image/"
-
-
-# constants for test
-
-PLAYER_COLOR = [pg.Color('green'), pg.Color('magenta')]
