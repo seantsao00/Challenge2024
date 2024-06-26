@@ -104,5 +104,5 @@ class Controller:
 
         if direction.length() != 0:
             # Try to move as far as player can.
-            displacement = direction.normalize() * const.MELEE_SPEED
+            displacement = direction.normalize() * max(const.ARENA_SIZE)
             ev_manager.post(EventHumanInput(const.INPUT_TYPES.MOVE, displacement=displacement))
