@@ -14,6 +14,7 @@ class Character(Entity):
      - speed: How fast the character moves in the game.
      - attack_range: How far the character can attack.
      - damage: How much hurt the character can cause in one attack.
+     - max_health: The maximum total health 
      - health: The total amount of damage the character can withstand.
      - vision: How far the character can see.
      - alive: The character is alive or not.
@@ -26,6 +27,7 @@ class Character(Entity):
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
+        self.max_health: float = health
         self.health: float = health
         self.vision: float = vision
         self.alive: bool = alive
