@@ -75,12 +75,12 @@ class View:
             background_image = pg.transform.scale(image, (const.ARENA_SIZE[0], const.ARENA_SIZE[1]))
             break # temporary use ONLY background, instead of background and obstacle
         
-        self.canvas.blit(background_image, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
+        self.arena.blit(background_image, (0, 0))
         
         for i in range(5):
             for en in model.entities:
                 if len(en.view) > i:
-                    en.view[i].draw(self.canvas)
+                    en.view[i].draw(self.arena)
         
         # the two lines making the arena now in the middle
         
