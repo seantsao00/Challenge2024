@@ -35,19 +35,20 @@ class Team:
     def __init__(self, fountain_position: pg.Vector2, name: str, master: str):
         if Team.total == 4:
             raise Exception('Team size exceeds.')
+        Team.total += 1
         self.name = name
         self.total_buildings = 0
         self.points = 0
-        self.id = Team.total + 1
+        self.id = Team.total
         self.master = master
         self.building_list = []
         self.character_list = []
         if master == 'human':
             self.controlling = None
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
-        Team.total += 1
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
         get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
+        get_event_manager().register_listener(EventSpawnCharacter, self.gain_character, self.id)
 
     def handle_input(self, event: EventHumanInput):
         """
@@ -72,11 +73,8 @@ class Team:
                 print('clicked on non interactable entity')
         elif event.input_type == const.INPUT_TYPES.MOVE and self.controlling != None:
             self.controlling.move(event.displacement)
-        elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
+        elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None and event.clicked != None:
             self.controlling.attack(event.clicked)
-
-    def set_fountain(self, fountain: Fountain):
-        self.building_list.append(fountain)
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)
@@ -86,10 +84,10 @@ class Team:
         if event.tower not in self.building_list:
             self.building_list.append(event.tower)
         print(self.id, " gained a tower with id",
-              event.tower.building_id, " at", event.tower.position)
+              event.tower.id, " at", event.tower.position)
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(self.id, " lost a tower with id", event.tower.building_id, " at", event.tower.position)
+        print(self.id, " lost a tower with id", event.tower.id, " at", event.tower.position)
         if event.tower in self.building_list:
             self.building_list.remove(event.tower)
         self.total_buildings -= 1

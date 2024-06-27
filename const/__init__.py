@@ -11,6 +11,7 @@ from const.model import *
 from const.team import *
 from const.visual import *
 from const.window import *
+from const.tower import *
 
 # image path
 

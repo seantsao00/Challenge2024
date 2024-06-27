@@ -69,6 +69,9 @@ class View:
         self.canvas.fill(const.BACKGROUND_COLOR)
         model = get_model()
 
+        # for i in model.entities:
+        #     print(i.entity_id, i.health, i.type, i.imgstate)
+
         for i in range(5):
             for en in model.entities:
                 if len(en.view) > i:

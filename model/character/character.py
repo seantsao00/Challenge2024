@@ -23,13 +23,11 @@ class Character(Entity):
 
     def __init__(self, team: Team, position: pg.Vector2 | tuple[float, float], speed: float, attack_range: float,
                  damage: float, health: float, vision: float, alive: bool = True):
-        super().__init__(position)
+        super().__init__(position, health)
         self.team = team
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
-        self.max_health: float = health
-        self.health: float = health
         self.vision: float = vision
         self.alive: bool = alive
         model = get_model()
@@ -37,7 +35,8 @@ class Character(Entity):
             self.view.append(view.ViewRangeView(self))
         if model.show_attack_range:
             self.view.append(view.AttackRangeView(self))
-        self.view.append(view.HealthView(self))
+        if self.health != None:
+            self.view.append(view.HealthView(self))
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
 
     def move(self, direction: pg.Vector2):

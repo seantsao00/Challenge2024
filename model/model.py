@@ -10,7 +10,7 @@ import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
                            EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
-from model.building import Fountain
+from model.building import Tower
 from model.character import Character, Melee
 from model.character.ranged_fighter import RangedFighter
 from model.entity import Entity
@@ -58,8 +58,8 @@ class Model:
         for i, team_master in enumerate(self.teams):
             team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2),
                         "team" + str(i+1), team_master)
-            self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team)
-            team.set_fountain(self.test_fountain)
+            self.test_tower = Tower((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team, 1)
+        self.neutral_tower = Tower((700, 700))
 
     def handle_every_tick(self, _: EventEveryTick):
         """

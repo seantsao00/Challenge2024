@@ -2,3 +2,6 @@ import pygame as pg
 
 ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
+
+HEALTH_BAR_UPPER = 7
+CD_BAR_UPPER = 5
