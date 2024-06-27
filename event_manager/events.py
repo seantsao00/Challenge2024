@@ -52,7 +52,12 @@ class EventContinueModel(BaseEvent):
 
 @dataclass(kw_only=True)
 class EventEveryTick(BaseEvent):
-    """Event posted every tick."""
+    """Event posted every tick when the game is not in pause state"""
+
+
+@dataclass(kw_only=True)
+class EventUnconditionalTick(BaseEvent):
+    """Event posted every tick, regardless of whether the game is in a paused state or not."""
 
 
 class EventHumanInput(BaseEvent):
