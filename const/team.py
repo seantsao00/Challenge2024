@@ -2,10 +2,12 @@
 This module defines constants associated with teams.
 """
 
+from enum import Enum
+
 MAX_TEAMS = 4
 
 
-class INPUT_TYPES:
+class INPUT_TYPES(Enum):
     PICK = 0
     MOVE = 1
     ATTACK = 2
