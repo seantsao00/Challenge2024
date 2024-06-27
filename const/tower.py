@@ -4,3 +4,8 @@ This module defines constants associated with towers.
 
 INITIAL_PERIOD_MS = 5000
 FORMULA_K = 1000
+
+TOWER_ATTACK_RANGE = 100
+TOWER_DAMAGE = 50
+TOWER_HEALTH = 1000
+TOWER_VISION = 100

@@ -21,19 +21,16 @@ class Entity:
     """
 
     entity_id: int = 0
-    """
-    self.view change to list
-    append all need thing to draw
-    add health and cd
-    """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float],
-                 entity_type: str = 'default', imgstate: str = 'default'):
+                 health: float = None, type: str = 'default', imgstate: str = 'default'):
         Entity.entity_id += 1
         self.id: int = Entity.entity_id
         self.position: pg.Vector2 = pg.Vector2(position)
-        self.type: str = entity_type
+        self.type: str = type
         self.imgstate: str = imgstate
         self.hidden: bool = False
+        self.health: float = health
+        self.max_health: float = health
         self.view: list = [view.EntityView(self)]
         get_event_manager().post(EventCreateEntity(self))

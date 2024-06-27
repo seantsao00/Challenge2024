@@ -1,47 +1,97 @@
 """
-The module defines Tower class.
+The module defines Building class.
 """
 
+from random import choice, randint
+
 import pygame as pg
+import view
+import const
+import const.tower
+from event_manager import EventSpawnCharacter, EventAttack, EventTeamGainTower, EventTeamLoseTower
+from instances_manager import get_event_manager, get_model
+from model.character import Character, Melee
+from model.entity import Entity
+from model.team import Team
+from model.timer import Timer
 
-from event_manager import EventAttack, EventTeamGainTower, EventTeamLoseTower
-from instances_manager import get_event_manager
-from model.building import Building
 
-
-class Tower(Building):
+class Tower(Entity):
     """
     Class for Tower (object) in the game.
     Each Tower has the following property:
-     - health_init: The original health of the tower.
-     - health_now: The health of the tower now.
-     - team: The owner of this building
-     - building_id: The id of the building. (Try not to get confused with the id in Entity)
+     - max_health: The original health of the tower. (from class entity)
+     - health: The health of the tower now. (from class entity)
+     - id: The id of the entity. (from entity)
+     - team: The owner team id of this building.
      - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
      - spawn_timer: The timer spawning characters.
      - character_type: The type chose to generate next, melee by default.
      - period: The period to generate characters, in milliseconds, integer.
+     - is_fountain: is fountion or not.
     """
 
-    def __init__(self, health: float, position: pg.Vector2):
-        super().__init__(position)
-        self.health_init = health
-        self.health_now = health
+
+    def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, type='tower', imgstate='default'):
+        super().__init__(position, const.TOWER_HEALTH, type, imgstate)
+        self.team = team
+        self.log = list()
+        self.period = const.tower.INITIAL_PERIOD_MS
+        self.is_fountain = is_fountain
+        self.character_type = Melee
+        self.attack_range: float = const.TOWER_ATTACK_RANGE
+        self.damage: float = const.TOWER_DAMAGE
+        self.vision: float = const.TOWER_VISION
+        self.spawn_timer = None
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
+        if self.is_fountain == True:
+            self.imgstate = 'temporary_blue_nexus'
+        if self.team != None:
+            self.set_timer()
+            get_event_manager().post(EventTeamGainTower(self), self.team.id)
+        model = get_model()
+        if model.show_view_range:
+            self.view.append(view.ViewRangeView(self))
+        if model.show_attack_range:
+            self.view.append(view.AttackRangeView(self))
+        if self.health != None:
+            self.view.append(view.HealthView(self))
+
+
+    def update_period(self):
+        self.period = const.tower.INITIAL_PERIOD_MS + \
+            int(const.tower.FORMULA_K * self.team.total_buildings ** 0.5)
+
+    def generate_character(self, character_type: Character, timestamp=pg.time.get_ticks()):
+        self.log.append((character_type, timestamp))
+        new_position = pg.Vector2(
+            choice([1, -1]) * (50 + randint(-50, 50)), choice([1, -1]) * (50 + randint(-50, 50)))
+        new_character = character_type(self.team, self.position + new_position)
+        get_event_manager().post(EventSpawnCharacter(new_character), self.team.id)
+        self.set_timer()
+
+    def set_timer(self):
+        self.update_period()
+        self.spawn_timer = Timer(self.period, self.generate_character, self.character_type, once=True)
+
+    def update_character_type(self, character_type):
+        self.character_type = character_type
 
     def take_damage(self, event: EventAttack):
-        if self.health_now - event.attacker.damage <= 0:
+        if self.team == event.attacker.team or self.is_fountain == True:
+            print("same team or is fountion")
+            return
+        if self.health - event.attacker.damage <= 0:
             if self.team is None:
-                get_event_manager().post(EventTeamGainTower(self.id), event.attacker.team.id)
-                self.team = event.attacker.team
+                get_event_manager().post(EventTeamGainTower(self), event.attacker.team.id)
             else:
-                get_event_manager().post(EventTeamLoseTower(self.id), self.team.id)
-                get_event_manager().post(EventTeamGainTower(self.id), event.attacker.team.id)
-                self.team = event.attacker.team
-            self.spawn_timer.delete()
+                get_event_manager().post(EventTeamLoseTower(self), self.team.id)
+                get_event_manager().post(EventTeamGainTower(self), event.attacker.team.id)
+            self.team = event.attacker.team
+            self.imgstate = 'team' + str(self.team.id)
             self.set_timer()
-            self.health_now = self.health_init
+            self.health = self.max_health
 
         else:
-            self.health_now -= event.attacker.damage
-        print(self.team, self.health_now)
+            self.health -= event.attacker.damage
+        print(self.team, self.health)

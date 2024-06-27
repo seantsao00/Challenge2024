@@ -7,20 +7,22 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
+    from model import Entity
     from model import Character
+    from model import Tower
 
 
 class HealthView:
 
-    def __init__(self, character: Character):
-        self.character = character
+    def __init__(self, entity: Entity | Character | Tower):
+        self.entity = entity
 
     def draw(self, screen: pg.Surface):
-        character = self.character
-        if character.hidden:
+        entity = self.entity
+        if entity.hidden == True:
             return
-        blood_width = (character.health / character.max_health) * const.ENTITY_RADIUS * 2
+        blood_width = (entity.health / entity.max_health) * const.ENTITY_RADIUS * 2
         pg.draw.rect(screen, (0, 0, 0),
-                     (self.character.position.x - const.ENTITY_RADIUS, self.character.position.y - 2 * const.ENTITY_RADIUS - 8, const.ENTITY_RADIUS * 2, 3))
+                     (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER, const.ENTITY_RADIUS * 2, 3))
         pg.draw.rect(screen, (255, 0, 0),
-                     (self.character.position.x - const.ENTITY_RADIUS, self.character.position.y - 2 * const.ENTITY_RADIUS - 8, blood_width, 3))
+                     (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER, blood_width, 3))
