@@ -23,7 +23,6 @@ class HealthView:
             return
         blood_width = (character.health / character.max_health) * const.ENTITY_RADIUS * 2
         pg.draw.rect(screen, (0, 0, 0),
-                         (self.character.position.x - const.ENTITY_RADIUS, self.character.position.y - 2 * const.ENTITY_RADIUS - 8, const.ENTITY_RADIUS * 2, 3))
+                     (self.character.position.x - const.ENTITY_RADIUS, self.character.position.y - 2 * const.ENTITY_RADIUS - 8, const.ENTITY_RADIUS * 2, 3))
         pg.draw.rect(screen, (255, 0, 0),
-                         (self.character.position.x - const.ENTITY_RADIUS, self.character.position.y - 2 * const.ENTITY_RADIUS - 8, blood_width, 3))
-        
+                     (self.character.position.x - const.ENTITY_RADIUS, self.character.position.y - 2 * const.ENTITY_RADIUS - 8, blood_width, 3))

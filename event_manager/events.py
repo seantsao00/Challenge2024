@@ -12,9 +12,9 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
+    from model.building import Tower
     from model.character import Character
     from model.entity import Entity
-    from model.building import Tower
 
 
 @dataclass(kw_only=True)
@@ -106,6 +106,7 @@ class EventTeamGainTower(BaseEvent):
 class EventTeamLoseTower(BaseEvent):
     def __init__(self, tower: Tower):
         self.tower = tower
+
 
 class EventSpawnCharacter(BaseEvent):
     def __init__(self, character: Character):

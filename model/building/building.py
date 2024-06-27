@@ -10,11 +10,10 @@ import const
 import const.building
 from event_manager import EventSpawnCharacter
 from instances_manager import get_event_manager
-from model.character import Melee
+from model.character import Character, Melee
 from model.entity import Entity
 from model.team import Team
 from model.timer import Timer
-from model.character import Character
 
 
 class Building(Entity):

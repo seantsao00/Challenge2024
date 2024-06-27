@@ -9,8 +9,8 @@ from const.controller import *
 from const.entity import *
 from const.model import *
 from const.team import *
-from const.window import *
 from const.visual import *
+from const.window import *
 
 # image path
 

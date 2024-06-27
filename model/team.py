@@ -4,16 +4,18 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
-
 import const
 import const.team
-from event_manager import (EventHumanInput, EventSpawnCharacter, EventEveryTick,
-                           EventTeamGainTower, EventTeamLoseTower)
+from event_manager import (EventEveryTick, EventHumanInput,
+                           EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager
 
 if TYPE_CHECKING:
     from model.building import Fountain
     from model.entity import Entity
+
+
 class Team:
 
     """
@@ -83,10 +85,11 @@ class Team:
         self.total_buildings += 1
         if event.tower not in self.building_list:
             self.building_list.append(event.tower)
-        print(self.id, " gained a tower with id", event.tower.building_id," at", event.tower.position)
+        print(self.id, " gained a tower with id",
+              event.tower.building_id, " at", event.tower.position)
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(self.id, " lost a tower with id", event.tower.building_id," at", event.tower.position)
+        print(self.id, " lost a tower with id", event.tower.building_id, " at", event.tower.position)
         if event.tower in self.building_list:
             self.building_list.remove(event.tower)
         self.total_buildings -= 1
@@ -100,4 +103,3 @@ class Team:
         a = 1
         self.points += a * self.total_buildings
         print(self.id, " gain", a * self.total_buildings, "points.")
-

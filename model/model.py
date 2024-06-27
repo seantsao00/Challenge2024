@@ -10,16 +10,13 @@ import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
                            EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
-from model.character import Character
-from model.entity import Entity
 from model.building import Fountain
-from model.map import load_map
+from model.character import Character, Melee
 from model.character.ranged_fighter import RangedFighter
+from model.entity import Entity
+from model.map import load_map
 from model.team import Team
 from model.timer import Timer
-
-from model.character import Melee
-
 
 
 class Model:

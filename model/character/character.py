@@ -1,11 +1,12 @@
 import pygame as pg
 
+import view
 from event_manager import (EventAttack, EventCreateEntity, EventEveryTick,
                            EventInitialize, EventQuit)
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity
 from model.team import Team
-import view
+
 
 class Character(Entity):
     """
