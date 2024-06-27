@@ -74,16 +74,14 @@ class View:
                 if len(en.view) > i:
                     en.view[i].draw(self.canvas)
 
-        # the two lines making the arena now in the middle
+        # the arena is now in the middle
         pg.draw.line(
-            self.canvas, 'white', ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2,
-                                   0), ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, const.ARENA_SIZE[1] - 1), 1
+            self.canvas, 'white', (0, 0), (0, const.ARENA_SIZE[1] - 1), 1
         )
         pg.draw.line(
-            self.canvas, 'white', ((const.WINDOW_SIZE[0] + const.ARENA_SIZE[0]) / 2,
-                                   0), ((const.WINDOW_SIZE[0] + const.ARENA_SIZE[0]) / 2, const.ARENA_SIZE[1] - 1), 1
+            self.canvas, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
         )
-        self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
+        self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
         pg.display.flip()
 
     def register_listeners(self):
