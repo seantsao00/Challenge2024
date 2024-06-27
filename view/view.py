@@ -78,7 +78,6 @@ class View:
         for i in range(5):
             for en in model.entities:
                 if len(en.view) > i:
-                    print(en.view[i])
                     en.view[i].draw(self.canvas)
         
         # the two lines making the arena now in the middle
