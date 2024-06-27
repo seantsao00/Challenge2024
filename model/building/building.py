@@ -30,13 +30,14 @@ class Building(Entity):
 
     building_total = 0
 
-    def __init__(self, position: pg.Vector2, team: Team = None, type='default', imgstate='default'):
-        super().__init__(position, type, imgstate)
+    def __init__(self, position: pg.Vector2, team: Team = None, entity_type='default', imgstate='default'):
+        super().__init__(position, entity_type, imgstate)
         self.team = team
         self.building_id = Building.building_total + 1
-        self.log = list()
+        self.log = []
         self.period = const.building.INITIAL_PERIOD_MS
         self.character_type = Melee
+        self.spawn_timer: Timer | None = None
         Building.building_total += 1
 
     def update_period(self):
@@ -53,7 +54,8 @@ class Building(Entity):
 
     def set_timer(self):
         self.update_period()
-        self.spawn_timer = Timer(self.period, self.generate_character, True, self.character_type)
+        self.spawn_timer = Timer(self.period, self.generate_character,
+                                 self.character_type, once=True)
 
     def update_character_type(self, character_type):
         self.character_type = character_type

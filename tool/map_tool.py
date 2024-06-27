@@ -8,7 +8,6 @@
 import sys
 
 import cv2
-import numpy as np
 
 
 def gen_map_file_from_image(img_path, width, height, threshold=0.8, distance=10):
@@ -16,7 +15,7 @@ def gen_map_file_from_image(img_path, width, height, threshold=0.8, distance=10)
     image_width = img.shape[1]
     image_height = img.shape[0]
 
-    map_list = [[0 for j in range(height)] for i in range(width)]
+    map_list = [[0 for _ in range(height)] for _ in range(width)]
     for x in range(width):
         for y in range(height):
             obstacle = 0
@@ -52,7 +51,7 @@ def print_help():
 
 if len(sys.argv) < 4:
     print_help()
-    exit(0)
+    sys.exit(0)
 
 path, width, height = sys.argv[1:4]
 width = int(width)
@@ -65,4 +64,4 @@ elif len(sys.argv) == 6:
     gen_map_file_from_image(path, width, height, float(sys.argv[4]), int(sys.argv[5]))
 else:
     print_help()
-    exit(0)
+    sys.exit(0)

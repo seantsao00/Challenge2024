@@ -7,7 +7,7 @@ from enum import Enum
 MAX_TEAMS = 4
 
 
-class INPUT_TYPES(Enum):
+class InputTypes(Enum):
     PICK = 0
     MOVE = 1
     ATTACK = 2

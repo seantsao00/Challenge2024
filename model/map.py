@@ -1,8 +1,6 @@
 import csv
 import json
 import os
-import random
-from queue import Queue
 
 import pygame as pg
 
@@ -32,9 +30,9 @@ class Map:
         self.spawn = spawn
         self.solider_spawn_point = solider_spawn_point
         self.map_dir = map_dir
-        self.connected_component = dict()
-        self.closest_cell = dict()
-        self.number_of_connected_components = dict()
+        self.connected_component = {}
+        self.closest_cell = {}
+        self.number_of_connected_components = {}
         self.portkey_map = portkey_map
 
     def convert_coordinate(self, position: tuple | pg.Vector2) -> tuple:
@@ -57,7 +55,7 @@ def load_map(map_dir):
 
     json_file = os.path.abspath(json_file)
     map_file = os.path.abspath(map_file)
-    with open(json_file) as f:
+    with open(json_file, encoding='utf-8') as f:
         data = json.load(f)
     images = data["images"]
 
@@ -68,7 +66,7 @@ def load_map(map_dir):
     ghost_spawn = tuple(data["tower_spawn"])
     portkey_cells = [[] for i in range(len(data["portals"]))]
 
-    with open(map_file) as f:
+    with open(map_file, encoding='utf-8') as f:
         rows = csv.reader(f)
         print(size)
         map_list = [[0] * size[1] for _ in range(0, size[0])]

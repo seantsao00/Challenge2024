@@ -2,8 +2,6 @@
 This module defines constants associated with entities.
 """
 
-from const.window import ARENA_SIZE
-
 ENTITY_IMAGE_PATH = "entity/"
 
 ENTITY_STATES = {

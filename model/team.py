@@ -58,21 +58,20 @@ class Team:
             This function checks if the clicked entity is actually interactable by the human controlled team.
             Any new interactive feature implementation should modify this function.
             """
-            if entity == None:
+            if entity is None:
                 return False
-            elif hasattr(entity, 'team') and entity.team == my_team and hasattr(entity, 'move'):
+            if hasattr(entity, 'team') and entity.team == my_team and hasattr(entity, 'move'):
                 return True
-            else:
-                return False
+            return False
 
-        if event.input_type == const.INPUT_TYPES.PICK:
+        if event.input_type == const.InputTypes.PICK:
             if check_interactable(event.clicked, self):
                 self.controlling = event.clicked
             else:
                 print('clicked on non interactable entity')
-        elif event.input_type == const.INPUT_TYPES.MOVE and self.controlling != None:
+        elif event.input_type == const.InputTypes.MOVE and self.controlling is not None:
             self.controlling.move(event.displacement)
-        elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
+        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None:
             self.controlling.attack(event.clicked)
 
     def set_fountain(self, fountain: Fountain):

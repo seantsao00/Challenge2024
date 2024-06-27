@@ -62,7 +62,7 @@ class EventHumanInput(BaseEvent):
     For example, a listener which draws position of characters can be registered with this event.
     """
 
-    def __init__(self, input_type: const.INPUT_TYPES, clicked: Character = None, displacement: pg.Vector2 = None):
+    def __init__(self, input_type: const.InputTypes, clicked: Character = None, displacement: pg.Vector2 = None):
         self.input_type = input_type
         self.clicked = clicked  # When INPUT_TYPE is PICK or ATTACK
         self.displacement = displacement  # When INPUT_TYPE is MOVE
@@ -71,10 +71,9 @@ class EventHumanInput(BaseEvent):
         """
 
     def __str__(self):
-        if self.input_type == const.INPUT_TYPES.PICK:
+        if self.input_type == const.InputTypes.PICK:
             return f"Clicked at {self.clicked.id}"
-        else:
-            return f"Move {self.displacement}"
+        return f"Move {self.displacement}"
 
 
 @dataclass(kw_only=True)

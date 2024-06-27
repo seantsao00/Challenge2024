@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from util import crop_image
-from view.object.object_base import ObjectBase
 
 if TYPE_CHECKING:
     from model import Character
@@ -19,7 +17,7 @@ class HealthView:
 
     def draw(self, screen: pg.Surface):
         character = self.character
-        if character.hidden == True:
+        if character.hidden:
             return
         blood_width = (character.health / character.max_health) * const.ENTITY_RADIUS * 2
         pg.draw.rect(screen, (0, 0, 0),

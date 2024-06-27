@@ -6,7 +6,6 @@ import pygame as pg
 
 from event_manager import EventAttack
 from model.building import Building
-from model.entity import Entity
 from model.team import Team
 
 
@@ -23,10 +22,9 @@ class Fountain(Building):
     """
 
     def __init__(self, position: pg.Vector2, team: Team):
-        super().__init__(position, type='fountain', imgstate='temporary_blue_nexus', team=team)
+        super().__init__(position, entity_type='fountain', imgstate='temporary_blue_nexus', team=team)
         self.team.total_buildings += 1
         self.set_timer()
 
     def take_damage(self, event: EventAttack):
         print(f"Building id:{self.building_id} is a fountain, nothing happened with the attack.")
-        return

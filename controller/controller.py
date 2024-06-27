@@ -62,7 +62,7 @@ class Controller:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
-                    ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
+                    ev_manager.post(EventHumanInput(const.InputTypes.PICK, clicked=clicked))
 
                 if event_pg.button == 3:  # Right mouse button
                     print(f"Right click position: ({x}, {y})")
@@ -71,7 +71,7 @@ class Controller:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
-                    ev_manager.post(EventHumanInput(const.INPUT_TYPES.ATTACK, clicked=clicked))
+                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked))
 
             TimerManager.handle_event(event_pg)
 
@@ -105,4 +105,4 @@ class Controller:
         if direction.length() != 0:
             # Try to move as far as player can.
             displacement = direction.normalize() * max(const.ARENA_SIZE)
-            ev_manager.post(EventHumanInput(const.INPUT_TYPES.MOVE, displacement=displacement))
+            ev_manager.post(EventHumanInput(const.InputTypes.MOVE, displacement=displacement))

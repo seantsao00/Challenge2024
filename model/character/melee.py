@@ -32,8 +32,8 @@ class Melee(Character):
             self.die()
 
     def move(self, direction: pg.Vector2):
-        if (not self.defense):
-            super(Melee, self).move(direction)
+        if not self.defense:
+            super().move(direction)
 
     def switch_mode(self):
         self.defense = not self.defense

@@ -9,10 +9,8 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventQuit
+from event_manager import EventEveryTick, EventInitialize
 from instances_manager import get_event_manager, get_model
-from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase,
-                         ViewRangeView)
 
 
 class View:

@@ -7,7 +7,6 @@ import pygame as pg
 from event_manager import EventAttack, EventTeamGainTower, EventTeamLoseTower
 from instances_manager import get_event_manager
 from model.building import Building
-from model.entity import Entity
 
 
 class Tower(Building):

@@ -19,5 +19,5 @@ class RangedFighter(Character):
 
     def area_attack(self, origin: pg.Vector2, radius: float):
         dist = self.position.distance_to(origin)
-        if (dist <= self.attack_range):
+        if dist <= self.attack_range:
             get_event_manager().post(EventMultiAttack(self, target=origin, radius=radius))

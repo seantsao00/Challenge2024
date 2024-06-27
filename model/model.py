@@ -11,12 +11,10 @@ from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
                            EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
 from model.building import Fountain
-from model.character import Character, Melee
-from model.character.ranged_fighter import RangedFighter
+from model.character import Character
 from model.entity import Entity
 from model.map import load_map
 from model.team import Team
-from model.timer import Timer
 
 
 class Model:
@@ -83,7 +81,7 @@ class Model:
         origin: pg.Vector2 = event.target
         radius = event.radius
         for victim in self.entities:
-            if (isinstance(victim, Character)):
+            if isinstance(victim, Character):
                 dist = origin.distance_to(victim.postition)
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)

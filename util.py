@@ -8,10 +8,9 @@ import pygame as pg
 def clamp(v, lo, hi):
     if v < lo:
         return lo
-    elif v > hi:
+    if v > hi:
         return hi
-    else:
-        return v
+    return v
 
 
 def crop_image(picture: pg.Surface, desire_width: int, desire_height: int,
@@ -24,7 +23,7 @@ def crop_image(picture: pg.Surface, desire_width: int, desire_height: int,
     * If `large == True`, the size of cropped image won't be smaller than the desired size.
     """
     image = picture
-    if bounding_rect == None:
+    if bounding_rect is None:
         bounding_rect = image.get_bounding_rect()
     cropped_image = pg.Surface(bounding_rect.size, pg.SRCALPHA)
     cropped_image.blit(image, (0, 0), bounding_rect)

@@ -28,27 +28,27 @@ class EntityView(ObjectBase):
 
     @classmethod
     def init_convert(cls):
-        for type, states in const.ENTITY_STATES.items():
-            if type not in cls.images:
-                cls.images[type] = {}
+        for entity_type, states in const.ENTITY_STATES.items():
+            if entity_type not in cls.images:
+                cls.images[entity_type] = {}
             for state in states:
                 path = (
                     const.IMAGE_PATH +
                     const.ENTITY_IMAGE_PATH +
-                    str(type) + '/' +
+                    str(entity_type) + '/' +
                     str(state) + '.png'
                 )
                 img = pg.image.load(path)
                 width = const.ENTITY_RADIUS * 2
                 height = const.ENTITY_RADIUS * 2
-                cls.images[type][state] = crop_image(
+                cls.images[entity_type][state] = crop_image(
                     img, width, height
                 ).convert_alpha()
         cls.image_initialized = True
 
     def draw(self, screen: pg.Surface):
         entity = self.entity
-        if entity.hidden == True:
+        if entity.hidden:
             return
         img = self.images[entity.type][entity.imgstate]
         screen.blit(img, img.get_rect(center=entity.position))

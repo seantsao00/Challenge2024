@@ -8,12 +8,10 @@ import argparse
 
 import pygame as pg
 
-import const
 import instances_manager
 from controller import Controller
 from event_manager import EventManager
 from model import Model
-from model.entity import Entity
 from view import View
 
 

@@ -1,5 +1,3 @@
-import pygame as pg
-
 import const
 from event_manager import EventAttack
 from model.character import Character
