@@ -31,7 +31,7 @@ class View:
 
         size = pg.display.Info()
         self.arena = pg.display.set_mode(
-            size=const.WINDOW_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
+            size=const.ARENA_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
         self.canvas = pg.display.set_mode( 
             size=const.WINDOW_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy() # Draw team UI(anything outside of arena) on self.canvas
         window_w = min(size.current_w, size.current_h / 9 * 16)
@@ -82,7 +82,7 @@ class View:
             self.arena, 'white', (0, 0), (0, const.ARENA_SIZE[1] - 1), 1
         )
         pg.draw.line(
-            self.arena, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
+            self.arena, 'white', (const.ARENA_SIZE[0] - 1, 0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
         )
         self.canvas.blit(self.arena, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
         self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
