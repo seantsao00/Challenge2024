@@ -4,8 +4,7 @@ import view
 from model.entity import Entity
 
 
-class PauseMenu(Entity):
+class PauseMenu:
     def __init__(self):
-        super().__init__(self)
-        self.view.append(view.PauseMenuView())
+        self.enabled: bool = True # to be renamed
         

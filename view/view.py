@@ -40,6 +40,8 @@ class View:
         # print(self.screen.get_rect().size)
         pg.display.set_caption(const.WINDOW_CAPTION)
 
+        self.pause_menu_view = PauseMenuView(model.pause_menu, self.canvas)
+
         for i in model.map.images:
             loaded_image = cv2.imread(
                 os.path.join(model.map.map_dir, i), cv2.IMREAD_UNCHANGED
@@ -83,6 +85,8 @@ class View:
             self.canvas, 'white', ((const.WINDOW_SIZE[0] + const.ARENA_SIZE[0]) / 2,
                                    0), ((const.WINDOW_SIZE[0] + const.ARENA_SIZE[0]) / 2, const.ARENA_SIZE[1] - 1), 1
         )
+        self.pause_menu_view.draw()
+
         self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
         pg.display.flip()
 

@@ -17,6 +17,7 @@ from model.entity import Entity
 from model.map import load_map
 from model.team import Team
 from model.timer import Timer
+from model.pause_menu import PauseMenu
 
 
 class Model:
@@ -45,6 +46,7 @@ class Model:
         self.teams = teams
         self.show_view_range = show_view_range
         self.show_attack_range = show_attack_range
+        self.pause_menu = PauseMenu()
 
     def initialize(self, _: EventInitialize):
         """
