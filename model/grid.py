@@ -20,11 +20,11 @@ class Cell:
         self.position = position
         self.fountain = None
         self.tower = None
-        self.characters = set()
+        self.characters = []
 
     def add(self, entity: Entity):
         if isinstance(entity, Character):
-            self.characters.add(entity)
+            self.characters.append(entity)
         else:
             self.tower = entity
 
@@ -78,6 +78,6 @@ class Grid:
         characters_list = get_model().characters
         for col in self.cells:
             for cell in col:
-                cell.characters = set()
+                cell.characters = []
         for character in characters_list:
             self.add_entity(character)
