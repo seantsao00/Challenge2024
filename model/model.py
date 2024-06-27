@@ -117,7 +117,7 @@ class Model:
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
         while self.running:
-            ev_manager.post(EventUnconditionalTick)
+            ev_manager.post(EventUnconditionalTick())
             if not(self.pause):
                 ev_manager.post(EventEveryTick())
                 self.dt = self.clock.tick(const.FPS) / 1000.0
