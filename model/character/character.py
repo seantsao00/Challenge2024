@@ -60,5 +60,7 @@ class Character(Entity):
             print("attack failed")
 
     def die(self):
+        print("Died")
+        get_model().characters.remove(self)
         self.alive = False
         self.hidden = True

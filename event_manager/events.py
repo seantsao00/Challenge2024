@@ -85,7 +85,7 @@ class EventCreateEntity(BaseEvent):
 
 
 class EventAttack(BaseEvent):
-    def __init__(self, attacker: Character, victim: Character):  # reference of two characters
+    def __init__(self, attacker: Entity, victim: Entity):  # reference of two characters
         self.attacker = attacker
         self.victim = victim
 

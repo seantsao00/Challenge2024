@@ -17,6 +17,7 @@ from model.entity import Entity
 from model.map import load_map
 from model.team import Team
 from random import choice, randint
+from model.grid import Grid
 
 
 class Model:
@@ -45,6 +46,8 @@ class Model:
         self.teams = teams
         self.show_view_range = show_view_range
         self.show_attack_range = show_attack_range
+        self.characters = set()
+        self.grid = Grid(900, 900)
 
     def initialize(self, _: EventInitialize):
         """
@@ -77,6 +80,8 @@ class Model:
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
+        if isinstance(event.entity, Character):
+            self.characters.add(event.entity)
 
     def multi_attack(self, event: EventMultiAttack):
         attacker = event.attacker

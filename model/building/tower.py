@@ -29,6 +29,7 @@ class Tower(Entity):
      - character_type: The type chose to generate next, melee by default.
      - period: The period to generate characters, in milliseconds, integer.
      - is_fountain: is fountion or not.
+     - attack_timer: The timer to periodcally attack characters.
     """
 
 
@@ -43,6 +44,10 @@ class Tower(Entity):
         self.damage: float = const.TOWER_DAMAGE
         self.vision: float = const.TOWER_VISION
         self.spawn_timer = None
+        if not is_fountain:
+            self.attack_timer = Timer(const.tower.TOWER_ATTACK_PERIOD, self.attack, once=False)
+        else:
+            self.attack_timer = None
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
         if self.is_fountain == True:
             self.imgstate = 'temporary_blue_nexus'
@@ -95,3 +100,11 @@ class Tower(Entity):
         else:
             self.health -= event.attacker.damage
         print(self.team, self.health)
+    
+    def attack(self):
+        model = get_model()
+        nearest_characters = model.grid.get_nearest_characters(self.position, 100)
+        for character in nearest_characters:
+            if character.team != self.team:
+                get_event_manager().post(EventAttack(self, character), character.id)
+                break
