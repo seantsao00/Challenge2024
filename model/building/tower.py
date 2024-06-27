@@ -54,7 +54,7 @@ class Tower(Entity):
             self.view.append(view.ViewRangeView(self))
         if model.show_attack_range:
             self.view.append(view.AttackRangeView(self))
-        if self.health != None:
+        if self.health != None and self.is_fountain == False:
             self.view.append(view.HealthView(self))
 
 

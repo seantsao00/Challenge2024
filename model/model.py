@@ -16,6 +16,7 @@ from model.character.ranged_fighter import RangedFighter
 from model.entity import Entity
 from model.map import load_map
 from model.team import Team
+from random import choice, randint
 
 
 class Model:
@@ -55,9 +56,9 @@ class Model:
         self.state = const.State.PLAY
 
         for i, team_master in enumerate(self.teams):
-            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2),
-                        "team" + str(i+1), team_master)
-            self.test_tower = Tower((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team, 1)
+            new_position = pg.Vector2(randint(0, const.ARENA_SIZE[0]), randint(0, const.ARENA_SIZE[1]))
+            team = Team(new_position, "team" + str(i+1), team_master)
+            self.test_tower = Tower(new_position, team, 1)
         self.neutral_tower = Tower((700, 700))
 
     def handle_every_tick(self, _: EventEveryTick):

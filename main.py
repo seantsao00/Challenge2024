@@ -28,6 +28,9 @@ def main():
     parser.add_argument(
         'team1', help='team1 Use "human" if this team is controlled by human.'
     )
+    parser.add_argument(
+        'team2', help='team2 Use "human" if this team is controlled by human.'
+    )
     # parser.add_argument(
     #     'team2', help='team2'
     # )
@@ -45,7 +48,7 @@ def main():
                         help='If added, the attack range of entities will be shown')
 
     args = parser.parse_args()
-    teams = [args.team1]
+    teams = [args.team1, args.team2]
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
