@@ -55,7 +55,7 @@ class View:
             picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
             picture = pg.transform.scale(picture, const.ARENA_SIZE)
             picture = picture.subsurface(pg.Rect(x, y, w, h))
-            self.background_images.append((int(model.map.images[i]), picture, (x, y)))
+            self.background_images.append(picture)
 
         self.register_listeners()
 
@@ -69,16 +69,25 @@ class View:
         self.canvas.fill(const.BACKGROUND_COLOR)
         model = get_model()
 
+        for image in self.background_images:
+            background_image = pg.transform.scale(image, (const.ARENA_SIZE[0], const.ARENA_SIZE[1]))
+            break # temporary use ONLY background, instead of background and obstacle
+        
+        self.canvas.blit(background_image, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
+        
         for i in range(5):
             for en in model.entities:
                 if len(en.view) > i:
+                    print(en.view[i])
                     en.view[i].draw(self.canvas)
-
+        
         # the two lines making the arena now in the middle
+        
         pg.draw.line(
             self.canvas, 'white', ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2,
                                    0), ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, const.ARENA_SIZE[1] - 1), 1
         )
+        
         pg.draw.line(
             self.canvas, 'white', ((const.WINDOW_SIZE[0] + const.ARENA_SIZE[0]) / 2,
                                    0), ((const.WINDOW_SIZE[0] + const.ARENA_SIZE[0]) / 2, const.ARENA_SIZE[1] - 1), 1
