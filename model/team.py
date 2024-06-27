@@ -72,8 +72,6 @@ class Team:
             self.controlling.move(event.displacement)
         elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
             self.controlling.attack(event.clicked)
-        elif event.input_type == const.INPUT_TYPES.ATTACK and self.controlling != None:
-            self.controlling.attack(event.clicked)
 
     def set_fountain(self, fountain: Fountain):
         self.building_list.append(fountain)
