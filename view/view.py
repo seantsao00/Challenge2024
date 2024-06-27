@@ -7,6 +7,7 @@ import os
 import cv2
 import numpy as np
 import pygame as pg
+from itertools import chain, zip_longest
 
 import const
 from event_manager import EventEveryTick, EventInitialize
@@ -78,10 +79,8 @@ class View:
 
         self.arena.blit(background_image, (0, 0))
 
-        for i in range(5):
-            for en in model.entities:
-                if len(en.view) > i:
-                    en.view[i].draw(self.arena)
+        for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
+            if view_object != None: view_object.draw(self.arena)
 
         # the two lines making the arena now in the middle
 
