@@ -8,7 +8,7 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditionalTick, EventInitialize,
-                           EventMultiAttack, EventQuit, EventPauseModel, EventContinueModel)
+                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel)
 from instances_manager import get_event_manager
 from model.character import Character
 from model.entity import Entity
@@ -81,10 +81,15 @@ class Model:
 
     def handle_pause(self, _: EventPauseModel):
         """
-        Pause or resume the game
-        When the current state is pause, change the current state to resume
+        Pause the game
         """
-        self.pause = not(self.pause)
+        self.pause = True
+    
+    def handle_resume(self, _: EventResumeModel):
+        """
+        Resume the game
+        """
+        self.pause = False
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
@@ -106,6 +111,7 @@ class Model:
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPauseModel, self.handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.handle_resume)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventMultiAttack, self.multi_attack)
 

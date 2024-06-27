@@ -42,7 +42,7 @@ class EventPauseModel(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventContinueModel(BaseEvent):
+class EventResumeModel(BaseEvent):
     """
     Event posted upon resuming the game.
 

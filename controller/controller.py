@@ -6,7 +6,7 @@ import pygame as pg
 
 import const
 from event_manager import (EventEveryTick, EventUnconditionalTick, EventHumanInput, EventInitialize,
-                           EventQuit, EventPauseModel)
+                           EventQuit, EventPauseModel, EventResumeModel)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -42,7 +42,11 @@ class Controller:
             if event_pg.type == pg.KEYDOWN:
                 # For pausing the game
                 if event_pg.key == const.PAUSE_BUTTON:
-                    ev_manager.post(EventPauseModel())
+                    if model.pause:
+                        ev_manager.post(EventResumeModel())
+                    else:
+                        ev_manager.post(EventPauseModel())
+                
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = event_pg.pos
@@ -73,7 +77,7 @@ class Controller:
             TimerManager.handle_event(event_pg)
 
         cur_state = model.state
-        if cur_state == const.State.PLAY:
+        if cur_state == const.State.PLAY and not(model.pause):
             self.ctrl_play()
 
     def register_listeners(self):
