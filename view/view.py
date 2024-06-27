@@ -30,8 +30,10 @@ class View:
         model = get_model()
 
         size = pg.display.Info()
-        self.canvas = pg.display.set_mode(
+        self.arena = pg.display.set_mode(
             size=const.WINDOW_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
+        self.canvas = pg.display.set_mode( 
+            size=const.WINDOW_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy() # Draw team UI(anything outside of arena) on self.canvas
         window_w = min(size.current_w, size.current_h / 9 * 16)
         window_h = min(size.current_h, size.current_w / 16 * 9)
         self.screen = pg.display.set_mode(
@@ -67,21 +69,23 @@ class View:
     def handle_every_tick(self, _: EventEveryTick):
         self.display_fps()
         self.canvas.fill(const.BACKGROUND_COLOR)
+        self.arena.fill(const.BACKGROUND_COLOR)
         model = get_model()
 
         for i in range(5):
             for en in model.entities:
                 if len(en.view) > i:
-                    en.view[i].draw(self.canvas)
+                    en.view[i].draw(self.arena)
 
         # the arena is now in the middle
         pg.draw.line(
-            self.canvas, 'white', (0, 0), (0, const.ARENA_SIZE[1] - 1), 1
+            self.arena, 'white', (0, 0), (0, const.ARENA_SIZE[1] - 1), 1
         )
         pg.draw.line(
-            self.canvas, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
+            self.arena, 'white', (const.ARENA_SIZE[0], 0), (const.ARENA_SIZE[0], const.ARENA_SIZE[1] - 1), 1
         )
-        self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
+        self.canvas.blit(self.arena, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
+        self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
         pg.display.flip()
 
     def register_listeners(self):
