@@ -24,7 +24,8 @@ def main():
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2023')
     parser.add_argument(
-        'map', help='The name of maps. It can be single_map, test_map or river(for test)')
+        'map', help='The name of maps. It can be single_map or test_map'
+    )
     parser.add_argument(
         'team1', help='team1 Use "human" if this team is controlled by human.'
     )
