@@ -12,7 +12,7 @@ import const
 from event_manager import EventEveryTick, EventInitialize, EventQuit
 from instances_manager import get_event_manager, get_model
 from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase,
-                         ViewRangeView)
+                         ViewRangeView, PauseMenuView)
 
 
 class View:
