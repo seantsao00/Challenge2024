@@ -5,14 +5,15 @@ Import paths should be relative to the location of this file.
 """
 
 import argparse
-import const
+
 import pygame as pg
 
+import const
 import instances_manager
 from controller import Controller
 from event_manager import EventManager
-from model.entity import Entity
 from model import Model
+from model.entity import Entity
 from view import View
 
 

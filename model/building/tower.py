@@ -5,10 +5,12 @@ The module defines Building class.
 from random import choice, randint
 
 import pygame as pg
-import view
+
 import const
 import const.tower
-from event_manager import EventSpawnCharacter, EventAttack, EventTeamGainTower, EventTeamLoseTower
+import view
+from event_manager import (EventAttack, EventSpawnCharacter,
+                           EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import Character, Melee
 from model.entity import Entity
@@ -23,7 +25,6 @@ class Tower(Entity):
      - max_health: The original health of the tower. (from class entity)
      - health: The health of the tower now. (from class entity)
      - id: The id of the entity. (from entity)
-     - team: The owner team id of this building.
      - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
      - spawn_timer: The timer spawning characters.
      - character_type: The type chose to generate next, melee by default.
@@ -32,10 +33,8 @@ class Tower(Entity):
      - attack_timer: The timer to periodcally attack characters.
     """
 
-
     def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, type='tower', imgstate='default'):
-        super().__init__(position, const.TOWER_HEALTH, type, imgstate)
-        self.team = team
+        super().__init__(position, const.TOWER_HEALTH, type, team, imgstate)
         self.log = list()
         self.period = const.tower.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
@@ -62,7 +61,6 @@ class Tower(Entity):
         if self.health != None and self.is_fountain == False:
             self.view.append(view.HealthView(self))
 
-
     def update_period(self):
         self.period = const.tower.INITIAL_PERIOD_MS + \
             int(const.tower.FORMULA_K * self.team.total_buildings ** 0.5)
@@ -77,7 +75,8 @@ class Tower(Entity):
 
     def set_timer(self):
         self.update_period()
-        self.spawn_timer = Timer(self.period, self.generate_character, self.character_type, once=True)
+        self.spawn_timer = Timer(self.period, self.generate_character,
+                                 self.character_type, once=True)
 
     def update_character_type(self, character_type):
         self.character_type = character_type
@@ -100,7 +99,7 @@ class Tower(Entity):
         else:
             self.health -= event.attacker.damage
         print(self.team, self.health)
-    
+
     def attack(self):
         model = get_model()
         nearest_characters = model.grid.get_nearest_characters(self.position, 100)

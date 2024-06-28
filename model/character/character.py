@@ -22,8 +22,7 @@ class Character(Entity):
 
     def __init__(self, team: Team, position: pg.Vector2 | tuple[float, float], speed: float, attack_range: float,
                  damage: float, health: float, vision: float, alive: bool = True):
-        super().__init__(position, health, 'team' + str(team.id))
-        self.team = team
+        super().__init__(position, health, 'team' + str(team.id), team)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage

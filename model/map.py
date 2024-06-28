@@ -57,7 +57,7 @@ def load_map(map_dir):
 
     fountains = [tuple(i) for i in data["fountains"]]
     tower_spawns = [tuple(i) for i in data["tower_spawns"]]
-    i=0
+    i = 0
     with open(map_file) as f:
         rows = list(csv.reader(f))
         map_list = [[0] * size[1] for _ in range(0, size[0])]

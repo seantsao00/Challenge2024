@@ -9,9 +9,9 @@ from const.controller import *
 from const.entity import *
 from const.model import *
 from const.team import *
+from const.tower import *
 from const.visual import *
 from const.window import *
-from const.tower import *
 
 # image path
 

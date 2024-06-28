@@ -55,7 +55,8 @@ class Controller:
                 h_canva_to_screen_ratio = h / const.WINDOW_SIZE[1]
                 x = x / w_canva_to_screen_ratio
                 y = y / h_canva_to_screen_ratio
-                x -= (const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2   # shift away from the center
+                x -= (const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / \
+                    2   # shift away from the center
                 if event_pg.button == 1:  # Left mouse button
                     print(f"Mouse click position: ({x}, {y})")
                     clicked = None
@@ -69,7 +70,7 @@ class Controller:
                     print(f"Right click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
-                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                        if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
                     ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked))

@@ -7,9 +7,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Entity
-    from model import Character
-    from model import Tower
+    from model import Character, Entity, Tower
 
 
 class HealthView:
