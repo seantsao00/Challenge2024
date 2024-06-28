@@ -70,7 +70,7 @@ class Controller:
                     print(f"Right click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
-                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                        if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
                     ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked))
