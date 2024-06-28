@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from itertools import chain
 import pygame as pg
 
 import const
@@ -9,11 +10,12 @@ import const.team
 from event_manager import (EventEveryTick, EventHumanInput,
                            EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
-from instances_manager import get_event_manager
+from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
-    from model.building import Fountain
+    from model.building import Tower
     from model.entity import Entity
+    from model.character import Character
 
 
 class Team:
@@ -28,6 +30,7 @@ class Team:
      - id: The id of the team.
      - building_list: list of the building of the team. The first one is the fountain.
      - character_list: list of the character of the team.
+     - visible_entities_list: list of visible entities to the team. Note that entities owned by this team is not in this list.
     """
 
     total = 0
@@ -41,8 +44,9 @@ class Team:
         self.points = 0
         self.id = Team.total
         self.master = master
-        self.building_list = []
-        self.character_list = []
+        self.building_list: list[Tower] = []
+        self.character_list: list[Character] = []
+        self.visible_entities_list: list[Entity] = []
         if master == 'human':
             self.controlling = None
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
@@ -100,3 +104,18 @@ class Team:
         a = 1
         self.points += a * self.total_buildings
         print(self.id, " gain", a * self.total_buildings, "points.")
+
+    def update_visible_entities_list(self):
+        """
+        This function updates the current entities visible to the instance of Team.
+        Still looking for a better algorithm to implement this feature.
+        """
+        model = get_model()
+        
+        self.visible_entities_list = []
+        for entity in model.entities:
+            if entity.team is not self:
+                for my_entity in chain(self.building_list, self.character_list):
+                    if my_entity.position.distance_to(entity.position) <= my_entity.vision:
+                        self.visible_entities_list.append(entity)
+                        break

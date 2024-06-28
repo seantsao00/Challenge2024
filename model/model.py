@@ -43,7 +43,8 @@ class Model:
         self.register_listeners()
         self.dt = 0
         self.map = load_map(os.path.join(const.map.MAP_DIR, map_name))
-        self.teams = teams
+        self.team_names = teams
+        self.teams: list[Team] = None
         self.show_view_range = show_view_range
         self.show_attack_range = show_attack_range
         self.characters = set()
@@ -57,11 +58,13 @@ class Model:
         even for the second or more rounds of the game.
         """
         self.state = const.State.PLAY
+        self.teams = []
 
-        for i, team_master in enumerate(self.teams):
+        for i, team_master in enumerate(self.team_names):
             new_position = pg.Vector2(
                 randint(100, const.ARENA_SIZE[0] - 100), randint(100, const.ARENA_SIZE[1]) - 100)
             team = Team(new_position, "team" + str(i+1), team_master)
+            self.teams.append(team)
             self.test_tower = Tower(new_position, team, 1)
         self.neutral_tower = Tower((700, 700))
 
@@ -72,6 +75,8 @@ class Model:
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
         """
+        for team in self.teams:
+            team.update_visible_entities_list()
 
     def handle_quit(self, _: EventQuit):
         """
