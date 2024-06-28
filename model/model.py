@@ -59,7 +59,7 @@ class Model:
         self.state = const.State.PLAY
 
         for i, team_master in enumerate(self.teams):
-            new_position = pg.Vector2(randint(0, const.ARENA_SIZE[0]), randint(0, const.ARENA_SIZE[1]))
+            new_position = pg.Vector2(randint(100, const.ARENA_SIZE[0] - 100), randint(100, const.ARENA_SIZE[1]) - 100)
             team = Team(new_position, "team" + str(i+1), team_master)
             self.test_tower = Tower(new_position, team, 1)
         self.neutral_tower = Tower((700, 700))
