@@ -19,7 +19,7 @@ class View:
     The class that presents the actual game content on the screen.
     """
 
-    def __init__(self):
+    def __init__(self, vision_of):
         """
         Initialize the View instance upon its creation.
 
@@ -58,6 +58,17 @@ class View:
             picture = pg.transform.scale(picture, const.ARENA_SIZE)
             picture = picture.subsurface(pg.Rect(x, y, w, h))
             self.background_images.append(picture)
+        
+        if vision_of == 'all':
+            self.vision_of = const.VIEW_EVERYTHING
+        else:
+            try:
+                self.vision_of = int(vision_of)
+            except ValueError:
+                for i, team_name in enumerate(model.team_names):
+                    if vision_of == team_name:
+                        self.vision_of = i+1
+                        break
 
         self.register_listeners()
 
@@ -79,8 +90,15 @@ class View:
 
         self.arena.blit(background_image, (0, 0))
 
-        for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
-            if view_object != None: view_object.draw(self.arena)
+        if self.vision_of == const.VIEW_EVERYTHING:
+            for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
+                if view_object != None: view_object.draw(self.arena)
+        else:
+            my_team = model.teams[self.vision_of - 1]
+            for view_object in chain(*zip_longest(*[en.view for en in chain(my_team.building_list,
+                                                                            my_team.character_list,
+                                                                            my_team.visible_entities_list)], fillvalue=None)):
+                if view_object != None: view_object.draw(self.arena)
 
         # the two lines making the arena now in the middle
 

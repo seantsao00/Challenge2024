@@ -47,6 +47,8 @@ def main():
                         help='If added, the view range of entities will be shown')
     parser.add_argument('-a', '--show-attack-range', action='store_true',
                         help='If added, the attack range of entities will be shown')
+    parser.add_argument('--vision_of', default='all',
+                        help='Display the vision of which player. If not assigned or assigned "all", all visible entities are displayed. Team id or team name can be assigned.')
 
     args = parser.parse_args()
     teams = [args.team1, args.team2]
@@ -59,7 +61,7 @@ def main():
     instances_manager.register_model(model)
 
     Controller()
-    View()
+    View(args.vision_of)
 
     # Main loop
     model.run()
