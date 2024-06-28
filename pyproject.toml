@@ -1,5 +1,8 @@
 [tool.autopep8]
 max_line_length = 99
 
-[tool.pylint.'MAIN']
-extension-pkg-allow-list = 'pygame'
+[tool.pylint.main]
+extension-pkg-allow-list = ['pygame']
+
+[tool.pylint.typecheck]
+generated-members = ['cv2.*']

@@ -1,15 +1,14 @@
 {
     "width": 900,
     "height": 900,
-    "spawn": [
-        [180, 180], [180, 720], [720, 180], [720, 720]
+    "fountains": [
+        [630, 250]
     ],
     "images": {
         "background.png": -1,
         "obstacle.png": 8
     },
-    "portals": [
-        [[360, 360], [90, 90]]
-    ],
-    "tower_spawn": [450, 450]
+    "tower_spawns": [
+        [50, 860]
+    ]
 }

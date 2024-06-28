@@ -8,16 +8,17 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
-                           EventQuit, EventMultiAttack)
+                           EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
-from model.player import Player
+from model.building import Tower
+from model.character import Character, Melee
+from model.character.ranged_fighter import RangedFighter
 from model.entity import Entity
-from model.timer import Timer
-from model.character import Character
-from model.ranged_fighter import RangedFighter
-from model.fountain import Fountain
-from model.team import Team
 from model.map import load_map
+from model.team import Team
+from random import choice, randint
+from model.grid import Grid
+
 
 class Model:
     """
@@ -26,7 +27,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self, map_name, teams):
+    def __init__(self, map_name, teams, show_view_range, show_attack_range):
         """
         Initialize the Model object.
 
@@ -38,12 +39,15 @@ class Model:
         self.running: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
-        self.players: dict[const.PlayerIds, Player] = {}
         self.entities: list[Entity] = []
         self.register_listeners()
         self.dt = 0
         self.map = load_map(os.path.join(const.map.MAP_DIR, map_name))
         self.teams = teams
+        self.show_view_range = show_view_range
+        self.show_attack_range = show_attack_range
+        self.characters = set()
+        self.grid = Grid(900, 900)
 
     def initialize(self, _: EventInitialize):
         """
@@ -52,14 +56,14 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        self.players = {player_id: Player(player_id) for player_id in const.PlayerIds}
         self.state = const.State.PLAY
 
         for i, team_master in enumerate(self.teams):
-            team = Team((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), "team" + str(i+1), team_master)
-            self.test_fountain = Fountain((const.ARENA_SIZE[0] / 2, const.ARENA_SIZE[1] / 2), team)
-            team.set_fountain(self.test_fountain)
-        
+            new_position = pg.Vector2(randint(100, const.ARENA_SIZE[0] - 100), randint(100, const.ARENA_SIZE[1]) - 100)
+            team = Team(new_position, "team" + str(i+1), team_master)
+            self.test_tower = Tower(new_position, team, 1)
+        self.neutral_tower = Tower((700, 700))
+
     def handle_every_tick(self, _: EventEveryTick):
         """
         Do actions that should be executed every tick.
@@ -76,14 +80,15 @@ class Model:
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
+        if isinstance(event.entity, Character):
+            self.characters.add(event.entity)
 
     def multi_attack(self, event: EventMultiAttack):
         attacker = event.attacker
-        type = event.type
-        if (type == 1):
-            origin: pg.Vector2 = event.target
-            radius = event.radius
-            for victim in self.entities:
+        origin: pg.Vector2 = event.target
+        radius = event.radius
+        for victim in self.entities:
+            if isinstance(victim, Character):
                 dist = origin.distance_to(victim.postition)
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)
@@ -95,6 +100,7 @@ class Model:
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
+        ev_manager.register_listener(EventMultiAttack, self.multi_attack)
 
     def run(self):
         """Run the main loop of the game."""

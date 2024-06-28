@@ -5,15 +5,14 @@ Import paths should be relative to the location of this file.
 """
 
 import argparse
-
+import const
 import pygame as pg
 
-import const
 import instances_manager
 from controller import Controller
 from event_manager import EventManager
-from model import Model
 from model.entity import Entity
+from model import Model
 from view import View
 
 
@@ -21,20 +20,16 @@ def main():
     # Initialization
     pg.init()
 
-    # Reset Window/Arena Size, maximum 16 : 9 in current screen
-    # size = pg.display.Info()
-    # print(size.current_w, size.current_h)
-    # window_w = min(size.current_w, size.current_h / 9 * 16)
-    # window_h = min(size.current_h, size.current_w / 16 * 9)
-    # const.WINDOW_SIZE = (window_w, window_h)
-    # const.ARENA_SIZE = (window_h, window_h)
-
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2023')
     parser.add_argument(
-        'map', help='The name of maps. It can be single_map, test_map or river(for test)') 
+        'map', help='The name of maps. It can be single_map or test_map'
+    )
     parser.add_argument(
         'team1', help='team1 Use "human" if this team is controlled by human.'
+    )
+    parser.add_argument(
+        'team2', help='team2 Use "human" if this team is controlled by human.'
     )
     # parser.add_argument(
     #     'team2', help='team2'
@@ -47,19 +42,23 @@ def main():
     # )
     # Here is WIP
 
+    parser.add_argument('-v', '--show-view-range', action='store_true',
+                        help='If added, the view range of entities will be shown')
+    parser.add_argument('-a', '--show-attack-range', action='store_true',
+                        help='If added, the attack range of entities will be shown')
+
     args = parser.parse_args()
-    teams = [args.team1]
+    teams = [args.team1, args.team2]
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
 
-    model = Model(args.map, teams)
+    model = Model(args.map, teams,
+                  args.show_view_range, args.show_attack_range)
     instances_manager.register_model(model)
 
     Controller()
     View()
-
-    
 
     # Main loop
     model.run()

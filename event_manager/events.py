@@ -3,16 +3,18 @@ The module defines events used by EventManager.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
+
 if TYPE_CHECKING:
-    from model.entity import Entity
-    from model.tower import Tower
+    from model.building import Tower
     from model.character import Character
+    from model.entity import Entity
 
 
 @dataclass(kw_only=True)
@@ -59,19 +61,19 @@ class EventHumanInput(BaseEvent):
 
     For example, a listener which draws position of characters can be registered with this event.
     """
-    def __init__(self, input_type: const.INPUT_TYPES, clicked: Character = None, displacement: pg.Vector2 = None):
+
+    def __init__(self, input_type: const.InputTypes, clicked: Character = None, displacement: pg.Vector2 = None):
         self.input_type = input_type
-        self.clicked = clicked # When INPUT_TYPE is PICK
-        self.displacement = displacement# When INPUT_TYPE is MOVE
+        self.clicked = clicked  # When INPUT_TYPE is PICK or ATTACK
+        self.displacement = displacement  # When INPUT_TYPE is MOVE
         """
         The displacement vector representing the movement.
         """
 
     def __str__(self):
-        if self.input_type == const.INPUT_TYPES.PICK:
+        if self.input_type == const.InputTypes.PICK:
             return f"Clicked at {self.clicked.id}"
-        else:
-            return f"Move {self.displacement}"
+        return f"Move {self.displacement}"
 
 
 @dataclass(kw_only=True)
@@ -83,16 +85,14 @@ class EventCreateEntity(BaseEvent):
 
 
 class EventAttack(BaseEvent):
-    def __init__(self, attacker: Character, victim: Character):  # reference of two characters
+    def __init__(self, attacker: Entity, victim: Entity):  # reference of two characters
         self.attacker = attacker
         self.victim = victim
 
 
 class EventMultiAttack(BaseEvent):
-    def __init__(self, attacker: Character, type=1, orientation=None, target: pg.Vector2 = None, radius=None):
+    def __init__(self, attacker: Character, target: pg.Vector2, radius):
         self.attacker = attacker
-        self.type = type
-        self.orientation = orientation
         self.target = target
         self.raidus = radius
 
@@ -105,3 +105,8 @@ class EventTeamGainTower(BaseEvent):
 class EventTeamLoseTower(BaseEvent):
     def __init__(self, tower: Tower):
         self.tower = tower
+
+
+class EventSpawnCharacter(BaseEvent):
+    def __init__(self, character: Character):
+        self.character = character

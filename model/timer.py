@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Callable
 
 import pygame as pg
@@ -21,6 +22,7 @@ class TimerManager:
         """Handle events for all timers. Returns True if handled."""
         timer = cls._timers.get(event.type)
         if timer:
+            # pylint: disable=protected-access
             timer._handle_event(event)
             return True
         return False
@@ -29,7 +31,7 @@ class TimerManager:
 class Timer:
     _next_event_type = pg.USEREVENT + 30
 
-    def __init__(self, interval: int, function: Callable, once: bool = False, *args, **kwargs):
+    def __init__(self, interval: int, function: Callable, *args, once: bool = False, **kwargs):
         """
         Initialize a Timer object.
 

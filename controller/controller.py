@@ -5,7 +5,8 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize, EventQuit, EventHumanInput
+from event_manager import (EventEveryTick, EventHumanInput, EventInitialize,
+                           EventQuit)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -41,20 +42,37 @@ class Controller:
 
             if event_pg.type == pg.KEYDOWN:
                 # For orientating
+                if event_pg.key == pg.K_ESCAPE:
+                    print("press ESC")
+
                 key_down_events.append(event_pg)
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
+                mouse_pos = event_pg.pos
+                x, y = mouse_pos
+                w, h = pg.display.get_surface().get_size()
+                w_canva_to_screen_ratio = w / const.WINDOW_SIZE[0]
+                h_canva_to_screen_ratio = h / const.WINDOW_SIZE[1]
+                x = x / w_canva_to_screen_ratio
+                y = y / h_canva_to_screen_ratio
+                x -= (const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2   # shift away from the center
                 if event_pg.button == 1:  # Left mouse button
-                    mouse_pos = event_pg.pos
-                    x, y = mouse_pos
                     print(f"Mouse click position: ({x}, {y})")
-
                     clicked = None
                     for entity in model.entities:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
-                    
-                    ev_manager.post(EventHumanInput(const.INPUT_TYPES.PICK, clicked=clicked))
+
+                    ev_manager.post(EventHumanInput(const.InputTypes.PICK, clicked=clicked))
+
+                if event_pg.button == 3:  # Right mouse button
+                    print(f"Right click position: ({x}, {y})")
+                    clicked = None
+                    for entity in model.entities:
+                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                            clicked = entity
+
+                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked))
 
             TimerManager.handle_event(event_pg)
 
@@ -87,5 +105,5 @@ class Controller:
 
         if direction.length() != 0:
             # Try to move as far as player can.
-            displacement = direction.normalize() * max(const.PlayerSpeeds)
-            ev_manager.post(EventHumanInput(const.INPUT_TYPES.MOVE, displacement=displacement))
+            displacement = direction.normalize() * max(const.ARENA_SIZE)
+            ev_manager.post(EventHumanInput(const.InputTypes.MOVE, displacement=displacement))
