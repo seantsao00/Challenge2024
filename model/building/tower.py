@@ -25,7 +25,6 @@ class Tower(Entity):
      - max_health: The original health of the tower. (from class entity)
      - health: The health of the tower now. (from class entity)
      - id: The id of the entity. (from entity)
-     - team: The owner team id of this building.
      - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
      - spawn_timer: The timer spawning characters.
      - character_type: The type chose to generate next, melee by default.
@@ -35,8 +34,7 @@ class Tower(Entity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, type='tower', imgstate='default'):
-        super().__init__(position, const.TOWER_HEALTH, type, imgstate)
-        self.team = team
+        super().__init__(position, const.TOWER_HEALTH, type, team, imgstate)
         self.log = list()
         self.period = const.tower.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
