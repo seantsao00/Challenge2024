@@ -27,7 +27,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self, map_name, teams, show_view_range, show_attack_range):
+    def __init__(self, map_name: str, teams: list[Team], show_view_range: bool, show_attack_range: bool):
         """
         Initialize the Model object.
 
