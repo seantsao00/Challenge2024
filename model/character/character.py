@@ -20,20 +20,20 @@ class Character(Entity):
      - alive: The character is alive or not.
     """
 
-    def __init__(self, team: Team, position: pg.Vector2 | tuple[float, float], speed: float, attack_range: float,
-                 damage: float, health: float, vision: float, alive: bool = True):
-        super().__init__(position, health, 'team' + str(team.id), team)
+    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
+                 attack_range: float, damage: float, health: float, vision: float):
+        super().__init__(position, health=health, entity_type='team' + str(team.id), team=team)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
         self.vision: float = vision
-        self.alive: bool = alive
+        self.alive: bool = True
         model = get_model()
         if model.show_view_range:
             self.view.append(view.ViewRangeView(self))
         if model.show_attack_range:
             self.view.append(view.AttackRangeView(self))
-        if self.health != None:
+        if self.health is not None:
             self.view.append(view.HealthView(self))
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
 

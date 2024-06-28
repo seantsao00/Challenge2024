@@ -3,6 +3,12 @@ max_line_length = 99
 
 [tool.pylint.main]
 extension-pkg-allow-list = ['pygame']
+disable = [
+    'missing-module-docstring',
+    'missing-function-docstring',
+    'line-too-long',
+    'missing-class-docstring',
+]
 
 [tool.pylint.typecheck]
 generated-members = ['cv2.*']

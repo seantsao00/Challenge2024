@@ -4,7 +4,6 @@ import pygame as pg
 
 from event_manager import EventCreateEntity
 from instances_manager import get_event_manager, get_model
-from model.building import Tower
 from model.character import Character
 from model.entity import Entity
 from model.timer import Timer

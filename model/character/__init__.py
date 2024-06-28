@@ -1,5 +1,3 @@
-from model.building import *
-from model.character import *
 from model.character.character import *
 from model.character.lookout import *
 from model.character.melee import *

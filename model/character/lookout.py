@@ -11,9 +11,9 @@ class Lookout(Character):
     focus: Increase damage that can be stacked. Loses stacks when taken damage.
     """
 
-    def __init__(self, team, position, alive=True):
-        super().__init__(team, position, const.LOOKOUT_SPEED, const.LOOKOUT_ATTACK_RANGE,
-                         const.LOOKOUT_DAMAGE, const.LOOKOUT_HEALTH, const.LOOKOUT_VISION, alive)
+    def __init__(self, team, position):
+        super().__init__(position, team, const.LOOKOUT_SPEED, const.LOOKOUT_ATTACK_RANGE,
+                         const.LOOKOUT_DAMAGE, const.LOOKOUT_HEALTH, const.LOOKOUT_VISION)
 
     def focus(self):
         self.damage += 5
