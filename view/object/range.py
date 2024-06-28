@@ -8,29 +8,29 @@ import const
 
 if TYPE_CHECKING:
     from model import Entity
-    from model.character import Character
+    from model.character import Entity
 
 
 class RangeView:
-    def __init__(self, character: Character):
-        self.character: Character = character
+    def __init__(self, entity: Entity):
+        self.entity: Entity = entity
         self.radius: float = None
         self.color = None
 
     def draw(self, screen):
-        if not self.character.hidden:
-            pg.draw.circle(screen, self.color, self.character.position, self.radius, width=1)
+        if not self.entity.hidden:
+            pg.draw.circle(screen, self.color, self.entity.position, self.radius, width=1)
 
 
 class AttackRangeView(RangeView):
-    def __init__(self, character: Character):
-        super().__init__(character)
+    def __init__(self, entity: Entity):
+        super().__init__(entity)
         self.color = const.ATTACK_RANGE_COLOR
-        self.radius = self.character.attack_range - 0.5
+        self.radius = self.entity.attack_range - 0.5
 
 
 class ViewRangeView(RangeView):
-    def __init__(self, character: Character):
-        super().__init__(character)
+    def __init__(self, entity: Entity):
+        super().__init__(entity)
         self.color = const.VIEW_RANGE_COLOR
-        self.radius = self.character.vision + 0.5
+        self.radius = self.entity.vision + 0.5
