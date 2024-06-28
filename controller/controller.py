@@ -85,6 +85,9 @@ class Controller:
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        # Listeners for TimerManager
+        ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
+        ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
 
 
     def ctrl_play(self):

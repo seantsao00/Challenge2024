@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Callable
 
 import pygame as pg
+import time
+from event_manager import EventPauseModel, EventResumeModel
 
 
 class TimerManager:
@@ -25,6 +27,16 @@ class TimerManager:
             timer._handle_event(event)
             return True
         return False
+    
+    @classmethod
+    def pause_all_timer(cls, _: EventPauseModel):
+        for timer in cls._timers.values():
+            timer.pause()
+
+    @classmethod
+    def resume_all_timer(cls, _: EventResumeModel):
+        for timer in cls._timers.values():
+            timer.resume()
 
 
 class Timer:
@@ -57,15 +69,31 @@ class Timer:
         self.start()
 
     def start(self):
-        """Start or resume the timer."""
+        """Restart the timer."""
         if not self.running:
             pg.time.set_timer(self.event_type, self.interval)
+            self.remaining_time = self.interval
+            self.last_time = time.time()
             self.running = True
 
     def stop(self):
         """Stop the timer."""
-        pg.time.set_timer(self.event_type, 0)
         self.running = False
+        pg.time.set_timer(self.event_type, 0)
+
+    def pause(self):
+        """Pause the timer."""
+        if self.running:
+            self.remaining_time = int(max(0, self.remaining_time - (time.time() - self.last_time) * 1000))
+            self.running = False
+            pg.time.set_timer(self.event_type, 0)
+
+    def resume(self):
+        """Resume the timer."""
+        if not self.running:
+            pg.time.set_timer(self.event_type, self.remaining_time)
+            self.last_time = time.time()
+            self.running = True
 
     def set_interval(self, interval: int):
         """Set a new interval for the timer."""
@@ -91,5 +119,9 @@ class Timer:
         if event.type == self.event_type:
             self.count += 1
             self.function(*self.args, **self.kwargs)
+            
             if self.once:
                 self.delete()
+            elif self.running:
+                self.stop()
+                self.start()

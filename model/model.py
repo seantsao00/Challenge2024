@@ -19,7 +19,7 @@ from model.team import Team
 from model.timer import Timer
 
 from model.character import Melee
-
+# import time
 
 
 class Model:
@@ -49,6 +49,14 @@ class Model:
         self.teams = teams
         self.show_view_range = show_view_range
         self.show_attack_range = show_attack_range
+        # self.tt1 = Timer(400, self.on_tt1)
+        # self.tt2 = Timer(700, self.on_tt2)
+
+    # def on_tt1(self):
+    #     print("tt1 ticked at", time.time())
+
+    # def on_tt2(self):
+    #     print("tt2 ticked at", time.time())
 
     def initialize(self, _: EventInitialize):
         """
