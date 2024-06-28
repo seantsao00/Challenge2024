@@ -1,5 +1,8 @@
 import pygame as pg
 
+import const
+import const.map
+import util
 import view
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
@@ -41,9 +44,39 @@ class Character(Entity):
         """
         Move the character in the given direction.
         """
-        if direction.length() != 0:
-            direction = direction.normalize()
-            self.position += direction * self.speed
+        if direction.length() > self.speed:
+            direction = self.speed * direction.normalize()
+
+        map = get_model().map
+
+        # set the minimum move into 1/4 of the original direction
+        min_direction = direction / 4
+        cur_direction = direction / 4
+
+        # try further distance
+        for i in range(4):
+
+            new_position = self.position + cur_direction
+            new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
+            new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
+
+            # prevent out of bound, in a stupid way
+            if (new_position.x + const.ENTITY_RADIUS >= const.ARENA_SIZE[0] or 
+                new_position.y + const.ENTITY_RADIUS >= const.ARENA_SIZE[1] or 
+                new_position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER < 0 or
+                new_position.x - const.ENTITY_RADIUS < 0):
+                self.position += cur_direction - min_direction
+                return
+            
+            if (map.get_type(new_position) == const.map.MAP_OBSTACLE):
+                self.position = new_position - min_direction
+                return
+            
+            if (i == 3): 
+                self.position = new_position
+                return
+
+            cur_direction += min_direction
 
     def take_damage(self, event: EventAttack):
         self.health -= event.attacker.damage
