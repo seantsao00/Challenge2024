@@ -33,9 +33,10 @@ class Tower(Entity):
      - attack_timer: The timer to periodcally attack characters.
     """
 
-    def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, type='tower', imgstate='default'):
-        super().__init__(position, const.TOWER_HEALTH, type, team, imgstate)
-        self.log = list()
+    def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, entity_type='tower', imgstate='default'):
+        super().__init__(position, health=const.TOWER_HEALTH,
+                         entity_type=entity_type, team=team, imgstate=imgstate)
+        self.log = []
         self.period = const.tower.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
         self.character_type = Melee
@@ -48,9 +49,9 @@ class Tower(Entity):
         else:
             self.attack_timer = None
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
-        if self.is_fountain == True:
+        if self.is_fountain:
             self.imgstate = 'temporary_blue_nexus'
-        if self.team != None:
+        if self.team is not None:
             self.set_timer()
             get_event_manager().post(EventTeamGainTower(self), self.team.id)
         model = get_model()
@@ -58,12 +59,12 @@ class Tower(Entity):
             self.view.append(view.ViewRangeView(self))
         if model.show_attack_range:
             self.view.append(view.AttackRangeView(self))
-        if self.health != None and self.is_fountain == False:
+        if self.health is not None and not self.is_fountain:
             self.view.append(view.HealthView(self))
 
     def update_period(self):
         self.period = const.tower.INITIAL_PERIOD_MS + \
-            int(const.tower.FORMULA_K * self.team.total_buildings ** 0.5)
+            int(const.tower.FORMULA_K * len(self.team.building_list) ** 0.5)
 
     def generate_character(self, character_type: Character, timestamp=pg.time.get_ticks()):
         self.log.append((character_type, timestamp))
@@ -82,7 +83,7 @@ class Tower(Entity):
         self.character_type = character_type
 
     def take_damage(self, event: EventAttack):
-        if self.team == event.attacker.team or self.is_fountain == True:
+        if self.team is event.attacker.team or self.is_fountain:
             print("same team or is fountion")
             return
         if self.health - event.attacker.damage <= 0:

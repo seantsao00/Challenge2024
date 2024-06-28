@@ -20,9 +20,9 @@ class Melee(Character):
 
     """
 
-    def __init__(self, team, position, alive=True, defense=False):
-        super().__init__(team, position, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
-                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, alive)
+    def __init__(self, team, position, defense=False):
+        super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
+                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION)
         self.defense = defense
 
     def take_damage(self, event: EventAttack):

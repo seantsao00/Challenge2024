@@ -18,7 +18,7 @@ class RangeView:
         self.color = None
 
     def draw(self, screen):
-        if self.character.hidden == False:
+        if not self.character.hidden:
             pg.draw.circle(screen, self.color, self.character.position, self.radius, width=1)
 
 

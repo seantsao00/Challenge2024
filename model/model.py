@@ -2,7 +2,7 @@
 The module defines the main game engine.
 """
 import os
-from random import choice, randint
+from random import randint
 
 import pygame as pg
 
@@ -12,8 +12,7 @@ from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
                            EventMultiAttack, EventQuit)
 from instances_manager import get_event_manager
 from model.building import Tower
-from model.character import Character, Melee
-from model.character.ranged_fighter import RangedFighter
+from model.character import Character
 from model.entity import Entity
 from model.grid import Grid
 from model.map import load_map

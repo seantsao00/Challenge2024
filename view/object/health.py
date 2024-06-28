@@ -17,7 +17,7 @@ class HealthView:
 
     def draw(self, screen: pg.Surface):
         entity = self.entity
-        if entity.hidden == True:
+        if entity.hidden:
             return
         blood_width = (entity.health / entity.max_health) * const.ENTITY_RADIUS * 2
         pg.draw.rect(screen, (0, 0, 0),

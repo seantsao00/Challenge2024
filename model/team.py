@@ -36,10 +36,9 @@ class Team:
         if Team.total == 4:
             raise Exception('Team size exceeds.')
         Team.total += 1
-        self.name = name
-        self.total_buildings = 0
-        self.points = 0
         self.id = Team.total
+        self.name = name
+        self.points = 0
         self.master = master
         self.building_list = []
         self.character_list = []
@@ -61,7 +60,7 @@ class Team:
             """
             if entity is None:
                 return False
-            if hasattr(entity, 'team') and entity.team == my_team and hasattr(entity, 'move'):
+            if hasattr(entity, 'team') and entity.team is my_team and hasattr(entity, 'move'):
                 return True
             return False
 
@@ -72,14 +71,13 @@ class Team:
                 print('clicked on non interactable entity')
         elif event.input_type == const.InputTypes.MOVE and self.controlling is not None:
             self.controlling.move(event.displacement)
-        elif event.input_type == const.InputTypes.ATTACK and self.controlling != None and event.clicked != None:
+        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None and event.clicked is not None:
             self.controlling.attack(event.clicked)
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)
 
     def gain_tower(self, event: EventTeamGainTower):
-        self.total_buildings += 1
         if event.tower not in self.building_list:
             self.building_list.append(event.tower)
         print(self.id, " gained a tower with id",
@@ -89,7 +87,6 @@ class Team:
         print(self.id, " lost a tower with id", event.tower.id, " at", event.tower.position)
         if event.tower in self.building_list:
             self.building_list.remove(event.tower)
-        self.total_buildings -= 1
 
     def gain_point_kill(self):
         b = 1
@@ -98,5 +95,5 @@ class Team:
 
     def gain_point_tower(self, event: EventEveryTick):
         a = 1
-        self.points += a * self.total_buildings
-        print(self.id, " gain", a * self.total_buildings, "points.")
+        self.points += a * len(self.building_list)
+        print(self.id, " gain", a * len(self.building_list), "points.")

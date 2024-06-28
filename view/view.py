@@ -3,7 +3,6 @@ The module defines View class.
 """
 
 import os
-from itertools import chain, zip_longest
 
 import cv2
 import numpy as np
