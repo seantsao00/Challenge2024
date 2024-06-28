@@ -113,6 +113,6 @@ class Team:
         for entity in model.entities:
             if entity.team is not self:
                 for my_entity in chain(self.building_list, self.character_list):
-                    if my_entity.position.distance_to(entity.position) <= my_entity.vision:
+                    if my_entity.alive and my_entity.position.distance_to(entity.position) <= my_entity.vision:
                         self.visible_entities_list.append(entity)
                         break
