@@ -1,11 +1,14 @@
+import math
+
 import pygame as pg
-from model.character import Character
-from model.building import Tower
-from model.entity import Entity
+
 from event_manager import EventCreateEntity
 from instances_manager import get_event_manager, get_model
+from model.building import Tower
+from model.character import Character
+from model.entity import Entity
 from model.timer import Timer
-import math
+
 
 class Cell:
     """
@@ -30,9 +33,10 @@ class Cell:
 
     def remove_character(self, character: Character):
         self.characters.remove(character)
-    
+
     def get_characters(self):
         return list(self.characters)
+
 
 class Grid:
     """
@@ -68,7 +72,7 @@ class Grid:
                 dis = (position - pg.Vector2(i, j)).length()
                 if dis <= radius:
                     character_at_radius[math.floor(dis)].extend(self.cells[j][i].characters)
-        
+
         character_list = []
         for character_sublist in character_at_radius:
             character_list.extend(character_sublist)

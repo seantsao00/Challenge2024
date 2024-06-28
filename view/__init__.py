@@ -1,2 +1,2 @@
-from view.view import *
 from view.object import *
+from view.view import *
