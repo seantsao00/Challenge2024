@@ -110,3 +110,12 @@ class EventTeamLoseTower(BaseEvent):
 class EventSpawnCharacter(BaseEvent):
     def __init__(self, character: Character):
         self.character = character
+
+class EventCharactermove(BaseEvent):
+    def __init__(self, character: Character, original_pos: pg.Vector2):
+        self.character = character
+        self.original_pos = original_pos
+
+class EventCharacterDied(BaseEvent):
+    def __init__(self, character: Character):
+        self.character = character

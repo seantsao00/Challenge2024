@@ -99,12 +99,9 @@ class Tower(Entity):
 
         else:
             self.health -= event.attacker.damage
-        print(self.team, self.health)
 
     def attack(self):
         model = get_model()
-        nearest_characters = model.grid.get_nearest_characters(self.position, 100)
-        for character in nearest_characters:
-            if character.team != self.team:
-                get_event_manager().post(EventAttack(self, character), character.id)
-                break
+        nearest_character = model.grid.get_closet_enemy(self.position, self.team, 100, 1)
+        if len(nearest_character) != 0:
+            get_event_manager().post(EventAttack(self, nearest_character[0]), nearest_character[0].id)
