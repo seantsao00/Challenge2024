@@ -24,7 +24,7 @@ class Entity:
 
     entity_id: int = 0
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float], health: float | None = None,
+    def __init__(self, position: pg.Vector2 | tuple[float, float],
                  entity_type: str = 'default', team: Team = None, imgstate: str = 'default'):
         Entity.entity_id += 1
         self.id: int = Entity.entity_id
@@ -32,9 +32,15 @@ class Entity:
         self.type: str = entity_type
         self.imgstate: str = imgstate
         self.hidden: bool = False
-        self.health: float = health
-        self.max_health: float = health
         self.team: Team = team
         self.view: list = [view.EntityView(self)]
-        self.alive = None
         get_event_manager().post(EventCreateEntity(self))
+
+
+class LivingEntity(Entity):
+    def __init__(self, health: float, position: pg.Vector2 | tuple[float, float],
+                 entity_type: str = 'default', team: Team = None, imgstate: str = 'default') -> None:
+        super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
+        self.health: float = health
+        self.max_health: float = health
+        self.alive: bool = True

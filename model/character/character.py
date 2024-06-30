@@ -6,11 +6,11 @@ import util
 import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
-from model.entity import Entity
+from model.entity import Entity, LivingEntity
 from model.team import Team
 
 
-class Character(Entity):
+class Character(LivingEntity):
     """
     Class for character in the game.
     Each character has the following property:
@@ -25,7 +25,7 @@ class Character(Entity):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
                  attack_range: float, damage: float, health: float, vision: float):
-        super().__init__(position, health=health, entity_type='team' + str(team.id), team=team)
+        super().__init__(health, position, entity_type='team' + str(team.id), team=team)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage

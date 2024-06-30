@@ -7,12 +7,11 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Character, Entity, Tower
+    from model import LivingEntity
 
 
 class HealthView:
-
-    def __init__(self, entity: Entity | Character | Tower):
+    def __init__(self, entity: LivingEntity):
         self.entity = entity
 
     def draw(self, screen: pg.Surface):

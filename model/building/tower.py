@@ -9,16 +9,15 @@ import pygame as pg
 import const
 import const.tower
 import view
-from event_manager import (EventAttack, EventSpawnCharacter,
-                           EventTeamGainTower, EventTeamLoseTower)
+from event_manager import EventAttack, EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower
 from instances_manager import get_event_manager, get_model
 from model.character import Character, Melee
-from model.entity import Entity
+from model.entity import LivingEntity
 from model.team import Team
 from model.timer import Timer
 
 
-class Tower(Entity):
+class Tower(LivingEntity):
     """
     Class for Tower (object) in the game.
     Each Tower has the following property:
@@ -34,8 +33,7 @@ class Tower(Entity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, entity_type='tower', imgstate='default'):
-        super().__init__(position, health=const.TOWER_HEALTH,
-                         entity_type=entity_type, team=team, imgstate=imgstate)
+        super().__init__(const.TOWER_HEALTH, position, entity_type=entity_type, team=team, imgstate=imgstate)
         self.log = []
         self.period = const.tower.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
