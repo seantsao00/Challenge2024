@@ -73,44 +73,34 @@ class Grid:
         self.add_to_grid(event.entity)
 
     def get_closet_enemy(self, position: pg.Vector2, team: Team, radius: int, size: int = 1) -> list[Character]:
-        character_at_radius = [[] for _ in range(radius + 1)]
-        for i in range(int(max(position.x - radius, 0)), int(min(position.x + radius, self.height))):
-            for j in range(int(max(position.y - radius, 0)), int(min(position.y + radius, self.width))):
-                dis = (position - pg.Vector2(i, j)).length()
-                if dis <= radius:
-                    character_at_radius[math.floor(dis)].extend(self.cells[j][i].get_enemy(team))
-
+        cells = self.iterate_radius_cells(position, radius)
         enemies = []
-        for character_sublist in character_at_radius:
-            enemies.extend(character_sublist)
+        for cell in cells:
+            enemies.extend(cell.get_enemy(team))
+            if len(enemies) >= size:
+                break
         return enemies[:size]
 
 
-    def get_closest_enemy_tower(self, team: Team, radius: int):
-        for r in range(0, radius + 1):
-            radius_cells = self.iterate_radius_cells(self.position, r)
-            for position in radius_cells:
-                tower = self.get_cell(position).tower
-                if not tower.team is team:
-                    return tower
+    def get_closest_enemy_tower(self, position: pg.Vector2, team: Team, radius: int):
+        cells = self.iterate_radius_cells(position, radius)
+        for cell in cells:
+            if not cell.tower.team is team:
+                return cell.tower
         return None
 
-    def get_closest_neutral_tower(self, team: Team, radius: int):
-        for r in range(0, radius + 1):
-            radius_cells = self.iterate_radius_cells(self.position, r)
-            for position in radius_cells:
-                tower = self.get_cell(position).tower
-                if tower.team == None:
-                    return tower
+    def get_closest_neutral_tower(self, position: pg.Vector2, team: Team, radius: int):
+        cells = self.iterate_radius_cells(position, radius)
+        for cell in cells:
+            if cell.tower.team is None:
+                return cell.tower
         return None
 
-    def get_closest_team_tower(self, team: Team, radius: int):
-        for r in range(0, radius + 1):
-            radius_cells = self.iterate_radius_cells(self.position, r)
-            for position in radius_cells:
-                tower = self.get_cell(position).tower
-                if tower.team is team:
-                    return tower
+    def get_closest_team_tower(self, position: pg.Vector2, team: Team, radius: int):
+        cells = self.iterate_radius_cells(position, radius)
+        for cell in cells:
+            if cell.tower.team is team:
+                return cell.tower
         return None
 
     def update_location(self, event: EventCharactermove):
@@ -118,15 +108,15 @@ class Grid:
         self.add_to_grid(event.character)
 
     def iterate_radius_cells(self, position: pg.Vector2, radius: int) -> list[tuple]:
+        cell_at_radius = [[] for _ in range(radius + 1)]
         all_cells = []
-        for y_dis in range(-radius, radius + 1):
-            if position.y + y_dis < 0 or position.y + y_dis >= self.height:
-                continue
-            x_dis = int(math.sqrt(radius * radius - y_dis * y_dis))
-            if position.x + x_dis < self.width:
-                all_cells.append(pg.Vector2(position.x + x_dis, position.y + y_dis))
-            if position.x - x_dis >= 0:
-                all_cells.append(pg.Vector2(position.x - x_dis, position.y + y_dis))
+        for i in range(int(max(position.x - radius, 0)), int(min(position.x + radius, self.height))):
+            for j in range(int(max(position.y - radius, 0)), int(min(position.y + radius, self.width))):
+                dis = (position - pg.Vector2(i, j)).length()
+                if dis <= radius:
+                    cell_at_radius[int(dis)].append(self.cells[j][i])
+        for cell_sublist in cell_at_radius:
+            all_cells.extend(cell_sublist)
         return all_cells
     
 
