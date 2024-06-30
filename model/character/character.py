@@ -4,7 +4,7 @@ import const
 import const.map
 import util
 import view
-from event_manager import EventAttack, EventCharacterMove, EventCharacterDied
+from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity
 from model.team import Team
@@ -63,27 +63,25 @@ class Character(Entity):
             new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
             # prevent out of bound, in a stupid way
-            if (new_position.x + const.ENTITY_RADIUS >= const.ARENA_SIZE[0] or 
-                new_position.y + const.ENTITY_RADIUS >= const.ARENA_SIZE[1] or 
+            if (new_position.x + const.ENTITY_RADIUS >= const.ARENA_SIZE[0] or
+                new_position.y + const.ENTITY_RADIUS >= const.ARENA_SIZE[1] or
                 new_position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER < 0 or
-                new_position.x - const.ENTITY_RADIUS < 0):
+                    new_position.x - const.ENTITY_RADIUS < 0):
                 self.position += cur_direction - min_direction
                 get_event_manager().post(EventCharacterMove(self, original_pos))
                 return
-            
+
             if (map.get_type(new_position) == const.map.MAP_OBSTACLE):
                 self.position = new_position - min_direction
                 get_event_manager().post(EventCharacterMove(self, original_pos))
                 return
-            
-            if (i == 3): 
+
+            if (i == 3):
                 self.position = new_position
                 get_event_manager().post(EventCharacterMove(self, original_pos))
                 return
 
             cur_direction += min_direction
-
-        
 
     def take_damage(self, event: EventAttack):
         self.health -= event.attacker.damage

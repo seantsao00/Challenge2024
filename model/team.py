@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from itertools import chain
 from typing import TYPE_CHECKING
 
-from itertools import chain
 import pygame as pg
 
 import const
@@ -14,8 +14,8 @@ from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
     from model.building import Tower
-    from model.entity import Entity
     from model.character import Character
+    from model.entity import Entity
 
 
 class Team:
@@ -99,8 +99,8 @@ class Team:
 
     def gain_point_tower(self, event: EventEveryTick):
         a = 1
-        self.points += a * self.total_buildings
-        print(self.id, " gain", a * self.total_buildings, "points.")
+        self.points += a * len(self.building_list)
+        print(self.id, " gain", a * len(self.building_list), "points.")
 
     def update_visible_entities_list(self):
         """
@@ -108,7 +108,7 @@ class Team:
         Still looking for a better algorithm to implement this feature.
         """
         model = get_model()
-        
+
         self.visible_entities_list = []
         for entity in model.entities:
             if entity.team is not self:

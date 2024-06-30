@@ -40,11 +40,11 @@ class Map:
             int(position[1] * self.size[1] / const.ARENA_SIZE[1]), 0, self.size[1] - 1
         )
         return x, y
-    
+
     def get_type(self, position: tuple | pg.Vector2) -> int:
         x, y = self.convert_coordinate(position)
         return self.map[x][y]
-    
+
 
 def load_map(map_dir):
     json_file = os.path.join(map_dir, "map.json")

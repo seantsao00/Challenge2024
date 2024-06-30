@@ -3,11 +3,11 @@ The module defines View class.
 """
 
 import os
+from itertools import chain, zip_longest
 
 import cv2
 import numpy as np
 import pygame as pg
-from itertools import chain, zip_longest
 
 import const
 from event_manager import EventEveryTick, EventInitialize
@@ -58,7 +58,7 @@ class View:
             picture = pg.transform.scale(picture, const.ARENA_SIZE)
             picture = picture.subsurface(pg.Rect(x, y, w, h))
             self.background_images.append(picture)
-        
+
         if vision_of == 'all':
             self.vision_of = const.VIEW_EVERYTHING
         else:
@@ -92,13 +92,15 @@ class View:
 
         if self.vision_of == const.VIEW_EVERYTHING:
             for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
-                if view_object != None: view_object.draw(self.arena)
+                if view_object != None:
+                    view_object.draw(self.arena)
         else:
             my_team = model.teams[self.vision_of - 1]
             for view_object in chain(*zip_longest(*[en.view for en in chain(my_team.building_list,
                                                                             my_team.character_list,
                                                                             my_team.visible_entities_list)], fillvalue=None)):
-                if view_object != None: view_object.draw(self.arena)
+                if view_object != None:
+                    view_object.draw(self.arena)
 
         # the two lines making the arena now in the middle
 

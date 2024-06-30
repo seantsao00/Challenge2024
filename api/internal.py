@@ -1,12 +1,12 @@
-import threading
-import traceback
 import os
 import signal
+import threading
+import traceback
 
 import pygame as pg
 
 from api.api import API
-from const import PlayerIds, FPS
+from const import FPS, PlayerIds
 from instances_manager import get_model
 
 

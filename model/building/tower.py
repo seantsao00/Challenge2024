@@ -104,4 +104,5 @@ class Tower(Entity):
         model = get_model()
         nearest_character = model.grid.get_closet_enemy(self.position, self.team, 100, 1)
         if len(nearest_character) != 0:
-            get_event_manager().post(EventAttack(self, nearest_character[0]), nearest_character[0].id)
+            get_event_manager().post(EventAttack(
+                self, nearest_character[0]), nearest_character[0].id)
