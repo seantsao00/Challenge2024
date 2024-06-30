@@ -92,14 +92,14 @@ class View:
 
         if self.vision_of == const.VIEW_EVERYTHING:
             for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
-                if view_object != None:
+                if view_object is not None:
                     view_object.draw(self.arena)
         else:
             my_team = model.teams[self.vision_of - 1]
             for view_object in chain(*zip_longest(*[en.view for en in chain(my_team.building_list,
                                                                             my_team.character_list,
                                                                             my_team.visible_entities_list)], fillvalue=None)):
-                if view_object != None:
+                if view_object is not None:
                     view_object.draw(self.arena)
 
         # the two lines making the arena now in the middle

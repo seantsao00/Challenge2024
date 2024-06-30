@@ -49,7 +49,7 @@ class Character(Entity):
         if direction.length() > self.speed:
             direction = self.speed * direction.normalize()
 
-        map = get_model().map
+        game_map = get_model().map
 
         # set the minimum move into 1/4 of the original direction
         min_direction = direction / 4
@@ -71,12 +71,12 @@ class Character(Entity):
                 get_event_manager().post(EventCharacterMove(self, original_pos))
                 return
 
-            if (map.get_type(new_position) == const.map.MAP_OBSTACLE):
+            if game_map.get_type(new_position) == const.map.MAP_OBSTACLE:
                 self.position = new_position - min_direction
                 get_event_manager().post(EventCharacterMove(self, original_pos))
                 return
 
-            if (i == 3):
+            if i == 3:
                 self.position = new_position
                 get_event_manager().post(EventCharacterMove(self, original_pos))
                 return

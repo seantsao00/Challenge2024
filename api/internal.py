@@ -14,7 +14,7 @@ class Internal(API):
     def __init__(self, player_id: int):
         self.player_id = player_id
 
-    def get_time():
+    def get_time(self):
         return pg.time.get_ticks() * 1000
 
 
