@@ -102,6 +102,11 @@ class EventMultiAttack(BaseEvent):
         self.radius: float = radius
 
 
+class EventCreateTower(BaseEvent):
+    def __init__(self, tower: Tower):
+        self.tower: Tower = tower
+
+
 class EventTeamGainTower(BaseEvent):
     def __init__(self, tower: Tower):
         self.tower: Tower = tower

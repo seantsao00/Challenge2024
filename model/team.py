@@ -9,13 +9,14 @@ import const
 import const.team
 from event_manager import (EventEveryTick, EventHumanInput,
                            EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower)
+                           EventTeamLoseTower, EventCharacterMove,
+                           EventCreateTower)
 from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
     from model.building import Tower
     from model.character import Character
-    from model.entity import Entity
+    from model.entity import Entity, LivingEntity
 
 
 class Team:
@@ -45,10 +46,12 @@ class Team:
         self.master = master
         self.building_list: list[Tower] = []
         self.character_list: list[Character] = []
-        self.visible_entities_list: list[Entity] = []
+        self.visible_entities_list: set[Entity] = set()
         if master == 'human':
             self.controlling = None
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
+        get_event_manager().register_listener(EventCharacterMove, self.handle_character_move)
+        get_event_manager().register_listener(EventCreateTower, self.handle_create_tower)
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
         get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
         get_event_manager().register_listener(EventSpawnCharacter, self.gain_character, self.id)
@@ -102,17 +105,31 @@ class Team:
         self.points += a * len(self.building_list)
         print(self.id, " gain", a * len(self.building_list), "points.")
 
-    def update_visible_entities_list(self):
+    def handle_character_move(self, event: EventCharacterMove):
+        self.update_visible_entities_list(event.character)
+    
+    def handle_create_tower(self, event: EventCreateTower):
+        self.update_visible_entities_list(event.tower)
+
+    def handle_others_character_spawn(self, event: EventSpawnCharacter):
+        self.update_visible_entities_list(event.character)
+
+    def update_visible_entities_list(self, entity: LivingEntity):
         """
         This function updates the current entities visible to the instance of Team.
-        Still looking for a better algorithm to implement this feature.
         """
+        if not entity.alive:
+            return
+
         model = get_model()
 
-        self.visible_entities_list = []
-        for entity in model.entities:
-            if entity.team is not self:
-                for my_entity in chain(self.building_list, self.character_list):
-                    if my_entity.alive and my_entity.position.distance_to(entity.position) <= my_entity.vision:
-                        self.visible_entities_list.append(entity)
-                        break
+        if entity.team is self:
+            for other_entity in model.entities:
+                if (other_entity.team is not self and 
+                    other_entity.position.distance_to(entity.position) <= entity.vision):
+                    self.visible_entities_list.add(other_entity)
+        else:
+            for my_entity in chain(self.building_list, self.character_list):
+                if my_entity.alive and entity.position.distance_to(my_entity.position) <= my_entity.vision:
+                    self.visible_entities_list.add(entity)
+                    break

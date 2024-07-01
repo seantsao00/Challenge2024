@@ -9,7 +9,8 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditionalTick, EventInitialize,
-                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel)
+                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel,
+                           EventSpawnCharacter)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Melee
@@ -68,6 +69,10 @@ class Model:
             team = Team(new_position, "team" + str(i+1), team_master)
             self.teams.append(team)
             self.test_tower = Tower(new_position, team, 1)
+        for team in self.teams:
+            for i in range(len(self.teams)):
+                if i + 1 != team.id: get_event_manager().register_listener(EventSpawnCharacter,
+                                                                           team.handle_others_character_spawn, i + 1)
         self.neutral_tower = Tower((700, 700))
 
     def handle_every_tick(self, _: EventEveryTick):
@@ -77,8 +82,6 @@ class Model:
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
         """
-        for team in self.teams:
-            team.update_visible_entities_list()
 
     def handle_quit(self, _: EventQuit):
         """

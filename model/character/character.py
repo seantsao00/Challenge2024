@@ -25,11 +25,10 @@ class Character(LivingEntity):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
                  attack_range: float, damage: float, health: float, vision: float):
-        super().__init__(health, position, entity_type='team' + str(team.id), team=team)
+        super().__init__(health, position, vision, entity_type='team' + str(team.id), team=team)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
-        self.vision: float = vision
         self.alive: bool = True
         model = get_model()
         if model.show_view_range:
