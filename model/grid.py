@@ -3,9 +3,7 @@ import pygame as pg
 from event_manager import (EventCharacterDied, EventCharacterMove,
                            EventCreateEntity)
 from instances_manager import get_event_manager
-from model.character import Character
-from model.entity import Entity
-from model.team import Team
+from model import Character, Entity, Team, Tower
 
 
 class Cell:
@@ -26,8 +24,10 @@ class Cell:
     def add(self, entity: Entity):
         if isinstance(entity, Character):
             self.characters.add(entity)
-        else:
+        elif isinstance(entity, Tower):
             self.tower = entity
+        else:
+            raise NotImplementedError
 
     def remove_character(self, character: Character):
         if character in self.characters:
@@ -61,10 +61,10 @@ class Grid:
     def delete_from_grid(self, character: Character, position: pg.Vector2):
         self.get_cell(position).remove_character(character)
 
-    def remove_character(self, event: EventCharacterDied):
+    def handle_character_died(self, event: EventCharacterDied):
         self.delete_from_grid(event.character, event.character.position)
 
-    def event_add_entity(self, event: EventCreateEntity):
+    def handle_create_entity(self, event: EventCreateEntity):
         self.add_to_grid(event.entity)
 
     def iterate_radius_cells(self, position: pg.Vector2, radius: int) -> list[Cell]:
@@ -115,6 +115,6 @@ class Grid:
 
     def register_listeners(self):
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventCreateEntity, self.event_add_entity)
+        ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
         ev_manager.register_listener(EventCharacterMove, self.update_location)
-        ev_manager.register_listener(EventCharacterDied, self.remove_character)
+        ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
