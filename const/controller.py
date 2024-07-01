@@ -10,3 +10,5 @@ HUMAN_KEYS_MAP = {
     pg.K_a: pg.Vector2(-1, 0),
     pg.K_d: pg.Vector2(1, 0),
 }
+
+PAUSE_BUTTON = pg.K_ESCAPE

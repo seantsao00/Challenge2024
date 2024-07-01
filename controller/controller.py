@@ -5,8 +5,8 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import (EventEveryTick, EventHumanInput, EventInitialize,
-                           EventQuit)
+from event_manager import (EventEveryTick, EventUnconditionalTick, EventHumanInput, EventInitialize,
+                           EventQuit, EventPauseModel, EventResumeModel)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -29,9 +29,8 @@ class Controller:
     def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
 
-    def handle_every_tick(self, _: EventEveryTick):
-        """Do actions that should be executed every tick."""
-        key_down_events = []
+    def handle_unconditional_tick(self, _: EventUnconditionalTick):
+        """Do actions that should be executed every tick, regardless of whether the game is in a paused state or not."""
         ev_manager = get_event_manager()
         model = get_model()
         # Called once per game tick. We check our keyboard presses here.
@@ -41,11 +40,13 @@ class Controller:
                 ev_manager.post(EventQuit())
 
             if event_pg.type == pg.KEYDOWN:
-                # For orientating
-                if event_pg.key == pg.K_ESCAPE:
-                    print("press ESC")
-
-                key_down_events.append(event_pg)
+                # For pausing the game
+                if event_pg.key == const.PAUSE_BUTTON:
+                    if model.pause:
+                        ev_manager.post(EventResumeModel())
+                    else:
+                        ev_manager.post(EventPauseModel())
+                
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = event_pg.pos
@@ -78,14 +79,18 @@ class Controller:
             TimerManager.handle_event(event_pg)
 
         cur_state = model.state
-        if cur_state == const.State.PLAY:
+        if cur_state == const.State.PLAY and not(model.pause):
             self.ctrl_play()
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
-        ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
+        ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        # Listeners for TimerManager
+        ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
+        ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
+
 
     def ctrl_play(self):
         """

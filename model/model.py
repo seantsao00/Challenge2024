@@ -8,8 +8,8 @@ import pygame as pg
 
 import const
 import const.map
-from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize,
-                           EventMultiAttack, EventQuit)
+from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditionalTick, EventInitialize,
+                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -17,6 +17,13 @@ from model.entity import Entity
 from model.grid import Grid
 from model.map import load_map
 from model.team import Team
+<<<<<<< HEAD
+=======
+from model.timer import Timer
+
+from model.character import Melee
+# import time
+>>>>>>> pause
 
 
 class Model:
@@ -36,6 +43,7 @@ class Model:
         they should be initialized in Model.initialize()
         """
         self.running: bool = False
+        self.pause: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
         self.entities: list[Entity] = []
@@ -83,6 +91,18 @@ class Model:
         """
         self.running = False
 
+    def handle_pause(self, _: EventPauseModel):
+        """
+        Pause the game
+        """
+        self.pause = True
+    
+    def handle_resume(self, _: EventResumeModel):
+        """
+        Resume the game
+        """
+        self.pause = False
+
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
@@ -104,6 +124,8 @@ class Model:
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
         ev_manager.register_listener(EventQuit, self.handle_quit)
+        ev_manager.register_listener(EventPauseModel, self.handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.handle_resume)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventMultiAttack, self.multi_attack)
 
@@ -115,5 +137,7 @@ class Model:
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
         while self.running:
-            ev_manager.post(EventEveryTick())
-            self.dt = self.clock.tick(const.FPS) / 1000.0
+            ev_manager.post(EventUnconditionalTick())
+            if not(self.pause):
+                ev_manager.post(EventEveryTick())
+                self.dt = self.clock.tick(const.FPS) / 1000.0
