@@ -18,6 +18,7 @@ from model.grid import Grid
 from model.map import load_map
 from model.team import Team
 from model.timer import Timer
+from model.pause_menu import PauseMenu
 
 
 class Model:
@@ -47,6 +48,7 @@ class Model:
         self.teams: list[Team] = None
         self.show_view_range = show_view_range
         self.show_attack_range = show_attack_range
+        self.pause_menu = PauseMenu()
         self.characters = set()
         self.grid = Grid(900, 900)
 

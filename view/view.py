@@ -12,6 +12,8 @@ import pygame as pg
 import const
 from event_manager import EventUnconditionalTick, EventInitialize
 from instances_manager import get_event_manager, get_model
+from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase,
+                         ViewRangeView, PauseMenuView)
 
 
 class View:
@@ -41,6 +43,8 @@ class View:
         self.background_images = []
         # print(self.screen.get_rect().size)
         pg.display.set_caption(const.WINDOW_CAPTION)
+
+        self.pause_menu_view = PauseMenuView(model.pause_menu, self.canvas)
 
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -113,6 +117,8 @@ class View:
                                   0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
         )
         self.canvas.blit(self.arena, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
+        self.pause_menu_view.draw()
+
         self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
         pg.display.flip()
 
