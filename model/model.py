@@ -37,7 +37,6 @@ class Model:
         they should be initialized in Model.initialize()
         """
         self.running: bool = False
-        self.pause: bool = False
         self.state = const.State.PAUSE
         self.clock = pg.time.Clock()
         self.entities: list[Entity] = []
@@ -89,13 +88,13 @@ class Model:
         """
         Pause the game
         """
-        self.pause = True
+        self.state = const.State.PAUSE
     
     def handle_resume(self, _: EventResumeModel):
         """
         Resume the game
         """
-        self.pause = False
+        self.state = const.State.PLAY
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
@@ -132,6 +131,6 @@ class Model:
         ev_manager.post(EventInitialize())
         while self.running:
             ev_manager.post(EventUnconditionalTick())
-            if not(self.pause):
+            if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
                 self.dt = self.clock.tick(const.FPS) / 1000.0

@@ -42,9 +42,9 @@ class Controller:
             if event_pg.type == pg.KEYDOWN:
                 # For pausing the game
                 if event_pg.key == const.PAUSE_BUTTON:
-                    if model.pause:
+                    if model.state == const.State.PAUSE:
                         ev_manager.post(EventResumeModel())
-                    else:
+                    elif model.state == const.State.PLAY:
                         ev_manager.post(EventPauseModel())
                 
 
@@ -79,7 +79,7 @@ class Controller:
             TimerManager.handle_event(event_pg)
 
         cur_state = model.state
-        if cur_state == const.State.PLAY and not(model.pause):
+        if cur_state == const.State.PLAY:
             self.ctrl_play()
 
     def register_listeners(self):
