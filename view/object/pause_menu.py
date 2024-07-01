@@ -22,19 +22,19 @@ class PauseMenuView:
             return
         
         bg_surf = pg.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]), pg.SRCALPHA)
-        bg_surf.fill((200, 200, 200, 100))
+        bg_surf.fill((200, 200, 200, 230))
 
         center = (bg_surf.get_width() // 2, bg_surf.get_height() // 2)
         
-        draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'gray', self.title_font)
+        draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'black', self.title_font)
         for index, opt_text in enumerate(self.options):
-            draw_text(bg_surf, center[0], center[1]+80*index, opt_text, 'gray', self.font, index==self.pause_menu.selected)
+            draw_text(bg_surf, center[0], center[1]+80*index, opt_text, 'black', self.font, index==self.pause_menu.selected)
 
         self.canvas.blit(bg_surf, (0, 0))
 
 
 def draw_text(surf, x, y, text, color, font, underline=False):
-    underline_color = 'lightskyblue'
+    underline_color = 'darkblue'
     underline_thickness = 3
     underline_offset = 3
     

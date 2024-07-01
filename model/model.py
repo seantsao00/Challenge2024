@@ -91,12 +91,14 @@ class Model:
         Pause the game
         """
         self.state = const.State.PAUSE
+        self.pause_menu.enable_menu()
     
     def handle_resume(self, _: EventResumeModel):
         """
         Resume the game
         """
         self.state = const.State.PLAY
+        self.pause_menu.disable_menu()
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)

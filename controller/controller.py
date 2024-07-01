@@ -43,8 +43,10 @@ class Controller:
                 # For pausing the game
                 if event_pg.key == const.PAUSE_BUTTON:
                     if model.state == const.State.PAUSE:
+                        print("Game Paused")
                         ev_manager.post(EventResumeModel())
                     elif model.state == const.State.PLAY:
+                        print("Game Resumed")
                         ev_manager.post(EventPauseModel())
                 
 
