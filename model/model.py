@@ -12,18 +12,12 @@ from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditional
                            EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel)
 from instances_manager import get_event_manager
 from model.building import Tower
-from model.character import Character
+from model.character import Character, Melee
 from model.entity import Entity
 from model.grid import Grid
 from model.map import load_map
 from model.team import Team
-<<<<<<< HEAD
-=======
 from model.timer import Timer
-
-from model.character import Melee
-# import time
->>>>>>> pause
 
 
 class Model:
