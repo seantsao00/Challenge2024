@@ -68,9 +68,9 @@ class EventHumanInput(BaseEvent):
     """
 
     def __init__(self, input_type: const.InputTypes, clicked: Character = None, displacement: pg.Vector2 = None):
-        self.input_type = input_type
-        self.clicked = clicked  # When INPUT_TYPE is PICK or ATTACK
-        self.displacement = displacement  # When INPUT_TYPE is MOVE
+        self.input_type: const.InputTypes = input_type
+        self.clicked: Character = clicked  # When INPUT_TYPE is PICK or ATTACK
+        self.displacement: pg.Vector2 = displacement  # When INPUT_TYPE is MOVE
         """
         The displacement vector representing the movement.
         """
@@ -86,43 +86,43 @@ class EventCreateEntity(BaseEvent):
     """Event posted when an entity is created."""
 
     def __init__(self, entity: Entity):
-        self.entity = entity
+        self.entity: Entity = entity
 
 
 class EventAttack(BaseEvent):
     def __init__(self, attacker: Entity, victim: Entity):  # reference of two characters
-        self.attacker = attacker
-        self.victim = victim
+        self.attacker: Entity = attacker
+        self.victim: Entity = victim
 
 
 class EventMultiAttack(BaseEvent):
-    def __init__(self, attacker: Character, target: pg.Vector2, radius):
-        self.attacker = attacker
-        self.target = target
-        self.raidus = radius
+    def __init__(self, attacker: Character, target: pg.Vector2, radius: float):
+        self.attacker: Character = attacker
+        self.target: pg.Vector2 = target
+        self.radius: float = radius
 
 
 class EventTeamGainTower(BaseEvent):
     def __init__(self, tower: Tower):
-        self.tower = tower
+        self.tower: Tower = tower
 
 
 class EventTeamLoseTower(BaseEvent):
     def __init__(self, tower: Tower):
-        self.tower = tower
+        self.tower: Tower = tower
 
 
 class EventSpawnCharacter(BaseEvent):
     def __init__(self, character: Character):
-        self.character = character
+        self.character: Character = character
 
 
 class EventCharacterMove(BaseEvent):
     def __init__(self, character: Character, original_pos: pg.Vector2):
-        self.character = character
-        self.original_pos = original_pos
+        self.character: Character = character
+        self.original_pos: pg.Vector2 = original_pos
 
 
 class EventCharacterDied(BaseEvent):
     def __init__(self, character: Character):
-        self.character = character
+        self.character: Character = character
