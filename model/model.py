@@ -128,7 +128,9 @@ class Model:
 
         # Tell every one to start
         ev_manager = get_event_manager()
+        self.state = const.State.COVER
         ev_manager.post(EventInitialize())
+        self.state = const.State.PLAY
         while self.running:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:

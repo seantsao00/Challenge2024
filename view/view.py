@@ -10,7 +10,7 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventUnconditionalTick, EventInitialize
+from event_manager import EventInitialize, EventUnconditionalTick
 from instances_manager import get_event_manager, get_model
 
 
@@ -82,7 +82,19 @@ class View:
         self.canvas.fill(const.BACKGROUND_COLOR)
         self.arena.fill(const.BACKGROUND_COLOR)
         model = get_model()
+        if model.state == const.State.COVER:
+            self.render_cover()
+        elif model.state == const.State.PLAY:
+            self.render_play()
+        pg.display.flip()
 
+    def render_cover(self):
+        """Render game cover"""
+        self.screen.fill(const.BACKGROUND_COLOR)
+
+    def render_play(self):
+        """Render scenes when the game is being played"""
+        model = get_model()
         for image in self.background_images:
             background_image = pg.transform.scale(
                 image, (const.ARENA_SIZE[0], const.ARENA_SIZE[1]))
@@ -110,11 +122,10 @@ class View:
 
         pg.draw.line(
             self.arena, 'white', (const.ARENA_SIZE[0] - 1,
-                                  0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
+                                0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
         )
         self.canvas.blit(self.arena, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
         self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
-        pg.display.flip()
 
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""

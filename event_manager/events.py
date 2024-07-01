@@ -31,6 +31,14 @@ class EventInitialize(BaseEvent):
 class EventQuit(BaseEvent):
     """Event posted upon quitting the game (closing the program)."""
 
+@dataclass(kw_only=True)
+class EventStartGame(BaseEvent):
+    """
+    Event posted upon starting the game.
+
+    For example, press a key at cover scene might leave cover and start the game.
+    """
+
 
 @dataclass(kw_only=True)
 class EventPauseModel(BaseEvent):

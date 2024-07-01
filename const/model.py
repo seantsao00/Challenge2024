@@ -9,6 +9,6 @@ FPS = 60
 
 class State(Enum):
     """States of the game."""
-    MENU = auto()
+    COVER = auto()
     PLAY = auto()
     PAUSE = auto()
