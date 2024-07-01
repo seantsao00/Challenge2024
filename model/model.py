@@ -107,7 +107,7 @@ class Model:
         radius = event.radius
         for victim in self.entities:
             if isinstance(victim, Character):
-                dist = origin.distance_to(victim.postition)
+                dist = origin.distance_to(victim.position)
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)
 
