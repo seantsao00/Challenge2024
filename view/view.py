@@ -10,7 +10,7 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventInitialize
+from event_manager import EventUnconditionalTick, EventInitialize
 from instances_manager import get_event_manager, get_model
 
 
@@ -77,7 +77,7 @@ class View:
         Initialize components that require initialization at the start of every game.
         """
 
-    def handle_every_tick(self, _: EventEveryTick):
+    def handle_unconditional_tick(self, _: EventUnconditionalTick):
         self.display_fps()
         self.canvas.fill(const.BACKGROUND_COLOR)
         self.arena.fill(const.BACKGROUND_COLOR)
@@ -120,7 +120,7 @@ class View:
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
-        ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
+        ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
 
     def display_fps(self):
         """Display the current fps on the window caption."""
