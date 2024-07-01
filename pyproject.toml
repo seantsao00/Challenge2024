@@ -1,6 +1,9 @@
 [tool.autopep8]
 max_line_length = 99
 
+[tool.isort]
+line_length = 99
+
 [tool.pylint.main]
 extension-pkg-allow-list = ['pygame']
 disable = [

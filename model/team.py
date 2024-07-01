@@ -7,10 +7,8 @@ import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventEveryTick, EventHumanInput,
-                           EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterMove,
-                           EventCreateTower)
+from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
@@ -107,7 +105,7 @@ class Team:
 
     def handle_character_move(self, event: EventCharacterMove):
         self.update_visible_entities_list(event.character)
-    
+
     def handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)
 
@@ -125,8 +123,8 @@ class Team:
 
         if entity.team is self:
             for other_entity in model.entities:
-                if (other_entity.team is not self and 
-                    other_entity.position.distance_to(entity.position) <= entity.vision):
+                if (other_entity.team is not self and
+                        other_entity.position.distance_to(entity.position) <= entity.vision):
                     self.visible_entities_list.add(other_entity)
         else:
             for my_entity in chain(self.building_list, self.character_list):

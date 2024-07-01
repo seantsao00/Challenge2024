@@ -4,6 +4,7 @@ This file ONLY defines prototype. No actual thing is done in this file.
 
 from enum import IntEnum, auto
 
+
 class Character:
     """Character used for maniplutaing (prevents direct access to actual character)"""
     pass

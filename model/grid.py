@@ -1,7 +1,6 @@
 import pygame as pg
 
-from event_manager import (EventCharacterDied, EventCharacterMove,
-                           EventCreateEntity)
+from event_manager import EventCharacterDied, EventCharacterMove, EventCreateEntity
 from instances_manager import get_event_manager
 from model import Character, Entity, Team, Tower
 

@@ -8,18 +8,17 @@ import pygame as pg
 
 import const
 import const.map
-from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditionalTick, EventInitialize,
-                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel,
-                           EventSpawnCharacter)
+from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventMultiAttack,
+                           EventPauseModel, EventQuit, EventResumeModel, EventSpawnCharacter,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
-from model.character import Character, Melee
+from model.character import Character
 from model.entity import Entity
 from model.grid import Grid
 from model.map import load_map
-from model.team import Team
-from model.timer import Timer
 from model.pause_menu import PauseMenu
+from model.team import Team
 
 
 class Model:
@@ -71,8 +70,9 @@ class Model:
             self.test_tower = Tower(new_position, team, 1)
         for team in self.teams:
             for i in range(len(self.teams)):
-                if i + 1 != team.id: get_event_manager().register_listener(EventSpawnCharacter,
-                                                                           team.handle_others_character_spawn, i + 1)
+                if i + 1 != team.id:
+                    get_event_manager().register_listener(EventSpawnCharacter,
+                                                          team.handle_others_character_spawn, i + 1)
         self.neutral_tower = Tower((700, 700))
 
     def handle_every_tick(self, _: EventEveryTick):
@@ -94,7 +94,7 @@ class Model:
         Pause the game
         """
         self.state = const.State.PAUSE
-    
+
     def handle_resume(self, _: EventResumeModel):
         """
         Resume the game

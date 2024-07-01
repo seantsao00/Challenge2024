@@ -5,8 +5,8 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import (EventEveryTick, EventUnconditionalTick, EventHumanInput, EventInitialize,
-                           EventQuit, EventPauseModel, EventResumeModel)
+from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
+                           EventResumeModel, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -46,7 +46,6 @@ class Controller:
                         ev_manager.post(EventResumeModel())
                     elif model.state == const.State.PLAY:
                         ev_manager.post(EventPauseModel())
-                
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = event_pg.pos
@@ -90,7 +89,6 @@ class Controller:
         # Listeners for TimerManager
         ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
         ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
-
 
     def ctrl_play(self):
         """

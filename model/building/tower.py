@@ -9,7 +9,8 @@ import pygame as pg
 import const
 import const.tower
 import view
-from event_manager import EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower
+from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import Character, Melee
 from model.entity import LivingEntity
@@ -33,7 +34,8 @@ class Tower(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, entity_type='tower', imgstate='default'):
-        super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION, entity_type=entity_type, team=team, imgstate=imgstate)
+        super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION,
+                         entity_type=entity_type, team=team, imgstate=imgstate)
         self.log = []
         self.period = const.tower.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain

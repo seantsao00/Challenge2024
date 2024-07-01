@@ -10,10 +10,10 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventUnconditionalTick, EventInitialize
+from event_manager import EventInitialize, EventUnconditionalTick
 from instances_manager import get_event_manager, get_model
-from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase,
-                         ViewRangeView, PauseMenuView)
+from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase, PauseMenuView,
+                         ViewRangeView)
 
 
 class View:
