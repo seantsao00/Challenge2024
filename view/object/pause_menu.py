@@ -15,12 +15,12 @@ class PauseMenuView:
         self.canvas = canvas
         self.title_font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', 48)
         self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', 36)
-        self.options = ['Resume', 'Restart', 'Exit']
-        self.selected = 0
+        self.options = self.pause_menu.options
 
     def draw(self):
         if not self.pause_menu.enabled:
-            pass
+            return
+        
         bg_surf = pg.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]), pg.SRCALPHA)
         bg_surf.fill((200, 200, 200, 100))
 
@@ -28,7 +28,7 @@ class PauseMenuView:
         
         draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'gray', self.title_font)
         for index, opt_text in enumerate(self.options):
-            draw_text(bg_surf, center[0], center[1]+80*index, opt_text, 'gray', self.font, index==self.selected)
+            draw_text(bg_surf, center[0], center[1]+80*index, opt_text, 'gray', self.font, index==self.pause_menu.selected)
 
         self.canvas.blit(bg_surf, (0, 0))
 
