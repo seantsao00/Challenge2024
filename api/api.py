@@ -107,7 +107,7 @@ class API:
         """Return the list of tower visible from the team."""
         pass
 
-    def look_grid(self) -> list[Tower]:
+    def look_grid(self) -> list[list[int]]:
         """Return a grid of current vision."""
         pass
 

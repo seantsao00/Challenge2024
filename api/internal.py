@@ -8,8 +8,9 @@ import pygame as pg
 import api.api as api
 import model
 import model.character
-from const import FPS, MAX_TEAMS
+from const import FPS, MAX_TEAMS, ARENA_SIZE
 from instances_manager import get_model
+from itertools import chain
 import model.character.lookout
 import model.character.melee
 import model.character.ranged_fighter
@@ -120,6 +121,33 @@ class Internal(api.API):
         if not team.id == index:
             raise GameError("Team ID implement has changed.")
         return team.points
+    
+    def look_characters(self) -> list[api.Character]:
+        team = self.__team()
+        character_list: list[api.Character] = []
+        for entity in team.visible_entities_list:
+            if not isinstance(entity, model.Tower):
+                character_list.append(self.__register_character(entity))
+        return character_list
+    
+    def look_towers(self) -> list[api.Tower]:
+        team = self.__team()
+        tower_list: list[api.Tower] = []
+        for entity in team.visible_entities_list:
+            if isinstance(entity, model.Tower):
+                tower_list.append(self.__register_tower(entity))
+        return tower_list
+    
+    def look_grid(self) -> list[list[int]]:
+        team = self.__team()
+        coordinate_list: list[list[int]] = []
+        for i in range(0, ARENA_SIZE):
+            for j in range(0, ARENA_SIZE):
+                for my_entity in chain(team.building_list, team.character_list):
+                    if my_entity.alive and pg.Vector2(i, j).distance_to(my_entity.position) <= my_entity.vision:
+                        coordinate_list.append([i, j])
+                        break
+        return coordinate_list
 
 
 class Timer():
