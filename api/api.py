@@ -4,22 +4,78 @@ This file ONLY defines prototype. No actual thing is done in this file.
 
 from enum import IntEnum, auto
 
-class Character:
-    """Character used for maniplutaing (prevents direct access to actual character)"""
-    pass
+import pygame as pg
 
-
-class Tower:
-    """Tower used for maniplutaing (prevents direct access to actual tower)"""
-    pass
-
-
-class TowerSpawnType(IntEnum):
-    """Class for specifing tower spawning character type."""
+class CharacterClass(IntEnum):
+    """角色種類。`melee`、`lookout`、`ranged` 分別代表近戰、視野以及遠程兵。"""
     melee = auto()
     lookout = auto()
     ranged = auto()
     pass
+
+class Character:
+    """角色"""
+    def __init__(self, 
+                 _id: int, 
+                 _type: CharacterClass, 
+                 _position: pg.Vector2,
+                 _speed: float,
+                 _attack_range: float,
+                 _damage: float,
+                 _vision: float,
+                 _health: float,
+                 _max_health: float,
+                 _team_id: int):
+        self.__id = _id
+        self.__type = _type
+        self.__position = _position
+        self.__speed = _speed
+        self.__attack_range = _attack_range
+        self.__damage = _damage
+        self.__vision = _vision
+        self.__health = _health
+        self.__max_health = _max_health
+        self.__team_id = _team_id
+
+    @property
+    def id(self) -> int:
+        """回傳獨一的編號。編號可以用來識別不同時間的角色是否是相同的一個實體。"""
+        return self.__id
+
+    @property
+    def type(self) -> CharacterClass:
+        """回傳角色的兵種。"""
+        return self.__type
+    
+    # TODO: add other properties
+
+class Tower:
+    """Tower used for maniplutaing (prevents direct access to actual tower)"""
+    def __init__(self, 
+                 _id: int, 
+                 _position: pg.Vector2,
+                 _period: float, 
+                 _is_fountain: float,
+                 _spwan_character_type: CharacterClass,
+                 _attack_range: float,
+                 _damage: float,
+                 _vision: float,
+                 _health: float,
+                 _max_health: float,
+                 _team_id: int):
+        self.__id = _id
+        self.__period = _period
+        self.__position = _position
+        self.__is_fountain = _is_fountain
+        self.__spwan_character_type = _spwan_character_type
+        self.__attack_range = _attack_range
+        self.__damage = _damage
+        self.__vision = _vision
+        self.__health = _health
+        self.__max_health = _max_health
+        self.__team_id = _team_id
+        
+    # TODO: add other properties
 
 
 class API:
@@ -81,7 +137,7 @@ class API:
         """
         pass
 
-    def change_spawn_type(self, tower: Tower, spawn_type: TowerSpawnType):
+    def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
         """Change the spawning character type of a tower."""
         pass
 
