@@ -5,8 +5,9 @@ The module defines Controller class.
 import pygame as pg
 
 import const
+from model.character import Melee, RangerFighter, Sniper
 from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventUnconditionalTick)
+                           EventResumeModel, EventUnconditionalTick, EventSelectCharacter)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -75,13 +76,15 @@ class Controller:
                         if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
-                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked, displacement=pg.Vector2(x, y)))
+                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK,
+                                    clicked=clicked, displacement=pg.Vector2(x, y)))
 
             TimerManager.handle_event(event_pg)
 
         cur_state = model.state
         if cur_state == const.State.PLAY:
             self.ctrl_play()
+            self.select_character()
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
@@ -113,3 +116,21 @@ class Controller:
             # Try to move as far as player can.
             displacement = direction.normalize() * max(const.ARENA_SIZE)
             ev_manager.post(EventHumanInput(const.InputTypes.MOVE, displacement=displacement))
+
+    def select_character(self):
+        """Select characters after clicking the tower"""
+
+        ev_manager = get_event_manager()
+        pressed_keys = pg.key.get_pressed()
+
+        character = None
+
+        if pressed_keys[pg.K_1]:
+            character = Melee
+        elif pressed_keys[pg.K_2]:
+            character = RangerFighter
+        elif pressed_keys[pg.K_3]:
+            character = Sniper
+
+        if character is not None:
+            ev_manager.post(EventSelectCharacter(character=character))

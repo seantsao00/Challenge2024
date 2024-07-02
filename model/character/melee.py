@@ -29,7 +29,7 @@ class Melee(Character):
     def take_damage(self, event: EventAttack):
         if self.defense > 0:
             new_damage = 0.5 * event.attacker.damage
-            self.defense -= 1 
+            self.defense -= 1
         else:
             new_damage = event.attacker.damage
         self.health -= new_damage

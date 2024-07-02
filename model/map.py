@@ -41,7 +41,7 @@ class Map:
             int(position[1] * self.size[1] / const.ARENA_SIZE[1]), 0, self.size[1] - 1
         )
         return x, y
-    
+
     def convert_cell(self, position: tuple | pg.Vector2) -> pg.Vector2:
         """
         Given an entity at a certain position in the map, return which cell it's in
@@ -61,7 +61,7 @@ class Map:
         """
         x, y = self.convert_coordinate(position)
         return self.map[x][y]
-    
+
     def get_random_pos(self, r: int) -> pg.Vector2:
         """
         Return a random position in map that is not of type "obstacle"

@@ -27,7 +27,7 @@ class Tower(LivingEntity):
      - id: The id of the entity. (from entity)
      - log: A dictionary log of soldier generation, sorted by time. If the owner changed, the log will clear
      - spawn_timer: The timer spawning characters.
-     - character_type: The type chose to generate next, melee by default.
+     - character_type: The type chose to generate next, RangerFighter by default.
      - period: The period to generate characters, in milliseconds, integer.
      - is_fountain: is fountion or not.
      - attack_timer: The timer to periodcally attack characters.

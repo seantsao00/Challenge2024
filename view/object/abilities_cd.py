@@ -21,7 +21,8 @@ class AbilitiesCDView:
         if entity.hidden:
             return
 
-        self.cd_width = min(get_model().get_time() - entity.abilities_time, entity.abilities_cd) / entity.abilities_cd * const.ENTITY_RADIUS * 2
+        self.cd_width = min(get_model().get_time() - entity.abilities_time,
+                            entity.abilities_cd) / entity.abilities_cd * const.ENTITY_RADIUS * 2
         pg.draw.rect(screen, (0, 0, 0),
                      (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.CD_BAR_UPPER, const.ENTITY_RADIUS * 2, 2))
         pg.draw.rect(screen, (0, 0, 255),

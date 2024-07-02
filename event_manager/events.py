@@ -67,9 +67,11 @@ class EventHumanInput(BaseEvent):
     For example, a listener which draws position of characters can be registered with this event.
     """
 
-    def __init__(self, input_type: const.InputTypes, clicked: Character = None, displacement: pg.Vector2 = None):
+    def __init__(self, input_type: const.InputTypes, clicked: Entity = None, clicked_character: Character = None, clicked_tower: Tower = None, displacement: pg.Vector2 = None):
         self.input_type: const.InputTypes = input_type
-        self.clicked: Character = clicked  # When INPUT_TYPE is PICK or ATTACK
+        self.clicked: Entity = clicked
+        self.clicked_character: Character = clicked_character  # When INPUT_TYPE is PICK or ATTACK
+        self.clicked_tower: Tower = clicked_tower  # When INPUT_TYPE is PICK
         self.displacement: pg.Vector2 = displacement  # When INPUT_TYPE is MOVE
         """
         The displacement vector representing the movement.
@@ -79,6 +81,13 @@ class EventHumanInput(BaseEvent):
         if self.input_type == const.InputTypes.PICK:
             return f"Clicked at {self.clicked.id}"
         return f"Move {self.displacement}"
+
+
+class EventSelectCharacter(BaseEvent):
+    """When picking a tower, we could select charcters"""
+
+    def __init__(self, character: Character = None):
+        self.character = character
 
 
 @dataclass(kw_only=True)
