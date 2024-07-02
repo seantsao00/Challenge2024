@@ -11,6 +11,7 @@ class CharacterClass(IntEnum):
     melee = auto()
     lookout = auto()
     ranged = auto()
+    unknown = auto()
     pass
 
 class Character:
@@ -55,7 +56,7 @@ class Tower:
                  _id: int, 
                  _position: pg.Vector2,
                  _period: float, 
-                 _is_fountain: float,
+                 _is_fountain: bool,
                  _spwan_character_type: CharacterClass,
                  _attack_range: float,
                  _damage: float,

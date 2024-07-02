@@ -7,15 +7,88 @@ import pygame as pg
 
 import api.api as api
 import model
-from const import PlayerIds, FPS, MAX_TEAMS
+import model.character
+from const import FPS, MAX_TEAMS
 from instances_manager import get_model
+import model.character.lookout
+import model.character.melee
+import model.character.ranged_fighter
 
 __model = get_model()
 
 
+class GameError(Exception):
+    def __init__(self, message):            
+        super().__init__("The game broke. This is not your fault. Please contact us so we can fix it." + message)
+
 class Internal(api.API):
     def __init__(self, player_id: int):
         self.player_id = player_id
+        self.__character_map = {}
+        self.__tower_map = {}
+        self.__reverse_character_map = {}
+        self.__reverse_tower_map = {}
+
+    def clear_map(self):
+        self.__character_map = {}
+        self.__tower_map = {}
+        self.__reverse_character_map = {}
+        self.__reverse_tower_map = {}
+    
+    def __register_character(self, internal: model.Character) -> api.Character:
+        """
+        Register a `model.Character` to `api.Character`.
+        Therefore, API can only manipulate a character using the given interface 
+        while we still know the original `model.Character`.
+        """
+
+        if internal.id not in self.__character_map:
+            character_class = api.CharacterClass.unknown
+            if isinstance(internal, model.character.melee):
+                character_class = api.CharacterClass.melee
+            elif isinstance(internal, model.character.lookout):
+                character_class = api.CharacterClass.lookout
+            elif isinstance(internal, model.character.ranged_fighter):
+                character_class = api.CharacterClass.ranged
+            else:
+                raise GameError("Unknown character type")
+            extern = api.Character(
+                _id = internal.id,
+                _type = character_class,
+                _position = internal.position,
+                _speed = internal.speed,
+                _attack_range = internal.attack_range,
+                _damage = internal.damage,
+                _vision = internal.vision,
+                _health = internal.health,
+                _max_health = internal.max_health,
+                _team_id = internal.team.id
+            )
+            self.__character_map[internal.id] = extern
+            self.__reverse_character_map[id(extern)] = internal
+        return self.__character_map[internal.id]
+
+    
+    def __register_tower(self, internal: model.Tower) -> api.Tower:
+        """
+        Register a `model.Tower` to `api.Tower` like above.
+        """
+        if internal.id not in self.__tower_map:
+            extern = api.Tower(
+                _id = internal.id,
+                _position = internal.position,
+                _period = internal.period,
+                _is_fountain = internal.is_fountain,
+                _attack_range = internal.attack_range,
+                _damage = internal.damage,
+                _vision = internal.vision,
+                _health = internal.health,
+                _max_health = internal.max_health,
+                _team_id = internal.team.id
+            )
+            self.__tower_map[internal.id] = extern
+            self.__reverse_tower_map[id(extern)] = internal
+        return self.__tower_map[internal.id]
 
     def __team(self):
         return __model.teams[self.player_id - 1]
@@ -24,10 +97,12 @@ class Internal(api.API):
         return __model.clock.tick() * 1000
 
     def get_characters(self) -> list[api.Character]:
-        raise NotImplementedError
+        return [self.__register_character(character) 
+                for character in self.__team().character_list]
 
     def get_towers(self) -> list[api.Tower]:
-        raise NotImplementedError
+        return [self.__register_tower(tower) 
+                for tower in self.__team().building_list]
 
     def get_team_id(self) -> int:
         # Cast to prevent modification
@@ -42,7 +117,8 @@ class Internal(api.API):
             raise IndexError
         team = __model.teams[index - 1]
         # Should be correct, if model implementation changes this should fail
-        assert team.id == index
+        if not team.id == index:
+            raise GameError("Team ID implement has changed.")
         return team.points
 
 
