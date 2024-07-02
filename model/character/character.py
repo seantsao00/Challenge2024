@@ -103,7 +103,7 @@ class Character(LivingEntity):
     def attack(self, enemy: Entity):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team and dist <= self.attack_range):
-            print(self.last_abilities_time.tick())
+            # print(self.last_abilities_time.tick())
             if self.can_attack:
                 get_event_manager().post(EventAttack(self, enemy), enemy.id)
                 self.can_attack = False
