@@ -78,6 +78,8 @@ class Team:
             self.controlling.move(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None and event.clicked is not None:
             self.controlling.attack(event.clicked)
+        elif event.input_type == const.InputTypes.ABILITIES:
+            self.controlling.call_abilities()
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)

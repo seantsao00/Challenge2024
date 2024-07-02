@@ -11,3 +11,4 @@ class InputTypes(Enum):
     PICK = 0
     MOVE = 1
     ATTACK = 2
+    ABILITIES = 3

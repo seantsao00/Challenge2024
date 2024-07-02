@@ -46,6 +46,8 @@ class Controller:
                         ev_manager.post(EventResumeModel())
                     elif model.state == const.State.PLAY:
                         ev_manager.post(EventPauseModel())
+                elif event_pg.key == pg.K_q:
+                    ev_manager.post(EventHumanInput(const.InputTypes.ABILITIES))
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = event_pg.pos

@@ -26,12 +26,14 @@ class Character(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
-                 attack_range: float, damage: float, health: float, vision: float):
+                 attack_range: float, damage: float, health: float, vision: float, abilities_cd: float):
         super().__init__(health, position, vision, entity_type='team' + str(team.id), team=team)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
         self.alive: bool = True
+        self.abilities_time: float = -100
+        self.abilities_cd: float = abilities_cd
         model = get_model()
         if model.show_view_range:
             self.view.append(view.ViewRangeView(self))
@@ -107,11 +109,12 @@ class Character(LivingEntity):
         self.hidden = True
 
     def call_abilities(self):
-        if self.able_use_abilities is False:
+        now_time = get_model().get_time()
+        if now_time - self.abilities_time < self.abilities_cd:
             print('can not use abilities')
             return
+        self.abilities_time = now_time
         self.abilities()
-        self.able_use_abilities = False
 
     def abilities(self):
         return

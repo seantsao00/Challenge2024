@@ -22,7 +22,7 @@ class Melee(Character):
 
     def __init__(self, team, position, defense=False):
         super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
-                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION)
+                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ABILITIES_CD)
         self.defense = defense
 
     def take_damage(self, event: EventAttack):
@@ -36,4 +36,5 @@ class Melee(Character):
             super().move(direction)
 
     def abilities(self):
+        print("melee use abilites")
         self.defense = not self.defense
