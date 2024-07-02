@@ -5,17 +5,45 @@ import traceback
 
 import pygame as pg
 
-from api.api import API
-from const import FPS, PlayerIds
+import api.api as api
+import model
+from const import PlayerIds, FPS, MAX_TEAMS
 from instances_manager import get_model
 
+__model = get_model()
 
-class Internal(API):
+
+class Internal(api.API):
     def __init__(self, player_id: int):
         self.player_id = player_id
 
-    def get_time(self):
-        return pg.time.get_ticks() * 1000
+    def __team(self):
+        return __model.teams[self.player_id - 1]
+
+    def get_time():
+        return __model.clock.tick() * 1000
+
+    def get_characters(self) -> list[api.Character]:
+        raise NotImplementedError
+
+    def get_towers(self) -> list[api.Tower]:
+        raise NotImplementedError
+
+    def get_team_id(self) -> int:
+        # Cast to prevent modification
+        return self.__team().id
+
+    def get_score(self, index=0) -> int:
+        if not isinstance(index, int):
+            raise TypeError("Team index must be type int.")
+        if index == 0:
+            index = self.player_id
+        if index < 1 or MAX_TEAMS:
+            raise IndexError
+        team = __model.teams[index - 1]
+        # Should be correct, if model implementation changes this should fail
+        assert team.id == index
+        return team.points
 
 
 class Timer():
@@ -56,7 +84,7 @@ class Timer():
             print("Perhaps some very slightly timeout.")
 
 
-helpers = [Internal(i) for i in PlayerIds]
+helpers = [Internal(i) for i in range(MAX_TEAMS)]
 ai = [None] * len(helpers)
 timer = Timer()
 
@@ -66,7 +94,6 @@ def init_ai(files):
 
 
 def call_ai(player_id):
-    model = get_model()
     if ai[player_id] is None:
         return
 
