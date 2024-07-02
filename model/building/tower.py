@@ -95,6 +95,8 @@ class Tower(LivingEntity):
                 get_event_manager().post(EventTeamGainTower(self), event.attacker.team.id)
             self.team = event.attacker.team
             self.imgstate = 'team' + str(self.team.id)
+            if self.spawn_timer is not None:
+                self.spawn_timer.delete()
             self.set_timer()
             self.health = self.max_health
 

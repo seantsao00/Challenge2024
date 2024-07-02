@@ -17,7 +17,7 @@ class RangedFighter(Character):
         super().__init__(position, team, const.RANGED_SPEED, const.RANGED_ATTACK_RANGE,
                          const.RANGED_DAMAGE, const.RANGED_HEALTH, const.RANGED_VISION, const.MELEE_CDTIME)
 
-    def area_attack(self, origin: pg.Vector2, radius: float):
+    def abilities(self, origin: pg.Vector2, radius: float):
         dist = self.position.distance_to(origin)
         if dist <= self.attack_range:
             get_event_manager().post(EventMultiAttack(self, target=origin, radius=radius))
