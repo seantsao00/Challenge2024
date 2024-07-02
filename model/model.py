@@ -10,7 +10,7 @@ import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventMultiAttack,
                            EventPauseModel, EventQuit, EventResumeModel, EventSpawnCharacter,
-                           EventUnconditionalTick)
+                           EventUnconditionalTick, EventCharacterDied)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -115,6 +115,13 @@ class Model:
                 dist = origin.distance_to(victim.position)
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)
+    
+    def handle_entity_death(self, event: EventCharacterDied):
+        """ 
+        handle the death of entities 
+        """
+        self.entities.remove(event.character)
+        self.characters.remove(event.character)
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
@@ -126,6 +133,7 @@ class Model:
         ev_manager.register_listener(EventResumeModel, self.handle_resume)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventMultiAttack, self.multi_attack)
+        ev_manager.register_listener(EventCharacterDied, self.handle_entity_death)
 
     def run(self):
         """Run the main loop of the game."""

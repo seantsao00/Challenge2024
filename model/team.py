@@ -8,7 +8,7 @@ import pygame as pg
 import const
 import const.team
 from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower, EventCharacterDied)
 from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
@@ -53,6 +53,7 @@ class Team:
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
         get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
         get_event_manager().register_listener(EventSpawnCharacter, self.gain_character, self.id)
+        get_event_manager().register_listener(EventCharacterDied, self.lose_character, self.id)
 
     def handle_input(self, event: EventHumanInput):
         """
@@ -81,6 +82,9 @@ class Team:
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)
+        
+    def lose_character(self, event: EventCharacterDied):
+        self.character_list.remove(event.character)
 
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.building_list:
