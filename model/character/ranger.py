@@ -6,16 +6,16 @@ from instances_manager import get_event_manager
 from model.character import Character
 
 
-class RangedFighter(Character):
+class RangerFighter(Character):
     """
-    Class for the ranged fighter
-    Ranged fighter has the following unique moves:
+    Class for the ranger fighter
+    Ranger fighter has the following unique moves:
      - area_attack: Attack a locations and damage all nearby foes.
     """
 
     def __init__(self, team, position: pg.Vector2):
-        super().__init__(position, team, const.RANGED_SPEED, const.RANGED_ATTACK_RANGE,
-                         const.RANGED_DAMAGE, const.RANGED_HEALTH, const.RANGED_VISION, const.MELEE_CDTIME, const.RANGED_ABILITIES_CD)
+        super().__init__(position, team, const.RANGER_SPEED, const.RANGER_ATTACK_RANGE,
+                         const.RANGER_DAMAGE, const.RANGER_HEALTH, const.RANGER_VISION, const.MELEE_CDTIME, const.RANGER_ABILITIES_CD)
 
     def abilities(self, origin: pg.Vector2, radius: float):
         dist = self.position.distance_to(origin)

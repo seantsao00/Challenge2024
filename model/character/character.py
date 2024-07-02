@@ -1,15 +1,15 @@
+import time
+
 import pygame as pg
 
 import const
 import const.map
 import util
 import view
-import time
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
 from model.team import Team
-from model.timer import Timer
 from model.timer import Timer
 
 

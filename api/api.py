@@ -18,8 +18,8 @@ class Tower:
 class TowerSpawnType(IntEnum):
     """Class for specifing tower spawning character type."""
     melee = auto()
-    lookout = auto()
-    ranged = auto()
+    sniper = auto()
+    ranger = auto()
     pass
 
 

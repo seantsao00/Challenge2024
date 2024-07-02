@@ -1,0 +1,11 @@
+"""
+This module defines constants associated with range fighter.
+"""
+
+RANGER_SPEED = 15
+RANGER_ATTACK_RANGE = 100
+RANGER_DAMAGE = 75
+RANGER_HEALTH = 200
+RANGER_VISION = 25
+RANGER_ABILITIES_CD = 1.5
+RANGER_CDTIME = 1000
