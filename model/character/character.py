@@ -8,6 +8,7 @@ from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
 from model.team import Team
+from model.timer import Timer
 
 
 class Character(LivingEntity):
@@ -24,12 +25,15 @@ class Character(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
-                 attack_range: float, damage: float, health: float, vision: float):
+                 attack_range: float, damage: float, health: float, vision: float, cd_time: int):
         super().__init__(health, position, vision, entity_type='team' + str(team.id), team=team)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
         self.alive: bool = True
+        self.cd_time: int = cd_time
+        self.can_attack: bool = True
+        self.attack_timer = None
         model = get_model()
         if model.show_view_range:
             self.view.append(view.ViewRangeView(self))
@@ -88,15 +92,27 @@ class Character(LivingEntity):
             self.die()
         print(f"I received {event.attacker.damage} points of damage")
 
+    def handle_cd(self):
+        if not self.can_attack:
+            self.can_attack = True
+            self.attack_timer.delete()
+            self.attack_timer = None
+
     def attack(self, enemy: Entity):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team and dist <= self.attack_range):
-            get_event_manager().post(EventAttack(self, enemy), enemy.id)
+            if self.can_attack:
+                get_event_manager().post(EventAttack(self, enemy), enemy.id)
+                self.can_attack = False
+                self.attack_timer = Timer(self.cd_time, self.handle_cd, once = False)
+                self.attack_timer.start()
+            else:
+                print(f"Character {self.id} in Team {self.team.id} next attack available in {self.attack_timer.get_remaining_time()} ms")
         else:
-            print("attack failed")
+            print(f"Character {self.id} in Team {self.team.id} attack failed")
 
     def die(self):
-        print("Died")
+        print(f"Character {self.id} in Team {self.team.id} died")
         if self in get_model().characters:
             get_model().characters.remove(self)
             get_event_manager().post(EventCharacterDied(self))

@@ -13,7 +13,7 @@ class Lookout(Character):
 
     def __init__(self, team, position):
         super().__init__(position, team, const.LOOKOUT_SPEED, const.LOOKOUT_ATTACK_RANGE,
-                         const.LOOKOUT_DAMAGE, const.LOOKOUT_HEALTH, const.LOOKOUT_VISION)
+                         const.LOOKOUT_DAMAGE, const.LOOKOUT_HEALTH, const.LOOKOUT_VISION, const.LOOKOUT_CDTIME)
 
     def focus(self):
         self.damage += 5
