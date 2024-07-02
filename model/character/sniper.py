@@ -1,6 +1,7 @@
 import const
 from event_manager import EventAttack
 from model.character import Character
+from model.entity import Entity
 
 
 class Sniper(Character):
@@ -11,13 +12,18 @@ class Sniper(Character):
     focus: Increase damage that can be stacked. Loses stacks when taken damage.
     """
 
-    def __init__(self, team, position):
+    def __init__(self, team, position, ability=0):
         super().__init__(position, team, const.SNIPER_SPEED, const.SNIPER_ATTACK_RANGE,
-                         const.SNIPER_DAMAGE, const.SNIPER_HEALTH, const.SNIPER_VISION, const.SNIPER_CDTIME, const.SNIPER_ABILITIES_CD)
+                         const.SNIPER_DAMAGE, const.SNIPER_HEALTH, const.SNIPER_VISION, const.SNIPER_ATTACK_SPEED, const.SNIPER_ABILITIES_CD)
+        self.ability = ability
 
     def abilities(self):
-        self.damage += 5
+        self.ability = 1
 
-    def take_damage(self, event: EventAttack):
-        self.damage = const.SNIPER_DAMAGE
-        super().take_damage(event)
+    def attack(self, enemy: Entity):
+        if self.ability > 0:
+            self.damage *= 2
+        super().attack(enemy)
+        if self.ability > 0:
+            self.damage /= 2
+            self.ability -= 1
