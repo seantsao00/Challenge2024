@@ -15,7 +15,7 @@ class RangedFighter(Character):
 
     def __init__(self, team, position: pg.Vector2):
         super().__init__(position, team, const.RANGED_SPEED, const.RANGED_ATTACK_RANGE,
-                         const.RANGED_DAMAGE, const.RANGED_HEALTH, const.RANGED_VISION, const.RANGED_ABILITIES_CD)
+                         const.RANGED_DAMAGE, const.RANGED_HEALTH, const.RANGED_VISION, const.MELEE_CDTIME, const.RANGED_ABILITIES_CD)
 
     def abilities(self, origin: pg.Vector2, radius: float):
         dist = self.position.distance_to(origin)
