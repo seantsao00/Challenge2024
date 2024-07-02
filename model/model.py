@@ -9,7 +9,7 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditionalTick, EventInitialize,
-                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel)
+                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel, EventStartGame)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Melee
@@ -57,7 +57,7 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        self.state = const.State.PLAY
+        self.state = const.State.COVER
         self.teams = []
 
         for i, team_master in enumerate(self.team_names):
@@ -96,6 +96,12 @@ class Model:
         """
         self.state = const.State.PLAY
 
+    def handle_start(self, _: EventStartGame):
+        """
+        Start the game
+        """
+        self.state = const.State.PLAY
+
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
@@ -119,6 +125,7 @@ class Model:
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPauseModel, self.handle_pause)
         ev_manager.register_listener(EventResumeModel, self.handle_resume)
+        ev_manager.register_listener(EventStartGame, self.handle_start)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventMultiAttack, self.multi_attack)
 
@@ -128,9 +135,7 @@ class Model:
 
         # Tell every one to start
         ev_manager = get_event_manager()
-        self.state = const.State.COVER
         ev_manager.post(EventInitialize())
-        self.state = const.State.PLAY
         while self.running:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:

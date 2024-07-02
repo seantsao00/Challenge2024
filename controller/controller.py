@@ -6,7 +6,7 @@ import pygame as pg
 
 import const
 from event_manager import (EventEveryTick, EventUnconditionalTick, EventHumanInput, EventInitialize,
-                           EventQuit, EventPauseModel, EventResumeModel)
+                           EventQuit, EventPauseModel, EventResumeModel, EventStartGame)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 
@@ -46,6 +46,12 @@ class Controller:
                         ev_manager.post(EventResumeModel())
                     elif model.state == const.State.PLAY:
                         ev_manager.post(EventPauseModel())
+
+                if event_pg.key == const.START_BUTTON:
+                    if model.state == const.State.COVER:
+                        ev_manager.post(EventStartGame())
+                    else:
+                        print('game is already in PLAY state')
                 
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:

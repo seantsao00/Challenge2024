@@ -36,7 +36,7 @@ class EventStartGame(BaseEvent):
     """
     Event posted upon starting the game.
 
-    For example, press a key at cover scene might leave cover and start the game.
+    For example, press space at cover scene would leave cover and start the game.
     """
 
 

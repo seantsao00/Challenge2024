@@ -10,7 +10,7 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventInitialize, EventUnconditionalTick
+from event_manager import EventInitialize, EventUnconditionalTick, EventStartGame
 from instances_manager import get_event_manager, get_model
 
 
@@ -29,6 +29,7 @@ class View:
         model = get_model()
 
         size = pg.display.Info()
+        # self.cover = pg.image.load(to be added).convert_alpha()
         self.arena = pg.display.set_mode(
             size=const.ARENA_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
         self.canvas = pg.display.set_mode(
@@ -91,6 +92,11 @@ class View:
     def render_cover(self):
         """Render game cover"""
         self.screen.fill(const.BACKGROUND_COLOR)
+
+        # setting up a temporary cover till we have a cover image
+        font = pg.font.Font(None, 36)
+        text_surface = font.render('THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
+        self.screen.blit(text_surface, (300, 200))
 
     def render_play(self):
         """Render scenes when the game is being played"""
