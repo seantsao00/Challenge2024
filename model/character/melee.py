@@ -21,13 +21,17 @@ class Melee(Character):
 
     """
 
-    def __init__(self, team, position, defense=False):
+    def __init__(self, team, position, defense=0):
         super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
-                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_CDTIME, const.MELEE_ABILITIES_CD)
+                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ATTACK_SPEED, const.MELEE_ABILITIES_CD)
         self.defense = defense
 
     def take_damage(self, event: EventAttack):
-        new_damage = event.attacker.damage * 0.5 if self.defense else event.attacker.damage
+        if self.defense > 0:
+            new_damage = 0.5 * event.attacker.damage
+            self.defense -= 1 
+        else:
+            new_damage = event.attacker.damage
         self.health -= new_damage
         if self.health <= 0:
             self.die()
@@ -35,12 +39,6 @@ class Melee(Character):
     def move(self, direction: pg.Vector2):
         super().move(direction)
 
-    def abilities_times_up(self):
-        print('melee stop abilites')
-        self.defense = False
-        self.timer.delete()
-
     def abilities(self):
         print("melee use abilites")
-        self.defense = True
-        self.timer = Timer(int(const.MELEE_ABILITIES_DURATION * 1000), self.abilities_times_up, once=True)
+        self.defense = const.MELEE_ABILITIES_VARIABLE

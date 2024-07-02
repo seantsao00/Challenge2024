@@ -15,9 +15,11 @@ class RangerFighter(Character):
 
     def __init__(self, team, position: pg.Vector2):
         super().__init__(position, team, const.RANGER_SPEED, const.RANGER_ATTACK_RANGE,
-                         const.RANGER_DAMAGE, const.RANGER_HEALTH, const.RANGER_VISION, const.MELEE_CDTIME, const.RANGER_ABILITIES_CD)
+                         const.RANGER_DAMAGE, const.RANGER_HEALTH, const.RANGER_VISION, const.RANGER_ATTACK_SPEED, const.RANGER_ABILITIES_CD)
+        self.abilities_radius = const.RANGER_ABILITIES_RADIUS
 
-    def abilities(self, origin: pg.Vector2, radius: float):
+    def abilities(self, origin: pg.Vector2):
         dist = self.position.distance_to(origin)
         if dist <= self.attack_range:
-            get_event_manager().post(EventMultiAttack(self, target=origin, radius=radius))
+            print("ranged abilities attack")
+            get_event_manager().post(EventMultiAttack(self, target=origin, radius=self.abilities_radius))

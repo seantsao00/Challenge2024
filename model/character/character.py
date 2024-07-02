@@ -27,7 +27,7 @@ class Character(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
-                 attack_range: float, damage: float, health: float, vision: float, cd_time: float, abilities_cd: float):
+                 attack_range: float, damage: float, health: float, vision: float, attack_speed: float, abilities_cd: float):
         super().__init__(health, position, vision, entity_type='team' + str(team.id), team=team)
         self.speed: float = speed
         self.attack_range: float = attack_range
@@ -35,9 +35,8 @@ class Character(LivingEntity):
         self.alive: bool = True
         self.abilities_time: float = -100
         self.abilities_cd: float = abilities_cd
-        self.cd_time: int = cd_time
-        self.can_attack: bool = True
-        self.attack_timer = None
+        self.attack_speed: int = attack_speed
+        self.attack_time: float = -100
         model = get_model()
         if model.show_view_range:
             self.view.append(view.ViewRangeView(self))
@@ -95,27 +94,13 @@ class Character(LivingEntity):
         self.health -= event.attacker.damage
         if self.health <= 0:
             self.die()
-        print(f"I received {event.attacker.damage} points of damage")
-
-    def handle_cd(self):
-        if not self.can_attack:
-            self.can_attack = True
-            self.attack_timer.delete()
-            self.attack_timer = None
 
     def attack(self, enemy: Entity):
+        now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
-        if (self.team != enemy.team and dist <= self.attack_range):
-            # print(self.last_abilities_time.tick())
-            if self.can_attack:
-                get_event_manager().post(EventAttack(self, enemy), enemy.id)
-                self.can_attack = False
-                self.attack_timer = Timer(self.cd_time, self.handle_cd, once = False)
-                self.attack_timer.start()
-            else:
-                print(f"Character {self.id} in Team {self.team.id} next attack available in {self.attack_timer.get_remaining_time()} ms")
-        else:
-            print(f"Character {self.id} in Team {self.team.id} attack failed")
+        if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
+            get_event_manager().post(EventAttack(self, enemy), enemy.id)
+            self.attack_time = now_time
 
     def die(self):
         print(f"Character {self.id} in Team {self.team.id} died")
@@ -125,13 +110,13 @@ class Character(LivingEntity):
         self.alive = False
         self.hidden = True
 
-    def call_abilities(self):
+    def call_abilities(self, *args):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.abilities_cd:
             print('can not use abilities')
             return
         self.abilities_time = now_time
-        self.abilities()
+        self.abilities(*args)
 
     def abilities(self):
         return

@@ -10,7 +10,7 @@ import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventMultiAttack,
                            EventPauseModel, EventQuit, EventResumeModel, EventSpawnCharacter,
-                           EventUnconditionalTick)
+                           EventUnconditionalTick, EventAttack)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -120,7 +120,7 @@ class Model:
             if isinstance(victim, Character):
                 dist = origin.distance_to(victim.position)
                 if (attacker.team != victim.team and dist <= radius):
-                    victim.take_damage(attacker.damage)
+                    get_event_manager().post(EventAttack(attacker, victim), victim.id)
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

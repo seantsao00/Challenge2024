@@ -12,8 +12,8 @@ from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick,
 from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
+    from model.character import Character, Melee, RangerFighter, Sniper
     from model.building import Tower
-    from model.character import Character
     from model.entity import Entity, LivingEntity
 
 
@@ -45,6 +45,7 @@ class Team:
         self.building_list: list[Tower] = []
         self.character_list: list[Character] = []
         self.visible_entities_list: set[Entity] = set()
+        self.choose_position = False
         if master == 'human':
             self.controlling = None
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
@@ -76,10 +77,18 @@ class Team:
                 print('clicked on non interactable entity')
         elif event.input_type == const.InputTypes.MOVE and self.controlling is not None:
             self.controlling.move(event.displacement)
-        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None and event.clicked is not None:
-            self.controlling.attack(event.clicked)
+        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None:
+            if self.choose_position is True:
+                self.controlling.call_abilities(event.displacement)
+                self.choose_position = False
+            elif event.clicked is not None:
+                self.controlling.attack(event.clicked)
         elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
-            self.controlling.call_abilities()
+            from model.character import RangerFighter
+            if isinstance(self.controlling, RangerFighter):
+                self.choose_position = True
+            else:
+                self.controlling.call_abilities()
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)

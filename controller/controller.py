@@ -75,7 +75,7 @@ class Controller:
                         if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
-                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked))
+                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK, clicked=clicked, displacement=pg.Vector2(x, y)))
 
             TimerManager.handle_event(event_pg)
 

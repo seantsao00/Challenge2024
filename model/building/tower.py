@@ -12,7 +12,7 @@ import view
 from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
-from model.character import Character, Melee
+from model.character import Character, Melee, RangerFighter, Sniper
 from model.entity import LivingEntity
 from model.team import Team
 from model.timer import Timer
@@ -39,7 +39,7 @@ class Tower(LivingEntity):
         self.log = []
         self.period = const.tower.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
-        self.character_type = Melee
+        self.character_type = RangerFighter
         self.attack_range: float = const.TOWER_ATTACK_RANGE
         self.damage: float = const.TOWER_DAMAGE
         self.spawn_timer = None
