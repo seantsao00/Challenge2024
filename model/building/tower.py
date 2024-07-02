@@ -58,7 +58,7 @@ class Tower(LivingEntity):
             self.view.append(view.ViewRangeView(self))
         if model.show_attack_range:
             self.view.append(view.AttackRangeView(self))
-        self.view.append(view.CDView(self))
+        self.view.append(view.TowerCDView(self))
         if self.health is not None and not self.is_fountain:
             self.view.append(view.HealthView(self))
         get_event_manager().post(EventCreateTower(self))

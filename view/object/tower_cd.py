@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from model import LivingEntity
 
 
-class CDView:
+class TowerCDView:
     def __init__(self, entity: LivingEntity):
         self.entity = entity
 

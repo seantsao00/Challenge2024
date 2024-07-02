@@ -43,6 +43,7 @@ class Character(LivingEntity):
             self.view.append(view.ViewRangeView(self))
         if model.show_attack_range:
             self.view.append(view.AttackRangeView(self))
+        self.view.append(view.AbilitiesCDView(self))
         if self.health is not None:
             self.view.append(view.HealthView(self))
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
