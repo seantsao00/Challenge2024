@@ -155,3 +155,4 @@ class Team:
     def select_character(self, event: EventSelectCharacter):
         if self.controlling is not None and hasattr(self.controlling, 'update_character_type'):
             self.controlling.update_character_type(event.character)
+            print(f'The character produced by team{self.id} is modified to {event.character}')
