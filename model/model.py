@@ -7,7 +7,6 @@ from random import randint
 import pygame as pg
 
 import const
-import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventMultiAttack,
                            EventPauseModel, EventQuit, EventResumeModel, EventSpawnCharacter,
                            EventUnconditionalTick)
