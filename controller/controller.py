@@ -50,7 +50,7 @@ class Controller:
                         ev_manager.post(EventPauseModel())
                 
 
-            if event_pg.type == pg.MOUSEBUTTONDOWN:
+            if event_pg.type == pg.MOUSEBUTTONDOWN and model.state == const.State.PLAY:
                 mouse_pos = event_pg.pos
                 x, y = mouse_pos
                 w, h = pg.display.get_surface().get_size()
