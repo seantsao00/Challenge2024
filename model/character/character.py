@@ -4,10 +4,12 @@ import const
 import const.map
 import util
 import view
+import time
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
 from model.team import Team
+from model.timer import Timer
 
 
 class Character(LivingEntity):
@@ -91,6 +93,7 @@ class Character(LivingEntity):
     def attack(self, enemy: Entity):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team and dist <= self.attack_range):
+            print(self.last_abilities_time.tick())
             get_event_manager().post(EventAttack(self, enemy), enemy.id)
         else:
             print("attack failed")
@@ -102,3 +105,13 @@ class Character(LivingEntity):
             get_event_manager().post(EventCharacterDied(self))
         self.alive = False
         self.hidden = True
+
+    def call_abilities(self):
+        if self.able_use_abilities is False:
+            print('can not use abilities')
+            return
+        self.abilities()
+        self.able_use_abilities = False
+
+    def abilities(self):
+        return

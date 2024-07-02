@@ -35,5 +35,5 @@ class Melee(Character):
         if not self.defense:
             super().move(direction)
 
-    def switch_mode(self):
+    def abilities(self):
         self.defense = not self.defense

@@ -51,6 +51,7 @@ class Model:
         self.pause_menu = PauseMenu()
         self.characters = set()
         self.grid = Grid(900, 900)
+        self.stop_time = 0
 
     def initialize(self, _: EventInitialize):
         """
@@ -93,13 +94,18 @@ class Model:
         """
         Pause the game
         """
+        self.tmp_timer = pg.time.Clock()
         self.state = const.State.PAUSE
 
     def handle_resume(self, _: EventResumeModel):
         """
         Resume the game
         """
+        self.stop_time += self.tmp_timer.tick()
         self.state = const.State.PLAY
+
+    def get_time(self):
+        return (pg.time.get_ticks() - self.stop_time) / 1000
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
@@ -130,7 +136,6 @@ class Model:
     def run(self):
         """Run the main loop of the game."""
         self.running = True
-
         # Tell every one to start
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
@@ -139,3 +144,4 @@ class Model:
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
                 self.dt = self.clock.tick(const.FPS) / 1000.0
+                # print(self.get_time())

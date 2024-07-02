@@ -15,7 +15,7 @@ class Lookout(Character):
         super().__init__(position, team, const.LOOKOUT_SPEED, const.LOOKOUT_ATTACK_RANGE,
                          const.LOOKOUT_DAMAGE, const.LOOKOUT_HEALTH, const.LOOKOUT_VISION)
 
-    def focus(self):
+    def abilities(self):
         self.damage += 5
 
     def take_damage(self, event: EventAttack):
