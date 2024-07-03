@@ -78,17 +78,17 @@ class Character(LivingEntity):
                 new_position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER < 0 or
                     new_position.x - const.ENTITY_RADIUS < 0):
                 self.position += cur_direction - min_direction
-                get_event_manager().post(EventCharacterMove(self, original_pos))
+                get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
                 return
 
             if game_map.get_type(new_position) == const.map.MAP_OBSTACLE:
                 self.position = new_position - min_direction
-                get_event_manager().post(EventCharacterMove(self, original_pos))
+                get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
                 return
 
             if i == 3:
                 self.position = new_position
-                get_event_manager().post(EventCharacterMove(self, original_pos))
+                get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
                 return
 
             cur_direction += min_direction
@@ -102,14 +102,14 @@ class Character(LivingEntity):
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
-            get_event_manager().post(EventAttack(self, enemy), enemy.id)
+            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
             self.attack_time = now_time
 
     def die(self):
         print(f"Character {self.id} in Team {self.team.id} died")
         if self in get_model().characters:
             get_model().characters.remove(self)
-            get_event_manager().post(EventCharacterDied(self))
+            get_event_manager().post(EventCharacterDied(character=self))
         self.alive = False
         self.hidden = True
 

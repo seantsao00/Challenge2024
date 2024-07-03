@@ -22,4 +22,4 @@ class RangerFighter(Character):
         dist = self.position.distance_to(origin)
         if dist <= self.attack_range:
             print("ranged abilities attack")
-            get_event_manager().post(EventMultiAttack(self, target=origin, radius=self.abilities_radius))
+            get_event_manager().post(EventMultiAttack(attacker=self, target=origin, radius=self.abilities_radius))

@@ -52,7 +52,7 @@ class Tower(LivingEntity):
             self.imgstate = 'temporary_blue_nexus'
         if self.team is not None:
             self.set_timer()
-            get_event_manager().post(EventTeamGainTower(self), self.team.id)
+            get_event_manager().post(EventTeamGainTower(tower=self), self.team.id)
         model = get_model()
         if model.show_view_range:
             self.view.append(view.ViewRangeView(self))
@@ -61,7 +61,7 @@ class Tower(LivingEntity):
         self.view.append(view.TowerCDView(self))
         if self.health is not None and not self.is_fountain:
             self.view.append(view.HealthView(self))
-        get_event_manager().post(EventCreateTower(self))
+        get_event_manager().post(EventCreateTower(tower=self))
 
     def update_period(self):
         self.period = const.tower.INITIAL_PERIOD_MS + \
@@ -72,7 +72,7 @@ class Tower(LivingEntity):
         new_position = pg.Vector2(
             choice([1, -1]) * (50 + randint(-50, 50)), choice([1, -1]) * (50 + randint(-50, 50)))
         new_character = character_type(self.team, self.position + new_position)
-        get_event_manager().post(EventSpawnCharacter(new_character), self.team.id)
+        get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.id)
         self.set_timer()
 
     def set_timer(self):
@@ -89,10 +89,10 @@ class Tower(LivingEntity):
             return
         if self.health - event.attacker.damage <= 0:
             if self.team is None:
-                get_event_manager().post(EventTeamGainTower(self), event.attacker.team.id)
+                get_event_manager().post(EventTeamGainTower(tower=self), event.attacker.team.id)
             else:
-                get_event_manager().post(EventTeamLoseTower(self), self.team.id)
-                get_event_manager().post(EventTeamGainTower(self), event.attacker.team.id)
+                get_event_manager().post(EventTeamLoseTower(tower=self), self.team.id)
+                get_event_manager().post(EventTeamGainTower(tower=self), event.attacker.team.id)
             self.team = event.attacker.team
             self.imgstate = 'team' + str(self.team.id)
             if self.spawn_timer is not None:
@@ -108,4 +108,4 @@ class Tower(LivingEntity):
         nearest_character = model.grid.get_closet_enemy(self.position, self.team, 100, 1)
         if len(nearest_character) != 0:
             get_event_manager().post(EventAttack(
-                self, nearest_character[0]), nearest_character[0].id)
+                attacker=self, victim=nearest_character[0]), nearest_character[0].id)

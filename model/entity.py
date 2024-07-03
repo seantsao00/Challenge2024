@@ -40,7 +40,7 @@ class Entity:
         self.hidden: bool = False
         self.team: Team = team
         self.view: list = [view.EntityView(self)]
-        get_event_manager().post(EventCreateEntity(self))
+        get_event_manager().post(EventCreateEntity(entity=self))
 
 
 class LivingEntity(Entity):

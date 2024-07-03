@@ -5,10 +5,10 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from model.character import Melee, RangerFighter, Sniper
 from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventUnconditionalTick, EventSelectCharacter)
+                           EventResumeModel, EventSelectCharacter, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
+from model.character import Melee, RangerFighter, Sniper
 from model.timer import TimerManager
 
 
@@ -48,7 +48,7 @@ class Controller:
                     elif model.state == const.State.PLAY:
                         ev_manager.post(EventPauseModel())
                 elif event_pg.key == pg.K_q:
-                    ev_manager.post(EventHumanInput(const.InputTypes.ABILITIES))
+                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITIES))
 
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = event_pg.pos
@@ -67,7 +67,8 @@ class Controller:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
-                    ev_manager.post(EventHumanInput(const.InputTypes.PICK, clicked=clicked))
+                    ev_manager.post(EventHumanInput(
+                        input_type=const.InputTypes.PICK, clicked=clicked))
 
                 if event_pg.button == 3:  # Right mouse button
                     print(f"Right click position: ({x}, {y})")
@@ -76,7 +77,7 @@ class Controller:
                         if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
 
-                    ev_manager.post(EventHumanInput(const.InputTypes.ATTACK,
+                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked=clicked, displacement=pg.Vector2(x, y)))
 
             TimerManager.handle_event(event_pg)
@@ -115,7 +116,8 @@ class Controller:
         if direction.length() != 0:
             # Try to move as far as player can.
             displacement = direction.normalize() * max(const.ARENA_SIZE)
-            ev_manager.post(EventHumanInput(const.InputTypes.MOVE, displacement=displacement))
+            ev_manager.post(EventHumanInput(input_type=const.InputTypes.MOVE,
+                                            displacement=displacement))
 
     def select_character(self):
         """Select characters after clicking the tower"""
