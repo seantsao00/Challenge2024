@@ -3,9 +3,11 @@ This file ONLY defines prototype. No actual thing is done in this file.
 The document of the API is at https://hackmd.io/@seantsao00/challenge_2024_api/edit.
 """
 
+from dataclasses import dataclass
 from enum import IntEnum, auto
 
 import pygame as pg
+
 
 class CharacterClass(IntEnum):
     """角色種類。`melee`、`lookout`、`ranged` 分別代表近戰、視野以及遠程兵。"""
@@ -15,11 +17,13 @@ class CharacterClass(IntEnum):
     unknown = auto()
     pass
 
+
 class Character:
     """角色"""
-    def __init__(self, 
-                 _id: int, 
-                 _type: CharacterClass, 
+
+    def __init__(self,
+                 _id: int,
+                 _type: CharacterClass,
                  _position: pg.Vector2,
                  _speed: float,
                  _attack_range: float,
@@ -48,15 +52,17 @@ class Character:
     def type(self) -> CharacterClass:
         """回傳角色的兵種。"""
         return self.__type
-    
+
     # TODO: add other properties
+
 
 class Tower:
     """Tower used for maniplutaing (prevents direct access to actual tower)"""
-    def __init__(self, 
-                 _id: int, 
+
+    def __init__(self,
+                 _id: int,
                  _position: pg.Vector2,
-                 _period: float, 
+                 _period: float,
                  _is_fountain: bool,
                  _spwan_character_type: CharacterClass,
                  _attack_range: float,
@@ -76,8 +82,27 @@ class Tower:
         self.__health = _health
         self.__max_health = _max_health
         self.__team_id = _team_id
-        
+
     # TODO: add other properties
+
+
+@dataclass
+class CharacterAction():
+    direction: pg.Vector2
+    attack_target_id: int
+    spell: bool
+    spell_target: pg.Vector2 = None
+
+
+@dataclass
+class Action():
+    towers_actions: list[tuple[int, CharacterClass]]
+    characters_actions: list[tuple[int, CharacterAction]]
+
+
+class AI:
+    def make_move(self) -> Action:
+        pass
 
 
 class API:
