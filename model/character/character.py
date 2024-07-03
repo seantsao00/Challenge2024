@@ -11,6 +11,8 @@ import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
+if TYPE_CHECKING:
+    from model.building import Linked_list, Node
 
 if TYPE_CHECKING:
     from model.team import Team
@@ -106,13 +108,13 @@ class Character(LivingEntity):
         self.alive = False
         self.hidden = True
 
-    def call_abilities(self, *args):
+    def call_abilities(self, *args, **kwargs):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.abilities_cd:
             print('can not use abilities')
             return
         self.abilities_time = now_time
-        self.abilities(*args)
+        self.abilities(*args, **kwargs)
 
-    def abilities(self):
-        return
+    def abilities(self, *args, **kwargs):
+        pass

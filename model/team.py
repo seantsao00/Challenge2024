@@ -9,7 +9,7 @@ import const
 import const.team
 from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
                            EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower)
+                           EventTeamLoseTower, EventCharacterDied)
 from instances_manager import get_event_manager, get_model
 from model.character import RangerFighter
 
@@ -51,7 +51,6 @@ class Team:
         self.controlling = None
         if master == 'human':
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
-        get_event_manager().register_listener(EventCharacterMove, self.handle_character_move)
         get_event_manager().register_listener(EventCreateTower, self.handle_create_tower)
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
         get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
@@ -135,8 +134,13 @@ class Team:
         self.points += a * len(self.building_list)
         print(self.id, " gain", a * len(self.building_list), "points.")
 
-    def handle_character_move(self, event: EventCharacterMove):
-        self.update_visible_entities_list(event.character)
+    def handle_character_died(self, character: Character):
+        if self.controlling is character:
+            self.controlling = None
+            self.character_list.remove(character)
+            if character in self.visible_entities_list:
+                self.visible_entities_list.remove(character)
+            
 
     def handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)

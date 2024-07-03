@@ -25,6 +25,7 @@ class Melee(Character):
         super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
                          const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ATTACK_SPEED, const.MELEE_ABILITIES_CD, 'melee')
         self.defense = defense
+        self.imgstate = 'melee'
 
     def take_damage(self, event: EventAttack):
         if self.defense > 0:
@@ -35,9 +36,6 @@ class Melee(Character):
         self.health -= new_damage
         if self.health <= 0:
             self.die()
-
-    def move(self, direction: pg.Vector2):
-        super().move(direction)
 
     def abilities(self):
         print("melee use abilites")
