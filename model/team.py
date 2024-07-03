@@ -8,12 +8,14 @@ import pygame as pg
 import const
 import const.team
 from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower, EventSelectCharacter)
+                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
+from model.character import RangerFighter
 
 if TYPE_CHECKING:
-    from model.character import Character, Melee, RangerFighter, Sniper
     from model.building import Tower
+    from model.character import Character, Melee, RangerFighter, Sniper
     from model.entity import Entity, LivingEntity
 
 
@@ -104,7 +106,6 @@ class Team:
             elif clicked_character is not None and clicked == const.CharTypes.CHAR:
                 self.controlling.attack(clicked_character)
         elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
-            from model.character import RangerFighter
             if isinstance(self.controlling, RangerFighter):
                 self.choose_position = True
             else:

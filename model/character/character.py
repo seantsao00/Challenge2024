@@ -1,4 +1,6 @@
-import time
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -9,8 +11,9 @@ import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
-from model.team import Team
-from model.timer import Timer
+
+if TYPE_CHECKING:
+    from model.team import Team
 
 
 class Character(LivingEntity):
