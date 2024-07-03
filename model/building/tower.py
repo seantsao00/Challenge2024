@@ -67,7 +67,8 @@ class Tower(LivingEntity):
         self.period = const.tower.INITIAL_PERIOD_MS + \
             int(const.tower.FORMULA_K * len(self.team.building_list) ** 0.5)
 
-    def generate_character(self, character_type: Character, timestamp=pg.time.get_ticks()):
+    def generate_character(self, timestamp=pg.time.get_ticks()):
+        character_type = self.character_type
         self.log.append((character_type, timestamp))
         new_position = pg.Vector2(
             choice([1, -1]) * (50 + randint(-50, 50)), choice([1, -1]) * (50 + randint(-50, 50)))
@@ -77,8 +78,7 @@ class Tower(LivingEntity):
 
     def set_timer(self):
         self.update_period()
-        self.spawn_timer = Timer(self.period, self.generate_character,
-                                 self.character_type, once=True)
+        self.spawn_timer = Timer(self.period, self.generate_character, once=True)
 
     def update_character_type(self, character_type):
         self.character_type = character_type
