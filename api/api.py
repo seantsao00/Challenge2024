@@ -88,16 +88,24 @@ class Tower:
 
 @dataclass
 class CharacterAction():
-    direction: pg.Vector2
-    attack_target_id: int
-    spell: bool
+    """角色能執行的動作"""
+    direction: pg.Vector2 = pg.Vector2(0, 0)
+    """角色的移動方向"""
+    attack_target_id: int = None
+    """角色的攻擊目標， `None` 代表不攻擊"""
+    spell: bool = False
+    """是否要使用技能"""
     spell_target: pg.Vector2 = None
+    """ranger 的技能的目標位置， ranger 需要指定此參數才能使用技能，其他兵種則不需要指定此 attribute"""
 
 
 @dataclass
 class Action():
-    towers_actions: list[tuple[int, CharacterClass]]
-    characters_actions: list[tuple[int, CharacterAction]]
+    """AI 所決定的 action"""
+    towers_actions: list[tuple[int, CharacterClass]] = None
+    """改變 tower 要生的兵種 ， 一個包含許多 (id, CharacterClass) 的 list ，沒有指定的 tower 會維持原本的兵"""
+    characters_actions: list[tuple[int, CharacterAction]] = None
+    """每個角色的動作，沒有被指定的角色會停在原地不動"""
 
 
 class AI:
