@@ -45,10 +45,7 @@ class Tower(LivingEntity):
         self.damage: float = const.TOWER_DAMAGE
         self.enemy: list[Linked_list] = [Linked_list() for _ in range(5)]
         self.spawn_timer = None
-        if not is_fountain:
-            self.attack_timer = Timer(const.tower.TOWER_ATTACK_PERIOD, self.attack, once=False)
-        else:
-            self.attack_timer = None
+        self.attack_timer = Timer(const.tower.TOWER_ATTACK_PERIOD, self.attack, once=False)
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
         if self.is_fountain:
             self.imgstate = 'temporary_blue_nexus'
