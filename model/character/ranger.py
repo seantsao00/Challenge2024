@@ -2,8 +2,10 @@ import pygame as pg
 
 import const
 from event_manager import EventMultiAttack
-from instances_manager import get_event_manager
 from model.character import Character
+from model.entity import Entity
+from event_manager import EventAttack
+from instances_manager import get_event_manager, get_model
 
 
 class RangerFighter(Character):
@@ -18,6 +20,13 @@ class RangerFighter(Character):
                          const.RANGER_DAMAGE, const.RANGER_HEALTH, const.RANGER_VISION, const.RANGER_ATTACK_SPEED, const.RANGER_ABILITIES_CD, 'ranger')
         self.abilities_radius = const.RANGER_ABILITIES_RADIUS
         self.imgstate = 'ranger'
+
+    def shoot(self, enemy: Entity):
+        now_time = get_model().get_time()
+        dist = self.position.distance_to(enemy.position)
+        if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
+            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
+            self.attack_time = now_time
 
     def abilities(self, *args, **kwargs):
         if len(args) < 1 or not isinstance(args[0], pg.Vector2):

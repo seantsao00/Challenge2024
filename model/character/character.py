@@ -93,13 +93,6 @@ class Character(LivingEntity):
         if self.health <= 0:
             self.die()
 
-    def attack(self, enemy: Entity):
-        now_time = get_model().get_time()
-        dist = self.position.distance_to(enemy.position)
-        if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self.attack_time = now_time
-
     def die(self):
         print(f"Character {self.id} in Team {self.team.id} died")
         if self in get_model().characters:
