@@ -1,5 +1,6 @@
 """
 This file ONLY defines prototype. No actual thing is done in this file.
+The document of the API is at https://hackmd.io/@seantsao00/challenge_2024_api/edit.
 """
 
 from enum import IntEnum, auto
