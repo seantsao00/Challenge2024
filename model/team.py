@@ -69,28 +69,37 @@ class Team:
             if hasattr(entity, 'team') and entity.team is my_team and hasattr(entity, 'move'):
                 return True
             return False
+        
+        clicked = const.CharTypes.NONE
+        if event.clicked is not None and event.clicked.type == 'tower':
+            event.clicked_tower = event.clicked
+            clicked = const.CharTypes.TOWER
+        elif event.clicked is not None:
+            event.clicked_character = event.clicked
+            clicked = const.CharTypes.CHAR
 
         if event.input_type == const.InputTypes.PICK:
-            if event.clicked is not None and event.clicked.type == 'tower':
-                event.clicked_tower = event.clicked
+
+            if clicked == const.CharTypes.TOWER:
                 if hasattr(event.clicked_tower, 'update_character_type') and event.clicked_tower.team is self:
                     self.controlling = event.clicked_tower
                 else:
                     print('clicked on non interactable tower')
-
-            elif event.clicked is not None:
-                event.clicked_character = event.clicked
+            elif clicked == const.CharTypes.CHAR:
                 if check_movable(event.clicked_character, self):
                     self.controlling = event.clicked_character
                 else:
                     print('clicked on non interactable entity')
-        elif event.input_type == const.InputTypes.MOVE and self.controlling is not None and check_movable(self.controlling, self):
+
+        if event.input_type == const.InputTypes.MOVE and self.controlling is not None and check_movable(self.controlling, self):
             self.controlling.move(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None:
             if self.choose_position is True:
                 self.controlling.call_abilities(event.displacement)
                 self.choose_position = False
-            elif event.clicked_character is not None:
+            elif event.clicked_tower is not None and clicked == const.CharTypes.TOWER:
+                self.controlling.attack(event.clicked_tower)
+            elif event.clicked_character is not None and  clicked == const.CharTypes.CHAR:
                 self.controlling.attack(event.clicked_character)
         elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
             from model.character import RangerFighter

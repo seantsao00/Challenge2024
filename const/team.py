@@ -12,3 +12,8 @@ class InputTypes(Enum):
     MOVE = 1
     ATTACK = 2
     ABILITIES = 3
+
+class CharTypes(Enum):
+    NONE = 0
+    TOWER = 1
+    CHAR = 2
