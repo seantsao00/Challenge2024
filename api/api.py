@@ -89,8 +89,8 @@ class Tower:
 @dataclass
 class CharacterAction():
     """角色能執行的動作"""
-    direction: pg.Vector2 = field(default_factory=pg.Vector2(0, 0))
-    """角色的移動方向"""
+    destination: pg.Vector2 = None
+    """角色的目的地， `None` 代表不改變"""
     attack_target_id: int | None = None
     """角色的攻擊目標， `None` 代表不攻擊"""
     spell: bool = False
