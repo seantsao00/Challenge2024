@@ -36,9 +36,6 @@ class Melee(Character):
         if self.health <= 0:
             self.die()
 
-    def move(self, direction: pg.Vector2):
-        super().move(direction)
-
     def abilities(self):
         print("melee use abilites")
         self.defense = const.MELEE_ABILITIES_VARIABLE

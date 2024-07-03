@@ -113,13 +113,13 @@ class Character(LivingEntity):
         self.alive = False
         self.hidden = True
 
-    def call_abilities(self, *args):
+    def call_abilities(self, *args, **kwargs):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.abilities_cd:
             print('can not use abilities')
             return
         self.abilities_time = now_time
-        self.abilities(*args)
+        self.abilities(*args, **kwargs)
 
-    def abilities(self):
-        return
+    def abilities(self, *args, **kwargs):
+        pass
