@@ -11,6 +11,8 @@ import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
+if TYPE_CHECKING:
+    from model.building import Linked_list, Node
 
 if TYPE_CHECKING:
     from model.team import Team

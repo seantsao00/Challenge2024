@@ -9,11 +9,11 @@ import pygame as pg
 import const
 from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventMultiAttack,
                            EventPauseModel, EventQuit, EventResumeModel, EventSpawnCharacter,
-                           EventUnconditionalTick, EventAttack)
+                           EventUnconditionalTick, EventAttack, EventCharacterDied, EventCharacterMove)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
-from model.entity import Entity
+from model.entity import Entity, LivingEntity
 from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
@@ -42,7 +42,7 @@ class Model:
         self.entities: list[Entity] = []
         self.register_listeners()
         self.dt = 0
-        self.map = load_map(os.path.join(const.map.MAP_DIR, map_name))
+        self.map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.team_names = teams
         self.teams: list[Team] = None
         self.show_view_range = show_view_range
@@ -51,6 +51,8 @@ class Model:
         self.characters = set()
         self.grid = Grid(900, 900)
         self.stop_time = 0
+        self.tower_occupied: list[list[set[Tower]]] = [[set() for _ in range(900)] for _ in range(900)]
+        self.tower: list[Tower] = []
 
     def initialize(self, _: EventInitialize):
         """
@@ -67,13 +69,24 @@ class Model:
                 randint(100, const.ARENA_SIZE[0] - 100), randint(100, const.ARENA_SIZE[1]) - 100)
             team = Team(new_position, "team" + str(i+1), team_master)
             self.teams.append(team)
-            self.test_tower = Tower(new_position, team, 1)
+            self.tower.append(Tower(new_position, team, 1))
         for team in self.teams:
             for i in range(len(self.teams)):
                 if i + 1 != team.id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i + 1)
-        self.neutral_tower = Tower((700, 700))
+        
+        self.tower.append(Tower((700, 700)))
+        for i in self.tower:
+            for x in range(max(0, int(i.position.x - i.attack_range)), min(900, int(i.position.x + i.attack_range))):
+                for y in range(max(0, int(i.position.y - i.attack_range)), min(900, int(i.position.y + i.attack_range))):
+                    in_range = 0
+                    for dx, dy in [[0, 0], [0, 1], [1, 0], [1, 1]]:
+                        if i.position.distance_to(pg.Vector2(x + dx, y + dy)) <= i.attack_range:
+                            in_range = 1
+                            break
+                    if in_range:
+                        self.tower_occupied[x][y].add(i)
 
     def handle_every_tick(self, _: EventEveryTick):
         """
@@ -110,6 +123,9 @@ class Model:
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
             self.characters.add(event.entity)
+            x, y = int(event.entity.position.x), int(event.entity.position.y)
+            for tower in self.tower_occupied[x][y]:
+                tower.enemy_in_range(event.entity)
 
     def multi_attack(self, event: EventMultiAttack):
         attacker = event.attacker
@@ -121,6 +137,27 @@ class Model:
                 if (attacker.team != victim.team and dist <= radius):
                     get_event_manager().post(EventAttack(attacker, victim), victim.id)
 
+    def handle_character_died(self, event: EventCharacterDied):
+        self.grid.delete_from_grid(event.character, event.character.position)
+        self.teams[event.character.team.id - 1].handle_character_died(event.character)
+        x, y = int(event.character.position.x), int(event.character.position.y)
+        for tower in self.tower_occupied[x][y]:
+            tower.enemy_out_range(event.character)
+            print('died remove from', tower.position.x, tower.position.y)
+
+    def handle_character_move(self, event: EventCharacterMove):
+        x1, y1 = int(event.character.position.x), int(event.character.position.y)
+        x2, y2 = int(event.original_pos.x), int(event.original_pos.y)
+        union = set(self.tower_occupied[x1][y1] & self.tower_occupied[x2][y2])
+        add = list(self.tower_occupied[x1][y1] - union)
+        rem = list(self.tower_occupied[x2][y2] - union)
+        for tower in rem:
+            tower.enemy_out_range(event.character)
+        for tower in add:
+            tower.enemy_in_range(event.character)
+        event.character.team.update_visible_entities_list(event.character)
+        
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -131,6 +168,8 @@ class Model:
         ev_manager.register_listener(EventResumeModel, self.handle_resume)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventMultiAttack, self.multi_attack)
+        ev_manager.register_listener(EventCharacterMove, self.handle_character_move)
+        ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
 
     def run(self):
         """Run the main loop of the game."""

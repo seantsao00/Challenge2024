@@ -12,6 +12,7 @@ import view
 from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
+from model.building.linked_list import Linked_list, Node
 from model.character import Character, Melee, RangerFighter, Sniper
 from model.entity import LivingEntity
 from model.team import Team
@@ -42,6 +43,7 @@ class Tower(LivingEntity):
         self.character_type = RangerFighter
         self.attack_range: float = const.TOWER_ATTACK_RANGE
         self.damage: float = const.TOWER_DAMAGE
+        self.enemy: list[Linked_list] = [Linked_list() for _ in range(5)]
         self.spawn_timer = None
         if not is_fountain:
             self.attack_timer = Timer(const.tower.TOWER_ATTACK_PERIOD, self.attack, once=False)
@@ -104,8 +106,20 @@ class Tower(LivingEntity):
             self.health -= event.attacker.damage
 
     def attack(self):
-        model = get_model()
-        nearest_character = model.grid.get_closet_enemy(self.position, self.team, 100, 1)
-        if len(nearest_character) != 0:
-            get_event_manager().post(EventAttack(
-                self, nearest_character[0]), nearest_character[0].id)
+        victim: Node = None
+        for i in range(1, 5):
+            if (self.team == None or self.team.id != i) and self.enemy[i].front() != None and (victim == None or victim.time > self.enemy[i].front().time):
+                victim = self.enemy[i].front()
+        if victim != None:
+            get_event_manager().post(EventAttack(self, victim.character), victim.character.id)
+            
+    def enemy_in_range(self, character: Character):
+        if character.id in self.enemy[character.team.id].map:
+            return
+        self.enemy[character.team.id].push_back(character, get_model().get_time())
+
+    def enemy_out_range(self, character: Character):
+        if character.id not in self.enemy[character.team.id].map:
+            return
+        self.enemy[character.team.id].delete(character)
+

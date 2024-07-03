@@ -25,6 +25,7 @@ class Melee(Character):
         super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
                          const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ATTACK_SPEED, const.MELEE_ABILITIES_CD)
         self.defense = defense
+        self.imgstate = 'melee'
 
     def take_damage(self, event: EventAttack):
         if self.defense > 0:
