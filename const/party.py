@@ -1,5 +1,5 @@
 """
-This module defines constants associated with parties.
+This module defines constants associated with party-selection.
 """
 
 from enum import Enum, auto
