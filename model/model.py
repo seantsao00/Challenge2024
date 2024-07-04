@@ -1,23 +1,29 @@
 """
 The module defines the main game engine.
 """
+from __future__ import annotations
+
 import os
 from random import randint
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
-from event_manager import (EventCreateEntity, EventEveryTick, EventInitialize, EventMultiAttack,
-                           EventPauseModel, EventQuit, EventResumeModel, EventSpawnCharacter,
-                           EventUnconditionalTick, EventAttack, EventCharacterDied, EventCharacterMove)
+from event_manager import (EventAttack, EventCharacterDied, EventCharacterMove, EventCreateEntity,
+                           EventEveryTick, EventInitialize, EventMultiAttack, EventPauseModel,
+                           EventQuit, EventResumeModel, EventSpawnCharacter,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
-from model.entity import Entity, LivingEntity
 from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
 from model.team import Team
+
+if TYPE_CHECKING:
+    from model.entity import Entity
 
 
 class Model:
@@ -51,7 +57,8 @@ class Model:
         self.characters = set()
         self.grid = Grid(900, 900)
         self.stop_time = 0
-        self.tower_occupied: list[list[set[Tower]]] = [[set() for _ in range(900)] for _ in range(900)]
+        self.tower_occupied: list[list[set[Tower]]] = [
+            [set() for _ in range(900)] for _ in range(900)]
         self.tower: list[Tower] = []
 
     def initialize(self, _: EventInitialize):
@@ -65,8 +72,7 @@ class Model:
         self.teams = []
 
         for i, team_master in enumerate(self.team_names):
-            new_position = pg.Vector2(
-                randint(100, const.ARENA_SIZE[0] - 100), randint(100, const.ARENA_SIZE[1]) - 100)
+            new_position = pg.Vector2(self.map.fountains[i])
             team = Team(new_position, "team" + str(i+1), team_master)
             self.teams.append(team)
             self.tower.append(Tower(new_position, team, 1))
@@ -75,7 +81,7 @@ class Model:
                 if i + 1 != team.id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i + 1)
-        
+
         self.tower.append(Tower((700, 700)))
         for i in self.tower:
             for x in range(max(0, int(i.position.x - i.attack_range)), min(900, int(i.position.x + i.attack_range))):
@@ -155,7 +161,6 @@ class Model:
         for tower in add:
             tower.enemy_in_range(event.character)
         event.character.team.update_visible_entities_list(event.character)
-        
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

@@ -6,7 +6,6 @@ import random
 import pygame as pg
 
 import const
-import const.map
 import util
 
 

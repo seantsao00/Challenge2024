@@ -8,8 +8,7 @@ import const
 from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
                            EventResumeModel, EventSelectCharacter, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
-from model.character import Melee, RangerFighter, Sniper
-from model.timer import TimerManager
+from model import Melee, RangerFighter, Sniper, TimerManager
 
 
 class Controller:

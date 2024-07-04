@@ -7,7 +7,6 @@ from random import choice, randint
 import pygame as pg
 
 import const
-import const.tower
 import view
 from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
@@ -38,7 +37,7 @@ class Tower(LivingEntity):
         super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION,
                          entity_type=entity_type, team=team, imgstate=imgstate)
         self.log = []
-        self.period = const.tower.INITIAL_PERIOD_MS
+        self.period = const.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
         self.character_type = RangerFighter
         self.attack_range: float = const.TOWER_ATTACK_RANGE
@@ -63,14 +62,13 @@ class Tower(LivingEntity):
         get_event_manager().post(EventCreateTower(tower=self))
 
     def update_period(self):
-        self.period = const.tower.INITIAL_PERIOD_MS + \
-            int(const.tower.FORMULA_K * len(self.team.building_list) ** 0.5)
+        self.period = const.INITIAL_PERIOD_MS + \
+            int(const.FORMULA_K * len(self.team.building_list) ** 0.5)
 
     def generate_character(self, timestamp=pg.time.get_ticks()):
         character_type = self.character_type
         self.log.append((character_type, timestamp))
-        new_position = pg.Vector2(
-            choice([1, -1]) * (50 + randint(-50, 50)), choice([1, -1]) * (50 + randint(-50, 50)))
+        new_position = pg.Vector2(0, 20)
         new_character = character_type(self.team, self.position + new_position)
         get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.id)
         self.set_timer()
@@ -109,7 +107,7 @@ class Tower(LivingEntity):
                 victim = self.enemy[i].front()
         if victim != None:
             get_event_manager().post(EventAttack(attacker=self, victim=victim.character), victim.character.id)
-            
+
     def enemy_in_range(self, character: Character):
         if character.id in self.enemy[character.team.id].map:
             return
@@ -119,4 +117,3 @@ class Tower(LivingEntity):
         if character.id not in self.enemy[character.team.id].map:
             return
         self.enemy[character.team.id].delete(character)
-

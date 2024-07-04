@@ -8,7 +8,6 @@ import const
 
 if TYPE_CHECKING:
     from model import Entity
-    from model.character import Entity
 
 
 class RangeView:

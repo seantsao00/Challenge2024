@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-import const.map
 import util
 import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
+
 if TYPE_CHECKING:
     from model.building import Linked_list, Node
 
