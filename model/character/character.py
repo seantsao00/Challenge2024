@@ -7,14 +7,12 @@ import pygame as pg
 import const
 import util
 import view
-from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
+from event_manager import EventAttack, EventCharacterDied, EventCharacterMove, EventEveryTick
 from instances_manager import get_event_manager, get_model
 from model.entity import Entity, LivingEntity
 
 if TYPE_CHECKING:
     from model.building import Linked_list, Node
-
-if TYPE_CHECKING:
     from model.team import Team
 
 
@@ -33,7 +31,7 @@ class Character(LivingEntity):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
                  attack_range: float, damage: float, health: float, vision: float, attack_speed: float, abilities_cd: float, imgstate: str):
-        super().__init__(health, position, vision, entity_type='team' + str(team.id), team=team, imgstate=imgstate)
+        super().__init__(health, position, vision, entity_type=team.name, team=team, imgstate=imgstate)
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
@@ -42,6 +40,7 @@ class Character(LivingEntity):
         self.abilities_cd: float = abilities_cd
         self.attack_speed: int = attack_speed
         self.attack_time: float = -100
+        self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
         model = get_model()
         if model.show_view_range:
             self.view.append(view.ViewRangeView(self))
@@ -51,6 +50,7 @@ class Character(LivingEntity):
         if self.health is not None:
             self.view.append(view.HealthView(self))
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
+        get_event_manager().register_listener(EventEveryTick, self.tick_move)
 
     def move(self, direction: pg.Vector2):
         """
@@ -87,6 +87,10 @@ class Character(LivingEntity):
                 cur_direction += min_direction
 
         get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
+
+    def tick_move(self, event: EventEveryTick):
+        """Move but it is called by every tick."""
+        self.move(self.move_direction)
 
     def take_damage(self, event: EventAttack):
         self.health -= event.attacker.damage
