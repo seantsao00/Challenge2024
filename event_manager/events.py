@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Bullet, Character, Entity, Tower
+    from model import Bullet, BulletRanger, BulletSniper, Character, Entity, Tower
 
 
 @dataclass(kw_only=True)
@@ -138,14 +138,13 @@ class EventBulletCreate(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventBulletMove(BaseEvent):
-    bullet: Bullet
-    original_pos: pg.Vector2
+class EventSniperBulletDamage(BaseEvent):
+    bullet: BulletSniper
 
 
 @dataclass(kw_only=True)
-class EventBulletDamage(BaseEvent):
-    bullet: Bullet
+class EventRangerBulletDamage(BaseEvent):
+    bullet: BulletRanger
 
 
 @dataclass(kw_only=True)

@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+import const.character
 import const.team
-from event_manager import (EventBulletCreate, EventBulletDamage, EventBulletDisappear,
-                           EventBulletMove, EventCharacterDied, EventCharacterMove,
-                           EventCreateTower, EventEveryTick, EventHumanInput, EventSelectCharacter,
+from event_manager import (EventBulletCreate, EventBulletDisappear, EventCharacterDied,
+                           EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventRangerBulletDamage, EventSelectCharacter, EventSniperBulletDamage,
                            EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import RangerFighter
@@ -58,8 +59,8 @@ class Team:
         get_event_manager().register_listener(EventSpawnCharacter, self.gain_character, self.id)
         get_event_manager().register_listener(EventSelectCharacter, self.select_character)
         get_event_manager().register_listener(EventBulletCreate, self.create_bullet)
-        get_event_manager().register_listener(EventBulletMove, self.bullet_move)
-        get_event_manager().register_listener(EventBulletDamage, self.bullet_damage)
+        get_event_manager().register_listener(EventRangerBulletDamage, self.ranger_damage)
+        get_event_manager().register_listener(EventSniperBulletDamage, self.sniper_damage)
         get_event_manager().register_listener(EventBulletDisappear, self.bullet_disappear)
 
     def handle_input(self, event: EventHumanInput):
@@ -175,14 +176,17 @@ class Team:
             self.controlling.update_character_type(event.character)
             print(f'The character produced by team{self.id} is modified to {event.character}')
 
-    def create_bullet():
-        pass
+    def create_bullet(self, event: EventBulletCreate):
+        event.bullet.judge()
 
-    def bullet_move():
-        pass
+    def ranger_damage(self, event: EventRangerBulletDamage):
+        model = get_model()
+        for entity in model.entities:
+            if (entity.position-event.bullet.target.position).length() < event.bullet.range and entity.team is not self:
+                entity.take_damage(event.bullet.damage)
 
-    def bullet_damage():
-        pass
+    def sniper_damage(self, event: EventSniperBulletDamage):
+        event.bullet.victim.take_damage(event.bullet.damage)
 
-    def bullet_disappear():
-        pass
+    def bullet_disappear(self, event: EventBulletDisappear):
+        event.bullet.exist = False

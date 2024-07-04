@@ -2,7 +2,7 @@ import pygame as pg
 
 from event_manager import EventCharacterDied, EventCharacterMove, EventCreateEntity
 from instances_manager import get_event_manager
-from model import Character, Entity, Team, Tower
+from model import Bullet, Character, Entity, Team, Tower
 
 
 class Cell:
@@ -18,6 +18,7 @@ class Cell:
         self.position: pg.Vector2 = position
         self.fountain = None
         self.tower = None
+        self.bullet = None
         self.characters: set[Character] = set()
 
     def add(self, entity: Entity):
@@ -25,6 +26,8 @@ class Cell:
             self.characters.add(entity)
         elif isinstance(entity, Tower):
             self.tower = entity
+        elif isinstance(entity, Bullet):
+            self.bullet = entity
         else:
             raise NotImplementedError
 
