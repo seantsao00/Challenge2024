@@ -7,9 +7,9 @@ import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterDied)
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
+                           EventEveryTick, EventHumanInput, EventSelectCharacter,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import RangerFighter
 
@@ -36,20 +36,20 @@ class Team:
 
     total = 0
 
-    def __init__(self, fountain_position: pg.Vector2, name: str, master: str):
+    def __init__(self, fountain_position: pg.Vector2, manual_control: bool):
         if Team.total == 4:
             raise Exception('Team size exceeds.')
-        Team.total += 1
         self.id = Team.total
-        self.name = name
+        Team.total += 1
+        self.name = "team" + str(Team.total)
         self.points = 0
-        self.master = master
+        self.manual_control = manual_control
         self.building_list: list[Tower] = []
         self.character_list: list[Character] = []
         self.visible_entities_list: set[Entity] = set()
         self.choose_position = False
         self.controlling = None
-        if master == 'human':
+        if manual_control:
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
         get_event_manager().register_listener(EventCreateTower, self.handle_create_tower)
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
@@ -117,23 +117,23 @@ class Team:
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.building_list:
             self.building_list.append(event.tower)
-        print(self.id, " gained a tower with id",
-              event.tower.id, " at", event.tower.position)
+        print(self.name, "gained a tower with id",
+              event.tower.id, "at", event.tower.position)
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(self.id, " lost a tower with id", event.tower.id, " at", event.tower.position)
+        print(self.name, "lost a tower with id", event.tower.id, "at", event.tower.position)
         if event.tower in self.building_list:
             self.building_list.remove(event.tower)
 
     def gain_point_kill(self):
         b = 1
         self.points += b
-        print(self.id, " gain", b, "points.")
+        print(self.name, " gain", b, "points.")
 
     def gain_point_tower(self, event: EventEveryTick):
         a = 1
         self.points += a * len(self.building_list)
-        print(self.id, " gain", a * len(self.building_list), "points.")
+        print(self.name, " gain", a * len(self.building_list), "points.")
 
     def handle_character_died(self, event: EventCharacterDied):
         if self.controlling is event.character:
@@ -142,7 +142,6 @@ class Team:
             self.character_list.remove(event.character)
         if event.character in self.visible_entities_list:
             self.visible_entities_list.remove(event.character)
-            
 
     def handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)
@@ -173,4 +172,4 @@ class Team:
     def select_character(self, event: EventSelectCharacter):
         if self.controlling is not None and hasattr(self.controlling, 'update_character_type'):
             self.controlling.update_character_type(event.character)
-            print(f'The character produced by team{self.id} is modified to {event.character}')
+            print(f'The character produced by {self.name} is modified to {event.character}')

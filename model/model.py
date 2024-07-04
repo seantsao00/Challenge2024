@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from api.internal import call_ai, load_ai
 from event_manager import (EventAttack, EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventInitialize, EventPauseModel, EventQuit, 
                            EventResumeModel, EventSpawnCharacter, EventUnconditionalTick)
@@ -32,7 +33,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self, map_name: str, teams: list[Team], show_view_range: bool, show_attack_range: bool):
+    def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool):
         """
         Initialize the Model object.
 
@@ -48,7 +49,7 @@ class Model:
         self.register_listeners()
         self.dt = 0
         self.map = load_map(os.path.join(const.MAP_DIR, map_name))
-        self.team_names = teams
+        self.team_files_names: list[str] = team_files
         self.teams: list[Team] = None
         self.show_view_range = show_view_range
         self.show_attack_range = show_attack_range
@@ -65,19 +66,21 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
+        load_ai(self.team_files_names)
+
         self.state = const.State.PLAY
         self.teams = []
 
-        for i, team_master in enumerate(self.team_names):
+        for i, team_master in enumerate(self.team_files_names):
             new_position = pg.Vector2(self.map.fountains[i])
-            team = Team(new_position, "team" + str(i+1), team_master)
+            team = Team(new_position, team_master == 'human')
             self.teams.append(team)
             self.tower.append(Tower(new_position, team, 1))
         for team in self.teams:
             for i in range(len(self.teams)):
-                if i + 1 != team.id:
+                if i != team.id:
                     get_event_manager().register_listener(EventSpawnCharacter,
-                                                          team.handle_others_character_spawn, i + 1)
+                                                          team.handle_others_character_spawn, i)
 
         self.tower.append(Tower((700, 700)))
 
@@ -88,6 +91,8 @@ class Model:
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
         """
+        for i in range(len(self.teams)):
+            call_ai(i)
 
     def handle_quit(self, _: EventQuit):
         """

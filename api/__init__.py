@@ -1,2 +1,1 @@
-import api.api
-import api.internal
+import api.prototype
