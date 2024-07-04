@@ -10,16 +10,16 @@ import util
 import view
 from event_manager import EventBulletDamage, EventBulletEnd, EventBulletMove, EventBulletStart
 from instances_manager import get_event_manager, get_model
+from model.bullet import Bullet
 from model.entity import Entity
 
 if TYPE_CHECKING:
     from model.team import Team
 
 
-class Bullet(Entity):
+class BulletRanger(Bullet):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = 0.0, imgstate: str = 'default') -> None:
-        super().__init__(position, entity_type=entity_type, imgstate=imgstate)
-        self.direction: pg.Vector2 | tuple[float, float] = None
-        self.speed: float = speed
-        self.exist: bool = True
+                 speed: float = 0.0, imgstate: str = 'default', target: Entity = None, range: float = 0.0) -> None:
+        super().__init__(position=position, entity_type=entity_type, imgstate=imgstate, speed=speed)
+        self.target = target
+        self.range = range
