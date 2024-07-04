@@ -51,7 +51,8 @@ class Model:
         self.characters = set()
         self.grid = Grid(900, 900)
         self.stop_time = 0
-        self.tower_occupied: list[list[set[Tower]]] = [[set() for _ in range(900)] for _ in range(900)]
+        self.tower_occupied: list[list[set[Tower]]] = [
+            [set() for _ in range(900)] for _ in range(900)]
         self.tower: list[Tower] = []
 
     def initialize(self, _: EventInitialize):
@@ -75,7 +76,7 @@ class Model:
                 if i + 1 != team.id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i + 1)
-        
+
         self.tower.append(Tower((700, 700)))
         for i in self.tower:
             for x in range(max(0, int(i.position.x - i.attack_range)), min(900, int(i.position.x + i.attack_range))):
@@ -156,7 +157,6 @@ class Model:
         for tower in add:
             tower.enemy_in_range(event.character)
         event.character.team.update_visible_entities_list(event.character)
-        
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

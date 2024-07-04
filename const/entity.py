@@ -8,7 +8,8 @@ ENTITY_STATES = {
     "default": ["default"],
     "team1": ["default", "melee", "ranger", "sniper"],
     "team2": ["default", "melee", "ranger", "sniper"],
-    "tower": ["default", "temporary_blue_nexus", "team1", "team2"]
+    "tower": ["default", "temporary_blue_nexus", "team1", "team2"],
+    "bullet": ["default"],
 }
 
 ENTITY_RADIUS: float = 20

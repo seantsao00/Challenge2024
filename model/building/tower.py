@@ -109,7 +109,7 @@ class Tower(LivingEntity):
                 victim = self.enemy[i].front()
         if victim != None:
             get_event_manager().post(EventAttack(attacker=self, victim=victim.character), victim.character.id)
-            
+
     def enemy_in_range(self, character: Character):
         if character.id in self.enemy[character.team.id].map:
             return
@@ -119,4 +119,3 @@ class Tower(LivingEntity):
         if character.id not in self.enemy[character.team.id].map:
             return
         self.enemy[character.team.id].delete(character)
-

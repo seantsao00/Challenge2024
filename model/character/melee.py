@@ -8,6 +8,7 @@ from model.entity import Entity
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
 
+
 class Melee(Character):
     """
 

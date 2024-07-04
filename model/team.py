@@ -140,7 +140,6 @@ class Team:
             self.character_list.remove(character)
             if character in self.visible_entities_list:
                 self.visible_entities_list.remove(character)
-            
 
     def handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)
