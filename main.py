@@ -13,6 +13,7 @@ from controller import Controller
 from event_manager import EventManager
 from model import Model
 from view import View
+from music.music import BackgroundMusic
 
 
 def main():
@@ -34,6 +35,7 @@ def main():
                         help='If added, the attack range of entities will be shown')
     parser.add_argument('--vision-of', default='all',
                         help='Display the vision of which player. If not assigned or assigned "all", all visible entities are displayed. Team id or team name can be assigned.')
+    parser.add_argument('-m', '--music', action='store_true', help='play the BGM')
 
     args = parser.parse_args()
     teams: list[str] = args.team_control
@@ -47,6 +49,9 @@ def main():
 
     Controller()
     View(args.vision_of)
+
+    if args.music:
+        BackgroundMusic()
 
     # Main loop
     model.run()
