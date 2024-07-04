@@ -38,7 +38,7 @@ class EventStartGame(BaseEvent):
 
     For example, press space at cover scene would leave cover and start the game.
     """
-
+    
 
 @dataclass(kw_only=True)
 class EventPauseModel(BaseEvent):
@@ -87,6 +87,11 @@ class EventHumanInput(BaseEvent):
         if self.input_type == const.InputTypes.PICK:
             return f"Clicked at {self.clicked.id}"
         return f"Move {self.displacement}"
+    
+
+@dataclass(kw_only=True)
+class EventPartySelection(BaseEvent):
+    """Event posted when player is selecting parties"""
 
 
 @dataclass(kw_only=True)

@@ -6,7 +6,7 @@ import pygame as pg
 
 import const
 from event_manager import (EventEveryTick, EventUnconditionalTick, EventHumanInput, EventInitialize,
-                           EventQuit, EventPauseModel, EventResumeModel, EventStartGame)
+                           EventQuit, EventPauseModel, EventResumeModel, EventStartGame, EventPartySelection)
 from instances_manager import get_event_manager, get_model
 from model.timer import TimerManager
 

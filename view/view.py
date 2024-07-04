@@ -85,6 +85,8 @@ class View:
         model = get_model()
         if model.state == const.State.COVER:
             self.render_cover()
+        elif model.state == const.State.SELECT_PARTY:
+            self.render_party_selection()
         elif model.state == const.State.PLAY:
             self.render_play()
         pg.display.flip()
