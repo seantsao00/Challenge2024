@@ -72,8 +72,7 @@ class Model:
         self.teams = []
 
         for i, team_master in enumerate(self.team_names):
-            new_position = pg.Vector2(
-                randint(100, const.ARENA_SIZE[0] - 100), randint(100, const.ARENA_SIZE[1]) - 100)
+            new_position = pg.Vector2(self.map.fountains[i])
             team = Team(new_position, "team" + str(i+1), team_master)
             self.teams.append(team)
             self.tower.append(Tower(new_position, team, 1))
