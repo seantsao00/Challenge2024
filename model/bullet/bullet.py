@@ -1,16 +1,16 @@
-from model.entity import Entity
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from __future__ import annotations
 
 import pygame as pg
 
 import const
 import const.map
-from instances_manager import get_event_manager, get_model
-from event_manager import EventBulletStart, EventBulletMove, EventBulletEnd
 import util
 import view
+from event_manager import EventBulletEnd, EventBulletMove, EventBulletStart
+from instances_manager import get_event_manager, get_model
+from model.entity import Entity
 
 if TYPE_CHECKING:
     from model.team import Team
@@ -31,9 +31,6 @@ class Bullet(Entity):
         """
         original_pos = self.position
         target_pos = victim.position
-        direction = target_pos - original_pos
-        if direction.length() > self.speed:
-            direction = self.speed * direction.normalize()
-        
+        self.direction = (target_pos - original_pos).normalize()
+
         get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, victim=victim))
-    

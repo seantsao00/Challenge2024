@@ -7,9 +7,9 @@ import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterDied)
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
+                           EventEveryTick, EventHumanInput, EventSelectCharacter,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import RangerFighter
 
@@ -101,8 +101,6 @@ class Team:
                 self.choose_position = False
             elif clicked is not None and hasattr(self.controlling, 'attack'):
                 self.controlling.attack(clicked)
-            elif clicked is not None and hasattr(self.controlling, 'shoot'):
-                self.controlling.shoot(clicked)
 
         elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
             if isinstance(self.controlling, RangerFighter):

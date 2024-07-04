@@ -1,8 +1,8 @@
 import const
-from model.character import Character
-from model.entity import Entity
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
+from model.character import Character
+from model.entity import Entity
 
 
 class Sniper(Character):
@@ -19,7 +19,7 @@ class Sniper(Character):
         self.ability = ability
         self.imgstate = 'sniper'
 
-    def shoot(self, enemy: Entity):
+    def attack(self, enemy: Entity):
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
