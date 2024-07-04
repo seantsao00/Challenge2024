@@ -139,7 +139,6 @@ class Model:
 
     def handle_character_died(self, event: EventCharacterDied):
         self.grid.delete_from_grid(event.character, event.character.position)
-        self.teams[event.character.team.id - 1].handle_character_died(event.character)
         x, y = int(event.character.position.x), int(event.character.position.y)
         for tower in self.tower_occupied[x][y]:
             tower.enemy_out_range(event.character)
