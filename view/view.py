@@ -111,14 +111,16 @@ class View:
         self.arena.blit(background_image, (0, 0))
 
         if self.vision_of == const.VIEW_EVERYTHING:
-            for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
+            for view_object in chain(*zip_longest(*[en.view for en in sorted(model.entities,
+                                                                              key = lambda k: (k.position.y,k.position.x))], fillvalue=None)):
                 if view_object is not None:
                     view_object.draw(self.arena)
         else:
             my_team = model.teams[self.vision_of - 1]
-            for view_object in chain(*zip_longest(*[en.view for en in chain(my_team.building_list,
+            for view_object in chain(*zip_longest(*[en.view for en in sorted(chain(my_team.building_list,
                                                                             my_team.character_list,
-                                                                            my_team.visible_entities_list)], fillvalue=None)):
+                                                                            my_team.visible_entities_list), 
+                                                                            key = lambda k: (k.position.y,k.position.x))], fillvalue=None)):
                 if view_object is not None:
                     view_object.draw(self.arena)
 
