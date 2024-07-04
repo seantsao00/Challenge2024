@@ -9,7 +9,7 @@ class PauseMenu:
         self.enabled: bool = False
         self.options = ['Resume', 'Restart', 'Exit']
         self.selected = 0
-        
+
     def change_selected(self, move):
         self.selected += move
         if self.selected == 3:
@@ -19,6 +19,6 @@ class PauseMenu:
 
     def enable_menu(self):
         self.enabled = True
-    
+
     def disable_menu(self):
         self.enabled = False

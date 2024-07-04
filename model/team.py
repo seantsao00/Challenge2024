@@ -7,15 +7,15 @@ import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventEveryTick, EventHumanInput,
-                           EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterMove,
-                           EventCreateTower)
+from event_manager import (EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower, EventCharacterDied)
 from instances_manager import get_event_manager, get_model
+from model.character import RangerFighter
 
 if TYPE_CHECKING:
     from model.building import Tower
-    from model.character import Character
+    from model.character import Character, Melee, RangerFighter, Sniper
     from model.entity import Entity, LivingEntity
 
 
@@ -47,23 +47,23 @@ class Team:
         self.building_list: list[Tower] = []
         self.character_list: list[Character] = []
         self.visible_entities_list: set[Entity] = set()
+        self.choose_position = False
+        self.controlling = None
         if master == 'human':
-            self.controlling = None
             get_event_manager().register_listener(EventHumanInput, self.handle_input)
-        get_event_manager().register_listener(EventCharacterMove, self.handle_character_move)
         get_event_manager().register_listener(EventCreateTower, self.handle_create_tower)
         get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
         get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
         get_event_manager().register_listener(EventSpawnCharacter, self.gain_character, self.id)
+        get_event_manager().register_listener(EventSelectCharacter, self.select_character)
 
     def handle_input(self, event: EventHumanInput):
         """
         Handles input by human. This method is only used by human controlled teams.
         """
-        def check_interactable(entity: Entity, my_team: Team):
+        def check_movable(entity: Entity, my_team: Team):
             """
-            This function checks if the clicked entity is actually interactable by the human controlled team.
-            Any new interactive feature implementation should modify this function.
+            This function checks if the clicked entity is actually movable by the human controlled team.
             """
             if entity is None:
                 return False
@@ -71,15 +71,44 @@ class Team:
                 return True
             return False
 
+        clicked_tower: Tower = None
+        clicked_character: Character = None
+        clicked = const.CharTypes.NONE
+
+        if event.clicked is not None and event.clicked.type == 'tower':
+            clicked_tower = event.clicked
+            clicked = const.CharTypes.TOWER
+        elif event.clicked is not None:
+            clicked_character = event.clicked
+            clicked = const.CharTypes.CHAR
+
         if event.input_type == const.InputTypes.PICK:
-            if check_interactable(event.clicked, self):
-                self.controlling = event.clicked
-            else:
-                print('clicked on non interactable entity')
-        elif event.input_type == const.InputTypes.MOVE and self.controlling is not None:
+            if clicked == const.CharTypes.TOWER:
+                if hasattr(clicked_tower, 'update_character_type') and clicked_tower.team is self:
+                    self.controlling = clicked_tower
+                else:
+                    print('clicked on non interactable tower')
+            elif clicked == const.CharTypes.CHAR:
+                if check_movable(clicked_character, self):
+                    self.controlling = clicked_character
+                else:
+                    print('clicked on non interactable entity')
+
+        if event.input_type == const.InputTypes.MOVE and self.controlling is not None and check_movable(self.controlling, self):
             self.controlling.move(event.displacement)
-        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None and event.clicked is not None:
-            self.controlling.attack(event.clicked)
+        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None:
+            if self.choose_position is True:
+                self.controlling.call_abilities(event.displacement)
+                self.choose_position = False
+            elif clicked_tower is not None and clicked == const.CharTypes.TOWER:
+                self.controlling.attack(clicked_tower)
+            elif clicked_character is not None and clicked == const.CharTypes.CHAR:
+                self.controlling.attack(clicked_character)
+        elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
+            if isinstance(self.controlling, RangerFighter):
+                self.choose_position = True
+            else:
+                self.controlling.call_abilities()
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)
@@ -105,9 +134,14 @@ class Team:
         self.points += a * len(self.building_list)
         print(self.id, " gain", a * len(self.building_list), "points.")
 
-    def handle_character_move(self, event: EventCharacterMove):
-        self.update_visible_entities_list(event.character)
-    
+    def handle_character_died(self, character: Character):
+        if self.controlling is character:
+            self.controlling = None
+            self.character_list.remove(character)
+            if character in self.visible_entities_list:
+                self.visible_entities_list.remove(character)
+            
+
     def handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)
 
@@ -125,11 +159,16 @@ class Team:
 
         if entity.team is self:
             for other_entity in model.entities:
-                if (other_entity.team is not self and 
-                    other_entity.position.distance_to(entity.position) <= entity.vision):
+                if (other_entity.team is not self and
+                        other_entity.position.distance_to(entity.position) <= entity.vision):
                     self.visible_entities_list.add(other_entity)
         else:
             for my_entity in chain(self.building_list, self.character_list):
                 if my_entity.alive and entity.position.distance_to(my_entity.position) <= my_entity.vision:
                     self.visible_entities_list.add(entity)
                     break
+
+    def select_character(self, event: EventSelectCharacter):
+        if self.controlling is not None and hasattr(self.controlling, 'update_character_type'):
+            self.controlling.update_character_type(event.character)
+            print(f'The character produced by team{self.id} is modified to {event.character}')

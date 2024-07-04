@@ -10,10 +10,10 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventUnconditionalTick, EventInitialize
+from event_manager import EventInitialize, EventUnconditionalTick
 from instances_manager import get_event_manager, get_model
-from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase,
-                         ViewRangeView, PauseMenuView)
+from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase, PauseMenuView,
+                         ViewRangeView)
 
 
 class View:
@@ -31,11 +31,8 @@ class View:
         model = get_model()
 
         size = pg.display.Info()
-        self.arena = pg.display.set_mode(
-            size=const.ARENA_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
-        self.canvas = pg.display.set_mode(
-            # Draw team UI(anything outside of arena) on self.canvas
-            size=const.WINDOW_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
+        self.arena = pg.Surface(size=const.ARENA_SIZE)
+        self.canvas = pg.Surface(size=const.WINDOW_SIZE)
         window_w = min(size.current_w, size.current_h / 9 * 16)
         window_h = min(size.current_h, size.current_w / 16 * 9)
         self.screen = pg.display.set_mode(

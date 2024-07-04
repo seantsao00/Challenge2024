@@ -6,14 +6,15 @@ The document of the API is at https://hackmd.io/@seantsao00/challenge_2024_api/e
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 
+
 import pygame as pg
 
 
 class CharacterClass(IntEnum):
     """角色種類。`melee`、`lookout`、`ranged` 分別代表近戰、視野以及遠程兵。"""
     melee = auto()
-    lookout = auto()
-    ranged = auto()
+    sniper = auto()
+    ranger = auto()
     unknown = auto()
     pass
 
