@@ -10,10 +10,12 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+import const.map
 from api.internal import call_ai, load_ai
 from event_manager import (EventAttack, EventCharacterDied, EventCharacterMove, EventCreateEntity,
-                           EventEveryTick, EventInitialize, EventPauseModel, EventQuit, 
-                           EventResumeModel, EventSpawnCharacter, EventUnconditionalTick)
+                           EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
+                           EventResumeModel, EventSpawnCharacter, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -43,7 +45,7 @@ class Model:
         they should be initialized in Model.initialize()
         """
         self.running: bool = False
-        self.state = const.State.PAUSE
+        self.state = const.State.COVER
         self.clock = pg.time.Clock()
         self.entities: list[Entity] = []
         self.register_listeners()
@@ -114,6 +116,14 @@ class Model:
         self.stop_time += self.tmp_timer.tick()
         self.state = const.State.PLAY
 
+    def handle_start(self, _: EventStartGame):
+        """
+        Start the game and post EventInitialize
+        """
+
+        ev_manager = get_event_manager()
+        ev_manager.post(EventInitialize())
+
     def get_time(self):
         return (pg.time.get_ticks() - self.stop_time) / 1000
 
@@ -146,6 +156,7 @@ class Model:
         ev_manager.register_listener(EventQuit, self.handle_quit)
         ev_manager.register_listener(EventPauseModel, self.handle_pause)
         ev_manager.register_listener(EventResumeModel, self.handle_resume)
+        ev_manager.register_listener(EventStartGame, self.handle_start)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventCharacterMove, self.handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
@@ -155,7 +166,7 @@ class Model:
         self.running = True
         # Tell every one to start
         ev_manager = get_event_manager()
-        ev_manager.post(EventInitialize())
+
         while self.running:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:
