@@ -46,8 +46,8 @@ class Entity:
 class LivingEntity(Entity):
     def __init__(self, health: float, position: pg.Vector2 | tuple[float, float], vision: float,
                  entity_type: str = 'default', team: Team = None, imgstate: str = 'default') -> None:
+        self.alive: bool = True
         super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
         self.health: float = health
         self.max_health: float = health
         self.vision: float = vision
-        self.alive: bool = True

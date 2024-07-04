@@ -107,14 +107,11 @@ class Character(LivingEntity):
         print(f"Character {self.id} in Team {self.team.id} died")
         self.alive = False
         self.hidden = True
-        if self in get_model().characters:
-            get_model().characters.remove(self)
-            get_event_manager().post(EventCharacterDied(character=self))
+        get_event_manager().post(EventCharacterDied(character=self))
 
     def call_abilities(self, *args, **kwargs):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.abilities_cd:
-            print('can not use abilities')
             return
         self.abilities_time = now_time
         self.abilities(*args, **kwargs)
