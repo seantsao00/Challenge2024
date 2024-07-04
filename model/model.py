@@ -1,8 +1,11 @@
 """
 The module defines the main game engine.
 """
+from __future__ import annotations
+
 import os
 from random import randint
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -13,11 +16,13 @@ from event_manager import (EventAttack, EventCreateEntity, EventEveryTick, Event
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
-from model.entity import Entity
 from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
 from model.team import Team
+
+if TYPE_CHECKING:
+    from model.entity import Entity
 
 
 class Model:

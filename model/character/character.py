@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-import const.map
 import util
 import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove
@@ -81,7 +80,7 @@ class Character(LivingEntity):
                 get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
                 return
 
-            if game_map.get_type(new_position) == const.map.MAP_OBSTACLE:
+            if game_map.get_type(new_position) == const.MAP_OBSTACLE:
                 self.position = new_position - min_direction
                 get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
                 return
