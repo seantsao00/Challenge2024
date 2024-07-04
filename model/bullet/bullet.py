@@ -17,12 +17,15 @@ if TYPE_CHECKING:
 
 
 class Bullet(Entity):
-    def __init__(self, position: pg.Vector2 | tuple[float, float], direction: pg.Vector2 | tuple[float, float],
-                 entity_type: str = 'bullet', team: Team = None, imgstate: str = 'default',
-                 speed: float = 0.0) -> None:
-        super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
-        self.direction: pg.Vector2 | tuple[float, float] = direction
+    def __init__(self, position: pg.Vector2 | tuple[float, float], target: Entity,
+                 entity_type: str = 'bullet', imgstate: str = 'default',
+                 speed: float = 0.0, is_ranged: bool = False, radius: float = None) -> None:
+        super().__init__(position, entity_type=entity_type, imgstate=imgstate)
+        self.direction: pg.Vector2 | tuple[float, float] = None
+        self.target: Entity = target
         self.speed: float = speed
+        self.is_ranged: bool = is_ranged
+        self.radius: float = radius
         self.exist: bool = True
 
     def move(self, victim: Entity):
