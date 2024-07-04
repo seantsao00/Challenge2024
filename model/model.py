@@ -37,7 +37,7 @@ class Model:
         they should be initialized in Model.initialize()
         """
         self.running: bool = False
-        self.state = const.State.PAUSE
+        self.state = const.State.COVER
         self.clock = pg.time.Clock()
         self.entities: list[Entity] = []
         self.register_listeners()
@@ -57,7 +57,7 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        self.state = const.State.COVER
+        self.state = const.State.PLAY
         self.teams = []
 
         for i, team_master in enumerate(self.team_names):
@@ -98,9 +98,11 @@ class Model:
 
     def handle_start(self, _: EventStartGame):
         """
-        Start the game
+        Start the game and post EventInitialize
         """
-        self.state = const.State.PLAY
+
+        ev_manager = get_event_manager()
+        ev_manager.post(EventInitialize())
 
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
@@ -135,7 +137,7 @@ class Model:
 
         # Tell every one to start
         ev_manager = get_event_manager()
-        ev_manager.post(EventInitialize())
+        
         while self.running:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:
