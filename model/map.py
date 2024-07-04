@@ -78,8 +78,8 @@ class Map:
 
 
 def load_map(map_dir):
-    json_file = os.path.join(map_dir, "map.json")
-    map_file = os.path.join(map_dir, "map.csv")
+    json_file = os.path.join(map_dir, "topography.json")
+    map_file = os.path.join(map_dir, "topography.csv")
 
     json_file = os.path.abspath(json_file)
     map_file = os.path.abspath(map_file)
