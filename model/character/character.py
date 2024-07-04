@@ -110,6 +110,7 @@ class Character(LivingEntity):
         get_event_manager().post(EventCharacterDied(character=self))
 
     def call_abilities(self, *args, **kwargs):
+        print("call abilities")
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.abilities_cd:
             return

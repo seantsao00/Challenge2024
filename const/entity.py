@@ -6,9 +6,10 @@ ENTITY_IMAGE_PATH = "entity/"
 
 ENTITY_STATES = {
     "default": ["default"],
+    "team0": ["default", "melee", "ranger", "sniper"],
     "team1": ["default", "melee", "ranger", "sniper"],
-    "team2": ["default", "melee", "ranger", "sniper"],
-    "tower": ["default", "temporary_blue_nexus", "team1", "team2"]
+    "team2": ["melee", "ranger", "sniper"],
+    "tower": ["default", "temporary_blue_nexus", "team0", "team1"]
 }
 
 ENTITY_RADIUS: float = 20

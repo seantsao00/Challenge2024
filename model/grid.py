@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 import const
-from event_manager import EventCharacterDied, EventCharacterMove, EventCreateEntity
+from event_manager import EventCharacterDied, EventCharacterMove, EventCreateEntity, EventCreateTower
 from instances_manager import get_event_manager
 from model import Character, Tower
 
@@ -31,9 +31,7 @@ class Cell:
         if isinstance(entity, Character):
             self.characters.add(entity)
         elif isinstance(entity, Tower):
-            self.tower_occupied.add(entity)
-            if pg.Vector2(int(entity.position.x), int(entity.position.y)) == self.position:
-                self.tower.add(entity)
+            self.tower.add(entity)
         else:
             raise NotImplementedError
 
@@ -58,7 +56,7 @@ class Grid:
         self.radius = const.GRID_BLOCK_SIZE
         self.width = int(width / self.radius)
         self.height = int(height / self.radius)
-        self.cells = [[Cell(pg.Vector2(i, j)) for i in range(width)] for j in range(height)]
+        self.cells = [[Cell(pg.Vector2(i, j)) for i in range(height)] for j in range(width)]
         self.register_listeners()
 
     def transfer(self, position: pg.Vector2) -> pg.Vector2:
@@ -86,14 +84,17 @@ class Grid:
     def handle_create_entity(self, event: EventCreateEntity):
         self.add_to_grid(event.entity)
 
+    def handle_create_tower(self, event: EventCreateTower):
+        self.add_to_grid(event.tower)
+
     def get_attacker_tower(self, position: pg.Vector2) -> set[Tower]:
         return self.get_cell(position).tower_occupied
 
     def all_entity_in_range(self, position: pg.Vector2, radius: float) -> list[Character | Tower]:
         x, y = self.transfer(position)
         result = []
-        for dx in range(max(0, int(x)), min(self.height, int(x + radius / self.radius + 1))):
-            for dy in range(max(0, int(y)), min(self.width, int(y + radius / self.radius + 1))):
+        for dx in range(max(0, int(x - radius / self.radius)), min(self.height, int(x + radius / self.radius + 1))):
+            for dy in range(max(0, int(y - radius / self.radius)), min(self.width, int(y + radius / self.radius + 1))):
                 cell = self.cells[dx][dy]
                 result.extend([tower for tower in cell.tower if tower.position.distance_to(position) <= radius])
                 result.extend([character for character in cell.characters if character.position.distance_to(position) <= radius])
@@ -148,5 +149,6 @@ class Grid:
     def register_listeners(self):
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_listener(EventCreateTower, self.handle_create_tower)
         ev_manager.register_listener(EventCharacterMove, self.update_location)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
