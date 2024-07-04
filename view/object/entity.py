@@ -21,10 +21,10 @@ class EntityView(ObjectBase):
     built from const, and initialized only once in init_convert.
     """
 
-    def __init__(self, entity: Entity):
-        super().__init__()
-        self.entity = entity
-        self.position = self.entity.position.copy()
+    def __init__(self, canvas: pg.Surface, ratio: float, entity: Entity):
+        super().__init__(canvas, ratio)
+        self.entity: Entity = entity
+        self.position: pg.Vector2 = self.entity.position.copy()
 
     @classmethod
     def init_convert(cls):
@@ -46,9 +46,9 @@ class EntityView(ObjectBase):
                 ).convert_alpha()
         cls.image_initialized = True
 
-    def draw(self, screen: pg.Surface):
+    def draw(self):
         entity = self.entity
         if entity.hidden:
             return
         img = self.images[entity.type][entity.imgstate]
-        screen.blit(img, img.get_rect(center=entity.position))
+        self.canvas.blit(img, img.get_rect(center=entity.position))

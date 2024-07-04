@@ -5,14 +5,16 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from view.object.object_base import ObjectBase
 
 if TYPE_CHECKING:
     from model import LivingEntity
 
 
-class HealthView:
-    def __init__(self, entity: LivingEntity):
-        self.entity = entity
+class HealthView(ObjectBase):
+    def __init__(self, canvas: pg.Surface, ratio: float, entity: LivingEntity):
+        super().__init__(canvas, ratio)
+        self.entity: LivingEntity = entity
 
     def draw(self, screen: pg.Surface):
         entity = self.entity

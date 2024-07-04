@@ -31,19 +31,19 @@ class View:
         model = get_model()
 
         size = pg.display.Info()
-        # self.cover = pg.image.load(to be added).convert_alpha()
-        self.arena = pg.Surface(size=const.ARENA_SIZE)
-        self.canvas = pg.Surface(size=const.WINDOW_SIZE)
-        window_w = min(size.current_w, size.current_h / 9 * 16)
-        window_h = min(size.current_h, size.current_w / 16 * 9)
-        self.screen = pg.display.set_mode(
+        window_w = min(size.current_w, size.current_h /
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0])
+        window_h = min(size.current_h, size.current_w /
+                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1])
+        self.screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
-        self.background_images = []
-        # print(self.screen.get_rect().size)
+        self.screen_size: tuple[int, int] = (window_w, window_h)
         pg.display.set_caption(const.WINDOW_CAPTION)
+        self.ratio: float = window_w / const.WINDOW_SIZE[0]
 
-        self.pause_menu_view = PauseMenuView(model.pause_menu, self.canvas)
+        self.pause_menu_view = PauseMenuView(model.pause_menu, self.screen)
 
+        self.background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
                 os.path.join(model.map.map_dir, i), cv2.IMREAD_UNCHANGED
@@ -51,15 +51,15 @@ class View:
             loaded_image = cv2.resize(
                 loaded_image, const.ARENA_SIZE, interpolation=cv2.INTER_AREA
             )
-            if loaded_image.shape[2] == 3:
-                alpha_channel = np.ones(
-                    (loaded_image.shape[0], loaded_image.shape[1]), dtype=loaded_image.dtype) * 255
-                loaded_image = np.dstack((loaded_image, alpha_channel))
+            # if loaded_image.shape[2] == 3:
+            #     alpha_channel = np.ones(
+            #         (loaded_image.shape[0], loaded_image.shape[1]), dtype=loaded_image.dtype) * 255
+            #     loaded_image = np.dstack((loaded_image, alpha_channel))
             x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
             picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
             picture = pg.transform.scale(picture, const.ARENA_SIZE)
             picture = picture.subsurface(pg.Rect(x, y, w, h))
-            self.background_images.append(picture)
+            self.background_images.append((int(model.map.images[i]), picture, (x, y)))
 
         if vision_of == 'all':
             self.vision_of = const.VIEW_EVERYTHING
@@ -81,8 +81,7 @@ class View:
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
         self.display_fps()
-        self.canvas.fill(const.BACKGROUND_COLOR)
-        self.arena.fill(const.BACKGROUND_COLOR)
+        self.screen.fill(const.BACKGROUND_COLOR)
         model = get_model()
         if model.state == const.State.COVER:
             self.render_cover()
@@ -92,10 +91,9 @@ class View:
 
     def render_cover(self):
         """Render game cover"""
-        self.screen.fill(const.BACKGROUND_COLOR)
 
         # setting up a temporary cover till we have a cover image
-        font = pg.font.Font(None, 36)
+        font = pg.font.Font(None, 48)
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.screen.blit(text_surface, (300, 200))
@@ -108,19 +106,19 @@ class View:
                 image, (const.ARENA_SIZE[0], const.ARENA_SIZE[1]))
             break  # temporary use ONLY background, instead of background and obstacle
 
-        self.arena.blit(background_image, (0, 0))
+        self.screen.blit(background_image, (0, 0))
 
         if self.vision_of == const.VIEW_EVERYTHING:
             for view_object in chain(*zip_longest(*[en.view for en in sorted(model.entities,
-                                                                              key = lambda k: (k.position.y,k.position.x))], fillvalue=None)):
+                                                                             key=lambda k: (k.position.y, k.position.x))], fillvalue=None)):
                 if view_object is not None:
                     view_object.draw(self.arena)
         else:
             my_team = model.teams[self.vision_of - 1]
             for view_object in chain(*zip_longest(*[en.view for en in sorted(chain(my_team.building_list,
-                                                                            my_team.character_list,
-                                                                            my_team.visible_entities_list), 
-                                                                            key = lambda k: (k.position.y,k.position.x))], fillvalue=None)):
+                                                                                   my_team.character_list,
+                                                                                   my_team.visible_entities_list),
+                                                                             key=lambda k: (k.position.y, k.position.x))], fillvalue=None)):
                 if view_object is not None:
                     view_object.draw(self.arena)
 
