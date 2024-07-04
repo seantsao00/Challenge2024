@@ -98,18 +98,22 @@ class Team:
         if event.input_type == const.InputTypes.MOVE and self.controlling is not None and check_movable(self.controlling, self):
             self.controlling.move(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None:
-            if self.choose_position is True:
-                self.controlling.call_abilities(event.displacement)
-                self.choose_position = False
-            elif clicked_tower is not None and clicked == const.CharTypes.TOWER:
-                self.controlling.attack(clicked_tower)
-            elif clicked_character is not None and clicked == const.CharTypes.CHAR:
-                self.controlling.attack(clicked_character)
+            from model.building import Tower
+            if not isinstance(self.controlling, Tower):
+                if self.choose_position is True:
+                    self.controlling.call_abilities(event.displacement)
+                    self.choose_position = False
+                elif clicked_tower is not None and clicked == const.CharTypes.TOWER:
+                    self.controlling.attack(clicked_tower)
+                elif clicked_character is not None and clicked == const.CharTypes.CHAR:
+                    self.controlling.attack(clicked_character)
         elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
-            if isinstance(self.controlling, RangerFighter):
-                self.choose_position = True
-            else:
-                self.controlling.call_abilities()
+            from model.building import Tower
+            if not isinstance(self.controlling, Tower):
+                if isinstance(self.controlling, RangerFighter):
+                    self.choose_position = True
+                else:
+                    self.controlling.call_abilities()
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)

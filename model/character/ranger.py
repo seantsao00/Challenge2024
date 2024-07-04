@@ -26,6 +26,7 @@ class RangerFighter(Character):
         dist = self.position.distance_to(target)
         if dist <= self.attack_range:
             print("ranged abilities attack")
-            for victim in get_model().grid.all_entity_in_range(target, self.abilities_radius):
+            all_victim = get_model().grid.all_entity_in_range(target, self.abilities_radius)
+            for victim in all_victim:
                 if self.team != victim.team:
                     get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.id)
