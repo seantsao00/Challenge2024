@@ -86,33 +86,6 @@ class Tower:
     # TODO: add other properties
 
 
-@dataclass
-class CharacterAction():
-    """角色能執行的動作"""
-    destination: pg.Vector2 = None
-    """角色的目的地， `None` 代表不改變"""
-    attack_target_id: int | None = None
-    """角色的攻擊目標， `None` 代表不攻擊"""
-    spell: bool = False
-    """是否要使用技能"""
-    spell_target: pg.Vector2 | None = None
-    """ranger 的技能的目標位置， ranger 需要指定此參數才能使用技能，其他兵種則不需要指定此 attribute"""
-
-
-@dataclass
-class Action():
-    """AI 所決定的 action"""
-    towers_actions: list[tuple[int, CharacterClass]] | None = None
-    """改變 tower 要生的兵種 ， 一個包含許多 (id, CharacterClass) 的 list ，沒有指定的 tower 會維持原本的兵"""
-    characters_actions: list[tuple[int, CharacterAction]] | None = None
-    """每個角色的動作，沒有被指定的角色會停在原地不動"""
-
-
-class AI:
-    def make_move(self) -> Action:
-        pass
-
-
 class API:
     def get_time(self):
         """Return the current in-game time."""
@@ -145,7 +118,7 @@ class API:
         """Return a grid of current vision."""
         pass
 
-    def action_move_to(self, characters: list[Character], destination: tuple[float, float]):
+    def action_move_to(self, characters: list[Character], destination: pg.Vector2):
         """
         Make all characters in the list move to the destination, using internal A* algorithm.
         This function override previous action.
@@ -159,10 +132,16 @@ class API:
         """
         pass
 
-    def action_move_along(self, characters: list[Character], direction: tuple[float, float]):
+    def action_move_along(self, characters: list[Character], direction: pg.Vector2):
         """
         Make all characters in the list move along the direction. May bump into the wall or border.
         This function override previous action.
+        """
+        pass
+
+    def action_cast_spell(self, characters: list[Character], target: pg.Vector2 = None):
+        """
+        Make all characters in the list cast their spell. If the cooldown isn't ready, nothing happens for the character. Target will be used for ranged spell. For separate target call this function multiple times.
         """
         pass
 
@@ -176,6 +155,6 @@ class API:
         """Change the spawning character type of a tower."""
         pass
 
-    def sort_by_distance(self, characters: list[Character], target: tuple[float, float]):
+    def sort_by_distance(self, characters: list[Character], target: pg.Vector2):
         """Sort the whole character list according to the distance from target. Tie breaked arbitrarily."""
         pass
