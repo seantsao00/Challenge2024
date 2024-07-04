@@ -37,7 +37,6 @@ class Character(LivingEntity):
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
-        self.alive: bool = True
         self.abilities_time: float = -100
         self.abilities_cd: float = abilities_cd
         self.attack_speed: int = attack_speed
@@ -102,11 +101,11 @@ class Character(LivingEntity):
 
     def die(self):
         print(f"Character {self.id} in Team {self.team.id} died")
+        self.alive = False
+        self.hidden = True
         if self in get_model().characters:
             get_model().characters.remove(self)
             get_event_manager().post(EventCharacterDied(character=self))
-        self.alive = False
-        self.hidden = True
 
     def call_abilities(self, *args, **kwargs):
         now_time = get_model().get_time()

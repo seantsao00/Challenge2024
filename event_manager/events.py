@@ -95,13 +95,6 @@ class EventAttack(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventMultiAttack(BaseEvent):
-    attacker: Character
-    target: pg.Vector2
-    radius: float
-
-
-@dataclass(kw_only=True)
 class EventCreateTower(BaseEvent):
     tower: Tower
 

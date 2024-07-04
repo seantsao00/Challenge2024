@@ -109,11 +109,17 @@ class Tower(LivingEntity):
             get_event_manager().post(EventAttack(attacker=self, victim=victim.character), victim.character.id)
 
     def enemy_in_range(self, character: Character):
-        if character.id in self.enemy[character.team.id].map:
+        print("test", character.id in self.enemy[character.team.id].map, character.position.distance_to(self.position))
+        if character.id in self.enemy[character.team.id].map or \
+           character.position.distance_to(self.position) > self.attack_range:
             return
+        print(character.type, 'get in tower')
         self.enemy[character.team.id].push_back(character, get_model().get_time())
 
     def enemy_out_range(self, character: Character):
+        print("test out", character.id not in self.enemy[character.team.id].map, character.position.distance_to(self.position), character.alive)
         if character.id not in self.enemy[character.team.id].map:
             return
-        self.enemy[character.team.id].delete(character)
+        if character.position.distance_to(self.position) > self.attack_range or character.alive is False:
+            print(character.type, 'get out of tower')
+            self.enemy[character.team.id].delete(character)
