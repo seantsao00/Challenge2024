@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from model.team import Team
 
 
-class BaseBullet(Entity):
+class Bullet(Entity):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
                  speed: float = 0.0, imgstate: str = 'default') -> None:
         super().__init__(position, entity_type=entity_type, imgstate=imgstate)
@@ -25,29 +25,40 @@ class BaseBullet(Entity):
         self.exist: bool = True
 
 
-class BulletSniper:
+class BulletSniper(Bullet):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
                  speed: float = 0.0, imgstate: str = 'default', victim: Entity = None) -> None:
         super().__init__(position=position, entity_type=entity_type, imgstate=imgstate, speed=speed)
         self.victim = victim
 
-    # def move(self):
+    def move(self):
         """
         Move the bullet in the given direction.
         """
-        # original_pos = self.position
-        # target_pos = self.target.position
-        # self.direction = (target_pos - original_pos).normalize()
+        original_pos = self.position
+        victim_pos = self.victim.position
+        self.direction = (victim_pos - original_pos).normalize()
 
-        # if (target_pos - original_pos).length() <= self.speed:
-        #    get_event_manager().post(EventBulletDamage(bullet=self, original_pos=original_pos, victim=victim))
-        # else:
-        #    get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, victim=victim))
+        if (victim_pos - original_pos).length() <= self.speed:
+            get_event_manager().post(EventBulletDamage(bullet=self, original_pos=original_pos, victim=self.victim))
+        else:
+            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, victim=self.victim))
 
 
-class BulletRanger:
+class BulletRanger(Bullet):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
                  speed: float = 0.0, imgstate: str = 'default', target: Entity = None, range: float = 0.0) -> None:
         super().__init__(position=position, entity_type=entity_type, imgstate=imgstate, speed=speed)
         self.target = target
         self.range = range
+
+    def move(self):
+        """
+        Move the bullet in the given direction.
+        """
+        original_pos = self.position
+        target_pos = self.target.position
+        if (target_pos - original_pos).length() <= self.speed:
+            get_event_manager().post(EventBulletDamage(bullet=self, original_pos=original_pos, target=self.target))
+        else:
+            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, target=self.target))
