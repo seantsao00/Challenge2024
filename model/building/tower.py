@@ -69,8 +69,7 @@ class Tower(LivingEntity):
     def generate_character(self, timestamp=pg.time.get_ticks()):
         character_type = self.character_type
         self.log.append((character_type, timestamp))
-        new_position = pg.Vector2(
-            choice([1, -1]) * (50 + randint(-50, 50)), choice([1, -1]) * (50 + randint(-50, 50)))
+        new_position = pg.Vector2(0, 20)
         new_character = character_type(self.team, self.position + new_position)
         get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.id)
         self.set_timer()
