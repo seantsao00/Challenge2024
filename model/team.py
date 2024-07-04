@@ -35,7 +35,7 @@ class Team:
 
     total = 0
 
-    def __init__(self, fountain_position: pg.Vector2, name: str, master: str):
+    def __init__(self, fountain_position: pg.Vector2, name: str, master: str, party: str):
         if Team.total == 4:
             raise Exception('Team size exceeds.')
         Team.total += 1
@@ -43,6 +43,7 @@ class Team:
         self.name = name
         self.points = 0
         self.master = master
+        self.party = party
         self.building_list: list[Tower] = []
         self.character_list: list[Character] = []
         self.visible_entities_list: list[Entity] = []
