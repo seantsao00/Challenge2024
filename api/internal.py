@@ -5,6 +5,8 @@ import os
 import signal
 import threading
 import traceback
+import warnings
+from typing import Iterable
 
 import pygame as pg
 
@@ -57,11 +59,11 @@ class Internal(prototype.API):
 
         if internal.id not in self.__character_map:
             character_class = prototype.CharacterClass.unknown
-            if isinstance(internal, model.character.melee):
+            if isinstance(internal, model.Melee):
                 character_class = prototype.CharacterClass.melee
-            elif isinstance(internal, model.character.ranger):
+            elif isinstance(internal, model.RangerFighter):
                 character_class = prototype.CharacterClass.ranger
-            elif isinstance(internal, model.character.sniper):
+            elif isinstance(internal, model.Sniper):
                 character_class = prototype.CharacterClass.sniper
             else:
                 raise GameError("Unknown character type")
@@ -102,11 +104,20 @@ class Internal(prototype.API):
             self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
+    def __access_character(self, extern: prototype.Character) -> model.Character:
+        """
+        Return registered character. None if it does not exist.
+        """
+        if id(extern) not in self.__reverse_character_map:
+            warnings.warn("Invalid prototype.Character. Maybe it is already expired.")
+            return None
+        return self.__reverse_character_map[id(extern)]
+
     def __team(self):
         return get_model().teams[self.team_id]
 
-    def get_time():
-        return get_model().clock.tick() * 1000
+    def get_time(self):
+        return get_model().get_time()
 
     def get_characters(self) -> list[prototype.Character]:
         return [self.__register_character(character)
@@ -132,6 +143,17 @@ class Internal(prototype.API):
             print(team.id, index)
             raise GameError("Team ID implement has changed.")
         return team.points
+
+    def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
+        if not isinstance(characters, Iterable):
+            raise TypeError("Character is not iterable.")
+        for ch in characters:
+            if not isinstance(ch, prototype.Character):
+                raise TypeError("List contains non-character.")
+            internal = self.__access_character(ch)
+            if internal == None:
+                continue
+            internal.move_direction = direction
 
 
 class Timer():
