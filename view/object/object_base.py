@@ -21,11 +21,17 @@ class ObjectBase:
         """
         cls.image_initialized = True
 
-    def __init__(self):
+    def __init__(self, canvas: pg.Surface, ratio: float):
+        """
+        - canvas: the Surface object blited.
+        - ratio: the ratio between model coordinate and the canvas size.
+        """
+        self.canvas = canvas
+        self.ratio = ratio
         if not self.image_initialized:
             self.init_convert()
 
-    def draw(self, screen: pg.Surface):
+    def draw(self):
         """
         Draw the object to the screen
         """
