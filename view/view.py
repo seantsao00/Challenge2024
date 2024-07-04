@@ -3,6 +3,7 @@ The module defines View class.
 """
 
 import os
+import time
 from itertools import chain, zip_longest
 
 import cv2
@@ -14,6 +15,7 @@ from event_manager import EventInitialize, EventStartGame, EventUnconditionalTic
 from instances_manager import get_event_manager, get_model
 from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase, PauseMenuView,
                          ViewRangeView)
+from view.object.background_object import BackGroundObject
 
 
 class View:
@@ -40,8 +42,9 @@ class View:
         self.screen_size: tuple[int, int] = (window_w, window_h)
         pg.display.set_caption(const.WINDOW_CAPTION)
         self.ratio: float = window_w / const.WINDOW_SIZE[0]
+        self.entities = []
 
-        self.pause_menu_view = PauseMenuView(model.pause_menu, self.screen)
+        self.pause_menu_view = PauseMenuView(self.screen, self.ratio, model.pause_menu)
 
         self.background_images = []
         for i in model.map.images:
@@ -59,7 +62,8 @@ class View:
             picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
             picture = pg.transform.scale(picture, const.ARENA_SIZE)
             picture = picture.subsurface(pg.Rect(x, y, w, h))
-            self.background_images.append((int(model.map.images[i]), picture, (x, y)))
+            self.background_images.append(BackGroundObject(
+                self.screen, int(model.map.images[i]), (x, y), picture))
 
         if vision_of == 'all':
             self.vision_of = const.VIEW_EVERYTHING
@@ -85,6 +89,7 @@ class View:
         model = get_model()
         if model.state == const.State.COVER:
             self.render_cover()
+            time.sleep(0.01)
         elif model.state == const.State.PLAY:
             self.render_play()
         pg.display.flip()
@@ -93,49 +98,41 @@ class View:
         """Render game cover"""
 
         # setting up a temporary cover till we have a cover image
-        font = pg.font.Font(None, 48)
+        font = pg.font.Font(None, int(12*self.ratio))
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
-        self.screen.blit(text_surface, (300, 200))
+        self.screen.blit(text_surface, (100, 100))
 
     def render_play(self):
         """Render scenes when the game is being played"""
         model = get_model()
-        for image in self.background_images:
-            background_image = pg.transform.scale(
-                image, (const.ARENA_SIZE[0], const.ARENA_SIZE[1]))
-            break  # temporary use ONLY background, instead of background and obstacle
 
-        self.screen.blit(background_image, (0, 0))
+        for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
+            if view_object is not None:
+                view_object.update()
+
+        objects = []
+
+        objects += self.background_images
 
         if self.vision_of == const.VIEW_EVERYTHING:
-            for view_object in chain(*zip_longest(*[en.view for en in sorted(model.entities,
-                                                                             key=lambda k: (k.position.y, k.position.x))], fillvalue=None)):
+            for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
                 if view_object is not None:
-                    view_object.draw(self.arena)
+                    objects.append(view_object)
         else:
             my_team = model.teams[self.vision_of - 1]
-            for view_object in chain(*zip_longest(*[en.view for en in sorted(chain(my_team.building_list,
-                                                                                   my_team.character_list,
-                                                                                   my_team.visible_entities_list),
-                                                                             key=lambda k: (k.position.y, k.position.x))], fillvalue=None)):
+            for view_object in chain(*zip_longest(*[en.view for en in chain(my_team.building_list,
+                                                                            my_team.character_list,
+                                                                            my_team.visible_entities_list)], fillvalue=None)):
                 if view_object is not None:
-                    view_object.draw(self.arena)
+                    objects.append(view_object)
 
-        # the two lines making the arena now in the middle
+        objects.sort(key=lambda x: x.height)
+        for obj in objects:
+            obj.draw()
 
-        pg.draw.line(
-            self.arena, 'white', (0, 0), (0, const.ARENA_SIZE[1] - 1), 1
-        )
-
-        pg.draw.line(
-            self.arena, 'white', (const.ARENA_SIZE[0] - 1,
-                                  0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
-        )
-        self.canvas.blit(self.arena, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
-        self.pause_menu_view.draw()
-
-        self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
+        if model.state == const.State.PAUSE:
+            self.pause_menu_view.draw()
 
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""

@@ -52,3 +52,6 @@ class EntityView(ObjectBase):
             return
         img = self.images[entity.type][entity.imgstate]
         self.canvas.blit(img, img.get_rect(center=entity.position))
+
+    def update(self):
+        self.height = self.entity.position[1]

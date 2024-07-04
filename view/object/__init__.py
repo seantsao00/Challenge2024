@@ -1,4 +1,5 @@
 from view.object.abilities_cd import *
+from view.object.background_object import *
 from view.object.entity import *
 from view.object.health import *
 from view.object.object_base import *

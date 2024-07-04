@@ -70,7 +70,6 @@ class Model:
         """
         load_ai(self.team_files_names)
 
-        self.state = const.State.PLAY
         self.teams = []
 
         for i, team_master in enumerate(self.team_files_names):
@@ -85,6 +84,7 @@ class Model:
                                                           team.handle_others_character_spawn, i)
 
         self.tower.append(Tower((700, 700)))
+        self.state = const.State.PLAY
 
     def handle_every_tick(self, _: EventEveryTick):
         """
@@ -120,7 +120,6 @@ class Model:
         """
         Start the game and post EventInitialize
         """
-
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
 
@@ -172,4 +171,4 @@ class Model:
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
                 self.dt = self.clock.tick(const.FPS) / 1000.0
-                # print(self.get_time())
+        # print(self.get_time())

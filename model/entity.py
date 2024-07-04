@@ -39,7 +39,6 @@ class Entity:
         self.imgstate: str = imgstate
         self.hidden: bool = False
         self.team: Team = team
-        self.view: list = [view.EntityView(self)]
         get_event_manager().post(EventCreateEntity(entity=self))
 
 
