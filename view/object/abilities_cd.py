@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import time
-from instances_manager import get_event_manager, get_model
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
+from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
     from model import Character

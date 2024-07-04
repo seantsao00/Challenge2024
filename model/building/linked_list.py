@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from model.character import Character
+
 
 class Node:
     def __init__(self, character: Character, time: float):
@@ -45,12 +47,11 @@ class Linked_list:
         if self.back is None:
             self.back = self.map[character.id]
             self.head = self.map[character.id]
-        else :
+        else:
             self.map[character.id].insert(self.back)
 
     def front(self):
         return self.head
-    
+
     def back(self):
         return self.back
-

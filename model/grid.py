@@ -3,8 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pygame as pg
+
 import const
-from event_manager import EventCharacterDied, EventCharacterMove, EventCreateEntity, EventCreateTower
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
+                           EventCreateTower)
 from instances_manager import get_event_manager
 from model import Character, Tower
 
@@ -69,8 +71,10 @@ class Grid:
     def add_to_grid(self, entity: Entity):
         self.get_cell(entity.position).add(entity)
         if isinstance(entity, Tower):
-            x1, x2 = (entity.position.x - const.TOWER_ATTACK_RANGE) / self.radius, (entity.position.x + const.TOWER_ATTACK_RANGE) / self.radius
-            y1, y2 = (entity.position.y - const.TOWER_ATTACK_RANGE) / self.radius, (entity.position.y + const.TOWER_ATTACK_RANGE) / self.radius
+            x1, x2 = (entity.position.x - const.TOWER_ATTACK_RANGE) / \
+                self.radius, (entity.position.x + const.TOWER_ATTACK_RANGE) / self.radius
+            y1, y2 = (entity.position.y - const.TOWER_ATTACK_RANGE) / \
+                self.radius, (entity.position.y + const.TOWER_ATTACK_RANGE) / self.radius
             for x in range(max(0, int(x1)), min(self.height, int(x2) + 1)):
                 for y in range(max(0, int(y1)), min(self.width, int(y2) + 1)):
                     self.cells[x][y].tower_occupied.add(entity)
@@ -96,8 +100,10 @@ class Grid:
         for dx in range(max(0, int(x - radius / self.radius)), min(self.height, int(x + radius / self.radius + 1))):
             for dy in range(max(0, int(y - radius / self.radius)), min(self.width, int(y + radius / self.radius + 1))):
                 cell = self.cells[dx][dy]
-                result.extend([tower for tower in cell.tower if tower.position.distance_to(position) <= radius])
-                result.extend([character for character in cell.characters if character.position.distance_to(position) <= radius])
+                result.extend(
+                    [tower for tower in cell.tower if tower.position.distance_to(position) <= radius])
+                result.extend(
+                    [character for character in cell.characters if character.position.distance_to(position) <= radius])
         return result
 
     def iterate_radius_cells(self, position: pg.Vector2, radius: int) -> list[Cell]:
