@@ -2,7 +2,8 @@
     "width": 900,
     "height": 900,
     "fountains": [
-        [630, 250]
+        [630, 250],
+        [430, 250]
     ],
     "images": {
         "background.png": -1,
