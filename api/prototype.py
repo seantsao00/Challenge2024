@@ -153,7 +153,7 @@ class API:
         pass
 
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
-        """Change the spawning character type of a tower."""
+        """改變特定塔生成的兵種"""
         pass
 
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):

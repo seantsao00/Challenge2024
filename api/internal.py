@@ -155,6 +155,9 @@ class Internal(prototype.API):
                 continue
             internal.move_direction = direction
 
+    def change_spawn_type(self, tower: model.Tower, spawn_type: prototype.CharacterClass):
+        pass
+
 
 class Timer():
     def __init__(self):
