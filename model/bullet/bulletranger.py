@@ -35,6 +35,6 @@ class BulletRanger(Bullet):
         original_pos = self.position
         target_pos = self.target.position
         if (target_pos - original_pos).length() <= self.speed:
-            get_event_manager().post(EventBulletDamage(bullet=self, original_pos=original_pos, target=self.target))
+            get_event_manager().post(EventBulletDamage(bullet=self, original_pos=original_pos))
         else:
-            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, target=self.target))
+            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos))

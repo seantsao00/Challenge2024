@@ -36,6 +36,6 @@ class BulletSniper(Bullet):
         self.direction = (victim_pos - original_pos).normalize()
 
         if (victim_pos - original_pos).length() <= self.speed:
-            get_event_manager().post(EventBulletDamage(bullet=self, victim=self.victim))
+            get_event_manager().post(EventBulletDamage(bullet=self))
         else:
-            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, victim=self.victim))
+            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos))
