@@ -6,7 +6,6 @@ The document of the API is at https://hackmd.io/@seantsao00/challenge_2024_api/e
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 
-
 import pygame as pg
 
 
@@ -103,7 +102,7 @@ class API:
     def get_team_id(self) -> int:
         """Return current team's `id`."""
 
-    def get_score(self, index=0) -> int:
+    def get_score(self, index=None) -> int:
         """Return the score of team `index`. If `index` is 0, return the current team's score."""
         pass
 

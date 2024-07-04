@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import importlib
 import os
 import signal
 import threading
@@ -5,25 +8,24 @@ import traceback
 
 import pygame as pg
 
-import api.api as api
+import api.prototype as prototype
 import model
 import model.character
+import model.character.melee
+import model.character.ranger
+import model.character.sniper
 from const import FPS, MAX_TEAMS
 from instances_manager import get_model
-import model.character.lookout
-import model.character.melee
-import model.character.ranged_fighter
-
-__model = get_model()
 
 
 class GameError(Exception):
-    def __init__(self, message):            
+    def __init__(self, message):
         super().__init__("The game broke. This is not your fault. Please contact us so we can fix it." + message)
 
-class Internal(api.API):
-    def __init__(self, player_id: int):
-        self.player_id = player_id
+
+class Internal(prototype.API):
+    def __init__(self, team_id: int):
+        self.team_id = team_id
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
@@ -34,8 +36,19 @@ class Internal(api.API):
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
-    
-    def __register_character(self, internal: model.Character) -> api.Character:
+
+    @classmethod
+    def __cast_id(cls, id: int):
+        """
+        AI interprets the team as 1, 2, 3, 4 whereas internal naming uses 0, 1, 2, 3.
+        """
+        return id + 1
+
+    @classmethod
+    def __recast_id(cls, id: int):
+        return id - 1
+
+    def __register_character(self, internal: model.Character) -> prototype.Character:
         """
         Register a `model.Character` to `api.Character`.
         Therefore, API can only manipulate a character using the given interface 
@@ -43,81 +56,80 @@ class Internal(api.API):
         """
 
         if internal.id not in self.__character_map:
-            character_class = api.CharacterClass.unknown
+            character_class = prototype.CharacterClass.unknown
             if isinstance(internal, model.character.melee):
-                character_class = api.CharacterClass.melee
-            elif isinstance(internal, model.character.lookout):
-                character_class = api.CharacterClass.lookout
-            elif isinstance(internal, model.character.ranged_fighter):
-                character_class = api.CharacterClass.ranged
+                character_class = prototype.CharacterClass.melee
+            elif isinstance(internal, model.character.ranger):
+                character_class = prototype.CharacterClass.ranger
+            elif isinstance(internal, model.character.sniper):
+                character_class = prototype.CharacterClass.sniper
             else:
                 raise GameError("Unknown character type")
-            extern = api.Character(
-                _id = internal.id,
-                _type = character_class,
-                _position = internal.position,
-                _speed = internal.speed,
-                _attack_range = internal.attack_range,
-                _damage = internal.damage,
-                _vision = internal.vision,
-                _health = internal.health,
-                _max_health = internal.max_health,
-                _team_id = internal.team.id
+            extern = prototype.Character(
+                _id=internal.id,
+                _type=character_class,
+                _position=internal.position,
+                _speed=internal.speed,
+                _attack_range=internal.attack_range,
+                _damage=internal.damage,
+                _vision=internal.vision,
+                _health=internal.health,
+                _max_health=internal.max_health,
+                _team_id=Internal.__cast_id(internal.team.id)
             )
             self.__character_map[internal.id] = extern
             self.__reverse_character_map[id(extern)] = internal
         return self.__character_map[internal.id]
 
-    
-    def __register_tower(self, internal: model.Tower) -> api.Tower:
+    def __register_tower(self, internal: model.Tower) -> prototype.Tower:
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
         if internal.id not in self.__tower_map:
-            extern = api.Tower(
-                _id = internal.id,
-                _position = internal.position,
-                _period = internal.period,
-                _is_fountain = internal.is_fountain,
-                _attack_range = internal.attack_range,
-                _damage = internal.damage,
-                _vision = internal.vision,
-                _health = internal.health,
-                _max_health = internal.max_health,
-                _team_id = internal.team.id
+            extern = prototype.Tower(
+                _id=internal.id,
+                _position=internal.position,
+                _period=internal.period,
+                _is_fountain=internal.is_fountain,
+                _attack_range=internal.attack_range,
+                _damage=internal.damage,
+                _vision=internal.vision,
+                _health=internal.health,
+                _max_health=internal.max_health,
+                _team_id=Internal.__cast_id(internal.team.id)
             )
             self.__tower_map[internal.id] = extern
             self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
     def __team(self):
-        return __model.teams[self.player_id - 1]
+        return get_model().teams[self.team_id]
 
     def get_time():
-        return __model.clock.tick() * 1000
+        return get_model().clock.tick() * 1000
 
-    def get_characters(self) -> list[api.Character]:
-        return [self.__register_character(character) 
+    def get_characters(self) -> list[prototype.Character]:
+        return [self.__register_character(character)
                 for character in self.__team().character_list]
 
-    def get_towers(self) -> list[api.Tower]:
-        return [self.__register_tower(tower) 
+    def get_towers(self) -> list[prototype.Tower]:
+        return [self.__register_tower(tower)
                 for tower in self.__team().building_list]
 
     def get_team_id(self) -> int:
-        # Cast to prevent modification
-        return self.__team().id
+        return Internal.__cast_id(self.__team().id)
 
-    def get_score(self, index=0) -> int:
+    def get_score(self, index=None) -> int:
+        if index == None:
+            index = self.team_id
         if not isinstance(index, int):
-            raise TypeError("Team index must be type int.")
-        if index == 0:
-            index = self.player_id
-        if index < 1 or MAX_TEAMS:
+            raise TypeError("Team index must be type int or None.")
+        if index < 0 or index >= MAX_TEAMS:
             raise IndexError
-        team = __model.teams[index - 1]
+        team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
         if not team.id == index:
+            print(team.id, index)
             raise GameError("Team ID implement has changed.")
         return team.points
 
@@ -165,19 +177,22 @@ ai = [None] * len(helpers)
 timer = Timer()
 
 
-def init_ai(files):
-    raise NotImplementedError
+def load_ai(files: list[str]):
+    for i, file in enumerate(files):
+        if file == 'human':
+            continue
+        ai[i] = importlib.import_module('ai.' + file)
 
 
-def call_ai(player_id):
-    if ai[player_id] is None:
+def call_ai(team_id):
+    if ai[team_id] == None:
         return
 
     try:
-        timer.set_timer(1 / (4 * FPS), player_id)
-        ai[player_id].player_tick()
+        timer.set_timer(1 / (4 * FPS), team_id)
+        ai[team_id].every_tick(helpers[team_id])
     except Exception as e:
-        print(f"Caught exception in AI of {player_id}:")
+        print(f"Caught exception in AI of team {team_id}:")
         print(traceback.format_exc())
         return
     finally:
