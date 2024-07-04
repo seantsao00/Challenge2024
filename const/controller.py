@@ -14,3 +14,26 @@ HUMAN_KEYS_MAP = {
 PAUSE_BUTTON = pg.K_ESCAPE
 
 START_BUTTON = pg.K_SPACE
+
+PARTY_KEYS_MAP = {
+    'team1': {
+        'left': pg.K_r,
+        'right': pg.K_f,
+        'enter': pg.K_v
+    },
+    'team2': {
+        'left': pg.K_t,
+        'right': pg.K_g,
+        'enter': pg.K_b
+    },
+    'team3': {
+        'left': pg.K_y,
+        'right': pg.K_h,
+        'enter': pg.K_n
+    },
+    'team4': {
+        'left': pg.K_u,
+        'right': pg.K_j,
+        'enter': pg.K_m
+    }
+}
