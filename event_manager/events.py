@@ -133,13 +133,21 @@ class EventCharacterDied(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventBulletCreate(BaseEvent):
+    bullet: Bullet
+
+
+@dataclass(kw_only=True)
 class EventBulletMove(BaseEvent):
-    bullet: Character
+    bullet: Bullet
     original_pos: pg.Vector2
-    victim: Entity
 
 
+@dataclass(kw_only=True)
 class EventBulletDamage(BaseEvent):
-    bullet: Character
-    attacker: Entity
-    victim: Entity
+    bullet: Bullet
+
+
+@dataclass(kw_only=True)
+class EventBulletDisappear(BaseEvent):
+    bullet: Bullet
