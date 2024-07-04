@@ -100,7 +100,7 @@ class View:
 
     def render_party_selection(self):
         """Render party selection process"""
-        
+        pass
 
     def render_play(self):
         """Render scenes when the game is being played"""
