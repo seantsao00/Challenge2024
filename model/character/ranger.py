@@ -1,8 +1,9 @@
 import pygame as pg
 
 import const
-from event_manager import EventAttack, EventMultiAttack
+from event_manager import EventAttack, EventBulletCreate, EventMultiAttack
 from instances_manager import get_event_manager, get_model
+from model.bullet import BulletRanger, BulletSniper
 from model.character import Character
 from model.entity import Entity
 
@@ -24,7 +25,8 @@ class RangerFighter(Character):
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
+            bullet = BulletSniper(position=self.position, victim=enemy)
+            get_event_manager().post(EventBulletCreate(bullet=bullet), self.team.id)
             self.attack_time = now_time
 
     def abilities(self, *args, **kwargs):
@@ -34,4 +36,6 @@ class RangerFighter(Character):
         dist = self.position.distance_to(origin)
         if dist <= self.attack_range:
             print("ranged abilities attack")
-            get_event_manager().post(EventMultiAttack(attacker=self, target=origin, radius=self.abilities_radius))
+            bullet = BulletRanger(position=self.position, target=origin,
+                                  radius=self.abilities_radius)
+            get_event_manager().post(EventBulletCreate(bullet=bullet), self.team.id)
