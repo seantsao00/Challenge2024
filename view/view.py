@@ -98,6 +98,10 @@ class View:
         text_surface = font.render('THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.screen.blit(text_surface, (300, 200))
 
+    def render_party_selection(self):
+        """Render party selection process"""
+        pass
+
     def render_play(self):
         """Render scenes when the game is being played"""
         model = get_model()
