@@ -73,7 +73,6 @@ class Grid:
         if isinstance(entity, Tower):
             x1, x2 = (entity.position.x - const.TOWER_ATTACK_RANGE) / self.radius, (entity.position.x + const.TOWER_ATTACK_RANGE) / self.radius
             y1, y2 = (entity.position.y - const.TOWER_ATTACK_RANGE) / self.radius, (entity.position.y + const.TOWER_ATTACK_RANGE) / self.radius
-            print(entity.type, entity.imgstate, x1, x2, y1, y2)
             for x in range(max(0, int(x1)), min(self.height, int(x2) + 1)):
                 for y in range(max(0, int(y1)), min(self.width, int(y2) + 1)):
                     self.cells[x][y].tower_occupied.add(entity)
