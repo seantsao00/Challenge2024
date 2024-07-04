@@ -23,15 +23,15 @@ class BulletSniper(Bullet):
         super().__init__(position=position, entity_type=entity_type, imgstate=imgstate, speed=speed)
         self.victim = victim
 
-    # def move(self):
+    def move(self):
         """
         Move the bullet in the given direction.
         """
-        # original_pos = self.position
-        # target_pos = self.target.position
-        # self.direction = (target_pos - original_pos).normalize()
+        original_pos = self.position
+        victim_pos = self.victim.position
+        self.direction = (victim_pos - original_pos).normalize()
 
-        # if (target_pos - original_pos).length() <= self.speed:
-        #    get_event_manager().post(EventBulletDamage(bullet=self, original_pos=original_pos, victim=victim))
-        # else:
-        #    get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, victim=victim))
+        if (victim_pos - original_pos).length() <= self.speed:
+            get_event_manager().post(EventBulletDamage(bullet=self, victim=self.victim))
+        else:
+            get_event_manager().post(EventBulletMove(bullet=self, original_pos=original_pos, victim=self.victim))

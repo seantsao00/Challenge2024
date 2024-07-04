@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 
 class Bullet(Entity):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = 0.0, imgstate: str = 'default') -> None:
-        super().__init__(position, entity_type=entity_type, imgstate=imgstate)
+                 speed: float = 0.0, imgstate: str = 'default', team: Team = None) -> None:
+        super().__init__(position, entity_type=entity_type, imgstate=imgstate, team=team)
         self.direction: pg.Vector2 | tuple[float, float] = None
         self.speed: float = speed
         self.exist: bool = True
