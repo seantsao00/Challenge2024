@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Character, Entity, Tower
+    from model import Character, Entity, Tower, Bullet
 
 
 @dataclass(kw_only=True)
@@ -130,3 +130,14 @@ class EventCharacterMove(BaseEvent):
 @dataclass(kw_only=True)
 class EventCharacterDied(BaseEvent):
     character: Character
+
+@dataclass(kw_only=True)
+class EventBulletMove(BaseEvent):
+    bullet: Character
+    original_pos: pg.Vector2
+    victim: Entity
+
+class EventBulletDamage(BaseEvent):
+    bullet: Character
+    attacker: Entity
+    victim: Entity
