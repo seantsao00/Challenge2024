@@ -7,15 +7,15 @@ import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
-                           EventEveryTick, EventHumanInput, EventSelectCharacter,
-                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
+from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import RangerFighter
 
 if TYPE_CHECKING:
     from model.building import Tower
-    from model.character import Character, Melee, RangerFighter, Sniper
+    from model.character import Character
     from model.entity import Entity, LivingEntity
 
 

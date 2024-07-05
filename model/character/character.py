@@ -6,13 +6,12 @@ import pygame as pg
 
 import const
 import util
-import view
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove, EventEveryTick
 from instances_manager import get_event_manager, get_model
-from model.entity import Entity, LivingEntity
+from model.entity import LivingEntity
 
 if TYPE_CHECKING:
-    from model.building import Linked_list, Node
+    from model.entity import Entity
     from model.team import Team
 
 

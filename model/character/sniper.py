@@ -1,6 +1,5 @@
 import const
-from event_manager import EventAttack
-from model.character import Character
+from model.character.character import Character
 from model.entity import Entity
 
 

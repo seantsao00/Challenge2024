@@ -14,11 +14,11 @@ from instances_manager import get_event_manager, get_model
 from model.building.linked_list import Linked_list, Node
 from model.character import RangerFighter
 from model.entity import LivingEntity
-from model.team import Team
 from model.timer import Timer
 
 if TYPE_CHECKING:
     from model.character import Character
+    from model.team import Team
 
 
 class Tower(LivingEntity):

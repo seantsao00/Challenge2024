@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
-import view
 from event_manager.events import EventCreateEntity, EventDiscardEntity
 from instances_manager import get_event_manager
 

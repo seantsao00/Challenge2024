@@ -1,9 +1,6 @@
-import pygame as pg
-
 import const
 from event_manager import EventAttack
-from model.character import Character
-from model.timer import Timer
+from model.character.character import Character
 
 
 class Melee(Character):

@@ -1,7 +1,6 @@
-import pygame as pg
-
+from event_manager import EventQuit, EventRestartGame, EventResumeModel
 from instances_manager import get_event_manager
-from event_manager import EventQuit, EventResumeModel, EventRestartGame
+
 
 class PauseMenu:
     def __init__(self):

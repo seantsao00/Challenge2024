@@ -8,7 +8,8 @@ import const
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventCreateTower)
 from instances_manager import get_event_manager
-from model import Character, Tower
+from model.building import Tower
+from model.character import Character
 
 if TYPE_CHECKING:
     from model import Entity, Team
@@ -134,7 +135,7 @@ class Grid:
                 return cell.tower
         return None
 
-    def get_closest_neutral_tower(self, position: pg.Vector2, team: Team, radius: int):
+    def get_closest_neutral_tower(self, position: pg.Vector2, radius: int):
         cells = self.iterate_radius_cells(position, radius)
         for cell in cells:
             if cell.tower.team is None:
