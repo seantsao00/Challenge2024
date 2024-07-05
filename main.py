@@ -22,7 +22,7 @@ def main():
     pg.init()
 
     # Argument parser
-    parser = argparse.ArgumentParser(prog='Challenge2023')
+    parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument(
         'map', help='The name of maps. It can be single_map or test_map'
     )

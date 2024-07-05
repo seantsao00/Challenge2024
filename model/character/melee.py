@@ -3,6 +3,7 @@ import pygame as pg
 import const
 from event_manager import EventAttack
 from model.character import Character
+from model.timer import Timer
 
 
 class Melee(Character):
@@ -20,20 +21,22 @@ class Melee(Character):
 
     """
 
-    def __init__(self, team, position, defense=False):
+    def __init__(self, team, position, defense=0):
         super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
-                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION)
+                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ATTACK_SPEED, const.MELEE_ABILITIES_CD, 'melee')
         self.defense = defense
+        self.imgstate = 'melee'
 
     def take_damage(self, event: EventAttack):
-        new_damage = event.attacker.damage * 0.5 if self.defense else event.attacker.damage
+        if self.defense > 0:
+            new_damage = 0.5 * event.attacker.damage
+            self.defense -= 1
+        else:
+            new_damage = event.attacker.damage
         self.health -= new_damage
         if self.health <= 0:
             self.die()
 
-    def move(self, direction: pg.Vector2):
-        if not self.defense:
-            super().move(direction)
-
-    def switch_mode(self):
-        self.defense = not self.defense
+    def abilities(self):
+        print("melee use abilites")
+        self.defense = const.MELEE_ABILITIES_VARIABLE

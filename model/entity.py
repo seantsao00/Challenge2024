@@ -2,12 +2,18 @@
 The module defines Entity class.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import view
 from event_manager.events import EventCreateEntity
 from instances_manager import get_event_manager
-from model.team import Team
+
+if TYPE_CHECKING:
+    from model.team import Team
 
 
 class Entity:
@@ -34,7 +40,7 @@ class Entity:
         self.hidden: bool = False
         self.team: Team = team
         self.view: list = [view.EntityView(self)]
-        get_event_manager().post(EventCreateEntity(self))
+        get_event_manager().post(EventCreateEntity(entity=self))
 
 
 class LivingEntity(Entity):
