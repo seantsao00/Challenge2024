@@ -111,7 +111,7 @@ class Map:
             for dx, dy, dd in diff:
                 nx, ny, nd = cur_cell[0] + dx, cur_cell[1] + dy, cur_dist + dd
                 if (0 <= nx < max_x and 0 <= ny < max_y
-                        and self.map[nx][ny] != const.MAP_OBSTACLE):
+                        and self.map_list[nx][ny] != const.MAP_OBSTACLE):
                     yield (nx, ny, nd)
 
         # find single source shortest path
