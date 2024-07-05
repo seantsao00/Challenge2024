@@ -114,7 +114,7 @@ class View:
             if model.show_attack_range:
                 self.__entities.append(AttackRangeView(self.__arena, entity))
             self.__entities.append(TowerCDView(self.__arena, entity))
-            if entity.health is not None:
+            if not entity.is_fountain:
                 self.__entities.append(HealthView(self.__arena, entity))
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
