@@ -49,14 +49,7 @@ class Team:
         self.visible_entities_list: set[Entity] = set()
         self.choose_position = False
         self.controlling = None
-        if manual_control:
-            get_event_manager().register_listener(EventHumanInput, self.handle_input)
-        get_event_manager().register_listener(EventCreateTower, self.handle_create_tower)
-        get_event_manager().register_listener(EventTeamGainTower, self.gain_tower, self.id)
-        get_event_manager().register_listener(EventTeamLoseTower, self.lose_tower, self.id)
-        get_event_manager().register_listener(EventSpawnCharacter, self.gain_character, self.id)
-        get_event_manager().register_listener(EventSelectCharacter, self.select_character)
-        get_event_manager().register_listener(EventCharacterDied, self.handle_character_died)
+        self.register_listeners()
 
     def handle_input(self, event: EventHumanInput):
         """
@@ -177,3 +170,15 @@ class Team:
         if self.controlling is not None and hasattr(self.controlling, 'update_character_type'):
             self.controlling.update_character_type(event.character)
             print(f'The character produced by {self.name} is modified to {event.character}')
+
+    def register_listeners(self):
+        """Register all listeners of this object with the event manager."""
+        ev_manager = get_event_manager()
+        if self.manual_control:
+            ev_manager.register_listener(EventHumanInput, self.handle_input)
+        ev_manager.register_listener(EventCreateTower, self.handle_create_tower)
+        ev_manager.register_listener(EventTeamGainTower, self.gain_tower, self.id)
+        ev_manager.register_listener(EventTeamLoseTower, self.lose_tower, self.id)
+        ev_manager.register_listener(EventSpawnCharacter, self.gain_character, self.id)
+        ev_manager.register_listener(EventSelectCharacter, self.select_character)
+        ev_manager.register_listener(EventCharacterDied, self.handle_character_died)

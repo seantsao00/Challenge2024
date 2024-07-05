@@ -4,7 +4,6 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os
-from random import randint
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -12,10 +11,10 @@ import pygame as pg
 import const
 import const.map
 from api.internal import call_ai, load_ai
-from event_manager import (EventAttack, EventCharacterDied, EventCharacterMove, EventCreateEntity,
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSpawnCharacter, EventStartGame,
-                           EventUnconditionalTick, EventRestartGame)
+                           EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -46,21 +45,23 @@ class Model:
         they should be initialized in Model.initialize()
         """
         self.running: bool = False
-        self.state = const.State.COVER
-        self.clock = pg.time.Clock()
+        self.state: const.State = const.State.COVER
+        self.clock: pg.Clock = pg.time.Clock()
+        self.tmp_timer: pg.Clock | None = None
         self.entities: list[Entity] = []
-        self.register_listeners()
         self.dt = 0
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.team_files_names: list[str] = team_files
         self.teams: list[Team] = None
-        self.show_view_range = show_view_range
-        self.show_attack_range = show_attack_range
+        self.show_view_range: bool = show_view_range
+        self.show_attack_range: bool = show_attack_range
         self.pause_menu = PauseMenu()
         self.characters = set()
         self.grid = Grid(900, 900)
         self.stop_time = 0
         self.tower: list[Tower] = []
+
+        self.register_listeners()
 
     def initialize(self, _: EventInitialize):
         """
@@ -129,21 +130,10 @@ class Model:
     def get_time(self):
         return (pg.time.get_ticks() - self.stop_time) / 1000
 
-    def handle_start(self, _: EventStartGame):
-        """
-        Start the game and post EventInitialize
-        """
-        ev_manager = get_event_manager()
-        ev_manager.post(EventInitialize())
-
-    def get_time(self):
-        return (pg.time.get_ticks() - self.stop_time) / 1000
-
     def register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
             self.characters.add(event.entity)
-            x, y = int(event.entity.position.x), int(event.entity.position.y)
             for tower in self.grid.get_attacker_tower(event.entity.position):
                 tower.enemy_in_range(event.entity)
 
@@ -162,11 +152,6 @@ class Model:
 
     def restart_game(self, _: EventRestartGame):
         get_event_manager().post(EventInitialize())
-        pass
-
-    def restart_game(self, _: EventRestartGame):
-        get_event_manager().post(EventInitialize())
-        pass
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

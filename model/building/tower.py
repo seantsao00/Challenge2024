@@ -1,21 +1,24 @@
 """
 The module defines Building class.
 """
+from __future__ import annotations
 
-from random import choice, randint
+from typing import TYPE_CHECKING, Type
 
 import pygame as pg
 
 import const
-import view
 from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building.linked_list import Linked_list, Node
-from model.character import Character, Melee, RangerFighter, Sniper
+from model.character import RangerFighter
 from model.entity import LivingEntity
 from model.team import Team
 from model.timer import Timer
+
+if TYPE_CHECKING:
+    from model.character import Character
 
 
 class Tower(LivingEntity):
@@ -37,15 +40,16 @@ class Tower(LivingEntity):
         self.log = []
         self.period = const.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
-        self.character_type = RangerFighter
+        self.character_type: Type[Character] = RangerFighter
         self.attack_range: float = const.TOWER_ATTACK_RANGE
         self.damage: float = const.TOWER_DAMAGE
         self.enemy: list[Linked_list] = [Linked_list() for _ in range(4)]
         self.spawn_timer = None
-        self.attack_timer = Timer(const.tower.TOWER_ATTACK_PERIOD, self.attack, once=False)
+        self.attack_timer = Timer(const.TOWER_ATTACK_PERIOD, self.attack, once=False)
         super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION,
                          entity_type=entity_type, team=team, imgstate=imgstate)
-        get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
+        self.register_listeners()
+
         if self.is_fountain:
             self.imgstate = 'temporary_blue_nexus'
         if self.team is not None:
@@ -73,15 +77,16 @@ class Tower(LivingEntity):
         self.character_type = character_type
 
     def take_damage(self, event: EventAttack):
+        ev_manager = get_event_manager()
         if self.team is event.attacker.team or self.is_fountain:
-            print("same team or is fountion")
+            print('same team or is fountain')
             return
         if self.health - event.attacker.damage <= 0:
             if self.team is None:
-                get_event_manager().post(EventTeamGainTower(tower=self), event.attacker.team.id)
+                ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.id)
             else:
-                get_event_manager().post(EventTeamLoseTower(tower=self), self.team.id)
-                get_event_manager().post(EventTeamGainTower(tower=self), event.attacker.team.id)
+                ev_manager.post(EventTeamLoseTower(tower=self), self.team.id)
+                ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.id)
             self.team = event.attacker.team
             self.imgstate = 'team' + str(self.team.id)
             if self.spawn_timer is not None:
@@ -114,3 +119,8 @@ class Tower(LivingEntity):
         if character.position.distance_to(self.position) > self.attack_range or character.alive is False:
             # print(character.type, 'get out of tower')
             self.enemy[character.team.id].delete(character)
+
+    def register_listeners(self):
+        """Register every listeners of this object into the event manager."""
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(EventAttack, self.take_damage, self.id)
