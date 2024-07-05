@@ -56,7 +56,7 @@ class Model:
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.grid: Grid = Grid(900, 900)
-        self.teams: list[Team]
+        self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
 
@@ -150,7 +150,8 @@ class Model:
             tower.enemy_out_range(event.character)
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_in_range(event.character)
-        event.character.team.update_visible_entities_list(event.character)
+        if event.original_pos.distance_to(event.character.position) > 0.1:
+            event.character.team.update_vision(event.character)
 
     def __restart_game(self, _: EventRestartGame):
         get_event_manager().post(EventInitialize())
