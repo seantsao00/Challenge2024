@@ -183,4 +183,4 @@ class View:
         """Display the current fps on the window caption."""
         model = get_model()
         pg.display.set_caption(
-            f'{const.WINDOW_CAPTION} - FPS: {model.clock.get_fps():.2f}')
+            f'{const.WINDOW_CAPTION} - FPS: {model.global_clock.get_fps():.2f}')

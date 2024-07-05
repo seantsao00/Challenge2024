@@ -8,12 +8,10 @@ import argparse
 
 import pygame as pg
 
-import const
 import instances_manager
 from controller import Controller
 from event_manager import EventManager
 from model import Model
-from model.entity import Entity
 from view import View
 
 
@@ -51,7 +49,7 @@ def main():
                         help='Display the vision of which player. If not assigned or assigned "all", all visible entities are displayed. Team id or team name can be assigned.')
 
     args = parser.parse_args()
-    teams = [args.team1, args.team2]
+    teams: list[str] = [args.team1, args.team2]
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
