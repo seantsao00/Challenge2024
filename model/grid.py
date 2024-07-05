@@ -1,8 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 from event_manager import EventCharacterDied, EventCharacterMove, EventCreateEntity
 from instances_manager import get_event_manager
-from model import Bullet, Character, Entity, Team, Tower
+from model.building import Tower
+from model.bullet import Bullet
+from model.character import Character
+
+if TYPE_CHECKING:
+    from model.entity import Entity
+    from model.team import Team
 
 
 class Cell:
