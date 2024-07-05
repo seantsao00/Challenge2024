@@ -10,8 +10,10 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventInitialize, EventUnconditionalTick, EventStartGame
+from event_manager import EventInitialize, EventStartGame, EventUnconditionalTick
 from instances_manager import get_event_manager, get_model
+from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase, PauseMenuView,
+                         ViewRangeView)
 
 
 class View:
@@ -30,11 +32,8 @@ class View:
 
         size = pg.display.Info()
         # self.cover = pg.image.load(to be added).convert_alpha()
-        self.arena = pg.display.set_mode(
-            size=const.ARENA_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
-        self.canvas = pg.display.set_mode(
-            # Draw team UI(anything outside of arena) on self.canvas
-            size=const.WINDOW_SIZE, flags=pg.RESIZABLE | pg.DOUBLEBUF).copy()
+        self.arena = pg.Surface(size=const.ARENA_SIZE)
+        self.canvas = pg.Surface(size=const.WINDOW_SIZE)
         window_w = min(size.current_w, size.current_h / 9 * 16)
         window_h = min(size.current_h, size.current_w / 16 * 9)
         self.screen = pg.display.set_mode(
@@ -42,6 +41,8 @@ class View:
         self.background_images = []
         # print(self.screen.get_rect().size)
         pg.display.set_caption(const.WINDOW_CAPTION)
+
+        self.pause_menu_view = PauseMenuView(model.pause_menu, self.canvas)
 
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -97,7 +98,8 @@ class View:
 
         # setting up a temporary cover till we have a cover image
         font = pg.font.Font(None, 36)
-        text_surface = font.render('THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
+        text_surface = font.render(
+            'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.screen.blit(text_surface, (300, 200))
 
     def render_party_selection(self):
@@ -134,9 +136,11 @@ class View:
 
         pg.draw.line(
             self.arena, 'white', (const.ARENA_SIZE[0] - 1,
-                                0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
+                                  0), (const.ARENA_SIZE[0] - 1, const.ARENA_SIZE[1] - 1), 1
         )
         self.canvas.blit(self.arena, ((const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2, 0))
+        self.pause_menu_view.draw()
+
         self.screen.blit(pg.transform.scale(self.canvas, self.screen.get_rect().size), (0, 0))
 
     def register_listeners(self):

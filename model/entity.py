@@ -2,12 +2,18 @@
 The module defines Entity class.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import view
 from event_manager.events import EventCreateEntity
 from instances_manager import get_event_manager
-from model.team import Team
+
+if TYPE_CHECKING:
+    from model.team import Team
 
 
 class Entity:
@@ -34,13 +40,14 @@ class Entity:
         self.hidden: bool = False
         self.team: Team = team
         self.view: list = [view.EntityView(self)]
-        get_event_manager().post(EventCreateEntity(self))
+        get_event_manager().post(EventCreateEntity(entity=self))
 
 
 class LivingEntity(Entity):
-    def __init__(self, health: float, position: pg.Vector2 | tuple[float, float],
+    def __init__(self, health: float, position: pg.Vector2 | tuple[float, float], vision: float,
                  entity_type: str = 'default', team: Team = None, imgstate: str = 'default') -> None:
+        self.alive: bool = True
         super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
         self.health: float = health
         self.max_health: float = health
-        self.alive: bool = True
+        self.vision: float = vision

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import time
 from typing import Callable
 
 import pygame as pg
-import time
+
 from event_manager import EventPauseModel, EventResumeModel
 
 
@@ -28,7 +29,7 @@ class TimerManager:
             timer._handle_event(event)
             return True
         return False
-    
+
     @classmethod
     def pause_all_timer(cls, _: EventPauseModel):
         for timer in cls._timers.values():
@@ -85,7 +86,7 @@ class Timer:
     def pause(self):
         """Pause the timer."""
         if self.running:
-            self.remaining_time = int(max(0, self.remaining_time - (time.time() - self.last_time) * 1000))
+            self.remaining_time = self.get_remaining_time()
             self.running = False
             pg.time.set_timer(self.event_type, 0)
 
@@ -102,6 +103,12 @@ class Timer:
         if self.running:
             self.stop()
             self.start()
+
+    def get_remaining_time(self):
+        if self.running:
+            return int(max(0, self.remaining_time - (time.time() - self.last_time) * 1000))
+        else:
+            return self.remaining_time
 
     def get_interval(self):
         """Get the current interval of the timer."""
@@ -120,7 +127,7 @@ class Timer:
         if event.type == self.event_type:
             self.count += 1
             self.function(*self.args, **self.kwargs)
-            
+
             if self.once:
                 self.delete()
             elif self.running:

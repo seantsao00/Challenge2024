@@ -12,9 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model.building import Tower
-    from model.character import Character
-    from model.entity import Entity
+    from model import Character, Entity, Tower
 
 
 @dataclass(kw_only=True)
@@ -31,6 +29,7 @@ class EventInitialize(BaseEvent):
 class EventQuit(BaseEvent):
     """Event posted upon quitting the game (closing the program)."""
 
+
 @dataclass(kw_only=True)
 class EventStartGame(BaseEvent):
     """
@@ -38,7 +37,7 @@ class EventStartGame(BaseEvent):
 
     For example, press space at cover scene would leave cover and start the game.
     """
-    
+
 
 @dataclass(kw_only=True)
 class EventPauseModel(BaseEvent):
@@ -68,26 +67,23 @@ class EventUnconditionalTick(BaseEvent):
     """Event posted every tick, regardless of whether the game is in a paused state or not."""
 
 
+@dataclass(kw_only=True)
 class EventHumanInput(BaseEvent):
     """
     Event posted upon moving a human controlled team.
 
     For example, a listener which draws position of characters can be registered with this event.
     """
-
-    def __init__(self, input_type: const.InputTypes, clicked: Character = None, displacement: pg.Vector2 = None):
-        self.input_type: const.InputTypes = input_type
-        self.clicked: Character = clicked  # When INPUT_TYPE is PICK or ATTACK
-        self.displacement: pg.Vector2 = displacement  # When INPUT_TYPE is MOVE
-        """
-        The displacement vector representing the movement.
-        """
+    input_type: const.InputTypes
+    clicked: Entity | None = None
+    displacement: pg.Vector2 | None = None
+    """The displacement vector representing the movement."""
 
     def __str__(self):
         if self.input_type == const.InputTypes.PICK:
             return f"Clicked at {self.clicked.id}"
         return f"Move {self.displacement}"
-    
+
 
 @dataclass(kw_only=True)
 class EventPartySelection(BaseEvent):
@@ -95,47 +91,56 @@ class EventPartySelection(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventSelectCharacter(BaseEvent):
+    """When picking a tower, we could select charcters"""
+    character: Character | None = None
+
+
+@dataclass(kw_only=True)
 class EventCreateEntity(BaseEvent):
     """Event posted when an entity is created."""
-
-    def __init__(self, entity: Entity):
-        self.entity: Entity = entity
+    entity: Entity
 
 
+@dataclass(kw_only=True)
 class EventAttack(BaseEvent):
-    def __init__(self, attacker: Entity, victim: Entity):  # reference of two characters
-        self.attacker: Entity = attacker
-        self.victim: Entity = victim
+    attacker: Entity
+    victim: Entity
 
 
-class EventMultiAttack(BaseEvent):
-    def __init__(self, attacker: Character, target: pg.Vector2, radius: float):
-        self.attacker: Character = attacker
-        self.target: pg.Vector2 = target
-        self.radius: float = radius
+@dataclass(kw_only=True)
+class EventCreateTower(BaseEvent):
+    tower: Tower
 
 
+@dataclass(kw_only=True)
 class EventTeamGainTower(BaseEvent):
-    def __init__(self, tower: Tower):
-        self.tower: Tower = tower
+    tower: Tower
 
 
+@dataclass(kw_only=True)
 class EventTeamLoseTower(BaseEvent):
-    def __init__(self, tower: Tower):
-        self.tower: Tower = tower
+    tower: Tower
 
 
+@dataclass(kw_only=True)
 class EventSpawnCharacter(BaseEvent):
-    def __init__(self, character: Character):
-        self.character: Character = character
+    character: Character
 
 
+@dataclass(kw_only=True)
 class EventCharacterMove(BaseEvent):
-    def __init__(self, character: Character, original_pos: pg.Vector2):
-        self.character: Character = character
-        self.original_pos: pg.Vector2 = original_pos
+    character: Character
+    original_pos: pg.Vector2
 
 
+@dataclass(kw_only=True)
 class EventCharacterDied(BaseEvent):
-    def __init__(self, character: Character):
-        self.character: Character = character
+    character: Character
+
+
+@dataclass(kw_only=True)
+class EventSelectParty(BaseEvent):
+    """Event posted when player is selecting parties"""
+    index: int
+    increase: bool
