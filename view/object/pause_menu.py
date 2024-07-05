@@ -6,6 +6,8 @@ import pygame as pg
 
 from view.object.object_base import ObjectBase
 
+from const import WINDOW_SIZE
+
 if TYPE_CHECKING:
     from model import PauseMenu
 
@@ -22,22 +24,22 @@ class PauseMenuView(ObjectBase):
     def draw(self):
         if not self.pause_menu.enabled:
             return
-
-        bg_surf = pg.Surface(self.canvas.get_rect().size, pg.SRCALPHA)
-        bg_surf.fill((200, 200, 200, 100))
+        
+        bg_surf = pg.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]), pg.SRCALPHA)
+        bg_surf.fill((200, 200, 200, 230))
 
         center = (bg_surf.get_width() // 2, bg_surf.get_height() // 2)
-
-        draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'gray', self.title_font)
+        
+        draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'black', self.title_font)
         for index, opt_text in enumerate(self.options):
             draw_text(bg_surf, center[0], center[1]+80*index, opt_text,
-                      'gray', self.font, index == self.pause_menu.selected)
+                      'black', self.font, index == self.pause_menu.selected)
 
         self.canvas.blit(bg_surf, (0, 0))
 
 
 def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):
-    underline_color = 'lightskyblue'
+    underline_color = 'darkblue'
     underline_thickness = 3
     underline_offset = 3
 

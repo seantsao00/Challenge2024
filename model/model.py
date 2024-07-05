@@ -15,7 +15,7 @@ from api.internal import call_ai, load_ai
 from event_manager import (EventAttack, EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
                            EventResumeModel, EventSpawnCharacter, EventStartGame,
-                           EventUnconditionalTick)
+                           EventUnconditionalTick, EventRestartGame)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -109,6 +109,7 @@ class Model:
         """
         self.tmp_timer = pg.time.Clock()
         self.state = const.State.PAUSE
+        self.pause_menu.enable_menu()
 
     def handle_resume(self, _: EventResumeModel):
         """
@@ -116,6 +117,17 @@ class Model:
         """
         self.stop_time += self.tmp_timer.tick()
         self.state = const.State.PLAY
+        self.pause_menu.disable_menu()
+
+    def handle_start(self, _: EventStartGame):
+        """
+        Start the game and post EventInitialize
+        """
+        ev_manager = get_event_manager()
+        ev_manager.post(EventInitialize())
+
+    def get_time(self):
+        return (pg.time.get_ticks() - self.stop_time) / 1000
 
     def handle_start(self, _: EventStartGame):
         """
@@ -148,6 +160,14 @@ class Model:
             tower.enemy_in_range(event.character)
         event.character.team.update_visible_entities_list(event.character)
 
+    def restart_game(self, _: EventRestartGame):
+        get_event_manager().post(EventInitialize())
+        pass
+
+    def restart_game(self, _: EventRestartGame):
+        get_event_manager().post(EventInitialize())
+        pass
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -160,6 +180,7 @@ class Model:
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventCharacterMove, self.handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
+        ev_manager.register_listener(EventRestartGame, self.restart_game)
 
     def run(self):
         """Run the main loop of the game."""

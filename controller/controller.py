@@ -57,6 +57,14 @@ class Controller:
                 elif event_pg.key == pg.K_q:
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITIES))
 
+                # For pause menu
+                elif event_pg.key == pg.K_DOWN:
+                    model.pause_menu.change_selected(1)
+                elif event_pg.key == pg.K_UP:
+                    model.pause_menu.change_selected(-1)
+                elif event_pg.key == pg.K_RETURN:
+                    model.pause_menu.execute()
+
             if event_pg.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = event_pg.pos
                 x, y = mouse_pos

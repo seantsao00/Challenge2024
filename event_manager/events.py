@@ -66,6 +66,10 @@ class EventEveryTick(BaseEvent):
 class EventUnconditionalTick(BaseEvent):
     """Event posted every tick, regardless of whether the game is in a paused state or not."""
 
+@dataclass(kw_only=True)
+class EventRestartGame(BaseEvent):
+    """Post this event when the game needs to restart."""
+
 
 @dataclass(kw_only=True)
 class EventHumanInput(BaseEvent):

@@ -1,8 +1,7 @@
 import pygame as pg
 
-import view
-from model.entity import Entity
-
+from instances_manager import get_event_manager
+from event_manager import EventQuit, EventResumeModel, EventRestartGame
 
 class PauseMenu:
     def __init__(self):
@@ -16,6 +15,15 @@ class PauseMenu:
             self.selected = 0
         elif self.selected == -1:
             self.selected = 2
+
+    def execute(self):
+        ev_manager = get_event_manager()
+        if self.selected == 0:
+            ev_manager.post(EventResumeModel())
+        elif self.selected == 1:
+            ev_manager.post(EventRestartGame())
+        elif self.selected == 2:
+            ev_manager.post(EventQuit())
 
     def enable_menu(self):
         self.enabled = True
