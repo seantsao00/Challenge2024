@@ -9,7 +9,7 @@ import pygame as pg
 import const
 import const.map
 from event_manager import (EventCreateEntity, EventEveryTick, EventUnconditionalTick, EventInitialize,
-                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel)
+                           EventMultiAttack, EventQuit, EventPauseModel, EventResumeModel, EventRestartGame)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Melee
@@ -115,6 +115,10 @@ class Model:
                 if (attacker.team != victim.team and dist <= radius):
                     victim.take_damage(attacker.damage)
 
+    def restart_game(self, _: EventRestartGame):
+        get_event_manager().post(EventInitialize())
+        pass
+
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -125,6 +129,7 @@ class Model:
         ev_manager.register_listener(EventResumeModel, self.handle_resume)
         ev_manager.register_listener(EventCreateEntity, self.register_entity)
         ev_manager.register_listener(EventMultiAttack, self.multi_attack)
+        ev_manager.register_listener(EventMultiAttack, self.restart_game)
 
     def run(self):
         """Run the main loop of the game."""
