@@ -2,6 +2,10 @@
 The module defines Controller class.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Type
+
 import pygame as pg
 
 import const
@@ -11,11 +15,15 @@ from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, Ev
 from instances_manager import get_event_manager, get_model
 from model import Melee, RangerFighter, Sniper, TimerManager
 
+if TYPE_CHECKING:
+    from model import Character
+
 
 class Controller:
     """
     The object handles the control input, either from keyboard or from AI.
     """
+    __resize_ratio: float
 
     def __init__(self):
         """
@@ -25,82 +33,133 @@ class Controller:
         For more specific objects related to a game instance,
         they should be initialized in Controller.initialize()
         """
+        screen_info = pg.display.Info()
+        window_w = int(min(screen_info.current_w, screen_info.current_h /
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]))
+        self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
+
+    def transform(self, x: float, y: float) -> tuple[float, float]:
+        """Transform control position to position in model's coordinate."""
+        x = x / self.__resize_ratio
+        y = y / self.__resize_ratio
+        x -= (const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / 2
+        return (x, y)
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
         """Do actions that should be executed every tick, regardless of whether the game is in a paused state or not."""
         ev_manager = get_event_manager()
         model = get_model()
         # Called once per game tick. We check our keyboard presses here.
-        for event_pg in pg.event.get():
+        pg_events = pg.event.get()
+        for pg_event in pg_events:
             # Handle window manager closing our window
-            if event_pg.type == pg.QUIT:
+            if pg_event.type == pg.QUIT:
                 ev_manager.post(EventQuit())
+            TimerManager.handle_event(pg_event)
 
-            if event_pg.type == pg.KEYDOWN:
-                # For pausing the game
-                if event_pg.key == const.PAUSE_BUTTON:
-                    if model.state == const.State.PAUSE:
-                        ev_manager.post(EventResumeModel())
-                    elif model.state == const.State.PLAY:
-                        ev_manager.post(EventPauseModel())
+        if model.state is const.State.PLAY:
+            self.ctrl_play(pg_events)
+        elif model.state is const.State.PAUSE:
+            self.ctrl_pause(pg_events)
+        elif model.state is const.State.COVER:
+            self.ctrl_cover(pg_events)
 
-                elif event_pg.key == const.START_BUTTON:
-                    if model.state == const.State.COVER:
-                        ev_manager.post(EventStartGame())
-                    else:
-                        print('game is already in PLAY state')
+    def ctrl_play(self, pg_events: list[pg.Event]):
+        """
+        Control depending on key input when the model.state is PLAY.
 
-                elif event_pg.key == pg.K_q:
+        When the method called, controller get what keys is pressed in this tick,
+        and post EventHumanInput according to the keys pressed.
+        """
+        ev_manager = get_event_manager()
+        model = get_model()
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                key = pg_event.key
+                if key == const.PAUSE_BUTTON:
+                    ev_manager.post(EventPauseModel())
+                if key == const.ABILITY_BUTTON:
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITIES))
+                if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
+                    character: Type[Character]
+                    character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
+                    if character_type is const.CharacterType.MELEE:
+                        character = Melee
+                    if character_type is const.CharacterType.RANGER:
+                        character = RangerFighter
+                    if character_type is const.CharacterType.SNIPER:
+                        character = Sniper
+                    ev_manager.post(EventSelectCharacter(character=character))
 
-                # For pause menu
-                elif event_pg.key == pg.K_DOWN:
-                    model.pause_menu.change_selected(1)
-                elif event_pg.key == pg.K_UP:
-                    model.pause_menu.change_selected(-1)
-                elif event_pg.key == pg.K_RETURN:
-                    model.pause_menu.execute()
+            if pg_event.type == pg.MOUSEBUTTONDOWN:
+                x, y = pg_event.pos
+                x, y = self.transform(x, y)
 
-            if event_pg.type == pg.MOUSEBUTTONDOWN:
-                mouse_pos = event_pg.pos
-                x, y = mouse_pos
-                w, h = pg.display.get_surface().get_size()
-                w_canva_to_screen_ratio = w / const.WINDOW_SIZE[0]
-                h_canva_to_screen_ratio = h / const.WINDOW_SIZE[1]
-                x = x / w_canva_to_screen_ratio
-                y = y / h_canva_to_screen_ratio
-                x -= (const.WINDOW_SIZE[0] - const.ARENA_SIZE[0]) / \
-                    2   # shift away from the center
-                if event_pg.button == 1:  # Left mouse button
+                if pg_event.button == 1:  # Left mouse button
                     print(f"Mouse click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
-
                     ev_manager.post(EventHumanInput(
                         input_type=const.InputTypes.PICK, clicked=clicked))
 
-                if event_pg.button == 3:  # Right mouse button
+                if pg_event.button == 3:  # Right mouse button
                     print(f"Right click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
                         if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
                             clicked = entity
-
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked=clicked, displacement=pg.Vector2(x, y)))
 
-            TimerManager.handle_event(event_pg)
+        pressed_keys = pg.key.get_pressed()
+        direction = pg.Vector2(0, 0)
+        for key, val in const.DIRECTION_BUTTONS_MAP.items():
+            if pressed_keys[key]:
+                direction += val
+        if direction.length() != 0:
+            # Try to move as far as player can.
+            displacement = direction.normalize() * max(const.ARENA_SIZE)
+            ev_manager.post(EventHumanInput(
+                input_type=const.InputTypes.MOVE, displacement=displacement))
 
-        cur_state = model.state
-        if cur_state == const.State.PLAY:
-            self.ctrl_play()
-            self.select_character()
+    def ctrl_pause(self, pg_events: list[pg.Event]):
+        """
+        Control depending on key input when the model.state is PAUSE.
+        """
+        ev_manager = get_event_manager()
+        model = get_model()
+
+        for pg_event in pg_events:
+            key = pg_event.key
+            if pg_event.type == pg.KEYDOWN:
+                if key == const.PAUSE_BUTTON:
+                    ev_manager.post(EventResumeModel())
+                elif key == pg.K_DOWN:
+                    model.pause_menu.change_selected(1)
+                elif key == pg.K_UP:
+                    model.pause_menu.change_selected(-1)
+                elif key == pg.K_RETURN:
+                    model.pause_menu.execute()
+                # SHOULD BE MODIFIED TO UTILIZING EVENT
+
+    def ctrl_cover(self, pg_events: list[pg.Event]):
+        """
+        Control depending on key input when the model.state is COVER.
+        """
+        ev_manager = get_event_manager()
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                # For pausing the game
+                if pg_event.key == const.START_BUTTON:
+                    ev_manager.post(EventStartGame())
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
@@ -110,44 +169,3 @@ class Controller:
         # Listeners for TimerManager
         ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
         ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
-
-    def ctrl_play(self):
-        """
-        Control the behavior of player characters depending on key input during the game.
-
-        When the method called, controller get what keys is pressed in this tick,
-        and post EventHumanInput according to the keys pressed.
-        """
-        ev_manager = get_event_manager()
-        pressed_keys = pg.key.get_pressed()
-
-        direction = pg.Vector2(0, 0)
-
-        for k, v in const.HUMAN_KEYS_MAP.items():
-            # If the key is actually pressed
-            if pressed_keys[k]:
-                direction += v
-
-        if direction.length() != 0:
-            # Try to move as far as player can.
-            displacement = direction.normalize() * max(const.ARENA_SIZE)
-            ev_manager.post(EventHumanInput(input_type=const.InputTypes.MOVE,
-                                            displacement=displacement))
-
-    def select_character(self):
-        """Select characters after clicking the tower"""
-
-        ev_manager = get_event_manager()
-        pressed_keys = pg.key.get_pressed()
-
-        character = None
-
-        if pressed_keys[pg.K_1]:
-            character = Melee
-        elif pressed_keys[pg.K_2]:
-            character = RangerFighter
-        elif pressed_keys[pg.K_3]:
-            character = Sniper
-
-        if character is not None:
-            ev_manager.post(EventSelectCharacter(character=character))
