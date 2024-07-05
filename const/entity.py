@@ -12,4 +12,4 @@ ENTITY_STATES = {
     "tower": ["default", "temporary_blue_nexus", "team0", "team1"]
 }
 
-ENTITY_RADIUS: float = 20
+ENTITY_RADIUS: float = 8

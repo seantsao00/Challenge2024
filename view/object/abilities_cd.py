@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class AbilitiesCDView(ObjectBase):
-    def __init__(self, canvas: pg.Surface, ratio: float, entity: Character):
-        super().__init__(canvas, ratio)
+    def __init__(self, canvas: pg.Surface, entity: Character):
+        super().__init__(canvas)
         self.entity: Character = entity
 
     def draw(self):
@@ -22,9 +22,12 @@ class AbilitiesCDView(ObjectBase):
         if entity.hidden:
             return
 
-        cd_width = min(get_model().get_time() - entity.abilities_time,
-                       entity.abilities_cd) / entity.abilities_cd * const.ENTITY_RADIUS * 2
+        cd_width = min(get_model().get_time() - entity.abilities_time, entity.abilities_cd) / \
+            entity.abilities_cd * const.ENTITY_RADIUS * 2 * self.resize_ratio
+        top = (self.entity.position.x - const.ENTITY_RADIUS) * self.resize_ratio
+        left = (self.entity.position.y - const.ENTITY_RADIUS -
+                const.CD_BAR_UPPER) * self.resize_ratio
         pg.draw.rect(self.canvas, (0, 0, 0),
-                     (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.CD_BAR_UPPER, const.ENTITY_RADIUS * 2, 2))
+                     (top, left, const.ENTITY_RADIUS * 2 * self.resize_ratio, 2 * self.resize_ratio))
         pg.draw.rect(self.canvas, (0, 0, 255),
-                     (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.CD_BAR_UPPER, cd_width, 2))
+                     (top, left, cd_width, 2 * self.resize_ratio))

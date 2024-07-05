@@ -31,7 +31,7 @@ class Character(LivingEntity):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
                  attack_range: float, damage: float, health: float, vision: float, attack_speed: float, abilities_cd: float, imgstate: str):
-        super().__init__(health, position, vision, entity_type=team.name, team=team, imgstate=imgstate)
+        ev_manager = get_event_manager()
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
@@ -40,16 +40,9 @@ class Character(LivingEntity):
         self.attack_speed: int = attack_speed
         self.attack_time: float = -100
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
-        model = get_model()
-        if model.show_view_range:
-            self.view.append(view.ViewRangeView(self))
-        if model.show_attack_range:
-            self.view.append(view.AttackRangeView(self))
-        self.view.append(view.AbilitiesCDView(self))
-        if self.health is not None:
-            self.view.append(view.HealthView(self))
-        get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
-        get_event_manager().register_listener(EventEveryTick, self.tick_move)
+        super().__init__(health, position, vision, entity_type=team.name, team=team, imgstate=imgstate)
+        ev_manager.register_listener(EventAttack, self.take_damage, self.id)
+        ev_manager.register_listener(EventEveryTick, self.tick_move)
 
     def move(self, direction: pg.Vector2):
         """
@@ -107,6 +100,7 @@ class Character(LivingEntity):
         print(f"Character {self.id} in Team {self.team.id} died")
         self.alive = False
         self.hidden = True
+        super().discard()
         get_event_manager().post(EventCharacterDied(character=self))
 
     def call_abilities(self, *args, **kwargs):

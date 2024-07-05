@@ -12,16 +12,20 @@ if TYPE_CHECKING:
 
 
 class HealthView(ObjectBase):
-    def __init__(self, canvas: pg.Surface, ratio: float, entity: LivingEntity):
-        super().__init__(canvas, ratio)
+    def __init__(self, canvas: pg.Surface, entity: LivingEntity):
+        super().__init__(canvas)
         self.entity: LivingEntity = entity
 
     def draw(self):
         entity = self.entity
         if entity.hidden:
             return
-        blood_width = (entity.health / entity.max_health) * const.ENTITY_RADIUS * 2
+        blood_width = (entity.health / entity.max_health) * \
+            const.ENTITY_RADIUS * 2 * self.resize_ratio
+        top = (self.entity.position.x - const.ENTITY_RADIUS) * self.resize_ratio
+        left = (self.entity.position.y - const.ENTITY_RADIUS -
+                const.HEALTH_BAR_UPPER) * self.resize_ratio
         pg.draw.rect(self.canvas, (0, 0, 0),
-                     (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER, const.ENTITY_RADIUS * 2, 3))
+                     (top, left, const.ENTITY_RADIUS * 2 * self.resize_ratio, 3*self.resize_ratio))
         pg.draw.rect(self.canvas, (255, 0, 0),
-                     (self.entity.position.x - const.ENTITY_RADIUS, self.entity.position.y - const.ENTITY_RADIUS - const.HEALTH_BAR_UPPER, blood_width, 3))
+                     (top, left, blood_width, 3*self.resize_ratio))

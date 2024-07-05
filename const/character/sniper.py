@@ -2,8 +2,8 @@
 This module defines constants associated with range fighter.
 """
 
-SNIPER_SPEED = 15
-SNIPER_ATTACK_RANGE = 100
+SNIPER_SPEED = 1.5
+SNIPER_ATTACK_RANGE = 50
 SNIPER_DAMAGE = 150
 SNIPER_HEALTH = 300
 SNIPER_VISION = 50

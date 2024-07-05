@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 
 
 class PauseMenuView(ObjectBase):
-    def __init__(self, canvas: pg.Surface, ratio: float, pause_menu: PauseMenu):
+    def __init__(self, canvas: pg.Surface, pause_menu: PauseMenu):
         self.image_initialized = True
-        super().__init__(canvas, ratio)
+        super().__init__(canvas)
         self.pause_menu = pause_menu
-        self.title_font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(20*ratio))
-        self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(12*ratio))
+        self.title_font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(20*self.resize_ratio))
+        self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(12*self.resize_ratio))
         self.options = self.pause_menu.options
 
     def draw(self):

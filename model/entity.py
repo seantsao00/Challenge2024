@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import view
-from event_manager.events import EventCreateEntity
+from event_manager.events import EventCreateEntity, EventDiscardEntity
 from instances_manager import get_event_manager
 
 if TYPE_CHECKING:
@@ -41,12 +41,16 @@ class Entity:
         self.team: Team = team
         get_event_manager().post(EventCreateEntity(entity=self))
 
+    def discard(self):
+        ev_manager = get_event_manager()
+        ev_manager.post(EventDiscardEntity, self.id)
+
 
 class LivingEntity(Entity):
     def __init__(self, health: float, position: pg.Vector2 | tuple[float, float], vision: float,
                  entity_type: str = 'default', team: Team = None, imgstate: str = 'default') -> None:
         self.alive: bool = True
-        super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
         self.health: float = health
         self.max_health: float = health
         self.vision: float = vision
+        super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)

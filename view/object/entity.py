@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from event_manager import EventDiscardEntity
+from instances_manager import get_event_manager
 from util import crop_image
 from view.object.object_base import ObjectBase
 
@@ -21,10 +23,12 @@ class EntityView(ObjectBase):
     built from const, and initialized only once in init_convert.
     """
 
-    def __init__(self, canvas: pg.Surface, ratio: float, entity: Entity):
-        super().__init__(canvas, ratio)
+    def __init__(self, canvas: pg.Surface, entity: Entity):
         self.entity: Entity = entity
         self.position: pg.Vector2 = self.entity.position.copy()
+        self.exist = True
+        super().__init__(canvas, self.position[1])
+        self.register_listeners()
 
     @classmethod
     def init_convert(cls):
@@ -39,19 +43,31 @@ class EntityView(ObjectBase):
                     str(state) + '.png'
                 )
                 img = pg.image.load(path)
-                width = const.ENTITY_RADIUS * 2
-                height = const.ENTITY_RADIUS * 2
+                width = const.ENTITY_RADIUS * 2 * cls.resize_ratio
+                height = const.ENTITY_RADIUS * 2 * cls.resize_ratio
                 cls.images[entity_type][state] = crop_image(
                     img, width, height
                 ).convert_alpha()
         cls.image_initialized = True
+
+    def handle_discard_entity(self):
+        self.exist = False
 
     def draw(self):
         entity = self.entity
         if entity.hidden:
             return
         img = self.images[entity.type][entity.imgstate]
-        self.canvas.blit(img, img.get_rect(center=entity.position))
+        self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 
     def update(self):
-        self.height = self.entity.position[1]
+        if not self.exist:
+            return False
+        self.priority = self.entity.position[1]
+        return True
+
+    def register_listeners(self):
+        """Register all listeners of this object with the event manager."""
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(
+            EventDiscardEntity, self.handle_discard_entity, self.entity.id)

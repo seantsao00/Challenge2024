@@ -34,8 +34,6 @@ class Tower(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team = None, is_fountain: bool = False, entity_type='tower', imgstate='default'):
-        super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION,
-                         entity_type=entity_type, team=team, imgstate=imgstate)
         self.log = []
         self.period = const.INITIAL_PERIOD_MS
         self.is_fountain = is_fountain
@@ -45,20 +43,14 @@ class Tower(LivingEntity):
         self.enemy: list[Linked_list] = [Linked_list() for _ in range(4)]
         self.spawn_timer = None
         self.attack_timer = Timer(const.tower.TOWER_ATTACK_PERIOD, self.attack, once=False)
+        super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION,
+                         entity_type=entity_type, team=team, imgstate=imgstate)
         get_event_manager().register_listener(EventAttack, self.take_damage, self.id)
         if self.is_fountain:
             self.imgstate = 'temporary_blue_nexus'
         if self.team is not None:
             self.set_timer()
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.id)
-        model = get_model()
-        if model.show_view_range:
-            self.view.append(view.ViewRangeView(self))
-        if model.show_attack_range:
-            self.view.append(view.AttackRangeView(self))
-        self.view.append(view.TowerCDView(self))
-        if self.health is not None and not self.is_fountain:
-            self.view.append(view.HealthView(self))
         get_event_manager().post(EventCreateTower(tower=self))
 
     def update_period(self):

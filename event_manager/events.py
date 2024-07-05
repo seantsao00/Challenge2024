@@ -98,6 +98,11 @@ class EventCreateEntity(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventDiscardEntity(BaseEvent):
+    """Event posted when an entity is discarded."""
+
+
+@dataclass(kw_only=True)
 class EventAttack(BaseEvent):
     attacker: Entity
     victim: Entity

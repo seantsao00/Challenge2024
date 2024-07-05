@@ -11,11 +11,11 @@ import numpy as np
 import pygame as pg
 
 import const
-from event_manager import EventInitialize, EventStartGame, EventUnconditionalTick
+from event_manager import (EventCreateEntity, EventInitialize, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
-from view.object import (AttackRangeView, EntityView, HealthView, ObjectBase, PauseMenuView,
-                         ViewRangeView)
-from view.object.background_object import BackGroundObject
+from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
+                         HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
 
 
 class View:
@@ -33,18 +33,22 @@ class View:
         model = get_model()
 
         size = pg.display.Info()
-        window_w = min(size.current_w, size.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0])
-        window_h = min(size.current_h, size.current_w /
-                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1])
+        window_w = int(min(size.current_w, size.current_h /
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]))
+        window_h = int(min(size.current_h, size.current_w /
+                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]))
         self.screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
         pg.display.set_caption(const.WINDOW_CAPTION)
-        self.ratio: float = window_w / const.WINDOW_SIZE[0]
-        self.entities = []
 
-        self.pause_menu_view = PauseMenuView(self.screen, self.ratio, model.pause_menu)
+        self.ratio: float = window_w / const.WINDOW_SIZE[0]
+        self.set_resize_ratio()
+        self.arena: pg.Surface = pg.Surface(size=(window_h, window_h))
+
+        self.pause_menu_view = PauseMenuView(self.screen, model.pause_menu)
+
+        self.entities: list[EntityView] = []
 
         self.background_images = []
         for i in model.map.images:
@@ -52,7 +56,7 @@ class View:
                 os.path.join(model.map.map_dir, i), cv2.IMREAD_UNCHANGED
             )
             loaded_image = cv2.resize(
-                loaded_image, const.ARENA_SIZE, interpolation=cv2.INTER_AREA
+                loaded_image, (window_h, window_h), interpolation=cv2.INTER_AREA
             )
             # if loaded_image.shape[2] == 3:
             #     alpha_channel = np.ones(
@@ -60,10 +64,10 @@ class View:
             #     loaded_image = np.dstack((loaded_image, alpha_channel))
             x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
             picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
-            picture = pg.transform.scale(picture, const.ARENA_SIZE)
+            picture = pg.transform.scale(picture, (window_h, window_h))
             picture = picture.subsurface(pg.Rect(x, y, w, h))
             self.background_images.append(BackGroundObject(
-                self.screen, int(model.map.images[i]), (x, y), picture))
+                self.arena, int(model.map.images[i]), (x, y), picture))
 
         if vision_of == 'all':
             self.vision_of = const.VIEW_EVERYTHING
@@ -78,10 +82,41 @@ class View:
 
         self.register_listeners()
 
+    def set_resize_ratio(self):
+        PauseMenuView.set_resize_ratio(self.ratio)
+        EntityView.set_resize_ratio(self.ratio)
+        ViewRangeView.set_resize_ratio(self.ratio)
+        AttackRangeView.set_resize_ratio(self.ratio)
+        AbilitiesCDView.set_resize_ratio(self.ratio)
+        HealthView.set_resize_ratio(self.ratio)
+        TowerCDView.set_resize_ratio(self.ratio)
+
     def initialize(self, _: EventInitialize):
         """
         Initialize components that require initialization at the start of every game.
         """
+
+    def handle_create_entity(self, event: EventCreateEntity):
+        from model import Character, Tower
+        model = get_model()
+        entity = event.entity
+        self.entities.append(EntityView(self.arena, entity))
+        if isinstance(entity, Character):
+            if model.show_view_range:
+                self.entities.append(ViewRangeView(self.arena, entity))
+            if model.show_attack_range:
+                self.entities.append(AttackRangeView(self.arena, entity))
+            self.entities.append(AbilitiesCDView(self.arena, entity))
+            if entity.health is not None:
+                self.entities.append(HealthView(self.arena, entity))
+        if isinstance(entity, Tower):
+            if model.show_view_range:
+                self.entities.append(ViewRangeView(self.arena, entity))
+            if model.show_attack_range:
+                self.entities.append(AttackRangeView(self.arena, entity))
+            self.entities.append(TowerCDView(self.arena, entity))
+            if entity.health is not None:
+                self.entities.append(HealthView(self.arena, entity))
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
         self.display_fps()
@@ -107,29 +142,31 @@ class View:
         """Render scenes when the game is being played"""
         model = get_model()
 
-        for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
-            if view_object is not None:
-                view_object.update()
+        discarded_entities: list[type[EntityView]] = []
 
-        objects = []
+        for entity in self.entities:
+            if not entity.update():
+                discarded_entities.append(entity)
+        self.entities = [entity for entity in self.entities if entity not in discarded_entities]
+
+        objects: list[type[ObjectBase]] = []
 
         objects += self.background_images
 
         if self.vision_of == const.VIEW_EVERYTHING:
-            for view_object in chain(*zip_longest(*[en.view for en in model.entities], fillvalue=None)):
-                if view_object is not None:
-                    objects.append(view_object)
+            for entity in self.entities:
+                objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            for view_object in chain(*zip_longest(*[en.view for en in chain(my_team.building_list,
-                                                                            my_team.character_list,
-                                                                            my_team.visible_entities_list)], fillvalue=None)):
-                if view_object is not None:
-                    objects.append(view_object)
+            for entity in self.entities:
+                if entity.entity in chain(my_team.building_list, my_team.character_list, my_team.visible_entities_list):
+                    objects.append(entity)
 
-        objects.sort(key=lambda x: x.height)
+        objects.sort(key=lambda x: x.priority)
         for obj in objects:
             obj.draw()
+
+        self.screen.blit(self.arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
 
         if model.state == const.State.PAUSE:
             self.pause_menu_view.draw()
@@ -139,6 +176,7 @@ class View:
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
 
     def display_fps(self):
         """Display the current fps on the window caption."""
