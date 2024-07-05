@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import random
+from dataclasses import dataclass
 
 import pygame as pg
 
@@ -9,24 +10,15 @@ import const
 import util
 
 
+@dataclass
 class Map:
-    def __init__(
-        self,
-        name: str,
-        size: tuple[int, int],
-        map_list: list[list[int]],
-        images: dict[str, int],
-        fountains: list[tuple[int, int]],
-        tower_spawns: list[tuple[int, int]],
-        map_dir,
-    ):
-        self.name = name
-        self.size = size
-        self.map = map_list
-        self.images = images
-        self.fountains = fountains
-        self.tower_spawns = tower_spawns
-        self.map_dir = map_dir
+    name: str
+    size: tuple[int, int]
+    map_list: list[list[int]]
+    images: dict[str, int]
+    fountains: list[tuple[int, int]]
+    neutral_towers: list[tuple[int, int]]
+    map_dir: str
 
     def convert_coordinate(self, position: tuple | pg.Vector2) -> tuple:
         """
@@ -78,20 +70,20 @@ class Map:
 
 
 def load_map(map_dir):
-    json_file = os.path.join(map_dir, "topography.json")
-    map_file = os.path.join(map_dir, "topography.csv")
+    json_file = os.path.join(map_dir, 'topography.json')
+    map_file = os.path.join(map_dir, 'topography.csv')
 
     json_file = os.path.abspath(json_file)
     map_file = os.path.abspath(map_file)
     with open(json_file, encoding='utf-8') as f:
         data = json.load(f)
-    images = data["images"]
+    images = data['images']
 
     name = os.path.basename(os.path.dirname(json_file))
-    size = (data["width"], data["height"])
+    size = (data['width'], data['height'])
 
-    fountains = [tuple(i) for i in data["fountains"]]
-    tower_spawns = [tuple(i) for i in data["tower_spawns"]]
+    fountains = [tuple(i) for i in data['fountains']]
+    neutral_towers = [tuple(i) for i in data['neutral_towers']]
     i = 0
     with open(map_file, encoding='utf-8') as f:
         rows = list(csv.reader(f))
@@ -100,5 +92,5 @@ def load_map(map_dir):
             for x, block in enumerate(row):
                 map_list[x][y] = int(row[x])
     return Map(
-        name, size, map_list, images, fountains, tower_spawns, map_dir
+        name, size, map_list, images, fountains, neutral_towers, map_dir
     )

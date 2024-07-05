@@ -4,6 +4,9 @@
     "fountains": [
         [20, 20], [20, 230], [230, 20], [230, 230]
     ],
+    "neutral_towers": [
+        [125, 125]
+    ],
     "images": {
         "background.png": -1,
         "horizontal1.png": 53,
@@ -12,8 +15,5 @@
         "vertical1.png": 184,
         "vertical2.png": 117,
         "vertical3.png": 250
-    },
-    "tower_spawns": [
-        [150, 150]
-    ]
+    }
 }

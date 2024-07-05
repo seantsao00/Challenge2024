@@ -26,6 +26,7 @@ from model.team import Team
 
 if TYPE_CHECKING:
     from model.entity import Entity
+    from model.map import Map
 
 
 class Model:
@@ -50,7 +51,7 @@ class Model:
         self.entities: list[Entity] = []
         self.register_listeners()
         self.dt = 0
-        self.map = load_map(os.path.join(const.MAP_DIR, map_name))
+        self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.team_files_names: list[str] = team_files
         self.teams: list[Team] = None
         self.show_view_range = show_view_range
@@ -82,8 +83,8 @@ class Model:
                 if i != team.id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i)
-
-        self.tower.append(Tower((700, 700)))
+        for position in self.map.neutral_towers:
+            self.tower.append(Tower(position))
         self.state = const.State.PLAY
 
     def handle_every_tick(self, _: EventEveryTick):
