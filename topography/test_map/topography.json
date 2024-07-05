@@ -6,12 +6,12 @@
     ],
     "images": {
         "background.png": -1,
-        "horizontal1.png": 1,
-        "horizontal2.png": 1,
-        "horizontal3.png": 1,
-        "vertical1.png": 1,
-        "vertical2.png": 1,
-        "vertical3.png": 1
+        "horizontal1.png": 53,
+        "horizontal2.png": 53,
+        "horizontal3.png": 184,
+        "vertical1.png": 184,
+        "vertical2.png": 117,
+        "vertical3.png": 250
     },
     "tower_spawns": [
         [150, 150]

@@ -36,7 +36,7 @@ class ObjectBase:
         """
         cls.image_initialized = True
 
-    def __init__(self, canvas: pg.Surface, priority: float = const.WINDOW_SIZE[1]):
+    def __init__(self, canvas: pg.Surface, priority: float = const.WINDOW_SIZE[1]+10):
         self.canvas: pg.Surface = canvas
         self.priority: float = priority
         if not self.image_initialized:
