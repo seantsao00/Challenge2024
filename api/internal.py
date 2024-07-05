@@ -186,6 +186,16 @@ class Internal(prototype.API):
             if internal == None:
                 continue
             internal.move_direction = direction
+    def action_cast_spell(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
+        if not isinstance(characters, Iterable):
+            raise TypeError("Character is not iterable.")
+        for ch in characters:
+            if not isinstance(ch, prototype.Character):
+                raise TypeError("List contains non-character.")
+            internal = self.__access_character(ch)
+            if internal == None:
+                continue
+            internal.move_direction = direction
 
 
 class Timer():
