@@ -40,7 +40,7 @@ class View:
         self.screen_size: tuple[int, int] = (window_w, window_h)
         pg.display.set_caption(const.WINDOW_CAPTION)
 
-        self.__ratio: float = window_w / const.WINDOW_SIZE[0]
+        self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
         self.set_resize_ratio()
         # self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
@@ -82,13 +82,13 @@ class View:
         self.register_listeners()
 
     def set_resize_ratio(self):
-        PauseMenuView.set_resize_ratio(self.__ratio)
-        EntityView.set_resize_ratio(self.__ratio)
-        ViewRangeView.set_resize_ratio(self.__ratio)
-        AttackRangeView.set_resize_ratio(self.__ratio)
-        AbilitiesCDView.set_resize_ratio(self.__ratio)
-        HealthView.set_resize_ratio(self.__ratio)
-        TowerCDView.set_resize_ratio(self.__ratio)
+        PauseMenuView.set_resize_ratio(self.__resize_ratio)
+        EntityView.set_resize_ratio(self.__resize_ratio)
+        ViewRangeView.set_resize_ratio(self.__resize_ratio)
+        AttackRangeView.set_resize_ratio(self.__resize_ratio)
+        AbilitiesCDView.set_resize_ratio(self.__resize_ratio)
+        HealthView.set_resize_ratio(self.__resize_ratio)
+        TowerCDView.set_resize_ratio(self.__resize_ratio)
 
     def initialize(self, _: EventInitialize):
         """
@@ -133,7 +133,7 @@ class View:
         """Render game cover"""
 
         # setting up a temporary cover till we have a cover image
-        font = pg.font.Font(None, int(12*self.__ratio))
+        font = pg.font.Font(None, int(12*self.__resize_ratio))
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
