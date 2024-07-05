@@ -5,8 +5,8 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import (EventEveryTick, EventHumanInput, EventInitialize, EventPauseModel,
-                           EventQuit, EventResumeModel, EventSelectCharacter, EventStartGame,
+from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
+                           EventResumeModel, EventSelectCharacter, EventStartGame,
                            EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
 from model import Melee, RangerFighter, Sniper, TimerManager

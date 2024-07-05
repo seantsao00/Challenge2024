@@ -1,13 +1,6 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 import pygame as pg
 
 from view.object.object_base import ObjectBase
-
-if TYPE_CHECKING:
-    from model import LivingEntity
 
 
 class BackGroundObject(ObjectBase):

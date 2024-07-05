@@ -4,9 +4,8 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
-from view.object.object_base import ObjectBase
-
 from const import WINDOW_SIZE
+from view.object.object_base import ObjectBase
 
 if TYPE_CHECKING:
     from model import PauseMenu
@@ -24,12 +23,12 @@ class PauseMenuView(ObjectBase):
     def draw(self):
         if not self.pause_menu.enabled:
             return
-        
+
         bg_surf = pg.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]), pg.SRCALPHA)
         bg_surf.fill((200, 200, 200, 230))
 
         center = (bg_surf.get_width() // 2, bg_surf.get_height() // 2)
-        
+
         draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'black', self.title_font)
         for index, opt_text in enumerate(self.options):
             draw_text(bg_surf, center[0], center[1]+80*index, opt_text,
