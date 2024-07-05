@@ -51,7 +51,7 @@ class Map:
         value 1 denotes road, 2 denotes puddle, and 3 denotes obstacle
         """
         x, y = self.convert_coordinate(position)
-        return self.map[x][y]
+        return self.map_list[x][y]
 
     def get_random_pos(self, r: int) -> pg.Vector2:
         """
