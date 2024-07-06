@@ -1,3 +1,5 @@
+import pygame as pg
+
 import const
 from model.character.character import Character
 from model.entity import Entity
@@ -11,10 +13,9 @@ class Sniper(Character):
     focus: Increase damage that can be stacked. Loses stacks when taken damage.
     """
 
-    def __init__(self, team, position, ability=0):
-        super().__init__(position, team, const.SNIPER_ATTRIBUTE, 'sniper')
-        self.ability = ability
-        self.imgstate = 'sniper'
+    def __init__(self, position: pg.Vector2 | tuple[float, float], party: const.PartyType):
+        super().__init__(position, party, const.MELEE_ATTRIBUTE, None)
+        self.defense = 0
 
     def abilities(self):
         print("sniper use abilities")
@@ -22,8 +23,8 @@ class Sniper(Character):
 
     def attack(self, enemy: Entity):
         if self.ability > 0:
-            self.damage *= 2
+            self.attack_damage *= 2
         super().attack(enemy)
         if self.ability > 0:
-            self.damage /= 2
+            self.attack_damage /= 2
             self.ability -= 1

@@ -28,18 +28,22 @@ class Character(LivingEntity):
      - alive: The character is alive or not.
     """
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, attribute: const.CharacterAttribute, imgstate: str):
-        ev_manager = get_event_manager()
-        self.speed: float = attribute.speed
-        self.attack_range: float = attribute.attack_range
-        self.damage: float = attribute.damage
-        self.abilities_time: float = -100
-        self.ability_cd: float = attribute.ability_cd
+    def __init__(self,
+                 position: pg.Vector2 | tuple[float, float],
+                 party: const.PartyType,
+                 attribute: const.CharacterAttribute,
+                 state: const.CharacterState):
+        self.attack_damage: float = attribute.attack_damage
         self.attack_speed: int = attribute.attack_speed
-        self.attack_time: float = -100
+        self.attack_range: float = attribute.attack_range
+        self.speed: float = attribute.speed
+        self.ability_variable: float = attribute.ability_cd
+        self.ability_cd: float = attribute.ability_cd
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
-        super().__init__(attribute.max_health, position, attribute.vision,
-                         entity_type=team.name, team=team, imgstate=imgstate)
+        self.abilities_time: float = -attribute.ability_cd
+        self.attack_time: float = -(1/attribute.attack_speed)
+        super().__init__(position, attribute.max_health, vision=attribute.vision, party, state)
+        ev_manager = get_event_manager()
         ev_manager.register_listener(EventAttack, self.take_damage, self.id)
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 

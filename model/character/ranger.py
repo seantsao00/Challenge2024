@@ -6,17 +6,16 @@ from instances_manager import get_event_manager, get_model
 from model.character import Character
 
 
-class RangerFighter(Character):
+class Ranger(Character):
     """
     Class for the ranger fighter
     Ranger fighter has the following unique moves:
      - area_attack: Attack a locations and damage all nearby foes.
     """
 
-    def __init__(self, team, position: pg.Vector2):
-        super().__init__(position, team, const.RANGER_ATTRIBUTE, 'ranger')
-        self.abilities_radius = const.RANGER_ATTRIBUTE.ability_variable
-        self.imgstate = 'ranger'
+    def __init__(self, position: pg.Vector2 | tuple[float, float], party: const.PartyType):
+        super().__init__(position, party, const.MELEE_ATTRIBUTE, None)
+        self.defense = 0
 
     def abilities(self, *args, **kwargs):
         if len(args) < 1 or not isinstance(args[0], pg.Vector2):

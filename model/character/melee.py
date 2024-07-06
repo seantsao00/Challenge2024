@@ -1,3 +1,5 @@
+import pygame as pg
+
 import const
 from event_manager import EventAttack
 from model.character.character import Character
@@ -18,10 +20,9 @@ class Melee(Character):
 
     """
 
-    def __init__(self, team, position, defense=0):
-        super().__init__(position, team, const.MELEE_ATTRIBUTE, 'melee')
-        self.defense = defense
-        self.imgstate = 'melee'
+    def __init__(self, position: pg.Vector2 | tuple[float, float], party: const.PartyType):
+        super().__init__(position, party, const.MELEE_ATTRIBUTE, None)
+        self.defense = 0
 
     def take_damage(self, event: EventAttack):
         if self.defense > 0:

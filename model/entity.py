@@ -51,14 +51,14 @@ class Entity:
 
 class LivingEntity(Entity):
     def __init__(self,
-                 max_health: float,
                  position: pg.Vector2 | tuple[float, float],
+                 max_health: float,
                  vision: float,
                  party: const.PartyType,
                  entity_type: const.EntityType,
                  state: const.EntityState = None):
         self.alive: bool = True
-        self.health: float = max_health
         self.max_health: float = max_health
         self.vision: float = vision
+        self.health: float = max_health
         super().__init__(position, party, entity_type, state)
