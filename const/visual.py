@@ -36,8 +36,8 @@ TOWER_DIR = 'tower/'
 TOWER_IMAGE: dict[TowerType, str] = {
     TowerType.FOUNTAIN: 'fountain.png',
     TowerType.HOTEL: 'neutral_hotel.png',
-    TowerType.FERRIES_WHEEL: 'ferries_wheel.png',
-    TowerType.PYLON: 'pylon.png'
+    TowerType.FERRIS_WHEEL: 'neutral_ferris_wheel.png',
+    TowerType.PYLON: 'neutral_pylon.png'
 }
 
 CHARACTER_DIR = 'character'
@@ -52,7 +52,7 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
         {
             tower: {
                 None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
-            } for tower in TowerType
+            } for tower in TowerType if tower is not TowerType.FOUNTAIN
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {

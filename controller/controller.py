@@ -35,7 +35,7 @@ class Controller:
         """
         screen_info = pg.display.Info()
         window_w = int(min(screen_info.current_w, screen_info.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0])) * const.SCREEN_FIT_RATIO
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
         self.register_listeners()
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from itertools import chain
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -15,7 +16,10 @@ if TYPE_CHECKING:
 
 
 class EntityView(ObjectBase):
-    images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]]
+    images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
+        = {party: {
+            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType)
+        } for party in const.PartyType}
     """
     structure: images[party][entity][state]
 
@@ -49,23 +53,23 @@ class EntityView(ObjectBase):
         self.exist = False
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(
-            EventDiscardEntity, self.handle_discard_entity, self.entity.__id)
+            EventDiscardEntity, self.handle_discard_entity, self.entity.id)
 
     def draw(self):
         entity = self.entity
-        if entity.__hidden:
+        if entity.hidden:
             return
-        img = self.images[entity.__team][entity.__entity_type][entity.__state]
-        self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.__position))
+        img = self.images[entity.team.party][entity.entity_type][entity.state]
+        self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 
     def update(self):
         if not self.exist:
             return False
-        self.priority = self.entity.__position[1]
+        self.priority = self.entity.position[1]
         return True
 
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(
-            EventDiscardEntity, self.handle_discard_entity, self.entity.__id)
+            EventDiscardEntity, self.handle_discard_entity, self.entity.id)

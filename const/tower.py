@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class TowerType(Enum):
     FOUNTAIN = auto()
     HOTEL = auto()
-    FERRIES_WHEEL = auto()
+    FERRIS_WHEEL = auto()
     PYLON = auto()
 
 
