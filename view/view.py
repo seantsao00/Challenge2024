@@ -37,6 +37,8 @@ class View:
         self.__screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
+
+        pg.display.set_icon(pg.image.load(const.ICON_IMAGE))
         pg.display.set_caption(const.WINDOW_CAPTION)
 
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
