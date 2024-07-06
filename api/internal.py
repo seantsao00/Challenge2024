@@ -114,6 +114,15 @@ class Internal(prototype.API):
             return None
         return self.__reverse_character_map[id(extern)]
 
+    def __access_tower(self, extern: prototype.Tower) -> model.Tower:
+        """
+        Return registered tower. None if it does not exist.
+        """
+        if id(extern) not in self.__reverse_tower_map:
+            warnings.warn("Invalid prototype.Tower. Maybe it is already expired.")
+            return None
+        return self.__reverse_tower_map[id(extern)]
+
     def __team(self):
         return get_model().teams[self.team_id]
 
@@ -186,6 +195,7 @@ class Internal(prototype.API):
             if internal == None:
                 continue
             internal.move_direction = direction
+
     def action_cast_spell(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         if not isinstance(characters, Iterable):
             raise TypeError("Character is not iterable.")
@@ -196,6 +206,28 @@ class Internal(prototype.API):
             if internal == None:
                 continue
             internal.move_direction = direction
+
+    def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
+        if not isinstance(characters, Iterable):
+            raise TypeError("Characters is not iterable.")
+
+        target_internal = None
+        if isinstance(target, prototype.Character):
+            target_internal = self.__access_character(target)
+        elif isinstance(target, prototype.Tower):
+            target_internal = self.__access_tower(target)
+        else:
+            raise TypeError("Invalid type of target.")
+        if target_internal is None:
+            return
+
+        for ch in characters:
+            if not isinstance(ch, prototype.Character):
+                raise TypeError("List contains non-character.")
+            internal = self.__access_character(ch)
+            if internal is None:
+                continue
+            internal.attack(target_internal)
 
 
 class Timer():
