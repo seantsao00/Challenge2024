@@ -15,8 +15,11 @@ if TYPE_CHECKING:
 
 
 class EntityView(ObjectBase):
-    images: dict[str, dict[str, pg.Surface]] = {}
+    images: dict[const.PartyType, dict[const.CharacterType |
+                                       const.TowerType, dict[tuple | None, pg.Surface]]]
     """
+    structure: images[party][entity][state]
+
     The static dict that stores entity images.
 
     This dict is shared among all Entity instances,
@@ -32,22 +35,15 @@ class EntityView(ObjectBase):
 
     @classmethod
     def init_convert(cls):
-        for entity_type, states in const.ENTITY_STATES.items():
-            if entity_type not in cls.images:
-                cls.images[entity_type] = {}
-            for state in states:
-                path = (
-                    const.IMAGE_PATH +
-                    const.ENTITY_IMAGE_PATH +
-                    str(entity_type) + '/' +
-                    str(state) + '.png'
-                )
-                img = pg.image.load(path)
-                width = const.ENTITY_RADIUS * 2 * cls.resize_ratio
-                height = const.ENTITY_RADIUS * 2 * cls.resize_ratio
-                cls.images[entity_type][state] = crop_image(
-                    img, width, height
-                ).convert_alpha()
+        for party, entity_dict in const.ENTITY_IMAGE.items():
+            for entity, state_dict in entity_dict.items():
+                for state, path in state_dict.items():
+                    img = pg.image.load(path)
+                    width = const.ENTITY_SIZE[entity][state] * 2 * cls.resize_ratio
+                    height = const.ENTITY_SIZE[entity][state] * 2 * cls.resize_ratio
+                    cls.images[party][entity][state] = crop_image(
+                        img, width, height
+                    ).convert_alpha()
         cls.image_initialized = True
 
     def handle_discard_entity(self):

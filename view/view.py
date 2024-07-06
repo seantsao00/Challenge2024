@@ -69,6 +69,8 @@ class View:
             self.__background_images.append(BackGroundObject(
                 self.__arena, int(model.map.images[i]), (x, y), picture))
 
+        EntityView.init_convert()
+
         if vision_of == 'all':
             self.vision_of = const.VIEW_EVERYTHING
         else:

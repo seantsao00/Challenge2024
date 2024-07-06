@@ -166,8 +166,8 @@ class Controller:
         """Select party for each team."""
 
         ev_manager = get_event_manager()
-        self.player_controls = [const.PARTY_KEYS_MAP['team1'], const.PARTY_KEYS_MAP['team2'],
-                                const.PARTY_KEYS_MAP['team3'], const.PARTY_KEYS_MAP['team4']]
+        self.player_controls = [const.PARTY_SELECT_BUTTONS_MAP['team1'], const.PARTY_SELECT_BUTTONS_MAP['team2'],
+                                const.PARTY_SELECT_BUTTONS_MAP['team3'], const.PARTY_SELECT_BUTTONS_MAP['team4']]
 
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:

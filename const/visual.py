@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias
 
 from const.character import *
 from const.team import *
 from const.tower import *
-
-if TYPE_CHECKING:
-    from model import Entity
 
 ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
@@ -47,18 +44,38 @@ CHARACTER_IMAGE: dict[CharacterType, str] = {
     CharacterType.SNIPER: 'sniper.png'
 }
 
-ENTITY_IMAGE: dict[PartyType, dict[Entity]] = {
+ENTITY_IMAGE: dict[PartyType, dict[CharacterType | TowerType, dict[tuple | None, str]]] = {
     party: (
         {
-            tower: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower]) for tower in TowerType
+            tower: {
+                None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
+            } for tower in TowerType
         } if party is PartyType.NEUTRAL else {
-            **{character: os.path.join(IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_IMAGE[character]) for character in CharacterType},
-            **{tower: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower]) for tower in TowerType}
+            **{
+                character: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_IMAGE[character])
+                } for character in CharacterType
+            },
+            **{
+                tower: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
+                } for tower in TowerType
+            }
         }
     ) for party in PartyType
 }
+"""
+structure: ENTITY_IMAGE[party][entity][state]
+"""
 
-ENTITY_SIZE = {
-    **{character: 6.25 for character in CharacterType},
-    **{tower: 6.25 for tower in TowerType}
+ENTITY_SIZE: dict[PartyType, dict[CharacterType | TowerType, dict[tuple | None, int]]] = {
+    **{character: {
+        None: 6.25
+    } for character in CharacterType},
+    **{tower: {
+        None: 6.25
+    } for tower in TowerType}
 }
+"""
+structure: ENTITY_SIZE[party][entity][state]
+"""
