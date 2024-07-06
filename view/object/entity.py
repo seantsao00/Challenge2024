@@ -31,7 +31,7 @@ class EntityView(ObjectBase):
 
     def __init__(self, canvas: pg.Surface, entity: Entity):
         self.entity: Entity = entity
-        self.position: pg.Vector2 = self.entity.__position.copy()
+        self.position: pg.Vector2 = self.entity.position.copy()
         self.exist = True
         super().__init__(canvas, self.position[1])
         self.register_listeners()
@@ -59,7 +59,10 @@ class EntityView(ObjectBase):
         entity = self.entity
         if entity.hidden:
             return
-        img = self.images[entity.team.party][entity.entity_type][entity.state]
+        try:
+            img = self.images[entity.team.party][entity.entity_type][entity.state]
+        except Exception as e:
+            raise Exception(f'{e}\n'+str([entity.team.party, entity.entity_type, entity.state]))
         self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 
     def update(self):

@@ -21,17 +21,17 @@ class Ranger(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.MELEE_ATTRIBUTE, None)
+        super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
         self.defense = 0
 
     def abilities(self, *args, **kwargs):
         if len(args) < 1 or not isinstance(args[0], pg.Vector2):
             raise ValueError()
         target: pg.Vector2 = args[0]
-        dist = self.__position.distance_to(target)
+        dist = self.position.distance_to(target)
         if dist <= self.attack_range:
             print("ranged ability attack")
             all_victim = get_model().grid.all_entity_in_range(target, self.ability_variables)
             for victim in all_victim:
                 if self.__team != victim.team:
-                    get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.__id)
+                    get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.id)

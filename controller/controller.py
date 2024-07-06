@@ -88,15 +88,9 @@ class Controller:
                 if key == const.ABILITY_BUTTON:
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITY))
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
-                    character: Type[Character]
+                    character: const.CharacterType
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
-                    if character_type is const.CharacterType.MELEE:
-                        character = Melee
-                    if character_type is const.CharacterType.RANGER:
-                        character = RangerFighter
-                    if character_type is const.CharacterType.SNIPER:
-                        character = Sniper
-                    ev_manager.post(EventSelectCharacter(character=character))
+                    ev_manager.post(EventSelectCharacter(character_type=character_type))
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
@@ -105,8 +99,8 @@ class Controller:
                 if pg_event.button == 1:  # Left mouse button
                     print(f"Mouse click position: ({x}, {y})")
                     clicked = None
-                    for entity in model.__entities:
-                        if (pg.Vector2(x, y) - entity.__position).length() < const.ENTITY_RADIUS:
+                    for entity in model.entities:
+                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
                             clicked = entity
                     ev_manager.post(EventHumanInput(
                         input_type=const.InputTypes.PICK, clicked_entity=clicked))
@@ -114,8 +108,8 @@ class Controller:
                 if pg_event.button == 3:  # Right mouse button
                     print(f"Right click position: ({x}, {y})")
                     clicked = None
-                    for entity in model.__entities:
-                        if entity.alive and (pg.Vector2(x, y) - entity.__position).length() < const.ENTITY_RADIUS:
+                    for entity in model.entities:
+                        if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
                             clicked = entity
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked_entity=clicked, displacement=pg.Vector2(x, y)))

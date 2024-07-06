@@ -32,6 +32,7 @@ class Character(LivingEntity):
                  position: pg.Vector2 | tuple[float, float],
                  team: Team,
                  attribute: const.CharacterAttribute,
+                 entity_type: const.CharacterType,
                  state: const.CharacterState):
         self.speed: float = attribute.speed
         self.ability_cd: float = attribute.ability_cd
@@ -39,16 +40,16 @@ class Character(LivingEntity):
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
         self.abilities_time: float = -attribute.ability_cd
         self.attack_time: float = -(1/attribute.attack_speed)
-        super().__init__(position, attribute, team, state)
+        super().__init__(position, attribute, team, entity_type, state)
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventAttack, self.take_damage, self.__id)
+        ev_manager.register_listener(EventAttack, self.take_damage, self.id)
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 
     def move(self, direction: pg.Vector2):
         """
         Move the character in the given direction.
         """
-        original_pos = self.__position
+        original_pos = self.position
 
         if direction.length() > self.speed:
             direction = self.speed * direction.normalize()
@@ -65,16 +66,16 @@ class Character(LivingEntity):
             # try further distance
             for i in range(4):
 
-                new_position = self.__position + cur_direction
+                new_position = self.position + cur_direction
                 new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
                 new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
                 if game_map.get_type(new_position) == const.map.MAP_OBSTACLE:
-                    self.__position = new_position - min_direction
+                    self.position = new_position - min_direction
                     break
 
                 if i == 3:
-                    self.__position = new_position
+                    self.position = new_position
 
                 cur_direction += min_direction
 
@@ -91,13 +92,13 @@ class Character(LivingEntity):
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
-        dist = self.__position.distance_to(enemy.position)
-        if self.__team != enemy.team and dist <= self.__attack_range and (now_time - self.attack_time) * self.__attack_speed >= 1:
+        dist = self.position.distance_to(enemy.position)
+        if self.team != enemy.team and dist <= self.__attack_range and (now_time - self.attack_time) * self.__attack_speed >= 1:
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
             self.attack_time = now_time
 
     def die(self):
-        print(f"Character {self.__id} in Team {self.__team.id} died")
+        print(f"Character {self.__id} in Team {self.team.team_id} died")
         self.alive = False
         # self.__hidden = True
         super().discard()

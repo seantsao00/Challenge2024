@@ -9,24 +9,24 @@ import const
 from view.object.object_base import ObjectBase
 
 if TYPE_CHECKING:
-    from model import LivingEntity
+    from model import Tower
 
 
 class TowerCDView(ObjectBase):
     def __init__(self, canvas: pg.Vector2, entity: LivingEntity):
         super().__init__(canvas)
-        self.entity: LivingEntity = entity
+        self.entity: Tower = entity
 
     def draw(self):
         entity = self.entity
-        if entity.__hidden or entity.spawn_timer is None:
+        if entity.hidden or entity.spawn_timer is None:
             return
 
-        radius = const.ENTITY_RADIUS / 1.5 * self.resize_ratio
-        position = self.resize_ratio * \
-            (entity.__position + pg.Vector2(const.ENTITY_RADIUS, const.ENTITY_RADIUS))
+        entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
+        radius = entity_size / 1.5 * self.resize_ratio
+        position = self.resize_ratio * (entity.position + pg.Vector2(entity_size, entity_size))
         pg.draw.circle(self.canvas, 'black', position, radius, width=int(3*self.resize_ratio))
         cd_remaining = (entity.spawn_timer.interval -
                         entity.spawn_timer.get_remaining_time()) / entity.spawn_timer.interval
-        pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((self.resize_ratio*entity.__position + pg.Vector2(self.resize_ratio*const.ENTITY_RADIUS - radius,
-                    self.resize_ratio*const.ENTITY_RADIUS - radius)), pg.Vector2(radius*2, radius*2)), pi / 2, pi / 2 - pi * 2 * cd_remaining, width=int(3*self.resize_ratio))
+        pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((self.resize_ratio*entity.position + pg.Vector2(self.resize_ratio*entity_size - radius,
+                    self.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2, pi / 2 - pi * 2 * cd_remaining, width=int(3*self.resize_ratio))

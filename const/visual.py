@@ -71,7 +71,7 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
 structure: ENTITY_IMAGE[party][entity][state]
 """
 
-ENTITY_SIZE: dict[PartyType, dict[EntityType, dict[EntityState, int]]] = {
+ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
         None: 6.25
     } for character in CharacterType},
@@ -80,5 +80,5 @@ ENTITY_SIZE: dict[PartyType, dict[EntityType, dict[EntityState, int]]] = {
     } for tower in TowerType}
 }
 """
-structure: ENTITY_SIZE[party][entity][state]
+structure: ENTITY_SIZE[entity][state]
 """

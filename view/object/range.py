@@ -19,8 +19,8 @@ class RangeView(ObjectBase):
         self.color = None
 
     def draw(self):
-        position = self.resize_ratio*self.entity.__position
-        if not self.entity.__hidden:
+        position = self.resize_ratio*self.entity.position
+        if not self.entity.hidden:
             pg.draw.circle(self.canvas, self.color, position, self.radius, width=2)
 
 
@@ -28,7 +28,7 @@ class AttackRangeView(RangeView):
     def __init__(self, canvas: pg.Vector2, entity: LivingEntity):
         super().__init__(canvas, entity)
         self.color = const.ATTACK_RANGE_COLOR
-        self.radius = (self.entity.__attack_range - 0.5) * self.resize_ratio
+        self.radius = (self.entity.attack_range - 0.5) * self.resize_ratio
 
 
 class ViewRangeView(RangeView):

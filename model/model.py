@@ -22,7 +22,7 @@ from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
-from model.team import Team
+from model.team import NeutralTeam, Team
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -76,20 +76,24 @@ class Model:
         """
         load_ai(self.__team_files_names)
 
-        self.teams = []
+        self.teams: list[Team] = []
 
         for i, team_master in enumerate(self.__team_files_names):
             new_position = pg.Vector2(self.map.fountains[i])
-            team = Team(new_position, team_master == 'human')
+            team = Team(team_master == 'human',
+                        [party for party in const.PartyType if party is not const.PartyType.NEUTRAL][i],
+                        team_master)
             self.teams.append(team)
-            self.__tower.append(Tower(new_position, team, 1))
+            self.__tower.append(Tower(new_position, team, True))
         for team in self.teams:
-            for i in range(len(self.teams)):
-                if i != team.__id:
+            for i in (team.team_id for team in self.teams):
+                if i != team.team_id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i)
+
+        self.__neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
         for position in self.map.neutral_towers:
-            self.__tower.append(Tower(position))
+            self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
     def __handle_every_tick(self, _: EventEveryTick):
@@ -132,19 +136,19 @@ class Model:
     def __register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
-            for tower in self.grid.get_attacker_tower(event.entity.__position):
+            for tower in self.grid.get_attacker_tower(event.entity.position):
                 tower.enemy_in_range(event.entity)
 
     def __handle_character_died(self, event: EventCharacterDied):
         print("died event")
-        self.grid.delete_from_grid(event.character, event.character.__position)
-        for tower in self.grid.get_attacker_tower(event.character.__position):
+        self.grid.delete_from_grid(event.character, event.character.position)
+        for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_out_range(event.character)
 
     def __handle_character_move(self, event: EventCharacterMove):
         for tower in self.grid.get_attacker_tower(event.original_pos):
             tower.enemy_out_range(event.character)
-        for tower in self.grid.get_attacker_tower(event.character.__position):
+        for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_in_range(event.character)
         event.character.team.update_visible_entities_list(event.character)
 

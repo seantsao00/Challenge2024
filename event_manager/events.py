@@ -98,7 +98,7 @@ class EventPartySelection(BaseEvent):
 @dataclass(kw_only=True)
 class EventSelectCharacter(BaseEvent):
     """When picking a tower, we could select generated character type"""
-    character: Character | None = None
+    character_type: const.CharacterType | None = None
 
 
 @dataclass(kw_only=True)

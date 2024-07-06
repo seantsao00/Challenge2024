@@ -18,7 +18,29 @@ if TYPE_CHECKING:
     from model.entity import Entity, LivingEntity
 
 
-class Team:
+class NeutralTeam:
+
+    """
+    super class of class Team.
+    """
+
+    _total: int = 0
+
+    def __init__(self, party: const.PartyType):
+        self.__team_id = NeutralTeam._total
+        self.__party = party
+        NeutralTeam._total += 1
+
+    @property
+    def team_id(self) -> int:
+        return self.__team_id
+
+    @property
+    def party(self) -> const.PartyType:
+        return self.__party
+
+
+class Team(NeutralTeam):
 
     """
     Class for Team in the game.
@@ -33,23 +55,17 @@ class Team:
      - visible_entities_list: list of visible entities to the team. Note that entities owned by this team is not in this list.
     """
 
-    __total: int = 0
-
     def __init__(self, manual_control: bool, party: const.PartyType, team_name: str | None = None):
-        if Team.__total == 4:
-            raise Exception('Team size exceeds.')
-        self.__id = Team.__total
-        Team.__total += 1
+        super().__init__(party)
 
         self.__manual_control: bool = manual_control
-        self.__party: const.PartyType = party
         if team_name:
             self.__team_name = team_name
         else:
-            self.__team_name = "team" + str(Team.__total)
+            self.__team_name = 'team' + str(self.__team_id)
         self.__points: int = 0
         self.__towers: set[Tower] = set()
-        self.__character_list: list[Character] = []
+        self.character_list: list[Character] = []
         self.__visible_entities_list: set[Entity] = set()
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
@@ -88,15 +104,15 @@ class Team:
                     self.__controlling.cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
-        self.__character_list.append(event.character)
+        self.character_list.append(event.character)
 
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.__towers:
             self.__towers.add(event.tower)
-        print(f'{self.__team_name} gained a tower with id {event.tower.__id} at {event.tower.__position}')
+        print(f'{self.__team_name} gained a tower with id {event.tower.id} at {event.tower.position}')
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(f'{self.__team_name} lost a tower with id {event.tower.__id} at {event.tower.__position}')
+        print(f'{self.__team_name} lost a tower with id {event.tower.id} at {event.tower.position}')
         if event.tower in self.__towers:
             self.__towers.remove(event.tower)
 
@@ -109,8 +125,8 @@ class Team:
     def handle_character_died(self, event: EventCharacterDied):
         if self.__controlling is event.character:
             self.__controlling = None
-        if event.character in self.__character_list:
-            self.__character_list.remove(event.character)
+        if event.character in self.character_list:
+            self.character_list.remove(event.character)
         if event.character in self.__visible_entities_list:
             self.__visible_entities_list.remove(event.character)
 
@@ -135,14 +151,14 @@ class Team:
                         other_entity.position.distance_to(entity.position) <= entity.vision):
                     self.__visible_entities_list.add(other_entity)
         else:
-            for my_entity in chain(self.__towers, self.__character_list):
+            for my_entity in chain(self.__towers, self.character_list):
                 if my_entity.alive and entity.position.distance_to(my_entity.position) <= my_entity.vision:
                     self.__visible_entities_list.add(entity)
                     break
 
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower):
-            self.__controlling.update_character_type(event.character)
+            self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
@@ -150,15 +166,11 @@ class Team:
         if self.__manual_control:
             ev_manager.register_listener(EventHumanInput, self.handle_input)
         ev_manager.register_listener(EventCreateTower, self.handle_create_tower)
-        ev_manager.register_listener(EventTeamGainTower, self.gain_tower, self.__id)
-        ev_manager.register_listener(EventTeamLoseTower, self.lose_tower, self.__id)
-        ev_manager.register_listener(EventSpawnCharacter, self.gain_character, self.__id)
+        ev_manager.register_listener(EventTeamGainTower, self.gain_tower, self.team_id)
+        ev_manager.register_listener(EventTeamLoseTower, self.lose_tower, self.team_id)
+        ev_manager.register_listener(EventSpawnCharacter, self.gain_character, self.team_id)
         ev_manager.register_listener(EventSelectCharacter, self.select_character)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
-
-    @property
-    def id(self) -> int:
-        return self.__id
 
     @property
     def team_name(self) -> str:
@@ -171,7 +183,3 @@ class Team:
     @property
     def towers(self) -> const.PartyType:
         return self.__towers
-
-    @property
-    def party(self) -> const.PartyType:
-        return self.__party

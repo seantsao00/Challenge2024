@@ -37,7 +37,7 @@ class Entity:
                  state: const.EntityState = None):
         Entity.entity_id += 1
         self.__id: int = Entity.entity_id
-        self.__position: pg.Vector2 = pg.Vector2(position)
+        self.position: pg.Vector2 = pg.Vector2(position)
         self.__team: Team = team
         self.__entity_type: const.EntityType = entity_type
         self.__state: const.EntityState = state
@@ -51,10 +51,6 @@ class Entity:
     @property
     def id(self) -> int:
         return self.__id
-
-    @property
-    def position(self) -> pg.Vector2:
-        return self.__position
 
     @property
     def team(self) -> Team:
@@ -82,12 +78,12 @@ class LivingEntity(Entity):
                  state: const.EntityState = None):
         self.__alive: bool = True
         self.__vision: float = attribute.vision
-        self.__max_health: float = attribute.max_health
+        self.max_health: float = attribute.max_health
         self.__attack_damage: float = attribute.attack_damage
         self.__attack_speed: float = attribute.attack_speed
         self.__attack_range: float = attribute.attack_range
 
-        self.__health: float = self.__max_health
+        self.health: float = self.max_health
         super().__init__(position, team, entity_type, state)
 
     @property
@@ -95,16 +91,8 @@ class LivingEntity(Entity):
         return self.__alive
 
     @property
-    def max_health(self) -> float:
-        return self.__max_health
-
-    @property
     def vision(self) -> float:
         return self.__vision
-
-    @property
-    def health(self) -> float:
-        return self.__health
 
     @property
     def attack_damage(self) -> float:

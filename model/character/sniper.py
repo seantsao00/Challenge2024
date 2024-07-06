@@ -21,7 +21,7 @@ class Sniper(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.MELEE_ATTRIBUTE, None)
+        super().__init__(position, team, const.SNIPER_ATTRIBUTE, const.CharacterType.SNIPER, None)
         self.defense = 0
 
     def ability(self, *args, **kwargs):

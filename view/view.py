@@ -117,7 +117,7 @@ class View:
             if model.show_attack_range:
                 self.__entities.append(AttackRangeView(self.__arena, entity))
             self.__entities.append(TowerCDView(self.__arena, entity))
-            if not entity.__is_fountain:
+            if not entity.is_fountain:
                 self.__entities.append(HealthView(self.__arena, entity))
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
@@ -168,7 +168,7 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             for entity in self.__entities:
-                if entity.entity in chain(my_team.__towers, my_team.__character_list, my_team.__visible_entities_list):
+                if entity.entity in chain(my_team.__towers, my_team.character_list, my_team.__visible_entities_list):
                     objects.append(entity)
 
         objects.sort(key=lambda x: x.priority)
