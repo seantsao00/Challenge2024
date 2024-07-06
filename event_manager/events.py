@@ -91,6 +91,11 @@ class EventHumanInput(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventPartySelection(BaseEvent):
+    """Event posted when player is selecting parties"""
+
+
+@dataclass(kw_only=True)
 class EventSelectCharacter(BaseEvent):
     """When picking a tower, we could select charcters"""
     character: Character | None = None
@@ -142,3 +147,10 @@ class EventCharacterMove(BaseEvent):
 @dataclass(kw_only=True)
 class EventCharacterDied(BaseEvent):
     character: Character
+
+
+@dataclass(kw_only=True)
+class EventSelectParty(BaseEvent):
+    """Event posted when player is selecting parties"""
+    index: int
+    increase: bool

@@ -125,6 +125,8 @@ class View:
             self.render_cover()
         elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
             self.render_play()
+        elif model.state is const.State.SELECT_PARTY:
+            self.render_party_selection()
         pg.display.flip()
 
     def render_cover(self):
@@ -135,6 +137,10 @@ class View:
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
+
+    def render_party_selection(self):
+        """Render party selection process"""
+        pass
 
     def render_play(self):
         """Render scenes when the game is being played"""

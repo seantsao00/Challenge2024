@@ -10,8 +10,8 @@ import pygame as pg
 
 import const
 from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSelectCharacter, EventStartGame,
-                           EventUnconditionalTick)
+                           EventResumeModel, EventSelectCharacter, EventSelectParty,
+                           EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
 from model import Melee, RangerFighter, Sniper, TimerManager
 
@@ -67,6 +67,8 @@ class Controller:
             self.ctrl_pause(pg_events)
         elif model.state is const.State.COVER:
             self.ctrl_cover(pg_events)
+        elif model.state is const.State.SELECT_PARTY:
+            self.ctrl_select_party(pg_events)
 
     def ctrl_play(self, pg_events: list[pg.Event]):
         """
@@ -159,6 +161,22 @@ class Controller:
                 # For pausing the game
                 if pg_event.key == const.START_BUTTON:
                     ev_manager.post(EventStartGame())
+
+    def select_party(self, pg_events: list[pg.Event]):
+        """Select party for each team."""
+
+        ev_manager = get_event_manager()
+        self.player_controls = [const.PARTY_KEYS_MAP['team1'], const.PARTY_KEYS_MAP['team2'],
+                                const.PARTY_KEYS_MAP['team3'], const.PARTY_KEYS_MAP['team4']]
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                key = pg_event.key
+                for i, controls in enumerate(self.player_controls):
+                    if key == controls['left']:
+                        ev_manager.post(EventSelectParty(index=i, increase=False))
+                    elif key == controls['right']:
+                        ev_manager.post(EventSelectParty(index=i, increase=True))
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

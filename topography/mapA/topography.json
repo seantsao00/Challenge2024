@@ -1,0 +1,20 @@
+{
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [20, 20], [20, 230], [230, 20], [230, 230]
+    ],
+    "neutral_towers": [
+        [125, 125]
+    ],
+    "images": {
+        "background.png": -1,
+        "object1.png": -1,
+        "object2.png": -1,
+        "object3.png": -1,
+        "object4.png": -1,
+        "object5.png": -1,
+        "object6.png": -1,
+        "object7.png": -1
+    }
+}
