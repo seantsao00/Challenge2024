@@ -1,5 +1,4 @@
 import const
-import const.character
 from event_manager import EventAttack, EventBulletCreate, EventMultiAttack
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletRanger, BulletSniper
@@ -32,8 +31,8 @@ class Sniper(Character):
         dist = self.position.distance_to(enemy.position)
         if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
             bullet = BulletSniper(position=self.position, victim=enemy,
-                                  damage=const.character.SNIPER_DAMAGE, team=self.team)
-            get_event_manager().post(EventBulletCreate(bullet=bullet), self.team.id)
+                                  damage=const.SNIPER_DAMAGE, team=self.team, attacker=self)
+            get_event_manager().post(EventBulletCreate(bullet=bullet))
             self.attack_time = now_time
 
         if self.ability > 0:

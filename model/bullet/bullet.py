@@ -9,7 +9,8 @@ import const.map
 import util
 import view
 from instances_manager import get_event_manager, get_model
-from model.entity import Entity
+from model.entity import Entity, LivingEntity
+from model.timer import Timer
 
 if TYPE_CHECKING:
     from model.character import Character
@@ -18,12 +19,13 @@ if TYPE_CHECKING:
 
 class Bullet(Entity):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = 0.0, imgstate: str = 'default', team: Team = None, damage: float = 0.0) -> None:
+                 speed: float = 0.0, imgstate: str = 'default', team: Team = None, damage: float = 0.0, attacker: LivingEntity = None) -> None:
         super().__init__(position, entity_type=entity_type, imgstate=imgstate, team=team)
         self.direction: pg.Vector2 | tuple[float, float] = None
         self.speed: float = speed
         self.damage: float = damage
-        self.exist: bool = True
+        self.timer: Timer = None
+        self.attacker: LivingEntity = attacker
 
     def judge(self, *args, **kwargs):
         pass
