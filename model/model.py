@@ -178,4 +178,4 @@ class Model:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
-                self.global_clock.tick(const.FPS)
+            self.global_clock.tick(const.FPS)

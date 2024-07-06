@@ -137,8 +137,8 @@ class Controller:
         model = get_model()
 
         for pg_event in pg_events:
-            key = pg_event.key
             if pg_event.type == pg.KEYDOWN:
+                key = pg_event.key
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventResumeModel())
                 elif key == pg.K_DOWN:
