@@ -26,12 +26,6 @@ class Sniper(Character):
 
     def ability(self, *args, **kwargs):
         print("sniper use ability")
-        self.ability = 1
 
     def attack(self, enemy: Entity):
-        if self.ability > 0:
-            self.__attack_damage *= 2
         super().attack(enemy)
-        if self.ability > 0:
-            self.__attack_damage /= 2
-            self.ability -= 1

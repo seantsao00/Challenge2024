@@ -79,7 +79,7 @@ class Team(NeutralTeam):
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
-            if clicked_entity.team is self:
+            if clicked_entity and clicked_entity.team is self:
                 self.__controlling = clicked_entity
             else:
                 print('picked a non interactable entity')
