@@ -17,7 +17,7 @@ class CharacterAttribute:
     speed: float
     attack_range: float
     damage: float
-    health: float
+    max_health: float
     vision: float
     ability_variable: float
     ability_cd: float | None

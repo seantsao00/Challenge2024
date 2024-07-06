@@ -15,8 +15,7 @@ if TYPE_CHECKING:
 
 
 class EntityView(ObjectBase):
-    images: dict[const.PartyType, dict[const.CharacterType |
-                                       const.TowerType, dict[tuple | None, pg.Surface]]]
+    images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]]
     """
     structure: images[party][entity][state]
 
@@ -56,7 +55,7 @@ class EntityView(ObjectBase):
         entity = self.entity
         if entity.hidden:
             return
-        img = self.images[entity.type][entity.imgstate]
+        img = self.images[entity.party][entity.entity_type][entity.state]
         self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 
     def update(self):

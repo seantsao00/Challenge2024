@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
+import const
 from event_manager.events import EventCreateEntity, EventDiscardEntity
 from instances_manager import get_event_manager
 
@@ -29,15 +30,18 @@ class Entity:
 
     entity_id: int = 0
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float],
-                 entity_type: str = 'default', team: Team = None, imgstate: str = 'default'):
+    def __init__(self,
+                 position: pg.Vector2 | tuple[float, float],
+                 party: const.PartyType,
+                 entity_type: const.EntityType,
+                 state: const.EntityState = None):
         Entity.entity_id += 1
         self.id: int = Entity.entity_id
         self.position: pg.Vector2 = pg.Vector2(position)
-        self.type: str = entity_type
-        self.imgstate: str = imgstate
+        self.party: const.PartyType = party
+        self.entity_type: const.EntityType = entity_type
+        self.state: const.EntityState = state
         self.hidden: bool = False
-        self.team: Team = team
         get_event_manager().post(EventCreateEntity(entity=self))
 
     def discard(self):
@@ -46,10 +50,15 @@ class Entity:
 
 
 class LivingEntity(Entity):
-    def __init__(self, health: float, position: pg.Vector2 | tuple[float, float], vision: float,
-                 entity_type: str = 'default', team: Team = None, imgstate: str = 'default') -> None:
+    def __init__(self,
+                 max_health: float,
+                 position: pg.Vector2 | tuple[float, float],
+                 vision: float,
+                 party: const.PartyType,
+                 entity_type: const.EntityType,
+                 state: const.EntityState = None):
         self.alive: bool = True
-        self.health: float = health
-        self.max_health: float = health
+        self.health: float = max_health
+        self.max_health: float = max_health
         self.vision: float = vision
-        super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
+        super().__init__(position, party, entity_type, state)

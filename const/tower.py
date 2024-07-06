@@ -17,7 +17,7 @@ class TowerAttribute:
     attack_speed: float
     attack_range: float
     damage: float
-    health: float
+    max_health: float
     vision: float
 
 

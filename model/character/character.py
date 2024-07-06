@@ -38,7 +38,7 @@ class Character(LivingEntity):
         self.attack_speed: int = attribute.attack_speed
         self.attack_time: float = -100
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
-        super().__init__(attribute.health, position, attribute.vision,
+        super().__init__(attribute.max_health, position, attribute.vision,
                          entity_type=team.name, team=team, imgstate=imgstate)
         ev_manager.register_listener(EventAttack, self.take_damage, self.id)
         ev_manager.register_listener(EventEveryTick, self.tick_move)

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING
 
-from const.character import *
-from const.team import *
-from const.tower import *
+from const.character import CharacterType
+from const.team import PartyType
+from const.tower import TowerType
+
+if TYPE_CHECKING:
+    from const.entity import EntityState, EntityType
 
 ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
@@ -44,7 +47,7 @@ CHARACTER_IMAGE: dict[CharacterType, str] = {
     CharacterType.SNIPER: 'sniper.png'
 }
 
-ENTITY_IMAGE: dict[PartyType, dict[CharacterType | TowerType, dict[tuple | None, str]]] = {
+ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
         {
             tower: {
@@ -68,7 +71,7 @@ ENTITY_IMAGE: dict[PartyType, dict[CharacterType | TowerType, dict[tuple | None,
 structure: ENTITY_IMAGE[party][entity][state]
 """
 
-ENTITY_SIZE: dict[PartyType, dict[CharacterType | TowerType, dict[tuple | None, int]]] = {
+ENTITY_SIZE: dict[PartyType, dict[EntityType, dict[EntityState, int]]] = {
     **{character: {
         None: 6.25
     } for character in CharacterType},
