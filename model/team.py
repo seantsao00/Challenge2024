@@ -50,7 +50,6 @@ class Team:
         self.master = master
         self.building_list: list[Tower] = []
         self.character_list: list[Character] = []
-        self.bullet_list: list[Bullet] = []
         self.visible_entities_list: set[Entity] = set()
         self.choose_position = False
         self.controlling = None
@@ -192,8 +191,8 @@ class Team:
 
     def create_bullet(self, event: EventBulletCreate):
         if event.bullet.team == self:
-            # self.bullet_list.append(event.bullet)
-            event.bullet.timer = Timer(interval=10, function=event.bullet.judge, once=False)
+            event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
+                                       function=event.bullet.judge, once=False)
 
     def ranger_damage(self, event: EventRangerBulletDamage):
         if event.bullet.team == self:
@@ -202,14 +201,15 @@ class Team:
             for entity in model.entities:
                 if (entity.position-event.bullet.target.position).length() < event.bullet.range and entity.team is not self:
                     get_event_manager().post(EventAttack(victim=entity, attacker=event.bullet.attacker), channel_id=entity.id)
+            get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
 
     def sniper_damage(self, event: EventSniperBulletDamage):
         if event.bullet.team == self:
             event.bullet.timer.stop()
             get_event_manager().post(EventAttack(victim=event.bullet.victim,
                                                  attacker=event.bullet.attacker), channel_id=event.bullet.victim.id)
+            get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
 
     def bullet_disappear(self, event: EventBulletDisappear):
         if event.bullet.team == self:
-            # self.bullet_list.remove(event.bullet)
             event.bullet.hidden = True

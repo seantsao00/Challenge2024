@@ -38,5 +38,5 @@ class RangerFighter(Character):
         if dist <= self.attack_range:
             print("ranged abilities attack")
             bullet = BulletRanger(position=self.position, target=origin,
-                                  radius=self.abilities_radius, team=self.team, damage=const.RANGER_DAMAGE, attacker=self)  # fix?
+                                  range=self.abilities_radius, team=self.team, damage=const.RANGER_DAMAGE, attacker=self)  # fix?
             get_event_manager().post(EventBulletCreate(bullet=bullet))
