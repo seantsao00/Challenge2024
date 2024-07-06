@@ -45,8 +45,6 @@ class Model:
         (e.g., The time that has elapsed in the game, )
         they should be initialized in Model.initialize()
         """
-        self.__register_permanent_event()
-
         self.__running: bool = False
         self.state: const.State = const.State.COVER
 
@@ -154,21 +152,6 @@ class Model:
 
     def __restart_game(self, _: EventRestartGame):
         get_event_manager().post(EventInitialize())
-
-    def __register_permanent_event(self):
-        """
-        Register ALL permanent event for the entire process.
-        """
-        ev_manager = get_event_manager()
-        ev_manager.register_permanent_event(EventInitialize)
-        ev_manager.register_permanent_event(EventUnconditionalTick)
-        ev_manager.register_permanent_event(EventQuit)
-        ev_manager.register_permanent_event(EventPauseModel)
-        ev_manager.register_permanent_event(EventResumeModel)
-        ev_manager.register_permanent_event(EventRestartGame)
-        ev_manager.register_permanent_event(EventStartGame)
-        ev_manager.register_permanent_event(EventCreateEntity)
-        ev_manager.register_permanent_event(EventCreateTower)
 
     def __register_permanent_listener(self):
         ev_manager = get_event_manager()
