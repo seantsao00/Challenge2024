@@ -6,7 +6,7 @@ import pygame as pg
 
 import const
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
-                           EventCreateTower)
+                           EventCreateTower, EventInitialize)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -60,6 +60,9 @@ class Grid:
         self.width = int(width / self.radius)
         self.height = int(height / self.radius)
         self.cells = [[Cell(pg.Vector2(i, j)) for i in range(height)] for j in range(width)]
+        self.register_permanent_listeners()
+
+    def initialize(self, _: EventInitialize):
         self.register_listeners()
 
     def transfer(self, position: pg.Vector2) -> pg.Vector2:
@@ -153,9 +156,14 @@ class Grid:
         self.delete_from_grid(event.character, event.original_pos)
         self.add_to_grid(event.character)
 
-    def register_listeners(self):
+    def register_permanent_listeners(self):
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
-        ev_manager.register_listener(EventCreateTower, self.handle_create_tower)
+        ev_manager.register_permanent_listener(EventInitialize, self.initialize)
+        ev_manager.register_permanent_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_permanent_listener(EventCreateTower, self.handle_create_tower)
+
+    def register_listeners(self):
+        """Register every listeners of this object into the event manager."""
+        ev_manager = get_event_manager()
         ev_manager.register_listener(EventCharacterMove, self.update_location)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)

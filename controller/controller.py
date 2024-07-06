@@ -37,10 +37,11 @@ class Controller:
         window_w = int(min(screen_info.current_w, screen_info.current_h /
                        const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]))
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
-        self.register_listeners()
+        self.__register_permanent_listeners()
 
     def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
+        self.__register_listeners()
 
     def transform(self, x: float, y: float) -> tuple[float, float]:
         """Transform control position to position in model's coordinate."""
@@ -160,11 +161,15 @@ class Controller:
                 if pg_event.key == const.START_BUTTON:
                     ev_manager.post(EventStartGame())
 
-    def register_listeners(self):
-        """Register every listeners of this object into the event manager."""
+    def __register_permanent_listeners(self):
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventInitialize, self.initialize)
-        ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        ev_manager.register_permanent_listener(EventInitialize, self.initialize)
+        ev_manager.register_permanent_listener(
+            EventUnconditionalTick, self.handle_unconditional_tick)
         # Listeners for TimerManager
-        ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
-        ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
+        ev_manager.register_permanent_listener(EventPauseModel, TimerManager.pause_all_timer)
+        ev_manager.register_permanent_listener(EventResumeModel, TimerManager.resume_all_timer)
+
+    def __register_listeners(self):
+        """Register every listeners of this object into the event manager."""
+        # ev_manager = get_event_manager()

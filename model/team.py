@@ -8,8 +8,8 @@ import pygame as pg
 import const
 import const.team
 from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower)
+                           EventInitialize, EventSelectCharacter, EventSpawnCharacter,
+                           EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import RangerFighter
 
@@ -49,9 +49,18 @@ class Team:
         self.visible_entities_list: set[Entity] = set()
         self.choose_position = False
         self.controlling = None
-        self.register_listeners()
+        self.__register_permanent_listeners()
 
-    def handle_input(self, event: EventHumanInput):
+    def __initialize(self, _: EventInitialize):
+        """
+        Initialize attributes related to a game.
+
+        This method should be called when a new game is about to start,
+        even for the second or more rounds of the game.
+        """
+        self.__register_listeners()
+
+    def __handle_input(self, event: EventHumanInput):
         """
         Handles input by human. This method is only used by human controlled teams.
         """
@@ -140,7 +149,7 @@ class Team:
         if event.character in self.visible_entities_list:
             self.visible_entities_list.remove(event.character)
 
-    def handle_create_tower(self, event: EventCreateTower):
+    def __handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)
 
     def handle_others_character_spawn(self, event: EventSpawnCharacter):
@@ -171,12 +180,16 @@ class Team:
             self.controlling.update_character_type(event.character)
             print(f'The character produced by {self.name} is modified to {event.character}')
 
-    def register_listeners(self):
+    def __register_permanent_listeners(self):
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
+        ev_manager.register_permanent_listener(EventInitialize, self.__initialize)
+        ev_manager.register_permanent_listener(EventCreateTower, self.__handle_create_tower)
+
+    def __register_listeners(self):
+        ev_manager = get_event_manager()
         if self.manual_control:
-            ev_manager.register_listener(EventHumanInput, self.handle_input)
-        ev_manager.register_listener(EventCreateTower, self.handle_create_tower)
+            ev_manager.register_listener(EventHumanInput, self.__handle_input)
         ev_manager.register_listener(EventTeamGainTower, self.gain_tower, self.id)
         ev_manager.register_listener(EventTeamLoseTower, self.lose_tower, self.id)
         ev_manager.register_listener(EventSpawnCharacter, self.gain_character, self.id)
