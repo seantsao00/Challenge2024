@@ -3,7 +3,6 @@ The module defines View class.
 """
 
 import os
-import time
 from itertools import chain
 
 import cv2
@@ -122,10 +121,9 @@ class View:
         self.__screen.fill(const.BACKGROUND_COLOR)
         self.__arena.fill(const.BACKGROUND_COLOR)
         model = get_model()
-        if model.state == const.State.COVER:
+        if model.state is const.State.COVER:
             self.render_cover()
-            time.sleep(0.01)
-        elif model.state == const.State.PLAY:
+        elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
             self.render_play()
         pg.display.flip()
 

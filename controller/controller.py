@@ -147,7 +147,6 @@ class Controller:
                     model.pause_menu.change_selected(-1)
                 elif key == pg.K_RETURN:
                     model.pause_menu.execute()
-                # SHOULD BE MODIFIED TO UTILIZING EVENT
 
     def ctrl_cover(self, pg_events: list[pg.Event]):
         """
