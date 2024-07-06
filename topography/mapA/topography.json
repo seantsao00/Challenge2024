@@ -1,5 +1,4 @@
 {
-    "name": "test_map",
     "width": 250,
     "height": 250,
     "fountains": [
@@ -10,11 +9,12 @@
     ],
     "images": {
         "background.png": -1,
-        "horizontal1.png": 53,
-        "horizontal2.png": 53,
-        "horizontal3.png": 184,
-        "vertical1.png": 184,
-        "vertical2.png": 117,
-        "vertical3.png": 250
+        "object1.png": -1,
+        "object2.png": -1,
+        "object3.png": -1,
+        "object4.png": -1,
+        "object5.png": -1,
+        "object6.png": -1,
+        "object7.png": -1
     }
 }

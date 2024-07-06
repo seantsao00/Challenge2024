@@ -1,12 +1,15 @@
 """
 This module defines constants associated with melee. (Value to be corrected with official version of docs)
 """
+from const.character.character import CharacterAttribute
 
-MELEE_SPEED = 2
-MELEE_ATTACK_RANGE = 10
-MELEE_DAMAGE = 75
-MELEE_HEALTH = 500
-MELEE_VISION = 30
-MELEE_ABILITIES_VARIABLE = 5
-MELEE_ABILITIES_CD = 1.5
-MELEE_ATTACK_SPEED = 0.8
+MELEE_ATTRIBUTE = CharacterAttribute(
+    speed=2,
+    attack_range=10,
+    damage=75,
+    health=500,
+    vision=30,
+    ability_variable=5,
+    ability_cd=1.5,
+    attack_speed=0.8
+)

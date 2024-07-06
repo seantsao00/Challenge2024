@@ -19,8 +19,7 @@ class Melee(Character):
     """
 
     def __init__(self, team, position, defense=0):
-        super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
-                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ATTACK_SPEED, const.MELEE_ABILITIES_CD, 'melee')
+        super().__init__(position, team, const.MELEE_ATTRIBUTE, 'melee')
         self.defense = defense
         self.imgstate = 'melee'
 
@@ -36,4 +35,4 @@ class Melee(Character):
 
     def abilities(self):
         print("melee use abilites")
-        self.defense = const.MELEE_ABILITIES_VARIABLE
+        self.defense = const.MELEE_ATTRIBUTE.ability_variable
