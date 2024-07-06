@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Type
 import pygame as pg
 
 import const
-from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower)
+from event_manager import (EventAttack, EventCreateTower, EventInitialize, EventSpawnCharacter,
+                           EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building.linked_list import Linked_list, Node
 from model.character import RangerFighter
@@ -48,7 +48,7 @@ class Tower(LivingEntity):
         self.attack_timer = Timer(const.TOWER_ATTACK_PERIOD, self.attack, once=False)
         super().__init__(const.TOWER_HEALTH, position, const.TOWER_VISION,
                          entity_type=entity_type, team=team, imgstate=imgstate)
-        self.register_listeners()
+        self.__register_permanent_listeners()
 
         if self.is_fountain:
             self.imgstate = 'temporary_blue_nexus'
@@ -56,6 +56,9 @@ class Tower(LivingEntity):
             self.set_timer()
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.id)
         get_event_manager().post(EventCreateTower(tower=self))
+
+    def __initialize(self, _: EventInitialize):
+        self.__register_listeners()
 
     def update_period(self):
         self.period = const.INITIAL_PERIOD_MS + \
@@ -120,7 +123,11 @@ class Tower(LivingEntity):
             # print(character.type, 'get out of tower')
             self.enemy[character.team.id].delete(character)
 
-    def register_listeners(self):
+    def __register_permanent_listeners(self):
+        ev_manager = get_event_manager()
+        ev_manager.register_permanent_listener(EventInitialize, self.__initialize)
+
+    def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventAttack, self.take_damage, self.id)

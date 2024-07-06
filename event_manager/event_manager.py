@@ -68,8 +68,9 @@ class EventManager:
         """
         Unregister all listeners expect listeners for events in permanent_event.
         """
-        self.__listeners = {key: val
-                            for key, val in self.__listeners.items() if key[0].permanent()}
+        self.__listeners: defaultdict[tuple[type[BaseEvent], Optional[int]],
+                                      list[ListenerCallback]] = defaultdict(list, {key: val if key[0].permanent() else []
+                                                                                   for key, val in self.__listeners.items()})
 
     def post(self, event: BaseEvent, channel_id: Optional[int] = None):
         """

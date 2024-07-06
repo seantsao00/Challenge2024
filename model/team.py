@@ -58,6 +58,7 @@ class Team:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
+        Team.total = 0
         self.__register_listeners()
 
     def __handle_input(self, event: EventHumanInput):

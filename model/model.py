@@ -65,7 +65,7 @@ class Model:
 
         self.pause_menu: PauseMenu = PauseMenu()
 
-        self.__register_permanent_listener()
+        self.__register_permanent_listeners()
 
     def __initialize(self, _: EventInitialize):
         """
@@ -151,9 +151,11 @@ class Model:
         event.character.team.update_visible_entities_list(event.character)
 
     def __restart_game(self, _: EventRestartGame):
-        get_event_manager().post(EventInitialize())
+        ev_manager = get_event_manager()
+        ev_manager.reset_manager()
+        ev_manager.post(EventInitialize())
 
-    def __register_permanent_listener(self):
+    def __register_permanent_listeners(self):
         ev_manager = get_event_manager()
         ev_manager.register_permanent_listener(EventInitialize, self.__initialize)
         ev_manager.register_permanent_listener(EventQuit, self.__handle_quit)
