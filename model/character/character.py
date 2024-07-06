@@ -28,18 +28,18 @@ class Character(LivingEntity):
      - alive: The character is alive or not.
     """
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
-                 attack_range: float, damage: float, health: float, vision: float, attack_speed: float, abilities_cd: float, imgstate: str):
+    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, attribute: const.CharacterAttribute, imgstate: str):
         ev_manager = get_event_manager()
-        self.speed: float = speed
-        self.attack_range: float = attack_range
-        self.damage: float = damage
+        self.speed: float = attribute.speed
+        self.attack_range: float = attribute.attack_range
+        self.damage: float = attribute.damage
         self.abilities_time: float = -100
-        self.abilities_cd: float = abilities_cd
-        self.attack_speed: int = attack_speed
+        self.ability_cd: float = attribute.ability_cd
+        self.attack_speed: int = attribute.attack_speed
         self.attack_time: float = -100
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
-        super().__init__(health, position, vision, entity_type=team.name, team=team, imgstate=imgstate)
+        super().__init__(attribute.health, position, attribute.vision,
+                         entity_type=team.name, team=team, imgstate=imgstate)
         ev_manager.register_listener(EventAttack, self.take_damage, self.id)
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 
@@ -105,7 +105,7 @@ class Character(LivingEntity):
     def call_abilities(self, *args, **kwargs):
         print("call abilities")
         now_time = get_model().get_time()
-        if now_time - self.abilities_time < self.abilities_cd:
+        if now_time - self.abilities_time < self.ability_cd:
             return
         self.abilities_time = now_time
         self.abilities(*args, **kwargs)

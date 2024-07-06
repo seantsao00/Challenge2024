@@ -14,9 +14,8 @@ class RangerFighter(Character):
     """
 
     def __init__(self, team, position: pg.Vector2):
-        super().__init__(position, team, const.RANGER_SPEED, const.RANGER_ATTACK_RANGE,
-                         const.RANGER_DAMAGE, const.RANGER_HEALTH, const.RANGER_VISION, const.RANGER_ATTACK_SPEED, const.RANGER_ABILITIES_CD, 'ranger')
-        self.abilities_radius = const.RANGER_ABILITIES_RADIUS
+        super().__init__(position, team, const.RANGER_ATTRIBUTE, 'ranger')
+        self.abilities_radius = const.RANGER_ATTRIBUTE.ability_variable
         self.imgstate = 'ranger'
 
     def abilities(self, *args, **kwargs):

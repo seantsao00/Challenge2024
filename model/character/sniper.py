@@ -12,8 +12,7 @@ class Sniper(Character):
     """
 
     def __init__(self, team, position, ability=0):
-        super().__init__(position, team, const.SNIPER_SPEED, const.SNIPER_ATTACK_RANGE,
-                         const.SNIPER_DAMAGE, const.SNIPER_HEALTH, const.SNIPER_VISION, const.SNIPER_ATTACK_SPEED, const.SNIPER_ABILITIES_CD, 'sniper')
+        super().__init__(position, team, const.SNIPER_ATTRIBUTE, 'sniper')
         self.ability = ability
         self.imgstate = 'sniper'
 

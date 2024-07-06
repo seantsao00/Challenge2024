@@ -1,11 +1,15 @@
 """
 This module defines constants associated with range fighter.
 """
+from const.character.character import CharacterAttribute
 
-SNIPER_SPEED = 1.5
-SNIPER_ATTACK_RANGE = 50
-SNIPER_DAMAGE = 150
-SNIPER_HEALTH = 300
-SNIPER_VISION = 50
-SNIPER_ABILITIES_CD = 1.5
-SNIPER_ATTACK_SPEED = 0.5
+SNIPER_ATTRIBUTE = CharacterAttribute(
+    speed=1.5,
+    attack_range=50,
+    damage=150,
+    health=300,
+    vision=50,
+    ability_variable=None,
+    ability_cd=1.5,
+    attack_speed=0.5
+)

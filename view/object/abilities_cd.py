@@ -22,8 +22,8 @@ class AbilitiesCDView(ObjectBase):
         if entity.hidden:
             return
 
-        cd_width = min(get_model().get_time() - entity.abilities_time, entity.abilities_cd) / \
-            entity.abilities_cd * const.ENTITY_RADIUS * 2 * self.resize_ratio
+        cd_width = min(get_model().get_time() - entity.abilities_time, entity.ability_cd) / \
+            entity.ability_cd * const.ENTITY_RADIUS * 2 * self.resize_ratio
         top = (self.entity.position.x - const.ENTITY_RADIUS) * self.resize_ratio
         left = (self.entity.position.y - const.ENTITY_RADIUS -
                 const.CD_BAR_UPPER) * self.resize_ratio
