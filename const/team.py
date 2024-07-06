@@ -14,16 +14,17 @@ class InputTypes(Enum):
     ABILITIES = auto()
 
 
-class CharTypes(Enum):
+class CharType(Enum):
     NONE = auto()
     TOWER = auto()
     CHAR = auto()
 
 
-class PartyTypes(IntEnum):
+class PartyType(IntEnum):
     """This is for party selection"""
+    NEUTRAL = auto()
     JUNIOR = auto()
     FBI = auto()
     POLICE = auto()
     BLACK = auto()
-    MAORI = auto()
+    MOURI = auto()

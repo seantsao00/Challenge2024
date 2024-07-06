@@ -67,22 +67,22 @@ class Team:
 
         clicked_tower: Tower = None
         clicked_character: Character = None
-        clicked = const.CharTypes.NONE
+        clicked = const.CharType.NONE
 
         if event.clicked is not None and event.clicked.type == 'tower':
             clicked_tower = event.clicked
-            clicked = const.CharTypes.TOWER
+            clicked = const.CharType.TOWER
         elif event.clicked is not None:
             clicked_character = event.clicked
-            clicked = const.CharTypes.CHAR
+            clicked = const.CharType.CHAR
 
         if event.input_type == const.InputTypes.PICK:
-            if clicked == const.CharTypes.TOWER:
+            if clicked == const.CharType.TOWER:
                 if hasattr(clicked_tower, 'update_character_type') and clicked_tower.team is self:
                     self.controlling = clicked_tower
                 else:
                     print('clicked on non interactable tower')
-            elif clicked == const.CharTypes.CHAR:
+            elif clicked == const.CharType.CHAR:
                 if check_movable(clicked_character, self):
                     self.controlling = clicked_character
                 else:
@@ -96,9 +96,9 @@ class Team:
                 if self.choose_position is True:
                     self.controlling.call_abilities(event.displacement)
                     self.choose_position = False
-                elif clicked_tower is not None and clicked == const.CharTypes.TOWER:
+                elif clicked_tower is not None and clicked == const.CharType.TOWER:
                     self.controlling.attack(clicked_tower)
-                elif clicked_character is not None and clicked == const.CharTypes.CHAR:
+                elif clicked_character is not None and clicked == const.CharType.CHAR:
                     self.controlling.attack(clicked_character)
         elif event.input_type is const.InputTypes.ABILITIES and self.controlling is not None:
             from model.building import Tower

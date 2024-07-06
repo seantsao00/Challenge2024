@@ -1,6 +1,25 @@
 """
 This module defines constants associated with towers.
 """
+from dataclasses import dataclass
+from enum import Enum, auto
+
+
+class TowerType(Enum):
+    FOUNTAIN = auto()
+    HOTEL = auto()
+    FERRIES_WHEEL = auto()
+    PYLON = auto()
+
+
+@dataclass(kw_only=True)
+class TowerAttribute:
+    attack_speed: float
+    attack_range: float
+    damage: float
+    health: float
+    vision: float
+
 
 INITIAL_PERIOD_MS = 5000
 FORMULA_K = 1000
