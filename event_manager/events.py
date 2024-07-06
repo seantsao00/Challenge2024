@@ -85,7 +85,7 @@ class EventHumanInput(BaseEvent):
     """The displacement vector representing the movement."""
 
     def __str__(self):
-        if self.input_type == const.InputTypes.PICK:
+        if self.input_type is const.InputTypes.PICK:
             return f"Clicked at {self.clicked.id}"
         return f"Move {self.displacement}"
 

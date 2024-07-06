@@ -100,7 +100,7 @@ class Team:
                     self.controlling.attack(clicked_tower)
                 elif clicked_character is not None and clicked == const.CharTypes.CHAR:
                     self.controlling.attack(clicked_character)
-        elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
+        elif event.input_type is const.InputTypes.ABILITIES and self.controlling is not None:
             from model.building import Tower
             if not isinstance(self.controlling, Tower):
                 if isinstance(self.controlling, RangerFighter):

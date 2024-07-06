@@ -8,16 +8,16 @@ MAX_TEAMS = 4
 
 
 class InputTypes(Enum):
-    PICK = 0
-    MOVE = 1
-    ATTACK = 2
-    ABILITIES = 3
+    PICK = auto()
+    MOVE = auto()
+    ATTACK = auto()
+    ABILITIES = auto()
 
 
 class CharTypes(Enum):
-    NONE = 0
-    TOWER = 1
-    CHAR = 2
+    NONE = auto()
+    TOWER = auto()
+    CHAR = auto()
 
 
 class PartyTypes(IntEnum):
