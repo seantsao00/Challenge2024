@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Character, Entity, Tower
+    from model import Character, Entity, LivingEntity, Tower
 
 
 @dataclass(kw_only=True)
@@ -80,13 +80,13 @@ class EventHumanInput(BaseEvent):
     For example, a listener which draws position of characters can be registered with this event.
     """
     input_type: const.InputTypes
-    clicked: Entity | None = None
+    clicked_entity: Entity | None = None
     displacement: pg.Vector2 | None = None
     """The displacement vector representing the movement."""
 
     def __str__(self):
         if self.input_type is const.InputTypes.PICK:
-            return f"Clicked at {self.clicked.id}"
+            return f"Clicked at {self.clicked_entity.__id}"
         return f"Move {self.displacement}"
 
 
@@ -97,7 +97,7 @@ class EventPartySelection(BaseEvent):
 
 @dataclass(kw_only=True)
 class EventSelectCharacter(BaseEvent):
-    """When picking a tower, we could select charcters"""
+    """When picking a tower, we could select generated character type"""
     character: Character | None = None
 
 
@@ -114,8 +114,8 @@ class EventDiscardEntity(BaseEvent):
 
 @dataclass(kw_only=True)
 class EventAttack(BaseEvent):
-    attacker: Entity
-    victim: Entity
+    attacker: LivingEntity
+    victim: LivingEntity
 
 
 @dataclass(kw_only=True)

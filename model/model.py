@@ -85,7 +85,7 @@ class Model:
             self.__tower.append(Tower(new_position, team, 1))
         for team in self.teams:
             for i in range(len(self.teams)):
-                if i != team.id:
+                if i != team.__id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i)
         for position in self.map.neutral_towers:
@@ -132,19 +132,19 @@ class Model:
     def __register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
-            for tower in self.grid.get_attacker_tower(event.entity.position):
+            for tower in self.grid.get_attacker_tower(event.entity.__position):
                 tower.enemy_in_range(event.entity)
 
     def __handle_character_died(self, event: EventCharacterDied):
         print("died event")
-        self.grid.delete_from_grid(event.character, event.character.position)
-        for tower in self.grid.get_attacker_tower(event.character.position):
+        self.grid.delete_from_grid(event.character, event.character.__position)
+        for tower in self.grid.get_attacker_tower(event.character.__position):
             tower.enemy_out_range(event.character)
 
     def __handle_character_move(self, event: EventCharacterMove):
         for tower in self.grid.get_attacker_tower(event.original_pos):
             tower.enemy_out_range(event.character)
-        for tower in self.grid.get_attacker_tower(event.character.position):
+        for tower in self.grid.get_attacker_tower(event.character.__position):
             tower.enemy_in_range(event.character)
         event.character.team.update_visible_entities_list(event.character)
 

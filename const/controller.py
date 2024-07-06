@@ -26,7 +26,7 @@ PAUSE_BUTTON = pg.K_ESCAPE
 START_BUTTON = pg.K_SPACE
 
 """input buttons defined for party-selection process"""
-PARTY_KEYS_MAP = {
+PARTY_SELECT_BUTTONS_MAP = {
     'team1': {
         'left': pg.K_r,
         'right': pg.K_f,

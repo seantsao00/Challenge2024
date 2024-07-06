@@ -34,21 +34,21 @@ class Linked_list:
         self.map: dict[int, Node] = dict()
 
     def delete(self, character: Character):
-        if character.id in self.map:
-            if self.map[character.id] is self.head:
-                self.head = self.map[character.id].next
-            if self.map[character.id] is self.back:
-                self.back = self.map[character.id].prev
-            self.map[character.id].delete()
-            del self.map[character.id]
+        if character.__id in self.map:
+            if self.map[character.__id] is self.head:
+                self.head = self.map[character.__id].next
+            if self.map[character.__id] is self.back:
+                self.back = self.map[character.__id].prev
+            self.map[character.__id].delete()
+            del self.map[character.__id]
 
     def push_back(self, character: Character, time: float):
-        self.map[character.id] = Node(character, time)
+        self.map[character.__id] = Node(character, time)
         if self.back is None:
-            self.back = self.map[character.id]
-            self.head = self.map[character.id]
+            self.back = self.map[character.__id]
+            self.head = self.map[character.__id]
         else:
-            self.map[character.id].insert(self.back)
+            self.map[character.__id].insert(self.back)
 
     def front(self):
         return self.head

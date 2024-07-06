@@ -4,7 +4,9 @@ This module defines constants associated with characters.
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, Any, Optional, TypeAlias
+
+from const.entity import LivingEntityAttribute
 
 if TYPE_CHECKING:
     CharacterState: TypeAlias = None
@@ -17,15 +19,10 @@ class CharacterType(Enum):
 
 
 @dataclass(kw_only=True)
-class CharacterAttribute:
-    attack_damage: float
-    attack_speed: float
-    attack_range: float
-    max_health: float
-    vision: float
+class CharacterAttribute(LivingEntityAttribute):
     speed: float
-    ability_variable: float
     ability_cd: float | None
+    ability_variables: Optional[Any]
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(
@@ -34,9 +31,9 @@ MELEE_ATTRIBUTE = CharacterAttribute(
     attack_damage=75,
     max_health=500,
     vision=30,
-    ability_variable=5,
     ability_cd=1.5,
-    attack_speed=0.8
+    attack_speed=0.8,
+    ability_variables=5
 )
 
 RANGER_ATTRIBUTE = CharacterAttribute(
@@ -45,9 +42,9 @@ RANGER_ATTRIBUTE = CharacterAttribute(
     attack_damage=50,
     max_health=200,
     vision=30,
-    ability_variable=100,
     ability_cd=1.5,
-    attack_speed=1
+    attack_speed=1,
+    ability_variables=100
 )
 
 SNIPER_ATTRIBUTE = CharacterAttribute(
@@ -56,7 +53,7 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     attack_damage=150,
     max_health=300,
     vision=50,
-    ability_variable=None,
     ability_cd=1.5,
-    attack_speed=0.5
+    attack_speed=0.5,
+    ability_variables=None
 )

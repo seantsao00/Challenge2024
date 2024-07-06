@@ -43,7 +43,7 @@ class Cell:
             self.characters.remove(character)
 
     def get_enemy(self, team: Team) -> list[Character]:
-        return [character for character in self.characters if not character.team is team]
+        return [character for character in self.characters if not character.__team is team]
 
 
 class Grid:
@@ -70,12 +70,12 @@ class Grid:
         return self.cells[int(pos.x)][int(pos.y)]
 
     def add_to_grid(self, entity: Entity):
-        self.get_cell(entity.position).add(entity)
+        self.get_cell(entity.__position).add(entity)
         if isinstance(entity, Tower):
-            x1, x2 = (entity.position.x - const.TOWER_ATTACK_RANGE) / \
-                self.radius, (entity.position.x + const.TOWER_ATTACK_RANGE) / self.radius
-            y1, y2 = (entity.position.y - const.TOWER_ATTACK_RANGE) / \
-                self.radius, (entity.position.y + const.TOWER_ATTACK_RANGE) / self.radius
+            x1, x2 = (entity.__position.x - const.TOWER_ATTACK_RANGE) / \
+                self.radius, (entity.__position.x + const.TOWER_ATTACK_RANGE) / self.radius
+            y1, y2 = (entity.__position.y - const.TOWER_ATTACK_RANGE) / \
+                self.radius, (entity.__position.y + const.TOWER_ATTACK_RANGE) / self.radius
             for x in range(max(0, int(x1)), min(self.height, int(x2) + 1)):
                 for y in range(max(0, int(y1)), min(self.width, int(y2) + 1)):
                     self.cells[x][y].tower_occupied.add(entity)
@@ -84,7 +84,7 @@ class Grid:
         self.get_cell(position).remove_character(character)
 
     def handle_character_died(self, event: EventCharacterDied):
-        self.delete_from_grid(event.character, event.character.position)
+        self.delete_from_grid(event.character, event.character.__position)
 
     def handle_create_entity(self, event: EventCreateEntity):
         self.add_to_grid(event.entity)
@@ -102,9 +102,9 @@ class Grid:
             for dy in range(max(0, int(y - radius / self.radius)), min(self.width, int(y + radius / self.radius + 1))):
                 cell = self.cells[dx][dy]
                 result.extend(
-                    [tower for tower in cell.tower if tower.position.distance_to(position) <= radius])
+                    [tower for tower in cell.tower if tower.__position.distance_to(position) <= radius])
                 result.extend(
-                    [character for character in cell.characters if character.position.distance_to(position) <= radius])
+                    [character for character in cell.characters if character.__position.distance_to(position) <= radius])
         return result
 
     def iterate_radius_cells(self, position: pg.Vector2, radius: int) -> list[Cell]:

@@ -1,9 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
 from model.character import Character
+
+if TYPE_CHECKING:
+    from model.team import Team
 
 
 class Ranger(Character):
@@ -13,18 +20,18 @@ class Ranger(Character):
      - area_attack: Attack a locations and damage all nearby foes.
     """
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float], party: const.PartyType):
-        super().__init__(position, party, const.MELEE_ATTRIBUTE, None)
+    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
+        super().__init__(position, team, const.MELEE_ATTRIBUTE, None)
         self.defense = 0
 
     def abilities(self, *args, **kwargs):
         if len(args) < 1 or not isinstance(args[0], pg.Vector2):
             raise ValueError()
         target: pg.Vector2 = args[0]
-        dist = self.position.distance_to(target)
+        dist = self.__position.distance_to(target)
         if dist <= self.attack_range:
-            print("ranged abilities attack")
-            all_victim = get_model().grid.all_entity_in_range(target, self.abilities_radius)
+            print("ranged ability attack")
+            all_victim = get_model().grid.all_entity_in_range(target, self.ability_variables)
             for victim in all_victim:
-                if self.team != victim.team:
-                    get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.id)
+                if self.__team != victim.team:
+                    get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.__id)

@@ -11,13 +11,7 @@ class InputTypes(Enum):
     PICK = auto()
     MOVE = auto()
     ATTACK = auto()
-    ABILITIES = auto()
-
-
-class CharType(Enum):
-    NONE = auto()
-    TOWER = auto()
-    CHAR = auto()
+    ABILITY = auto()
 
 
 class PartyType(IntEnum):

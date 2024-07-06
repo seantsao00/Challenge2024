@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, TypeAlias
 
+from const.character import CharacterType
+from const.entity import LivingEntityAttribute
+
 if TYPE_CHECKING:
     TowerState: TypeAlias = None
 
@@ -17,19 +20,15 @@ class TowerType(Enum):
 
 
 @dataclass(kw_only=True)
-class TowerAttribute:
-    attack_damage: float
-    attack_speed: float
-    attack_range: float
-    max_health: float | None
-    vision: float
+class TowerAttribute(LivingEntityAttribute):
+    pass
 
 
 FOUNTAIN_ATTRIBUTE = TowerAttribute(
     attack_damage=50,
     attack_speed=0.5,
     attack_range=30,
-    max_health=None,
+    max_health=1000,
     vision=40
 )
 
@@ -41,11 +40,9 @@ NEUTRAL_TOWER_ATTRIBUTE = TowerAttribute(
     vision=40
 )
 
+TOWER_DEFAULT_GENERATE_CHARACTER = CharacterType.RANGER
+TOWER_GENERATE_DISPLACEMENT = 10
+"""The distance between generated character and the tower will be less than this value."""
+
 INITIAL_PERIOD_MS = 5000
 FORMULA_K = 1000
-
-TOWER_ATTACK_RANGE = 30
-TOWER_ATTACK_PERIOD = 500
-TOWER_DAMAGE = 50
-TOWER_HEALTH = 1000
-TOWER_VISION = 40

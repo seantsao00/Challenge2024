@@ -57,7 +57,7 @@ class Internal(prototype.API):
         while we still know the original `model.Character`.
         """
 
-        if internal.id not in self.__character_map:
+        if internal.__id not in self.__character_map:
             character_class = prototype.CharacterClass.unknown
             if isinstance(internal, model.Melee):
                 character_class = prototype.CharacterClass.melee
@@ -68,41 +68,41 @@ class Internal(prototype.API):
             else:
                 raise GameError("Unknown character type")
             extern = prototype.Character(
-                _id=internal.id,
+                _id=internal.__id,
                 _type=character_class,
-                _position=internal.position,
-                _speed=internal.attack_speed,
-                _attack_range=internal.attack_range,
-                _damage=internal.attack_damage,
+                _position=internal.__position,
+                _speed=internal.__attack_speed,
+                _attack_range=internal.__attack_range,
+                _damage=internal.__attack_damage,
                 _vision=internal.vision,
                 _health=internal.health,
                 _max_health=internal.max_health,
-                _team_id=Internal.__cast_id(internal.team.id)
+                _team_id=Internal.__cast_id(internal.__team.id)
             )
-            self.__character_map[internal.id] = extern
+            self.__character_map[internal.__id] = extern
             self.__reverse_character_map[id(extern)] = internal
-        return self.__character_map[internal.id]
+        return self.__character_map[internal.__id]
 
     def __register_tower(self, internal: model.Tower) -> prototype.Tower:
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
-        if internal.id not in self.__tower_map:
+        if internal.__id not in self.__tower_map:
             extern = prototype.Tower(
-                _id=internal.id,
-                _position=internal.position,
-                _period=internal.period,
-                _is_fountain=internal.is_fountain,
+                _id=internal.__id,
+                _position=internal.__position,
+                _period=internal.__period,
+                _is_fountain=internal.__is_fountain,
                 _attack_range=internal.attack_range,
                 _damage=internal.damage,
                 _vision=internal.vision,
                 _health=internal.health,
                 _max_health=internal.max_health,
-                _team_id=Internal.__cast_id(internal.team.id)
+                _team_id=Internal.__cast_id(internal.__team.id)
             )
-            self.__tower_map[internal.id] = extern
+            self.__tower_map[internal.__id] = extern
             self.__reverse_tower_map[id(extern)] = internal
-        return self.__tower_map[internal.id]
+        return self.__tower_map[internal.__id]
 
     def __access_character(self, extern: prototype.Character) -> model.Character:
         """
@@ -121,14 +121,14 @@ class Internal(prototype.API):
 
     def get_characters(self) -> list[prototype.Character]:
         return [self.__register_character(character)
-                for character in self.__team().character_list]
+                for character in self.__team().__character_list]
 
     def get_towers(self) -> list[prototype.Tower]:
         return [self.__register_tower(tower)
-                for tower in self.__team().building_list]
+                for tower in self.__team().__towers]
 
     def get_team_id(self) -> int:
-        return Internal.__cast_id(self.__team().id)
+        return Internal.__cast_id(self.__team().__id)
 
     def get_score(self, index=None) -> int:
         if index == None:
@@ -139,10 +139,10 @@ class Internal(prototype.API):
             raise IndexError
         team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
-        if not team.id == index:
-            print(team.id, index)
+        if not team.__id == index:
+            print(team.__id, index)
             raise GameError("Team ID implement has changed.")
-        return team.points
+        return team.__points
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         if not isinstance(characters, Iterable):

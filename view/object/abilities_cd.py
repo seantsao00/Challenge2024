@@ -19,13 +19,13 @@ class AbilitiesCDView(ObjectBase):
 
     def draw(self):
         entity = self.entity
-        if entity.hidden:
+        if entity.__hidden:
             return
 
         cd_width = min(get_model().get_time() - entity.abilities_time, entity.ability_cd) / \
             entity.ability_cd * const.ENTITY_RADIUS * 2 * self.resize_ratio
-        top = (self.entity.position.x - const.ENTITY_RADIUS) * self.resize_ratio
-        left = (self.entity.position.y - const.ENTITY_RADIUS -
+        top = (self.entity.__position.x - const.ENTITY_RADIUS) * self.resize_ratio
+        left = (self.entity.__position.y - const.ENTITY_RADIUS -
                 const.CD_BAR_UPPER) * self.resize_ratio
         pg.draw.rect(self.canvas, (0, 0, 0),
                      (top, left, const.ENTITY_RADIUS * 2 * self.resize_ratio, 2 * self.resize_ratio))

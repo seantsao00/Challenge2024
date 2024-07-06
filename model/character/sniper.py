@@ -1,8 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
 from model.character.character import Character
 from model.entity import Entity
+
+if TYPE_CHECKING:
+    from model.team import Team
 
 
 class Sniper(Character):
@@ -13,18 +20,18 @@ class Sniper(Character):
     focus: Increase damage that can be stacked. Loses stacks when taken damage.
     """
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float], party: const.PartyType):
-        super().__init__(position, party, const.MELEE_ATTRIBUTE, None)
+    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
+        super().__init__(position, team, const.MELEE_ATTRIBUTE, None)
         self.defense = 0
 
-    def abilities(self):
-        print("sniper use abilities")
+    def ability(self, *args, **kwargs):
+        print("sniper use ability")
         self.ability = 1
 
     def attack(self, enemy: Entity):
         if self.ability > 0:
-            self.attack_damage *= 2
+            self.__attack_damage *= 2
         super().attack(enemy)
         if self.ability > 0:
-            self.attack_damage /= 2
+            self.__attack_damage /= 2
             self.ability -= 1

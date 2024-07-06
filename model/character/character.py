@@ -30,28 +30,25 @@ class Character(LivingEntity):
 
     def __init__(self,
                  position: pg.Vector2 | tuple[float, float],
-                 party: const.PartyType,
+                 team: Team,
                  attribute: const.CharacterAttribute,
                  state: const.CharacterState):
-        self.attack_damage: float = attribute.attack_damage
-        self.attack_speed: int = attribute.attack_speed
-        self.attack_range: float = attribute.attack_range
         self.speed: float = attribute.speed
-        self.ability_variable: float = attribute.ability_cd
         self.ability_cd: float = attribute.ability_cd
+        self.ability_variables = attribute.ability_variables
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
         self.abilities_time: float = -attribute.ability_cd
         self.attack_time: float = -(1/attribute.attack_speed)
-        super().__init__(position, attribute.max_health, vision=attribute.vision, party, state)
+        super().__init__(position, attribute, team, state)
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventAttack, self.take_damage, self.id)
+        ev_manager.register_listener(EventAttack, self.take_damage, self.__id)
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 
     def move(self, direction: pg.Vector2):
         """
         Move the character in the given direction.
         """
-        original_pos = self.position
+        original_pos = self.__position
 
         if direction.length() > self.speed:
             direction = self.speed * direction.normalize()
@@ -68,51 +65,51 @@ class Character(LivingEntity):
             # try further distance
             for i in range(4):
 
-                new_position = self.position + cur_direction
+                new_position = self.__position + cur_direction
                 new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
                 new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
                 if game_map.get_type(new_position) == const.map.MAP_OBSTACLE:
-                    self.position = new_position - min_direction
+                    self.__position = new_position - min_direction
                     break
 
                 if i == 3:
-                    self.position = new_position
+                    self.__position = new_position
 
                 cur_direction += min_direction
 
         get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
 
-    def tick_move(self, event: EventEveryTick):
+    def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
         self.move(self.move_direction)
 
     def take_damage(self, event: EventAttack):
-        self.health -= event.attacker.damage
+        self.health -= event.attacker.attack_damage
         if self.health <= 0:
             self.die()
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
-        dist = self.position.distance_to(enemy.position)
-        if self.team != enemy.team and dist <= self.attack_range and (now_time - self.attack_time) * self.attack_speed >= 1:
+        dist = self.__position.distance_to(enemy.position)
+        if self.__team != enemy.team and dist <= self.__attack_range and (now_time - self.attack_time) * self.__attack_speed >= 1:
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
             self.attack_time = now_time
 
     def die(self):
-        print(f"Character {self.id} in Team {self.team.id} died")
+        print(f"Character {self.__id} in Team {self.__team.id} died")
         self.alive = False
-        self.hidden = True
+        # self.__hidden = True
         super().discard()
         get_event_manager().post(EventCharacterDied(character=self))
 
-    def call_abilities(self, *args, **kwargs):
-        print("call abilities")
+    def cast_ability(self, *args, **kwargs):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.ability_cd:
             return
+        print("cast abilities")
         self.abilities_time = now_time
-        self.abilities(*args, **kwargs)
+        self.ability(*args, **kwargs)
 
-    def abilities(self, *args, **kwargs):
+    def ability(self, *args, **kwargs):
         pass

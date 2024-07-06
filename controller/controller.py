@@ -13,7 +13,7 @@ from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, Ev
                            EventResumeModel, EventSelectCharacter, EventSelectParty,
                            EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
-from model import Melee, RangerFighter, Sniper, TimerManager
+from model import Melee, Ranger, Sniper, TimerManager
 
 if TYPE_CHECKING:
     from model import Character
@@ -35,7 +35,7 @@ class Controller:
         """
         screen_info = pg.display.Info()
         window_w = int(min(screen_info.current_w, screen_info.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]))
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0])) * const.SCREEN_FIT_RATIO
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
         self.register_listeners()
 
@@ -86,7 +86,7 @@ class Controller:
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventPauseModel())
                 if key == const.ABILITY_BUTTON:
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITIES))
+                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITY))
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
                     character: Type[Character]
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
@@ -105,20 +105,20 @@ class Controller:
                 if pg_event.button == 1:  # Left mouse button
                     print(f"Mouse click position: ({x}, {y})")
                     clicked = None
-                    for entity in model.entities:
-                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                    for entity in model.__entities:
+                        if (pg.Vector2(x, y) - entity.__position).length() < const.ENTITY_RADIUS:
                             clicked = entity
                     ev_manager.post(EventHumanInput(
-                        input_type=const.InputTypes.PICK, clicked=clicked))
+                        input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     print(f"Right click position: ({x}, {y})")
                     clicked = None
-                    for entity in model.entities:
-                        if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_RADIUS:
+                    for entity in model.__entities:
+                        if entity.alive and (pg.Vector2(x, y) - entity.__position).length() < const.ENTITY_RADIUS:
                             clicked = entity
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
-                                    clicked=clicked, displacement=pg.Vector2(x, y)))
+                                    clicked_entity=clicked, displacement=pg.Vector2(x, y)))
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)
@@ -162,7 +162,7 @@ class Controller:
                 if pg_event.key == const.START_BUTTON:
                     ev_manager.post(EventStartGame())
 
-    def select_party(self, pg_events: list[pg.Event]):
+    def ctrl_select_party(self, pg_events: list[pg.Event]):
         """Select party for each team."""
 
         ev_manager = get_event_manager()

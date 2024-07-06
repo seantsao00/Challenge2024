@@ -31,9 +31,9 @@ class View:
 
         screen_info = pg.display.Info()
         window_w = int(min(screen_info.current_w, screen_info.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]))
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0])) * const.SCREEN_FIT_RATIO
         window_h = int(min(screen_info.current_h, screen_info.current_w /
-                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]))
+                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1])) * const.SCREEN_FIT_RATIO
         self.__screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
@@ -117,7 +117,7 @@ class View:
             if model.show_attack_range:
                 self.__entities.append(AttackRangeView(self.__arena, entity))
             self.__entities.append(TowerCDView(self.__arena, entity))
-            if not entity.is_fountain:
+            if not entity.__is_fountain:
                 self.__entities.append(HealthView(self.__arena, entity))
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
@@ -168,7 +168,7 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             for entity in self.__entities:
-                if entity.entity in chain(my_team.building_list, my_team.character_list, my_team.visible_entities_list):
+                if entity.entity in chain(my_team.__towers, my_team.__character_list, my_team.__visible_entities_list):
                     objects.append(entity)
 
         objects.sort(key=lambda x: x.priority)
