@@ -77,7 +77,8 @@ class View:
                     if vision_of == team_name:
                         self.vision_of = i+1
                         break
-        self.__register_permanent_listeners()
+
+        self.register_listeners()
 
     def set_resize_ratio(self):
         PauseMenuView.set_resize_ratio(self.__resize_ratio)
@@ -92,7 +93,6 @@ class View:
         """
         Initialize components that require initialization at the start of every game.
         """
-        self.__register_listeners()
 
     def handle_create_entity(self, event: EventCreateEntity):
         from model import Character, Tower
@@ -170,16 +170,12 @@ class View:
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
 
-    def __register_permanent_listeners(self):
-        ev_manager = get_event_manager()
-        ev_manager.register_permanent_listener(EventInitialize, self.initialize)
-        ev_manager.register_permanent_listener(
-            EventUnconditionalTick, self.handle_unconditional_tick)
-        ev_manager.register_permanent_listener(EventCreateEntity, self.handle_create_entity)
-
-    def __register_listeners(self):
+    def register_listeners(self):
         """Register all listeners of this object with the event manager."""
-        # ev_manager = get_event_manager()
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(EventInitialize, self.initialize)
+        ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
 
     def display_fps(self):
         """Display the current fps on the window caption."""

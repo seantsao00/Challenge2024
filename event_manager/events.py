@@ -5,7 +5,7 @@ The module defines events used by EventManager.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -18,23 +18,16 @@ if TYPE_CHECKING:
 @dataclass(kw_only=True)
 class BaseEvent:
     """The superclass of all events."""
-    _permanent: ClassVar[bool] = False
-
-    @classmethod
-    def permanent(cls):
-        return cls._permanent
 
 
 @dataclass(kw_only=True)
 class EventInitialize(BaseEvent):
     """Event posted upon a new round of game starts."""
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
 class EventQuit(BaseEvent):
     """Event posted upon quitting the game (closing the program)."""
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
@@ -44,7 +37,6 @@ class EventStartGame(BaseEvent):
 
     For example, press space at cover scene would leave cover and start the game.
     """
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
@@ -54,7 +46,6 @@ class EventPauseModel(BaseEvent):
 
     For example, a listener which forcibly pauses all characters can be registered with this event.
     """
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
@@ -64,7 +55,6 @@ class EventResumeModel(BaseEvent):
 
     For example, a listener which resumes the timer of the game can be registered with this event.
     """
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
@@ -75,13 +65,11 @@ class EventEveryTick(BaseEvent):
 @dataclass(kw_only=True)
 class EventUnconditionalTick(BaseEvent):
     """Event posted every tick, regardless of whether the game is in a paused state or not."""
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
 class EventRestartGame(BaseEvent):
     """Post this event when the game needs to restart."""
-    _permanent: ClassVar[bool] = True
 
 
 @dataclass(kw_only=True)
@@ -111,7 +99,6 @@ class EventSelectCharacter(BaseEvent):
 @dataclass(kw_only=True)
 class EventCreateEntity(BaseEvent):
     """Event posted when an entity is created."""
-    _permanent: ClassVar[bool] = True
     entity: Entity
 
 
@@ -128,7 +115,6 @@ class EventAttack(BaseEvent):
 
 @dataclass(kw_only=True)
 class EventCreateTower(BaseEvent):
-    _permanent: ClassVar[bool] = True
     tower: Tower
 
 

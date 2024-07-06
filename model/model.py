@@ -12,9 +12,9 @@ import const
 import const.map
 from api.internal import call_ai, load_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
-                           EventCreateTower, EventEveryTick, EventInitialize, EventPauseModel,
-                           EventQuit, EventRestartGame, EventResumeModel, EventSpawnCharacter,
-                           EventStartGame, EventUnconditionalTick)
+                           EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
+                           EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -65,7 +65,7 @@ class Model:
 
         self.pause_menu: PauseMenu = PauseMenu()
 
-        self.__register_permanent_listeners()
+        self.__register_listeners()
 
     def __initialize(self, _: EventInitialize):
         """
@@ -91,8 +91,6 @@ class Model:
         for position in self.map.neutral_towers:
             self.__tower.append(Tower(position))
         self.state = const.State.PLAY
-
-        self.__register_listeners()
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -151,26 +149,21 @@ class Model:
         event.character.team.update_visible_entities_list(event.character)
 
     def __restart_game(self, _: EventRestartGame):
-        ev_manager = get_event_manager()
-        ev_manager.reset_manager()
-        ev_manager.post(EventInitialize())
-
-    def __register_permanent_listeners(self):
-        ev_manager = get_event_manager()
-        ev_manager.register_permanent_listener(EventInitialize, self.__initialize)
-        ev_manager.register_permanent_listener(EventQuit, self.__handle_quit)
-        ev_manager.register_permanent_listener(EventPauseModel, self.__handle_pause)
-        ev_manager.register_permanent_listener(EventResumeModel, self.__handle_resume)
-        ev_manager.register_permanent_listener(EventRestartGame, self.__restart_game)
-        ev_manager.register_permanent_listener(EventStartGame, self.__handle_start)
-        ev_manager.register_permanent_listener(EventCreateEntity, self.__register_entity)
+        get_event_manager().post(EventInitialize())
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
+        ev_manager.register_listener(EventInitialize, self.__initialize)
         ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
+        ev_manager.register_listener(EventQuit, self.__handle_quit)
+        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
+        ev_manager.register_listener(EventStartGame, self.__handle_start)
+        ev_manager.register_listener(EventCreateEntity, self.__register_entity)
         ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
+        ev_manager.register_listener(EventRestartGame, self.__restart_game)
 
     def get_time(self):
         return self.__game_clock.get_time()

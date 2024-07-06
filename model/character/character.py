@@ -30,6 +30,7 @@ class Character(LivingEntity):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, speed: float,
                  attack_range: float, damage: float, health: float, vision: float, attack_speed: float, abilities_cd: float, imgstate: str):
+        ev_manager = get_event_manager()
         self.speed: float = speed
         self.attack_range: float = attack_range
         self.damage: float = damage
@@ -39,7 +40,8 @@ class Character(LivingEntity):
         self.attack_time: float = -100
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
         super().__init__(health, position, vision, entity_type=team.name, team=team, imgstate=imgstate)
-        self.__register_listeners()
+        ev_manager.register_listener(EventAttack, self.take_damage, self.id)
+        ev_manager.register_listener(EventEveryTick, self.tick_move)
 
     def move(self, direction: pg.Vector2):
         """
@@ -110,8 +112,3 @@ class Character(LivingEntity):
 
     def abilities(self, *args, **kwargs):
         pass
-
-    def __register_listeners(self):
-        ev_manager = get_event_manager()
-        ev_manager.register_listener(EventAttack, self.take_damage, self.id)
-        ev_manager.register_listener(EventEveryTick, self.tick_move)

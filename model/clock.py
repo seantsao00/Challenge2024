@@ -21,8 +21,8 @@ class Clock:
 
     def __register_listeners(self):
         ev_manager = get_event_manager()
-        ev_manager.register_permanent_listener(EventPauseModel, self.__handle_pause)
-        ev_manager.register_permanent_listener(EventResumeModel, self.__handle_resume)
+        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
 
     def get_time(self):
         return time.time() - self.__start_time - self.__total_paused_time

@@ -2,20 +2,18 @@
 The module defines EventManager.
 """
 
-from __future__ import annotations
-
 from collections import defaultdict
-from typing import TYPE_CHECKING, Callable, Optional, TypeAlias
+from typing import Callable, Optional, TypeAlias
 
-if TYPE_CHECKING:
-    from event_manager.events import BaseEvent
-    ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
-    """
-    The type of callback function used by listeners.
+from event_manager.events import BaseEvent
 
-    It is a function accepts one "Class" parameter,
-    which is a subclass of BaseEvent, and returns None
-    """
+ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
+"""
+The type of callback function used by listeners.
+
+It is a function accepts one "Class" parameter,
+which is a subclass of BaseEvent, and returns None
+"""
 
 
 class EventManager:
@@ -33,8 +31,8 @@ class EventManager:
     """
 
     def __init__(self):
-        self.__listeners: defaultdict[tuple[type[BaseEvent], Optional[int]],
-                                      list[ListenerCallback]] = defaultdict(list)
+        self.listeners: defaultdict[tuple[type[BaseEvent], Optional[int]],
+                                    list[ListenerCallback]] = defaultdict(list)
 
     def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
         """
@@ -43,40 +41,22 @@ class EventManager:
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        if event_class.permanent():
-            raise KeyError(f'Try to add a listener to a permanent event {event_class}.')
-        self.__listeners[(event_class, channel_id)].append(listener)
+        self.listeners[(event_class, channel_id)].append(listener)
 
     def unregister_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
         """
         Unregister a listener.
         """
         try:
-            self.__listeners[(event_class, channel_id)].remove(listener)
+            self.listeners[(event_class, channel_id)].remove(listener)
         except ValueError:
             print('{} is not listening to ({}, {})'.format(listener, event_class, channel_id))
-
-    def register_permanent_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
-        """
-        Register a listener by adding it to the permanent event's listener list.
-        """
-        if not event_class.permanent:
-            raise KeyError('The event should be a permanent event')
-        self.__listeners[(event_class, channel_id)].append(listener)
-
-    def reset_manager(self):
-        """
-        Unregister all listeners expect listeners for events in permanent_event.
-        """
-        self.__listeners: defaultdict[tuple[type[BaseEvent], Optional[int]],
-                                      list[ListenerCallback]] = defaultdict(list, {key: val if key[0].permanent() else []
-                                                                                   for key, val in self.__listeners.items()})
 
     def post(self, event: BaseEvent, channel_id: Optional[int] = None):
         """
         Invoke all registered listeners associated with the event.
         """
-        if (type(event), channel_id) not in self.__listeners:
+        if (type(event), channel_id) not in self.listeners:
             return
-        for listener in self.__listeners[(type(event), channel_id)]:
+        for listener in self.listeners[(type(event), channel_id)]:
             listener(event)
