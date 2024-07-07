@@ -71,7 +71,7 @@ class Character(LivingEntity):
                 new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
                 new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
-                if game_map.get_type(new_position) == const.map.MAP_OBSTACLE:
+                if game_map.get_type(new_position) == const.MAP_OBSTACLE:
                     self.position = new_position - min_direction
                     break
 
