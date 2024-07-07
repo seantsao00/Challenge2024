@@ -169,10 +169,10 @@ class View:
             my_team = model.teams[self.vision_of - 1]
             mask = pg.transform.scale(my_team.mask, (self.window_h, self.window_h))
             objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
-            for entity in self.__entities:
-                x, y = entity.position
+            for obj in self.__entities:
+                x, y = obj.entity.position
                 if my_team.mask.get_at((int(x), int(y)))[3] == 0:
-                    objects.append(entity)
+                    objects.append(obj)
 
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
