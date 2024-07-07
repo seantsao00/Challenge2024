@@ -57,6 +57,7 @@ class Model:
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.grid: Grid = Grid(900, 900)
         self.teams: list[Team]
+        self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
 
         self.__team_files_names: list[str] = team_files

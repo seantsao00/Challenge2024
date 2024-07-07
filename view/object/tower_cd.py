@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class TowerCDView(ObjectBase):
-    def __init__(self, canvas: pg.Vector2, entity: LivingEntity):
+    def __init__(self, canvas: pg.Vector2, entity: Tower):
         super().__init__(canvas)
         self.entity: Tower = entity
 

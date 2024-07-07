@@ -1,7 +1,3 @@
-import sys
-
-import pygame as pg
-
 import const
 from event_manager import EventSelectParty
 from instances_manager import get_event_manager

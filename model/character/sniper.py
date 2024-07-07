@@ -6,7 +6,6 @@ import pygame as pg
 
 import const
 from model.character.character import Character
-from model.entity import Entity
 
 if TYPE_CHECKING:
     from model.team import Team
@@ -26,6 +25,3 @@ class Sniper(Character):
 
     def ability(self, *args, **kwargs):
         print("sniper use ability")
-
-    def attack(self, enemy: Entity):
-        super().attack(enemy)

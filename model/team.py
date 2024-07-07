@@ -3,8 +3,6 @@ from __future__ import annotations
 from itertools import chain
 from typing import TYPE_CHECKING
 
-import pygame as pg
-
 import const
 import const.team
 from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
@@ -66,7 +64,7 @@ class Team(NeutralTeam):
         self.__points: int = 0
         self.__towers: set[Tower] = set()
         self.character_list: list[Character] = []
-        self.__visible_entities_list: set[Entity] = set()
+        self.visible_entities_list: set[Entity] = set()
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
@@ -94,7 +92,7 @@ class Team(NeutralTeam):
                 if self.__choosing_position is True:
                     self.__controlling.cast_ability(event.displacement)
                     self.__choosing_position = False
-                elif isinstance(clicked_entity, Tower) or isinstance(clicked_entity, Character):
+                elif isinstance(clicked_entity, (Tower, Character)):
                     self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
@@ -109,10 +107,12 @@ class Team(NeutralTeam):
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.__towers:
             self.__towers.add(event.tower)
-        print(f'{self.__team_name} gained a tower with id {event.tower.id} at {event.tower.position}')
+        print(f'{self.__team_name} gained a tower with id {
+              event.tower.id} at {event.tower.position}')
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(f'{self.__team_name} lost a tower with id {event.tower.id} at {event.tower.position}')
+        print(f'{self.__team_name} lost a tower with id {
+              event.tower.id} at {event.tower.position}')
         if event.tower in self.__towers:
             self.__towers.remove(event.tower)
 
@@ -127,8 +127,8 @@ class Team(NeutralTeam):
             self.__controlling = None
         if event.character in self.character_list:
             self.character_list.remove(event.character)
-        if event.character in self.__visible_entities_list:
-            self.__visible_entities_list.remove(event.character)
+        if event.character in self.visible_entities_list:
+            self.visible_entities_list.remove(event.character)
 
     def handle_create_tower(self, event: EventCreateTower):
         self.update_visible_entities_list(event.tower)
@@ -147,13 +147,14 @@ class Team(NeutralTeam):
 
         if entity.team is self:
             for other_entity in model.entities:
-                if (other_entity.team is not self and
-                        other_entity.position.distance_to(entity.position) <= entity.vision):
-                    self.__visible_entities_list.add(other_entity)
+                if (other_entity.team is not self
+                        and other_entity.position.distance_to(entity.position) <= entity.attribute.vision):
+                    self.visible_entities_list.add(other_entity)
         else:
             for my_entity in chain(self.__towers, self.character_list):
-                if my_entity.alive and entity.position.distance_to(my_entity.position) <= my_entity.vision:
-                    self.__visible_entities_list.add(entity)
+                if (my_entity.alive
+                        and entity.position.distance_to(my_entity.position) <= my_entity.attribute.vision):
+                    self.visible_entities_list.add(entity)
                     break
 
     def select_character(self, event: EventSelectCharacter):
