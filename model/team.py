@@ -1,18 +1,24 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from itertools import chain
 from typing import TYPE_CHECKING
 
 import const
+import const.character
 import const.team
-from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower)
+from event_manager import (EventAttack, EventBulletCreate, EventBulletDisappear,
+                           EventCharacterMove, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventRangerBulletDamage, EventSelectCharacter, EventSniperBulletDamage,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building import Tower
-from model.character import Character, Ranger
+from model.character import Character, Melee, Character, Ranger, Sniper
+from model.timer import Timer
 
 if TYPE_CHECKING:
+    from model.building import Tower
+    from model.bullet import Bullet
     from model.entity import Entity, LivingEntity
 
 
@@ -74,9 +80,46 @@ class Team(NeutralTeam):
         """
         Handles input by human. This method is only used by human controlled teams.
         """
+        def check_movable(entity: Entity, my_team: Team) -> bool:
+            """
+            This function checks if the clicked entity is actually movable by the human controlled team.
+            """
+            if entity is None:
+                return False
+            if hasattr(entity, 'team') and entity.team is my_team and hasattr(entity, 'move'):
+                return True
+            return False
+
+        def check_attackable(attacker: Entity, victim: Entity) -> bool:
+            """
+            This function checks if the clicked entity is able to be attacked and if the attacker is able to attack.
+            """
+            if attacker is None or not hasattr(attacker, 'attack') or not isinstance(attacker, Character):
+                return False
+            if victim is None or hasattr(victim, 'is_fountain') and victim.is_fountain:
+                return False
+            return True
+
+        clicked = None
+        clicked_type = const.CharTypes.NONE
+
+        if event.clicked is not None and event.clicked.type == 'tower':
+            clicked = event.clicked
+            clicked_type = const.CharTypes.TOWER
+        elif event.clicked is not None:
+            clicked = event.clicked
+            clicked_type = const.CharTypes.CHAR
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
+            if clicked_type == const.CharTypes.TOWER:
+                if hasattr(clicked, 'update_character_type') and clicked.team is self:
+                    self.controlling = clicked
+                else:
+                    print('clicked on non interactable tower')
+            elif clicked_type == const.CharTypes.CHAR:
+                if check_movable(clicked, self):
+                    self.controlling = clicked
             if clicked_entity and clicked_entity.team is self:
                 self.__controlling = clicked_entity
             else:
@@ -99,6 +142,22 @@ class Team(NeutralTeam):
                 if isinstance(self.__controlling, Ranger):
                     self.__choosing_position = True
                 else:
+                    print('clicked on non interactable entity')
+
+        if event.input_type == const.InputTypes.MOVE and check_movable(self.controlling, self):
+            self.controlling.move(event.displacement)
+        elif event.input_type == const.InputTypes.ATTACK and self.controlling is not None:
+            if self.choose_position is True and hasattr(self.controlling, 'call_abilities'):
+                self.controlling.call_abilities(event.displacement)
+                self.choose_position = False
+            elif check_attackable(attacker=self.controlling, victim=clicked):
+                self.controlling.attack(clicked)
+
+        elif event.input_type == const.InputTypes.ABILITIES and self.controlling is not None:
+            if isinstance(self.controlling, RangerFighter):
+                self.choose_position = True
+            elif hasattr(self.controlling, 'call_abilities'):
+                self.controlling.call_abilities()
                     self.__controlling.cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
@@ -186,3 +245,32 @@ class Team(NeutralTeam):
     @property
     def visible_entities_list(self):
         return self.__visible_entities_list
+        if self.controlling is not None and hasattr(self.controlling, 'update_character_type'):
+            if self.controlling.character_type != event.character:
+                print(f'The character produced by team{self.id} is modified to {event.character}')
+            self.controlling.update_character_type(event.character)
+
+    def create_bullet(self, event: EventBulletCreate):
+        if event.bullet.team == self:
+            event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
+                                       function=event.bullet.judge, once=False)
+
+    def ranger_damage(self, event: EventRangerBulletDamage):
+        if event.bullet.team == self:
+            event.bullet.timer.stop()
+            model = get_model()
+            for entity in model.entities:
+                if (entity.position-event.bullet.target.position).length() < event.bullet.range and entity.team is not self:
+                    get_event_manager().post(EventAttack(victim=entity, attacker=event.bullet.attacker), channel_id=entity.id)
+            get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
+
+    def sniper_damage(self, event: EventSniperBulletDamage):
+        if event.bullet.team == self:
+            event.bullet.timer.stop()
+            get_event_manager().post(EventAttack(victim=event.bullet.victim,
+                                                 attacker=event.bullet.attacker), channel_id=event.bullet.victim.id)
+            get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
+
+    def bullet_disappear(self, event: EventBulletDisappear):
+        if event.bullet.team == self:
+            event.bullet.hidden = True

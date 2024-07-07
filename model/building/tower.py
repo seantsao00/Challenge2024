@@ -116,6 +116,7 @@ class Tower(LivingEntity):
         if victim is not None:
             get_event_manager().post(EventAttack(attacker=self, victim=victim.character), victim.character.id)
 
+
     def enemy_in_range(self, character: Character):
         if (character.id in self.__enemies[character.team.team_id].map
             or character.position.distance_to(self.position) > self.attribute.attack_range
