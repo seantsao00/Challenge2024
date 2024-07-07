@@ -118,11 +118,9 @@ class Controller:
         for key, val in const.DIRECTION_BUTTONS_MAP.items():
             if pressed_keys[key]:
                 direction += val
-        if direction.length() != 0:
-            # Try to move as far as player can.
-            displacement = direction.normalize() * max(const.ARENA_SIZE)
-            ev_manager.post(EventHumanInput(
-                input_type=const.InputTypes.MOVE, displacement=displacement))
+        # Try to move as far as the player can.
+        ev_manager.post(EventHumanInput(
+            input_type=const.InputTypes.MOVE, displacement=direction))
 
     def ctrl_pause(self, pg_events: list[pg.Event]):
         """

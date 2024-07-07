@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -15,6 +16,12 @@ if TYPE_CHECKING:
     from model.team import Team
 
 
+class CharacterMovingState(Enum):
+    STOPPED = auto()
+    TO_POSITION = auto()
+    TO_DIRECTION = auto()
+
+
 class Character(LivingEntity):
     """
     Class for character in the game.
@@ -26,6 +33,11 @@ class Character(LivingEntity):
      - health: The total amount of damage the character can withstand.
      - vision: How far the character can see.
      - alive: The character is alive or not.
+     - __move_state: How is the character moving currently.
+     - __move_path: The path to reach the target position
+       (useful when __move_state == TO_LOCATION).
+     - __move_direction: The direction the character is facing and moving toward
+       (useful when __move_state == TO_DIRECTION).
     """
 
     def __init__(self,
@@ -34,9 +46,12 @@ class Character(LivingEntity):
                  attribute: const.CharacterAttribute,
                  entity_type: const.CharacterType,
                  state: const.CharacterState):
-        self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
         self.abilities_time: float = -attribute.ability_cd
         self.__attack_time: float = -1 / attribute.attack_speed
+
+        self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
+        self.__move_path: list[pg.Vector2] = []
+        self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
 
         super().__init__(position, attribute, team, entity_type, state)
 
@@ -46,13 +61,14 @@ class Character(LivingEntity):
 
         self.attribute: const.CharacterAttribute
 
-    def move(self, direction: pg.Vector2):
+    def __move_toward_direction(self):
         """
         Move the character in the given direction.
         """
+        direction = self.__move_direction
         original_pos = self.position
 
-        if direction.length() > self.attribute.speed:
+        if direction.length() > 0:
             direction = self.attribute.speed * direction.normalize()
 
         game_map = get_model().map
@@ -71,7 +87,7 @@ class Character(LivingEntity):
                 new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
                 new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
-                if game_map.get_type(new_position) == const.MAP_OBSTACLE:
+                if not game_map.is_position_passable(new_position):
                     self.position = new_position - min_direction
                     break
 
@@ -82,9 +98,54 @@ class Character(LivingEntity):
 
         get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
 
+    def __move_toward_position(self):
+        """
+        move along the predetermined path as far as it can
+        """
+        it = 0
+        game_map = get_model().map
+        while (it < len(self.__move_path) and
+               game_map.is_position_passable(self.__move_path[it]) and
+               (self.__move_path[it] - self.position).length() <= self.attribute.speed):
+            it += 1
+        if it == 0:
+            return
+        pos_init = self.position
+        pos_dest = self.__move_path[it - 1]
+        if it == len(self.__move_path):
+            self.__move_path = []
+            self.__move_state = CharacterMovingState.STOPPED
+        else:
+            del self.__move_path[:it]
+        self.position = pos_dest
+        get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
+
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
-        self.move(self.move_direction)
+        if self.__move_state == CharacterMovingState.TO_DIRECTION:
+            self.__move_toward_direction()
+        elif self.__move_state == CharacterMovingState.TO_POSITION:
+            self.__move_toward_position()
+
+    def set_move_stop(self) -> bool:
+        """Stop movement of the character. Returns True/False on success/failure."""
+        self.__move_state = CharacterMovingState.STOPPED
+        return True
+
+    def set_move_direction(self, direction: pg.Vector2):
+        """Set character movement toward a direction. Returns True/False on success/failure."""
+        self.__move_state = CharacterMovingState.TO_DIRECTION
+        self.__move_direction = direction
+        return True
+
+    def set_move_position(self, destination: pg.Vector2):
+        """Set character movement toward a target position. Returns True/False on success/failure."""
+        path = get_model().map.find_path(self.position, destination)
+        if path is None:
+            return False
+        self.__move_state = CharacterMovingState.TO_POSITION
+        self.__move_path = path
+        return True
 
     def take_damage(self, event: EventAttack):
         self.health -= event.attacker.attribute.attack_damage
