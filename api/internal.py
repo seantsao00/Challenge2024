@@ -153,7 +153,8 @@ class Internal(prototype.API):
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            internal.move_direction = direction
+            # internal.move_direction = direction
+            raise NotImplementedError
 
     def change_spawn_type(self, tower: model.Tower, spawn_type: prototype.CharacterClass):
         pass
