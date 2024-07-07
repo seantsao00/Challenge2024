@@ -39,6 +39,8 @@ class ObjectBase:
     def __init__(self, canvas: pg.Surface, priority: float = const.WINDOW_SIZE[1]+10):
         self.canvas: pg.Surface = canvas
         self.priority: float = priority
+        self.exist: bool = True
+        """If the object is still exist."""
         if not self.image_initialized:
             self.init_convert()
 
@@ -51,4 +53,4 @@ class ObjectBase:
         """
         update the position and the height of the object and return if the object is still exist.
         """
-        return True
+        return self.exist

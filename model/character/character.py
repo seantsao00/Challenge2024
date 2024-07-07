@@ -100,9 +100,9 @@ class Character(LivingEntity):
     def die(self):
         print(f"Character {self.id} in Team {self.team.team_id} died")
         self.alive = False
-        self.hidden = True
-        super().discard()
+        # self.hidden = True
         get_event_manager().post(EventCharacterDied(character=self))
+        super().discard()
 
     def cast_ability(self, *args, **kwargs):
         now_time = get_model().get_time()

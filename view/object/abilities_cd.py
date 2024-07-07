@@ -6,16 +6,17 @@ import pygame as pg
 
 import const
 from instances_manager import get_model
-from view.object.object_base import ObjectBase
+from view.object.entity_object import EntityObject
 
 if TYPE_CHECKING:
     from model import Character
 
 
-class AbilitiesCDView(ObjectBase):
+class AbilitiesCDView(EntityObject):
     def __init__(self, canvas: pg.Surface, entity: Character):
-        super().__init__(canvas)
-        self.entity: Character = entity
+        super().__init__(canvas, entity)
+        self.entity: Character
+        self.register_listeners()
 
     def draw(self):
         entity = self.entity

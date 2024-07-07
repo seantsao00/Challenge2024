@@ -46,9 +46,7 @@ class Entity:
 
     def discard(self):
         ev_manager = get_event_manager()
-        # print(ev_manager.listeners[(EventDiscardEntity, self.id)])
-        ev_manager.post(EventDiscardEntity, self.id)
-        # print(f'{self.id} was discarded')
+        ev_manager.post(EventDiscardEntity(), self.id)
 
     @property
     def id(self) -> int:

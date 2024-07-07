@@ -9,13 +9,13 @@ import const
 from event_manager import EventDiscardEntity
 from instances_manager import get_event_manager
 from util import crop_image
-from view.object.object_base import ObjectBase
+from view.object.entity_object import EntityObject
 
 if TYPE_CHECKING:
     from model import Entity
 
 
-class EntityView(ObjectBase):
+class EntityView(EntityObject):
     images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
         = {party: {
             entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType)
@@ -30,10 +30,7 @@ class EntityView(ObjectBase):
     """
 
     def __init__(self, canvas: pg.Surface, entity: Entity):
-        self.entity: Entity = entity
-        self.position: pg.Vector2 = self.entity.position.copy()
-        self.exist = True
-        super().__init__(canvas, self.position[1])
+        super().__init__(canvas, entity)
         self.register_listeners()
 
     @classmethod
@@ -49,20 +46,11 @@ class EntityView(ObjectBase):
                     ).convert_alpha()
         cls.image_initialized = True
 
-    def handle_discard_entity(self):
-        self.exist = False
-        ev_manager = get_event_manager()
-        ev_manager.unregister_listener(
-            EventDiscardEntity, self.handle_discard_entity, self.entity.id)
-
     def draw(self):
         entity = self.entity
         if entity.hidden:
             return
-        try:
-            img = self.images[entity.team.party][entity.entity_type][entity.state]
-        except Exception as e:
-            raise Exception(f'{e}\n'+str([entity.team.party, entity.entity_type, entity.state]))
+        img = self.images[entity.team.party][entity.entity_type][entity.state]
         self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 
     def update(self):
@@ -70,10 +58,3 @@ class EntityView(ObjectBase):
             return False
         self.priority = self.entity.position[1]
         return True
-
-    def register_listeners(self):
-        """Register all listeners of this object with the event manager."""
-        ev_manager = get_event_manager()
-        ev_manager.register_listener(
-            EventDiscardEntity, self.handle_discard_entity, self.entity.id)
-        print(f'{self.entity.id} registered')
