@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import pygame as pg
-from enum import Enum, auto
 
 import const
 import util
@@ -48,7 +48,7 @@ class Character(LivingEntity):
                  state: const.CharacterState):
         self.abilities_time: float = -attribute.ability_cd
         self.__attack_time: float = -1 / attribute.attack_speed
-        
+
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
@@ -68,7 +68,7 @@ class Character(LivingEntity):
         direction = self.__move_direction
         original_pos = self.position
 
-        if direction.length() > self.attribute.speed:
+        if direction.length() > 0:
             direction = self.attribute.speed * direction.normalize()
 
         game_map = get_model().map
@@ -137,7 +137,7 @@ class Character(LivingEntity):
         self.__move_state = CharacterMovingState.TO_DIRECTION
         self.__move_direction = direction
         return True
-    
+
     def set_move_position(self, destination: pg.Vector2):
         """Set character movement toward a target position. Returns True/False on success/failure."""
         path = get_model().map.find_path(self.position, destination)

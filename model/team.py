@@ -78,6 +78,8 @@ class Team(NeutralTeam):
 
         if event.input_type == const.InputTypes.PICK:
             if clicked_entity and clicked_entity.team is self:
+                if self.__controlling is not None and isinstance(self.__controlling, Character):
+                    self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             else:
                 print('picked a non interactable entity')
@@ -86,7 +88,7 @@ class Team(NeutralTeam):
             return
 
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
-            self.__controlling.move(event.displacement)
+            self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
             if isinstance(self.__controlling, Character):
                 if self.__choosing_position is True:
