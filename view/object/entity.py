@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class EntityView(EntityObject):
     images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
         = {party: {
-            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType)
+            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType, const.BulletType)
         } for party in const.PartyType}
     """
     structure: images[party][entity][state]
@@ -50,6 +50,7 @@ class EntityView(EntityObject):
         entity = self.entity
         if entity.hidden:
             return
+        print(entity.team.party, entity.entity_type, entity.state)
         img = self.images[entity.team.party][entity.entity_type][entity.state]
         self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 

@@ -21,10 +21,10 @@ from model.bullet import Bullet
 
 class BulletRanger(Bullet):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = const.BULLET_SPEED, imgstate: str = 'ranger', target: LivingEntity = None,
-                 team: Team = None, range: float = 0.0, damage: float = 0.0, attacker: LivingEntity = None) -> None:
+                 speed: float = const.BULLET_SPEED, target: LivingEntity = None,
+                 team: Team = None, range: float = 0.0, attacker: LivingEntity = None) -> None:
         super().__init__(position=position, entity_type=entity_type,
-                         team=team, imgstate=imgstate, speed=speed, damage=damage, attacker=attacker)
+                         team=team, speed=speed, attacker=attacker)
         self.target = target
         self.range = range
 

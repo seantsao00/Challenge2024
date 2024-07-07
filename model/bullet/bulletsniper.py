@@ -21,10 +21,10 @@ from model.bullet import Bullet
 
 class BulletSniper(Bullet):
     def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = const.BULLET_SPEED, imgstate: str = 'sniper',
+                 speed: float = const.BULLET_SPEED,
                  team: Team = None, victim: LivingEntity = None, damage: float = 0.0, attacker: LivingEntity = None) -> None:
         super().__init__(position=position, entity_type=entity_type,
-                         imgstate=imgstate, team=team, speed=speed, damage=damage, attacker=attacker)
+                         team=team, speed=speed, attacker=attacker)
         self.victim = victim
 
     def judge(self):

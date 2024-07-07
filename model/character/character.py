@@ -36,7 +36,7 @@ class Character(LivingEntity):
                  state: const.CharacterState):
         self.move_direction: pg.Vector2 = pg.Vector2(0, 0)
         self.abilities_time: float = -attribute.ability_cd
-        self.__attack_time: float = -1 / attribute.attack_speed
+        self.attack_time: float = -1 / attribute.attack_speed
 
         super().__init__(position, attribute, team, entity_type, state)
 
@@ -91,14 +91,8 @@ class Character(LivingEntity):
         if self.health <= 0:
             self.die()
 
-    def attack(self, enemy: Entity):
-        now_time = get_model().get_time()
-        dist = self.position.distance_to(enemy.position)
-        if (self.team != enemy.team
-            and dist <= self.attribute.attack_range
-                and (now_time - self.__attack_time) * self.attribute.attack_speed >= 1):
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self.__attack_time = now_time
+    def attack(self, *args, **kwargs):
+        pass
 
     def die(self):
         print(f"Character {self.id} in Team {self.team.team_id} died")

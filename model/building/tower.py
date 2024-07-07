@@ -75,7 +75,7 @@ class Tower(LivingEntity):
             raise TypeError(f'Character type error: {self.__character_type}')
         new_position = pg.Vector2()
         new_position.from_polar((random.uniform(0, 10), random.uniform(0, 360)))
-        new_character = character_type(self.position + new_position, self.team)
+        new_character = character_type(position=self.position + new_position, team=self.team)
         get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.team_id)
         self.set_timer()
 
