@@ -9,11 +9,11 @@
     ],
     "images": {
         "background.png": -1,
-        "object1.png": -1,
-        "object2.png": -1,
-        "object3.png": -1,
-        "object4.png": -1,
-        "object5.png": -1,
+        "object1.png": 230,
+        "object2.png": 67,
+        "object3.png": 65,
+        "object4.png": 206,
+        "object5.png": 127,
         "object6.png": -1,
         "object7.png": -1
     }
