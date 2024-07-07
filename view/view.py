@@ -170,7 +170,7 @@ class View:
             for entity in self.__entities:
                 if (entity.entity in my_team.towers or
                     entity.entity in my_team.character_list or
-                    entity.entity in my_team.visible_entities_list):
+                        entity.entity in my_team.visible_entities_list):
                     objects.append(entity)
 
         objects.sort(key=lambda x: x.priority)

@@ -156,12 +156,11 @@ def load_map(map_dir):
 
     fountains = [tuple(i) for i in data['fountains']]
     neutral_towers = [tuple(i) for i in data['neutral_towers']]
-    i = 0
     with open(map_file, encoding='utf-8') as f:
         rows = list(csv.reader(f))
         map_list = [[0] * size[1] for _ in range(0, size[0])]
         for y, row in enumerate(rows):
-            for x, block in enumerate(row):
+            for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
     return Map(
         name, size, map_list, images, fountains, neutral_towers, map_dir

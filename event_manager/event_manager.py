@@ -43,14 +43,15 @@ class EventManager:
         """
         self.listeners[(event_class, channel_id)].append(listener)
 
-    def unregister_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
+    def unregister_listener(self, event_class: type[BaseEvent],
+                            listener: ListenerCallback, channel_id: int | None = None):
         """
         Unregister a listener.
         """
         try:
             self.listeners[(event_class, channel_id)].remove(listener)
         except ValueError:
-            print('{} is not listening to ({}, {})'.format(listener, event_class, channel_id))
+            print(f'{listener} is not listening to ({event_class}, {channel_id})')
 
     def post(self, event: BaseEvent, channel_id: Optional[int] = None):
         """

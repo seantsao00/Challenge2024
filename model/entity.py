@@ -65,11 +65,8 @@ class LivingEntity(Entity):
                  entity_type: const.EntityType,
                  state: const.EntityState = None):
         self.alive: bool = True
-        self.vision: float = attribute.vision
-        self.max_health: float = attribute.max_health
-        self.attack_damage: float = attribute.attack_damage
-        self.attack_speed: float = attribute.attack_speed
-        self.attack_range: float = attribute.attack_range
+        self.attribute: const.LivingEntityAttribute = attribute
 
-        self.health: float = self.max_health
+        self.health: float = self.attribute.max_health
+
         super().__init__(position, team, entity_type, state)

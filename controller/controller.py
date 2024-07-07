@@ -4,7 +4,7 @@ The module defines Controller class.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -13,7 +13,7 @@ from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, Ev
                            EventResumeModel, EventSelectCharacter, EventSelectParty,
                            EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
-from model import Melee, Ranger, Sniper, TimerManager
+from model import TimerManager
 
 if TYPE_CHECKING:
     from model import Character
@@ -157,15 +157,11 @@ class Controller:
 
     def ctrl_select_party(self, pg_events: list[pg.Event]):
         """Select party for each team."""
-
         ev_manager = get_event_manager()
-        self.player_controls = [const.PARTY_SELECT_BUTTONS_MAP['team1'], const.PARTY_SELECT_BUTTONS_MAP['team2'],
-                                const.PARTY_SELECT_BUTTONS_MAP['team3'], const.PARTY_SELECT_BUTTONS_MAP['team4']]
-
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 key = pg_event.key
-                for i, controls in enumerate(self.player_controls):
+                for i, controls in enumerate(list(const.PARTY_SELECT_BUTTONS_MAP)):
                     if key == controls['left']:
                         ev_manager.post(EventSelectParty(index=i, increase=False))
                     elif key == controls['right']:

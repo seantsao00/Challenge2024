@@ -29,17 +29,17 @@ class Melee(Character):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
         super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
-        self.defense: float = 0
+        self.__defense: float = 0
 
     def take_damage(self, event: EventAttack):
-        if self.defense > 0:
-            new_damage = 0.5 * event.attacker.attack_damage
-            self.defense -= 1
+        if self.__defense > 0:
+            new_damage = 0.5 * event.attacker.attribute.attack_damage
+            self.__defense -= 1
         else:
-            new_damage = event.attacker.attack_damage
+            new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
         if self.health <= 0:
             self.die()
 
     def ability(self, *args, **kwargs):
-        self.defense = const.MELEE_ATTRIBUTE.ability_variables
+        self.__defense = const.MELEE_ATTRIBUTE.ability_variables

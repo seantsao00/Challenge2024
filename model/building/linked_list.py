@@ -5,13 +5,13 @@ from model.character import Character
 
 class Node:
     def __init__(self, character: Character, time: float):
-        self.prev: Node = None
-        self.next: Node = None
+        self.prev: Node | None = None
+        self.next: Node | None = None
         self.time = time
         self.character = character
 
     def insert(self, pre: Node):
-        if pre == None:
+        if pre is None:
             return
         if pre.next is not None:
             pre.next.prev = self
@@ -27,31 +27,31 @@ class Node:
         del self
 
 
-class Linked_list:
+class LinkedList:
     def __init__(self):
-        self.head: Node = None
-        self.back: Node = None
-        self.map: dict[int, Node] = dict()
+        self.head: Node | None = None
+        self.tail: Node | None = None
+        self.map: dict[int, Node] = {}
 
     def delete(self, character: Character):
         if character.id in self.map:
             if self.map[character.id] is self.head:
                 self.head = self.map[character.id].next
-            if self.map[character.id] is self.back:
-                self.back = self.map[character.id].prev
+            if self.map[character.id] is self.tail:
+                self.tail = self.map[character.id].prev
             self.map[character.id].delete()
             del self.map[character.id]
 
     def push_back(self, character: Character, time: float):
         self.map[character.id] = Node(character, time)
-        if self.back is None:
-            self.back = self.map[character.id]
+        if self.tail is None:
+            self.tail = self.map[character.id]
             self.head = self.map[character.id]
         else:
-            self.map[character.id].insert(self.back)
+            self.map[character.id].insert(self.tail)
 
     def front(self):
         return self.head
 
     def back(self):
-        return self.back
+        return self.tail
