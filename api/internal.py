@@ -199,14 +199,6 @@ class Internal(prototype.API):
     def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
         if not isinstance(characters, Iterable):
             raise TypeError("Character is not iterable.")
-        
-        target_internal = None
-        if isinstance(target, prototype.Character):
-            target_internal = self.__access_character(target)
-        else:
-            raise TypeError("Invalid type of target.")
-        if target_internal is None:
-            return
 
         for ch in characters:
             if not isinstance(ch, prototype.Character):
@@ -214,7 +206,7 @@ class Internal(prototype.API):
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            internal.call_abilities(target_internal)
+            internal.call_abilities()
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
         if not isinstance(characters, Iterable):
