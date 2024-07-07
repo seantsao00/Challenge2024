@@ -15,3 +15,4 @@ from const.team import *
 from const.tower import *
 from const.visual import *
 from const.window import *
+from const.music import *
