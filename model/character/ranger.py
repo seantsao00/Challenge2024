@@ -33,5 +33,5 @@ class Ranger(Character):
             print("ranged ability attack")
             all_victim = get_model().grid.all_entity_in_range(target, self.ability_variables)
             for victim in all_victim:
-                if self.__team != victim.team:
+                if self.team != victim.team:
                     get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.id)

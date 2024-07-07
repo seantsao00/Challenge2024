@@ -38,7 +38,7 @@ class Entity:
         Entity.entity_id += 1
         self.__id: int = Entity.entity_id
         self.position: pg.Vector2 = pg.Vector2(position)
-        self.__team: Team = team
+        self.team: Team = team
         self.__entity_type: const.EntityType = entity_type
         self.state: const.EntityState = state
         self.hidden: bool = False
@@ -53,10 +53,6 @@ class Entity:
     @property
     def id(self) -> int:
         return self.__id
-
-    @property
-    def team(self) -> Team:
-        return self.__team
 
     @property
     def entity_type(self) -> const.EntityType:
