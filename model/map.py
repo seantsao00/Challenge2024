@@ -100,6 +100,10 @@ class Map:
         Returns a list of positions describing the path, or None if the algorithm
         did not find a path.
         """
+        if (not self.is_position_passable(position_begin) or
+            not self.is_position_passable(position_end)):
+            return None
+
         max_x, max_y = self.size
         cell_begin = self.position_to_cell(position_begin)
         cell_end = self.position_to_cell(position_end)

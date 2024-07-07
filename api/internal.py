@@ -147,14 +147,28 @@ class Internal(prototype.API):
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         if not isinstance(characters, Iterable):
             raise TypeError("Character is not iterable.")
+        if not isinstance(direction, pg.Vector2):
+            raise TypeError("Direction is not a vector.")
         for ch in characters:
             if not isinstance(ch, prototype.Character):
                 raise TypeError("List contains non-character.")
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            # internal.move_direction = direction
-            raise NotImplementedError
+            internal.set_move_direction(direction)
+    
+    def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
+        if not isinstance(characters, Iterable):
+            raise TypeError("Character is not iterable.")
+        if not isinstance(destination, pg.Vector2):
+            raise TypeError("Destination is not a vector.")
+        for ch in characters:
+            if not isinstance(ch, prototype.Character):
+                raise TypeError("List contains non-character.")
+            internal = self.__access_character(ch)
+            if internal == None:
+                continue
+            internal.set_move_position(destination)
 
     def change_spawn_type(self, tower: model.Tower, spawn_type: prototype.CharacterClass):
         pass
