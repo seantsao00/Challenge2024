@@ -21,7 +21,7 @@ class Map:
     neutral_towers: list[tuple[int, int]]
     map_dir: str
 
-    def convert_coordinate(self, position: tuple | pg.Vector2) -> tuple:
+    def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
         """
         Return the coordinate based on self.size of position.
         position is a coordinate based on const.ARENA_SIZE.
@@ -34,25 +34,49 @@ class Map:
         )
         return x, y
 
-    def convert_cell(self, position: tuple | pg.Vector2) -> pg.Vector2:
+    def cell_to_position(self, cell: tuple[int, int]) -> pg.Vector2:
         """
         Given an entity at a certain position in the map, return which cell it's in
         """
         x = util.clamp(
-            position[0] * const.ARENA_SIZE[0] / self.size[0], 0, const.ARENA_SIZE[0] - 1
+            cell[0] * const.ARENA_SIZE[0] / self.size[0], 0, const.ARENA_SIZE[0] - 1
         )
         y = util.clamp(
-            position[1] * const.ARENA_SIZE[1] / self.size[1], 0, const.ARENA_SIZE[1] - 1
+            cell[1] * const.ARENA_SIZE[1] / self.size[1], 0, const.ARENA_SIZE[1] - 1
         )
         return pg.Vector2(x, y)
 
-    def get_type(self, position: tuple | pg.Vector2) -> int:
+    def get_cell_type(self, cell: tuple[int, int]) -> int:
         """
-        Return the type of terrain at a certain position in the map
-        value 1 denotes road, 2 denotes puddle, and 3 denotes obstacle
+        Get the type of terrain at a certain cell on the map
+        Cell takes in *integer* coordinates in range [0, Map.size)
+        Types of terrain are defined in const/map.py
         """
-        x, y = self.convert_coordinate(position)
+        x, y = cell
         return self.map_list[x][y]
+    
+    def get_position_type(self, position: pg.Vector2) -> int:
+        """
+        Get the type of terrain at a certain position on the map
+        Position takes in *real-valued* coordinates in range [0, const.ARENA_SIZE)
+        Types of terrain are defined in const/map.py
+        """
+        return self.get_cell_type(self.position_to_cell(position))
+
+    def is_cell_passable(self, cell: tuple[int, int]) -> bool:
+        """
+        Checks if a cell is open for characters to pass through
+        Cell takes in *integer* coordinates in range [0, Map.size)
+        """
+        return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
+                        and self.get_cell_type(cell) != const.MAP_OBSTACLE)
+    
+    def is_position_passable(self, position: pg.Vector2) -> bool:
+        """
+        Checks if a cell is open for characters to pass through
+        Position takes in *real-valued* coordinates in range [0, const.ARENA_SIZE)
+        """
+        return self.is_cell_passable(self.position_to_cell(position))
 
     def get_random_pos(self, r: int) -> pg.Vector2:
         """
@@ -62,7 +86,7 @@ class Map:
             random.randint(r, const.ARENA_SIZE[0] - r),
             random.randint(r, const.ARENA_SIZE[1] - r),
         )
-        while self.get_type(ret) == const.MAP_OBSTACLE:
+        while not self.is_position_passable(ret):
             ret = pg.Vector2(
                 random.randint(r, const.ARENA_SIZE[0] - r),
                 random.randint(r, const.ARENA_SIZE[1] - r),
@@ -77,8 +101,8 @@ class Map:
         did not find a path.
         """
         max_x, max_y = self.size
-        cell_begin = self.convert_coordinate(position_begin)
-        cell_end = self.convert_coordinate(position_end)
+        cell_begin = self.position_to_cell(position_begin)
+        cell_end = self.position_to_cell(position_end)
 
         dist: list[list[float]] = [[8] * max_y for _ in range(max_x)]
         src: list[list[None | tuple[int, int]]] = [[None] * max_y for _ in range(max_x)]
@@ -110,8 +134,7 @@ class Map:
             ]
             for dx, dy, dd in diff:
                 nx, ny, nd = cur_cell[0] + dx, cur_cell[1] + dy, cur_dist + dd
-                if (0 <= nx < max_x and 0 <= ny < max_y
-                        and self.map_list[nx][ny] != const.MAP_OBSTACLE):
+                if self.is_cell_passable((nx, ny)):
                     yield (nx, ny, nd)
 
         # find single source shortest path
@@ -136,7 +159,7 @@ class Map:
         cur_cell = cell_end
         while cur_cell != cell_begin:
             assert cur_cell is not None
-            path.append(self.convert_cell(cur_cell))
+            path.append(self.cell_to_position(cur_cell))
             cur_cell = src[cur_cell[0]][cur_cell[1]]
         return path[::-1]
 
