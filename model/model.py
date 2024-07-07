@@ -4,13 +4,14 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os
+from multiprocessing import Process
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
 import const.map
-from api.internal import call_ai, load_ai
+from api.internal import load_ai, start_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
                            EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,
@@ -52,6 +53,7 @@ class Model:
         """The clock since program start."""
         self.__game_clock: Clock = Clock()
         """The clock since game start, and will be paused when the game pause."""
+        self.__ticks: int = 0
 
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
@@ -59,7 +61,7 @@ class Model:
         self.teams: list[Team]
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
-
+        self.__team_thread: list[Process] = []
         self.__team_files_names: list[str] = team_files
         self.show_view_range: bool = show_view_range
         self.show_attack_range: bool = show_attack_range
@@ -104,8 +106,14 @@ class Model:
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
         """
-        for i in range(len(self.teams)):
-            call_ai(i)
+        self.__ticks += 1
+        self.__ticks %= const.TICKS_PER_CYCLE
+        if self.__ticks == 0:
+            self.__team_thread = [start_ai(i) for i in range(len(self.teams))]
+        elif self.__ticks + 1 == const.TICKS_PER_CYCLE:
+            for t in self.__team_thread:
+                assert not t.is_alive()
+            self.__team_thread = []
 
     def __handle_quit(self, _: EventQuit):
         """

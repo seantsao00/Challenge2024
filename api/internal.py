@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ctypes
 import importlib
 import os
 import signal
@@ -17,7 +18,7 @@ import model.character
 import model.character.melee
 import model.character.ranger
 import model.character.sniper
-from const import FPS, MAX_TEAMS
+from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
 
 
@@ -88,7 +89,7 @@ class Internal(prototype.API):
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
-        if internal.id not in self.tower_map:
+        if internal.id not in self.__tower_map:
             character_class = prototype.CharacterClass.unknown
             if internal.character_type == const.CharacterType.MELEE:
                 character_class = prototype.CharacterClass.melee
@@ -141,7 +142,7 @@ class Internal(prototype.API):
 
     def get_characters(self) -> list[prototype.Character]:
         return [self.__register_character(character)
-                for character in self.__team().character_list]
+                for character in self.__team().character_list if character.health > 0]
 
     def get_towers(self) -> list[prototype.Tower]:
         return [self.__register_tower(tower)
@@ -196,7 +197,7 @@ class Internal(prototype.API):
             if internal == None:
                 continue
             internal.set_move_direction(direction)
-    
+
     def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
         if not isinstance(characters, Iterable):
             raise TypeError("Character is not iterable.")
@@ -219,7 +220,7 @@ class Internal(prototype.API):
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            internal.move_direction = direction
+            internal.set_move_direction(direction)
 
     def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
         if not isinstance(characters, Iterable):
@@ -231,7 +232,7 @@ class Internal(prototype.API):
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            internal.call_abilities()
+            internal.cast_ability()
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
         if not isinstance(characters, Iterable):
@@ -257,7 +258,7 @@ class Internal(prototype.API):
 
 
 class Timer():
-    def __init__(self):
+    def __init__(self, tid: int):
         if os.name == 'nt':
             self.is_windows = True
         elif os.name == 'posix':
@@ -267,7 +268,10 @@ class Timer():
 
         if not self.is_windows:
             def handler(sig, frame):
-                raise TimeoutError()
+                res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+                    ctypes.c_long(tid), ctypes.py_object(TimeoutError))
+                if res != 0:
+                    print(f"Tried to raise exception inside a thread, the return value is {res}.")
 
             signal.signal(signal.SIGALRM, handler)
         self.timer = None
@@ -296,7 +300,6 @@ class Timer():
 
 helpers = [Internal(i) for i in range(MAX_TEAMS)]
 ai = [None] * len(helpers)
-timer = Timer()
 
 
 def load_ai(files: list[str]):
@@ -306,16 +309,22 @@ def load_ai(files: list[str]):
         ai[i] = importlib.import_module('ai.' + file)
 
 
-def call_ai(team_id):
+def threading_ai(team_id, helper):
     if ai[team_id] == None:
         return
-
     try:
-        timer.set_timer(1 / (4 * FPS), team_id)
-        ai[team_id].every_tick(helpers[team_id])
+        ai[team_id].every_tick(helper)
     except Exception as e:
         print(f"Caught exception in AI of team {team_id}:")
         print(traceback.format_exc())
         return
     finally:
-        timer.cancel_timer()
+        pass
+
+
+def start_ai(team_id):
+    t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id]))
+    t.start()
+    timer = Timer(t.ident)
+    timer.set_timer(1 / FPS * DECISION_TICKS, team_id)
+    return t
