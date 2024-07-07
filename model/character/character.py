@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 class CharacterMovingState(Enum):
     STOPPED = auto()
-    TO_LOCATION = auto()
+    TO_POSITION = auto()
     TO_DIRECTION = auto()
 
 
@@ -112,14 +112,40 @@ class Character(LivingEntity):
             return
         pos_init = self.position
         pos_dest = self.__move_path[it - 1]
-        del self.__move_path[:it]
+        if it == len(self.__move_path):
+            self.__move_path = []
+            self.__move_state = CharacterMovingState.STOPPED
+        else:
+            del self.__move_path[:it]
         self.position = pos_dest
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
-        # self.move(self.move_direction)
-        raise NotImplementedError
+        if self.__move_state == CharacterMovingState.TO_DIRECTION:
+            self.__move_toward_direction()
+        elif self.__move_state == CharacterMovingState.TO_POSITION:
+            self.__move_toward_position()
+
+    def set_move_stop(self) -> bool:
+        """Stop movement of the character. Returns True/False on success/failure."""
+        self.__move_state = CharacterMovingState.STOPPED
+        return True
+
+    def set_move_direction(self, direction: pg.Vector2):
+        """Set character movement toward a direction. Returns True/False on success/failure."""
+        self.__move_state = CharacterMovingState.TO_DIRECTION
+        self.__move_direction = direction
+        return True
+    
+    def set_move_position(self, destination: pg.Vector2):
+        """Set character movement toward a target position. Returns True/False on success/failure."""
+        path = get_model().map.find_path(self.position, destination)
+        if path is None:
+            return False
+        self.__move_state = CharacterMovingState.TO_POSITION
+        self.__move_path = path
+        return True
 
     def take_damage(self, event: EventAttack):
         self.health -= event.attacker.attribute.attack_damage
