@@ -40,13 +40,14 @@ class Entity:
         self.position: pg.Vector2 = pg.Vector2(position)
         self.__team: Team = team
         self.__entity_type: const.EntityType = entity_type
-        self.__state: const.EntityState = state
-        self.__hidden: bool = False
+        self.state: const.EntityState = state
+        self.hidden: bool = False
         get_event_manager().post(EventCreateEntity(entity=self))
 
     def discard(self):
         ev_manager = get_event_manager()
-        ev_manager.post(EventDiscardEntity, self.__id)
+        ev_manager.post(EventDiscardEntity, self.id)
+        print(f'{self.id} was discarded')
 
     @property
     def id(self) -> int:
@@ -60,14 +61,6 @@ class Entity:
     def entity_type(self) -> const.EntityType:
         return self.__entity_type
 
-    @property
-    def state(self) -> const.EntityState:
-        return self.__state
-
-    @property
-    def hidden(self) -> bool:
-        return self.__hidden
-
 
 class LivingEntity(Entity):
     def __init__(self,
@@ -76,32 +69,12 @@ class LivingEntity(Entity):
                  team: Team,
                  entity_type: const.EntityType,
                  state: const.EntityState = None):
-        self.__alive: bool = True
-        self.__vision: float = attribute.vision
+        self.alive: bool = True
+        self.vision: float = attribute.vision
         self.max_health: float = attribute.max_health
-        self.__attack_damage: float = attribute.attack_damage
-        self.__attack_speed: float = attribute.attack_speed
-        self.__attack_range: float = attribute.attack_range
+        self.attack_damage: float = attribute.attack_damage
+        self.attack_speed: float = attribute.attack_speed
+        self.attack_range: float = attribute.attack_range
 
         self.health: float = self.max_health
         super().__init__(position, team, entity_type, state)
-
-    @property
-    def alive(self) -> bool:
-        return self.__alive
-
-    @property
-    def vision(self) -> float:
-        return self.__vision
-
-    @property
-    def attack_damage(self) -> float:
-        return self.__attack_damage
-
-    @property
-    def attack_speed(self) -> float:
-        return self.__attack_speed
-
-    @property
-    def attack_range(self) -> float:
-        return self.__attack_range

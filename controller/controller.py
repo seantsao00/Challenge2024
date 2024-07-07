@@ -88,7 +88,6 @@ class Controller:
                 if key == const.ABILITY_BUTTON:
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITY))
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
-                    character: const.CharacterType
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
                     ev_manager.post(EventSelectCharacter(character_type=character_type))
 

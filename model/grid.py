@@ -43,7 +43,7 @@ class Cell:
             self.characters.remove(character)
 
     def get_enemy(self, team: Team) -> list[Character]:
-        return [character for character in self.characters if not character.__team is team]
+        return [character for character in self.characters if not character.team is team]
 
 
 class Grid:

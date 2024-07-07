@@ -86,7 +86,7 @@ class EventHumanInput(BaseEvent):
 
     def __str__(self):
         if self.input_type is const.InputTypes.PICK:
-            return f"Clicked at {self.clicked_entity.__id}"
+            return f"Clicked at {self.clicked_entity.id}"
         return f"Move {self.displacement}"
 
 
