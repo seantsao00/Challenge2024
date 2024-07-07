@@ -105,6 +105,8 @@ class Team(NeutralTeam):
 
         if event.input_type == const.InputTypes.PICK:
             if clicked_entity and clicked_entity.team is self:
+                if self.__controlling is not None and isinstance(self.__controlling, Character):
+                    self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             elif clicked_entity is not None:
                 print('picked a non interactable entity')
