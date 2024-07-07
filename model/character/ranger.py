@@ -1,8 +1,8 @@
 import pygame as pg
 
 import const
-from event_manager import EventMultiAttack
-from instances_manager import get_event_manager
+from event_manager import EventAttack
+from instances_manager import get_event_manager, get_model
 from model.character import Character
 
 
@@ -22,8 +22,11 @@ class RangerFighter(Character):
     def abilities(self, *args, **kwargs):
         if len(args) < 1 or not isinstance(args[0], pg.Vector2):
             raise ValueError()
-        origin: pg.Vector2 = args[0]
-        dist = self.position.distance_to(origin)
+        target: pg.Vector2 = args[0]
+        dist = self.position.distance_to(target)
         if dist <= self.attack_range:
             print("ranged abilities attack")
-            get_event_manager().post(EventMultiAttack(attacker=self, target=origin, radius=self.abilities_radius))
+            all_victim = get_model().grid.all_entity_in_range(target, self.abilities_radius)
+            for victim in all_victim:
+                if self.team != victim.team:
+                    get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.id)

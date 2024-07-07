@@ -31,6 +31,15 @@ class EventQuit(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventStartGame(BaseEvent):
+    """
+    Event posted upon starting the game.
+
+    For example, press space at cover scene would leave cover and start the game.
+    """
+
+
+@dataclass(kw_only=True)
 class EventPauseModel(BaseEvent):
     """
     Event posted upon pausing the game.
@@ -92,13 +101,6 @@ class EventCreateEntity(BaseEvent):
 class EventAttack(BaseEvent):
     attacker: Entity
     victim: Entity
-
-
-@dataclass(kw_only=True)
-class EventMultiAttack(BaseEvent):
-    attacker: Character
-    target: pg.Vector2
-    radius: float
 
 
 @dataclass(kw_only=True)

@@ -19,6 +19,7 @@ class Sniper(Character):
         self.imgstate = 'sniper'
 
     def abilities(self):
+        print("sniper use abilities")
         self.ability = 1
 
     def attack(self, enemy: Entity):

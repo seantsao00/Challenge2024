@@ -5,8 +5,9 @@ The module defines Controller class.
 import pygame as pg
 
 import const
-from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSelectCharacter, EventUnconditionalTick)
+from event_manager import (EventEveryTick, EventHumanInput, EventInitialize, EventPauseModel,
+                           EventQuit, EventResumeModel, EventSelectCharacter, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
 from model import Melee, RangerFighter, Sniper, TimerManager
 
@@ -46,6 +47,13 @@ class Controller:
                         ev_manager.post(EventResumeModel())
                     elif model.state == const.State.PLAY:
                         ev_manager.post(EventPauseModel())
+
+                elif event_pg.key == const.START_BUTTON:
+                    if model.state == const.State.COVER:
+                        ev_manager.post(EventStartGame())
+                    else:
+                        print('game is already in PLAY state')
+
                 elif event_pg.key == pg.K_q:
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITIES))
 

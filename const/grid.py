@@ -1,0 +1,1 @@
+GRID_BLOCK_SIZE = 2
