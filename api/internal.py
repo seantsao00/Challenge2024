@@ -11,6 +11,7 @@ from typing import Iterable
 import pygame as pg
 
 import api.prototype as prototype
+import const
 import model
 import model.character
 import model.character.melee
@@ -88,6 +89,15 @@ class Internal(prototype.API):
         Register a `model.Tower` to `api.Tower` like above.
         """
         if internal.id not in self.tower_map:
+            character_class = prototype.CharacterClass.unknown
+            if internal.character_type == const.CharacterType.MELEE:
+                character_class = prototype.CharacterClass.melee
+            elif internal.character_type == const.CharacterType.RANGER:
+                character_class = prototype.CharacterClass.ranger
+            elif internal.character_type == const.CharacterType.SNIPER:
+                character_class = prototype.CharacterClass.sniper
+            else:
+                raise GameError("Unknown spawn character type")
             extern = prototype.Tower(
                 _id=internal.id,
                 _position=internal.position,
@@ -97,9 +107,9 @@ class Internal(prototype.API):
                 _damage=internal.attribute.attack_damage,
                 _vision=internal.attribute.vision,
                 _health=internal.health,
-                _max_health=internal.attribute.max_health
+                _max_health=internal.attribute.max_health,
                 _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.id),
-                _spwan_character_type=internal.character_type
+                _spwan_character_type=character_class
             )
             self.__tower_map[internal.id] = extern
             self.__reverse_tower_map[id(extern)] = internal
