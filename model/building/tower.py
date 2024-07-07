@@ -92,7 +92,7 @@ class Tower(LivingEntity):
             print('same team or is fountain')
             return
         if self.health - event.attacker.attribute.attack_damage <= 0:
-            if self.team is const.PartyType.NEUTRAL:
+            if self.team.party is const.PartyType.NEUTRAL:
                 ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.team_id)
             else:
                 ev_manager.post(EventTeamLoseTower(tower=self), self.team.team_id)
