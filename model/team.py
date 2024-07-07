@@ -64,7 +64,7 @@ class Team(NeutralTeam):
         self.__points: int = 0
         self.__towers: set[Tower] = set()
         self.character_list: list[Character] = []
-        self.visible_entities_list: set[Entity] = set()
+        self.__visible_entities_list: set[Entity] = set()
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
@@ -184,3 +184,7 @@ class Team(NeutralTeam):
     @property
     def towers(self) -> const.PartyType:
         return self.__towers
+
+    @property
+    def visible_entities_list(self):
+        return self.__visible_entities_list
