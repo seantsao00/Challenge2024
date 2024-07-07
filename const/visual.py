@@ -76,7 +76,7 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
         None: 6.25
     } for character in CharacterType},
     **{tower: {
-        None: 6.25
+        None: 10
     } for tower in TowerType}
 }
 """
