@@ -34,6 +34,10 @@ class View:
                        const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
         window_h = int(min(screen_info.current_h, screen_info.current_w /
                        const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
+
+        self.window_w = window_w
+        self.window_h = window_h
+
         self.__screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
@@ -70,17 +74,7 @@ class View:
                 self.__arena, int(model.map.images[i]), (x, y), picture))
 
         EntityView.init_convert()
-
-        if vision_of == 'all':
-            self.vision_of = const.VIEW_EVERYTHING
-        else:
-            try:
-                self.vision_of = int(vision_of)
-            except ValueError:
-                for i, team_name in enumerate(model.team_names):
-                    if vision_of == team_name:
-                        self.vision_of = i+1
-                        break
+        self.vision_of = vision_of
 
         self.register_listeners()
 
@@ -97,6 +91,12 @@ class View:
         """
         Initialize components that require initialization at the start of every game.
         """
+        model = get_model()
+        for i, team in enumerate(model.teams):
+            if self.vision_of == team.team_name:
+                self.vision_of = i + 1
+                break
+        
 
     def handle_create_entity(self, event: EventCreateEntity):
         from model import Character, Tower
@@ -167,10 +167,11 @@ class View:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
+            mask = pg.transform.scale(my_team.mask, (self.window_h, self.window_h))
+            objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
             for entity in self.__entities:
-                if (entity.entity in my_team.towers or
-                    entity.entity in my_team.character_list or
-                        entity.entity in my_team.visible_entities_list):
+                x, y = entity.position
+                if my_team.mask.get_at((int(x), int(y)))[3] == 0:
                     objects.append(entity)
 
         objects.sort(key=lambda x: x.priority)
