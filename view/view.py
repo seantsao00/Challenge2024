@@ -162,7 +162,7 @@ class View:
 
         objects += self.__background_images
 
-        if self.vision_of == const.VIEW_EVERYTHING:
+        if self.vision_of == 'all':
             for entity in self.__entities:
                 objects.append(entity)
         else:
