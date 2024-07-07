@@ -196,16 +196,25 @@ class Internal(prototype.API):
                 continue
             internal.move_direction = direction
 
-    def action_cast_spell(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
+    def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
         if not isinstance(characters, Iterable):
             raise TypeError("Character is not iterable.")
+        
+        target_internal = None
+        if isinstance(target, prototype.Character):
+            target_internal = self.__access_character(target)
+        else:
+            raise TypeError("Invalid type of target.")
+        if target_internal is None:
+            return
+
         for ch in characters:
             if not isinstance(ch, prototype.Character):
                 raise TypeError("List contains non-character.")
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            internal.move_direction = direction
+            internal.call_abilities(target_internal)
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
         if not isinstance(characters, Iterable):
