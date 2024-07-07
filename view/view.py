@@ -168,7 +168,9 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             for entity in self.__entities:
-                if entity.entity in chain(my_team.__towers, my_team.character_list, my_team.__visible_entities_list):
+                if (entity.entity in my_team.towers or
+                    entity.entity in my_team.character_list or
+                    entity.entity in my_team.visible_entities_list):
                     objects.append(entity)
 
         objects.sort(key=lambda x: x.priority)

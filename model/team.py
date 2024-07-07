@@ -183,3 +183,7 @@ class Team(NeutralTeam):
     @property
     def towers(self) -> const.PartyType:
         return self.__towers
+
+    @property
+    def visible_entities_list(self):
+        return self.__visible_entities_list
