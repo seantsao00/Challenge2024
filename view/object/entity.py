@@ -50,7 +50,6 @@ class EntityView(ObjectBase):
         cls.image_initialized = True
 
     def handle_discard_entity(self):
-        print("OK")
         self.exist = False
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(

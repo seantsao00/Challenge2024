@@ -100,7 +100,7 @@ class Character(LivingEntity):
     def die(self):
         print(f"Character {self.id} in Team {self.team.team_id} died")
         self.alive = False
-        # self.__hidden = True
+        self.hidden = True
         super().discard()
         get_event_manager().post(EventCharacterDied(character=self))
 
