@@ -61,7 +61,7 @@ class Internal(prototype.API):
             character_class = prototype.CharacterClass.unknown
             if isinstance(internal, model.Melee):
                 character_class = prototype.CharacterClass.melee
-            elif isinstance(internal, model.RangerFighter):
+            elif isinstance(internal, model.Ranger):
                 character_class = prototype.CharacterClass.ranger
             elif isinstance(internal, model.Sniper):
                 character_class = prototype.CharacterClass.sniper
@@ -71,13 +71,13 @@ class Internal(prototype.API):
                 _id=internal.id,
                 _type=character_class,
                 _position=internal.position,
-                _speed=internal.speed,
-                _attack_range=internal.attack_range,
-                _damage=internal.damage,
-                _vision=internal.vision,
+                _speed=internal.attribute.attack_speed,
+                _attack_range=internal.attribute.attack_range,
+                _damage=internal.attribute.attack_damage,
+                _vision=internal.attribute.vision,
                 _health=internal.health,
-                _max_health=internal.max_health,
-                _team_id=Internal.__cast_id(internal.team.id)
+                _max_health=internal.attribute.max_health,
+                _team_id=Internal.__cast_id(internal.team.team_id)
             )
             self.__character_map[internal.id] = extern
             self.__reverse_character_map[id(extern)] = internal
@@ -87,17 +87,17 @@ class Internal(prototype.API):
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
-        if internal.id not in self.__tower_map:
+        if internal.id not in self.tower_map:
             extern = prototype.Tower(
                 _id=internal.id,
                 _position=internal.position,
-                _period=internal.period,
+                _period=internal.__period,
                 _is_fountain=internal.is_fountain,
-                _attack_range=internal.attack_range,
-                _damage=internal.damage,
-                _vision=internal.vision,
+                _attack_range=internal.attribute.attack_range,
+                _damage=internal.attribute.attack_damage,
+                _vision=internal.attribute.vision,
                 _health=internal.health,
-                _max_health=internal.max_health,
+                _max_health=internal.attribute.max_health
                 _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.id),
                 _spwan_character_type=internal.character_type
             )
@@ -135,10 +135,10 @@ class Internal(prototype.API):
 
     def get_towers(self) -> list[prototype.Tower]:
         return [self.__register_tower(tower)
-                for tower in self.__team().building_list]
+                for tower in self.__team().towers]
 
     def get_team_id(self) -> int:
-        return Internal.__cast_id(self.__team().id)
+        return Internal.__cast_id(self.__team().team_id)
 
     def get_score(self, index=None) -> int:
         if index == None:
@@ -149,8 +149,8 @@ class Internal(prototype.API):
             raise IndexError
         team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
-        if not team.id == index:
-            print(team.id, index)
+        if not team.team_id == index:
+            print(team.team_id, index)
             raise GameError("Team ID implement has changed.")
         return team.points
 

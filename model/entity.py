@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
-import view
-from event_manager.events import EventCreateEntity
+import const
+from event_manager.events import EventCreateEntity, EventDiscardEntity
 from instances_manager import get_event_manager
 
 if TYPE_CHECKING:
@@ -30,24 +30,43 @@ class Entity:
 
     entity_id: int = 0
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float],
-                 entity_type: str = 'default', team: Team = None, imgstate: str = 'default'):
+    def __init__(self,
+                 position: pg.Vector2 | tuple[float, float],
+                 team: Team,
+                 entity_type: const.EntityType,
+                 state: const.EntityState = None):
         Entity.entity_id += 1
-        self.id: int = Entity.entity_id
+        self.__id: int = Entity.entity_id
         self.position: pg.Vector2 = pg.Vector2(position)
-        self.type: str = entity_type
-        self.imgstate: str = imgstate
-        self.hidden: bool = False
         self.team: Team = team
-        self.view: list = [view.EntityView(self)]
+        self.__entity_type: const.EntityType = entity_type
+        self.state: const.EntityState = state
+        self.hidden: bool = False
         get_event_manager().post(EventCreateEntity(entity=self))
+
+    def discard(self):
+        ev_manager = get_event_manager()
+        ev_manager.post(EventDiscardEntity(), self.id)
+
+    @property
+    def id(self) -> int:
+        return self.__id
+
+    @property
+    def entity_type(self) -> const.EntityType:
+        return self.__entity_type
 
 
 class LivingEntity(Entity):
-    def __init__(self, health: float, position: pg.Vector2 | tuple[float, float], vision: float,
-                 entity_type: str = 'default', team: Team = None, imgstate: str = 'default') -> None:
+    def __init__(self,
+                 position: pg.Vector2 | tuple[float, float],
+                 attribute: const.LivingEntityAttribute,
+                 team: Team,
+                 entity_type: const.EntityType,
+                 state: const.EntityState = None):
         self.alive: bool = True
-        super().__init__(position, entity_type=entity_type, team=team, imgstate=imgstate)
-        self.health: float = health
-        self.max_health: float = health
-        self.vision: float = vision
+        self.attribute: const.LivingEntityAttribute = attribute
+
+        self.health: float = self.attribute.max_health
+
+        super().__init__(position, team, entity_type, state)

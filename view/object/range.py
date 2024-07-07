@@ -5,31 +5,35 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from view.object.entity_object import EntityObject
 
 if TYPE_CHECKING:
-    from model import Entity
+    from model import LivingEntity
 
 
-class RangeView:
-    def __init__(self, entity: Entity):
-        self.entity: Entity = entity
+class RangeView(EntityObject):
+    def __init__(self, canvas: pg.Vector2, entity: LivingEntity):
+        super().__init__(canvas, entity)
+        self.entity: LivingEntity
         self.radius: float = None
         self.color = None
 
-    def draw(self, screen):
-        if not self.entity.hidden:
-            pg.draw.circle(screen, self.color, self.entity.position, self.radius, width=1)
+    def draw(self):
+        if self.entity.hidden:
+            return
+        position = self.resize_ratio*self.entity.position
+        pg.draw.circle(self.canvas, self.color, position, self.radius, width=2)
 
 
 class AttackRangeView(RangeView):
-    def __init__(self, entity: Entity):
-        super().__init__(entity)
+    def __init__(self, canvas: pg.Vector2, entity: LivingEntity):
+        super().__init__(canvas, entity)
         self.color = const.ATTACK_RANGE_COLOR
-        self.radius = self.entity.attack_range - 0.5
+        self.radius = (self.entity.attribute.attack_range - 0.5) * self.resize_ratio
 
 
 class ViewRangeView(RangeView):
-    def __init__(self, entity: Entity):
-        super().__init__(entity)
+    def __init__(self, canvas: pg.Vector2, entity: LivingEntity):
+        super().__init__(canvas, entity)
         self.color = const.VIEW_RANGE_COLOR
-        self.radius = self.entity.vision + 0.5
+        self.radius = (self.entity.attribute.vision + 0.5) * self.resize_ratio

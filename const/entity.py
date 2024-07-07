@@ -1,15 +1,20 @@
 """
 This module defines constants associated with entities.
 """
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, TypeAlias
 
-ENTITY_IMAGE_PATH = "entity/"
+if TYPE_CHECKING:
+    from character import CharacterState, CharacterType
+    from tower import TowerState, TowerType
+    EntityType: TypeAlias = CharacterType | TowerType
+    EntityState: TypeAlias = CharacterState | TowerState
 
-ENTITY_STATES = {
-    "default": ["default"],
-    "team0": ["default", "melee", "ranger", "sniper"],
-    "team1": ["default", "melee", "ranger", "sniper"],
-    "team2": ["melee", "ranger", "sniper"],
-    "tower": ["default", "temporary_blue_nexus", "team0", "team1"]
-}
 
-ENTITY_RADIUS: float = 20
+@dataclass(kw_only=True)
+class LivingEntityAttribute:
+    attack_damage: float
+    attack_speed: float
+    attack_range: float
+    max_health: float
+    vision: float

@@ -1,9 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame as pg
 
 import const
 from event_manager import EventAttack
-from model.character import Character
-from model.timer import Timer
+from model.character.character import Character
+
+if TYPE_CHECKING:
+    from model.team import Team
 
 
 class Melee(Character):
@@ -21,22 +27,19 @@ class Melee(Character):
 
     """
 
-    def __init__(self, team, position, defense=0):
-        super().__init__(position, team, const.MELEE_SPEED, const.MELEE_ATTACK_RANGE,
-                         const.MELEE_DAMAGE, const.MELEE_HEALTH, const.MELEE_VISION, const.MELEE_ATTACK_SPEED, const.MELEE_ABILITIES_CD, 'melee')
-        self.defense = defense
-        self.imgstate = 'melee'
+    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
+        super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
+        self.__defense: float = 0
 
     def take_damage(self, event: EventAttack):
-        if self.defense > 0:
-            new_damage = 0.5 * event.attacker.damage
-            self.defense -= 1
+        if self.__defense > 0:
+            new_damage = 0.5 * event.attacker.attribute.attack_damage
+            self.__defense -= 1
         else:
-            new_damage = event.attacker.damage
+            new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
         if self.health <= 0:
             self.die()
 
-    def abilities(self):
-        print("melee use abilites")
-        self.defense = const.MELEE_ABILITIES_VARIABLE
+    def ability(self, *args, **kwargs):
+        self.__defense = const.MELEE_ATTRIBUTE.ability_variables

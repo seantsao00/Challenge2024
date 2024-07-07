@@ -8,13 +8,12 @@ import argparse
 
 import pygame as pg
 
-import const
 import instances_manager
 from controller import Controller
 from event_manager import EventManager
 from model import Model
-from model.entity import Entity
 from view import View
+from music.music import BackgroundMusic
 
 
 def main():
@@ -24,34 +23,22 @@ def main():
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument(
-        'map', help='The name of maps. It can be single_map or test_map'
+        'map', help='The name of maps. It can be test_map'
     )
     parser.add_argument(
-        'team1', help='team1 Use "human" if this team is controlled by human.'
+        'team_control', nargs='+', help='assign ai to teams or "human" if the team is controlled by human.'
     )
-    parser.add_argument(
-        'team2', help='team2 Use "human" if this team is controlled by human.'
-    )
-    # parser.add_argument(
-    #     'team2', help='team2'
-    # )
-    # parser.add_argument(
-    #     'team3', help='team3'
-    # )
-    # parser.add_argument(
-    #     'team4', help='team4'
-    # )
-    # Here is WIP
 
     parser.add_argument('-v', '--show-view-range', action='store_true',
                         help='If added, the view range of entities will be shown')
     parser.add_argument('-a', '--show-attack-range', action='store_true',
                         help='If added, the attack range of entities will be shown')
-    parser.add_argument('--vision_of', default='all',
+    parser.add_argument('--vision-of', default='all',
                         help='Display the vision of which player. If not assigned or assigned "all", all visible entities are displayed. Team id or team name can be assigned.')
+    parser.add_argument('-m', '--music', action='store_true', help='play the BGM')
 
     args = parser.parse_args()
-    teams = [args.team1, args.team2]
+    teams: list[str] = args.team_control
 
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
@@ -62,6 +49,9 @@ def main():
 
     Controller()
     View(args.vision_of)
+
+    if args.music:
+        BackgroundMusic()
 
     # Main loop
     model.run()

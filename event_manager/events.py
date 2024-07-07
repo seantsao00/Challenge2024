@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Character, Entity, Tower
+    from model import Character, Entity, LivingEntity, Tower
 
 
 @dataclass(kw_only=True)
@@ -68,6 +68,11 @@ class EventUnconditionalTick(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventRestartGame(BaseEvent):
+    """Post this event when the game needs to restart."""
+
+
+@dataclass(kw_only=True)
 class EventHumanInput(BaseEvent):
     """
     Event posted upon moving a human controlled team.
@@ -75,20 +80,25 @@ class EventHumanInput(BaseEvent):
     For example, a listener which draws position of characters can be registered with this event.
     """
     input_type: const.InputTypes
-    clicked: Entity | None = None
+    clicked_entity: Entity | None = None
     displacement: pg.Vector2 | None = None
     """The displacement vector representing the movement."""
 
     def __str__(self):
-        if self.input_type == const.InputTypes.PICK:
-            return f"Clicked at {self.clicked.id}"
+        if self.input_type is const.InputTypes.PICK:
+            return f"Clicked at {self.clicked_entity.id}"
         return f"Move {self.displacement}"
 
 
 @dataclass(kw_only=True)
+class EventPartySelection(BaseEvent):
+    """Event posted when player is selecting parties"""
+
+
+@dataclass(kw_only=True)
 class EventSelectCharacter(BaseEvent):
-    """When picking a tower, we could select charcters"""
-    character: Character | None = None
+    """When picking a tower, we could select generated character type"""
+    character_type: const.CharacterType | None = None
 
 
 @dataclass(kw_only=True)
@@ -98,9 +108,14 @@ class EventCreateEntity(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventDiscardEntity(BaseEvent):
+    """Event posted when an entity is discarded."""
+
+
+@dataclass(kw_only=True)
 class EventAttack(BaseEvent):
-    attacker: Entity
-    victim: Entity
+    attacker: LivingEntity
+    victim: LivingEntity
 
 
 @dataclass(kw_only=True)
@@ -132,3 +147,10 @@ class EventCharacterMove(BaseEvent):
 @dataclass(kw_only=True)
 class EventCharacterDied(BaseEvent):
     character: Character
+
+
+@dataclass(kw_only=True)
+class EventSelectParty(BaseEvent):
+    """Event posted when player is selecting parties"""
+    index: int
+    increase: bool

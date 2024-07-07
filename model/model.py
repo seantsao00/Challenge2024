@@ -4,7 +4,6 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os
-from random import randint
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -12,20 +11,22 @@ import pygame as pg
 import const
 import const.map
 from api.internal import call_ai, load_ai
-from event_manager import (EventAttack, EventCharacterDied, EventCharacterMove, EventCreateEntity,
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSpawnCharacter, EventStartGame,
+                           EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,
                            EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
+from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
-from model.team import Team
+from model.team import NeutralTeam, Team
 
 if TYPE_CHECKING:
     from model.entity import Entity
+    from model.map import Map
 
 
 class Model:
@@ -44,49 +45,59 @@ class Model:
         (e.g., The time that has elapsed in the game, )
         they should be initialized in Model.initialize()
         """
-        self.running: bool = False
-        self.state = const.State.COVER
-        self.clock = pg.time.Clock()
-        self.entities: list[Entity] = []
-        self.register_listeners()
-        self.dt = 0
-        self.map = load_map(os.path.join(const.MAP_DIR, map_name))
-        self.team_files_names: list[str] = team_files
-        self.teams: list[Team] = None
-        self.show_view_range = show_view_range
-        self.show_attack_range = show_attack_range
-        self.pause_menu = PauseMenu()
-        self.characters = set()
-        self.grid = Grid(900, 900)
-        self.stop_time = 0
-        self.tower: list[Tower] = []
+        self.__running: bool = False
+        self.state: const.State = const.State.COVER
 
-    def initialize(self, _: EventInitialize):
+        self.global_clock: pg.Clock = pg.time.Clock()
+        """The clock since program start."""
+        self.__game_clock: Clock = Clock()
+        """The clock since game start, and will be paused when the game pause."""
+
+        self.entities: list[Entity] = []
+        self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
+        self.grid: Grid = Grid(900, 900)
+        self.teams: list[Team]
+        self.__neutral_team: NeutralTeam
+        self.__tower: list[Tower] = []
+
+        self.__team_files_names: list[str] = team_files
+        self.show_view_range: bool = show_view_range
+        self.show_attack_range: bool = show_attack_range
+
+        self.pause_menu: PauseMenu = PauseMenu()
+
+        self.__register_listeners()
+
+    def __initialize(self, _: EventInitialize):
         """
         Initialize attributes related to a game.
 
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        load_ai(self.team_files_names)
+        load_ai(self.__team_files_names)
 
-        self.state = const.State.PLAY
-        self.teams = []
+        self.teams: list[Team] = []
 
-        for i, team_master in enumerate(self.team_files_names):
+        for i, team_master in enumerate(self.__team_files_names):
             new_position = pg.Vector2(self.map.fountains[i])
-            team = Team(new_position, team_master == 'human')
+            team = Team(team_master == 'human',
+                        [party for party in const.PartyType if party is not const.PartyType.NEUTRAL][i],
+                        team_master)
             self.teams.append(team)
-            self.tower.append(Tower(new_position, team, 1))
+            self.__tower.append(Tower(new_position, team, True))
         for team in self.teams:
-            for i in range(len(self.teams)):
-                if i != team.id:
+            for i in (team.team_id for team in self.teams):
+                if i != team.team_id:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i)
 
-        self.tower.append(Tower((700, 700)))
+        self.__neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
+        for position in self.map.neutral_towers:
+            self.__tower.append(Tower(position, self.__neutral_team))
+        self.state = const.State.PLAY
 
-    def handle_every_tick(self, _: EventEveryTick):
+    def __handle_every_tick(self, _: EventEveryTick):
         """
         Do actions that should be executed every tick.
 
@@ -96,80 +107,79 @@ class Model:
         for i in range(len(self.teams)):
             call_ai(i)
 
-    def handle_quit(self, _: EventQuit):
+    def __handle_quit(self, _: EventQuit):
         """
         Exit the main loop.
         """
-        self.running = False
+        self.__running = False
 
-    def handle_pause(self, _: EventPauseModel):
+    def __handle_pause(self, _: EventPauseModel):
         """
         Pause the game
         """
-        self.tmp_timer = pg.time.Clock()
         self.state = const.State.PAUSE
+        self.pause_menu.enable_menu()
 
-    def handle_resume(self, _: EventResumeModel):
+    def __handle_resume(self, _: EventResumeModel):
         """
         Resume the game
         """
-        self.stop_time += self.tmp_timer.tick()
         self.state = const.State.PLAY
+        self.pause_menu.disable_menu()
 
-    def handle_start(self, _: EventStartGame):
+    def __handle_start(self, _: EventStartGame):
         """
         Start the game and post EventInitialize
         """
-
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
 
-    def get_time(self):
-        return (pg.time.get_ticks() - self.stop_time) / 1000
-
-    def register_entity(self, event: EventCreateEntity):
+    def __register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
-            self.characters.add(event.entity)
-            x, y = int(event.entity.position.x), int(event.entity.position.y)
             for tower in self.grid.get_attacker_tower(event.entity.position):
                 tower.enemy_in_range(event.entity)
 
-    def handle_character_died(self, event: EventCharacterDied):
-        print("died event")
+    def __handle_character_died(self, event: EventCharacterDied):
         self.grid.delete_from_grid(event.character, event.character.position)
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_out_range(event.character)
 
-    def handle_character_move(self, event: EventCharacterMove):
+    def __handle_character_move(self, event: EventCharacterMove):
         for tower in self.grid.get_attacker_tower(event.original_pos):
             tower.enemy_out_range(event.character)
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_in_range(event.character)
         event.character.team.update_visible_entities_list(event.character)
 
-    def register_listeners(self):
+    def __restart_game(self, _: EventRestartGame):
+        get_event_manager().post(EventInitialize())
+
+    def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventInitialize, self.initialize)
-        ev_manager.register_listener(EventEveryTick, self.handle_every_tick)
-        ev_manager.register_listener(EventQuit, self.handle_quit)
-        ev_manager.register_listener(EventPauseModel, self.handle_pause)
-        ev_manager.register_listener(EventResumeModel, self.handle_resume)
-        ev_manager.register_listener(EventStartGame, self.handle_start)
-        ev_manager.register_listener(EventCreateEntity, self.register_entity)
-        ev_manager.register_listener(EventCharacterMove, self.handle_character_move)
-        ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
+        ev_manager.register_listener(EventInitialize, self.__initialize)
+        ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
+        ev_manager.register_listener(EventQuit, self.__handle_quit)
+        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
+        ev_manager.register_listener(EventStartGame, self.__handle_start)
+        ev_manager.register_listener(EventCreateEntity, self.__register_entity)
+        ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
+        ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
+        ev_manager.register_listener(EventRestartGame, self.__restart_game)
+
+    def get_time(self):
+        return self.__game_clock.get_time()
 
     def run(self):
         """Run the main loop of the game."""
-        self.running = True
+        self.__running = True
         # Tell every one to start
         ev_manager = get_event_manager()
 
-        while self.running:
+        while self.__running:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
-                self.dt = self.clock.tick(const.FPS) / 1000.0
-                # print(self.get_time())
+            self.global_clock.tick(const.FPS)
