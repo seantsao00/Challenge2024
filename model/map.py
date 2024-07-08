@@ -28,7 +28,8 @@ class Map:
         """
         max_x, max_y = self.size
 
-        self.nearest_obstacle: list[list[float]] = [[-1 for _ in range(max_y)] for _ in range(max_x)]
+        self.nearest_obstacle: list[list[float]] = [
+            [-1 for _ in range(max_y)] for _ in range(max_x)]
         """distance to the nearest obstacle cell"""
 
         offset_by_dist: list[list[tuple[int, int]]] = [[] for _ in range(int(max_x * 1.415 + 3))]
@@ -39,8 +40,13 @@ class Map:
                 offset_by_dist[int(dist)].append((dx, dy))
 
         """do a bfs-like approach from obstacles"""
-        is_inside = lambda tp: 0 <= tp[0] < max_x and 0 <= tp[1] < max_y
-        is_obstacle = lambda tp: self.get_cell_type(tp) == const.MAP_OBSTACLE
+        def is_inside(tp): return 0 <= tp[0] < max_x and 0 <= tp[1] < max_y
+
+        def is_obstacle(tp): return (
+            tp[0] == 0 or tp[0] == max_x - 1 or
+            tp[1] == 0 or tp[1] == max_y - 1 or
+            self.get_cell_type(tp) == const.MAP_OBSTACLE
+        )
         que: list[tuple[int, int]] = []
         for x in range(max_x):
             for y in range(max_y):
@@ -68,7 +74,6 @@ class Map:
                 if is_inside((nx, ny)) and self.nearest_obstacle[nx][ny] < 0:
                     self.nearest_obstacle[nx][ny] = len(offset_by_dist)
                     que.append((nx, ny))
-
 
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
         """
@@ -103,7 +108,7 @@ class Map:
         """
         x, y = cell
         return self.map_list[x][y]
-    
+
     def get_position_type(self, position: pg.Vector2) -> int:
         """
         Get the type of terrain at a certain position on the map
@@ -112,45 +117,46 @@ class Map:
         """
         return self.get_cell_type(self.position_to_cell(position))
 
-    def is_cell_passable(self, cell: tuple[int, int]) -> bool:
+    def is_cell_passable(self, cell: tuple[int, int], hitbox_radius: float = 0.001) -> bool:
         """
         Checks if a cell is open for characters to pass through
         Cell takes in *integer* coordinates in range [0, Map.size)
+        Hitbox radius is for the character to test for
         """
         return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
-                        and self.get_cell_type(cell) != const.MAP_OBSTACLE)
-    
-    def is_position_passable(self, position: pg.Vector2) -> bool:
+                and self.nearest_obstacle[cell[0]][cell[1]] > hitbox_radius)
+
+    def is_position_passable(self, position: pg.Vector2, hitbox_radius: float = 0.001) -> bool:
         """
         Checks if a cell is open for characters to pass through
         Position takes in *real-valued* coordinates in range [0, const.ARENA_SIZE)
+        Hitbox radius is for the character to test for
         """
-        return self.is_cell_passable(self.position_to_cell(position))
+        return self.is_cell_passable(self.position_to_cell(position), hitbox_radius)
 
-    def get_random_pos(self, r: int) -> pg.Vector2:
+    def get_random_pos(self, hitbox_radius: float = 0.001) -> pg.Vector2:
         """
-        Return a random position in map that is not of type "obstacle"
+        Return a random position in map that is passable for a character with
+        a certain hitbox radius
         """
-        ret = pg.Vector2(
-            random.randint(r, const.ARENA_SIZE[0] - r),
-            random.randint(r, const.ARENA_SIZE[1] - r),
+        def random_pos(): return pg.Vector2(
+            random.uniform(hitbox_radius, const.ARENA_SIZE[0] - hitbox_radius),
+            random.uniform(hitbox_radius, const.ARENA_SIZE[1] - hitbox_radius),
         )
-        while not self.is_position_passable(ret):
-            ret = pg.Vector2(
-                random.randint(r, const.ARENA_SIZE[0] - r),
-                random.randint(r, const.ARENA_SIZE[1] - r),
-            )
+        ret = random_pos()
+        while not self.is_position_passable(ret, hitbox_radius):
+            ret = random_pos()
         return ret
 
-    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
+    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2, hitbox_radius: float = 0.001) -> list[pg.Vector2] | None:
         """
         Find a path from position_begin to position_end. Positions take values
         in range [0, const.ARENA_SIZE).
         Returns a list of positions describing the path, or None if the algorithm
         did not find a path.
         """
-        if (not self.is_position_passable(position_begin) or
-            not self.is_position_passable(position_end)):
+        if (not self.is_position_passable(position_begin, hitbox_radius) or
+                not self.is_position_passable(position_end, hitbox_radius)):
             return None
 
         max_x, max_y = self.size
@@ -187,7 +193,7 @@ class Map:
             ]
             for dx, dy, dd in diff:
                 nx, ny, nd = cur_cell[0] + dx, cur_cell[1] + dy, cur_dist + dd
-                if self.is_cell_passable((nx, ny)):
+                if self.is_cell_passable((nx, ny), hitbox_radius):
                     yield (nx, ny, nd)
 
         # find single source shortest path
