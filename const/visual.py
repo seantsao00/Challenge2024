@@ -47,6 +47,13 @@ CHARACTER_IMAGE: dict[CharacterType, str] = {
     CharacterType.SNIPER: 'sniper.png'
 }
 
+WEAPON_DIR = 'weapon/'
+WEAPON_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: os.path.join(IMAGE_DIR, WEAPON_DIR, 'melee.png'),
+    CharacterType.RANGER: os.path.join(IMAGE_DIR, WEAPON_DIR, 'ranger.png'),
+    CharacterType.SNIPER: os.path.join(IMAGE_DIR, WEAPON_DIR, 'sniper.png')
+}
+
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
         {
