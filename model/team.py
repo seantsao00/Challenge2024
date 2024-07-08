@@ -10,12 +10,11 @@ import const.team
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDisappear,
                            EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
                            EventRangerBulletDamage, EventSelectCharacter, EventSniperBulletDamage,
-                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower,
-                           EventBulletCreate, EventBulletDisappear, EventRangerBulletDamage, EventSniperBulletDamage)
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
-from model.character import Character, Melee, Character, Ranger, Sniper
-from model.timer import Timer
 from model.building import Tower
+from model.character import Character, Melee, Ranger, Sniper
+from model.timer import Timer
 
 if TYPE_CHECKING:
     from model.building import Tower
@@ -87,7 +86,7 @@ class Team(NeutralTeam):
             """
             if entity is None:
                 return False
-            if isinstance(entity, Character) and entity.team is my_team and hasattr(entity, 'move'):
+            if isinstance(entity, Character) and entity.team is my_team and hasattr(entity, 'set_move_direction'):
                 return True
             return False
 
@@ -115,7 +114,7 @@ class Team(NeutralTeam):
             return
 
         if event.input_type == const.InputTypes.MOVE and check_movable(self.__controlling, self):
-            self.__controlling.move(event.displacement)
+            self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
             if isinstance(self.__controlling, Character):
                 if self.__choosing_position is True:
