@@ -74,26 +74,6 @@ class Team(NeutralTeam):
         """
         Handles input by human. This method is only used by human controlled teams.
         """
-        def check_movable(entity: Entity, my_team: Team) -> bool:
-            """
-            This function checks if the clicked entity is actually movable by the human controlled team.
-            """
-            if entity is None:
-                return False
-            if isinstance(entity, Character) and entity.team is my_team and hasattr(entity, 'set_move_direction'):
-                return True
-            return False
-
-        def check_attackable(attacker: Entity, victim: Entity) -> bool:
-            """
-            This function checks if the clicked entity is able to be attacked and if the attacker is able to attack.
-            """
-            if attacker is None or not hasattr(attacker, 'attack') or not isinstance(attacker, Character):
-                return False
-            if victim is None or isinstance(attacker, Tower) and victim.is_fountain:
-                return False
-            return True
-
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
@@ -107,7 +87,7 @@ class Team(NeutralTeam):
         if self.__controlling is None:
             return
 
-        if event.input_type == const.InputTypes.MOVE and check_movable(self.__controlling, self):
+        if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
             if isinstance(self.__controlling, Character):
