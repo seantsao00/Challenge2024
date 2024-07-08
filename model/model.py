@@ -50,8 +50,6 @@ class Model:
 
         self.global_clock: pg.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock = Clock()
-        """The clock since game start, and will be paused when the game pause."""
 
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
@@ -96,6 +94,9 @@ class Model:
         for position in self.map.neutral_towers:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
+
+        self.__game_clock: Clock = Clock()
+        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
