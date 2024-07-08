@@ -21,6 +21,55 @@ class Map:
     neutral_towers: list[tuple[int, int]]
     map_dir: str
 
+    def generate_nearest(self):
+        """
+        For every cell on the map, calculate its distance to the nearest obstacle cell.
+        Takes ~2 seconds on the test map.
+        """
+        max_x, max_y = self.size
+
+        self.nearest_obstacle: list[list[float]] = [[-1 for _ in range(max_y)] for _ in range(max_x)]
+        """distance to the nearest obstacle cell"""
+
+        offset_by_dist: list[list[tuple[int, int]]] = [[] for _ in range(int(max_x * 1.415 + 3))]
+        """offset_by_dist[x] loads all cells at distances within [x, x + 1)"""
+        for dx in range(-max_x, max_x + 1):
+            for dy in range(-max_y, max_y + 1):
+                dist = (dx ** 2 + dy ** 2) ** 0.5
+                offset_by_dist[int(dist)].append((dx, dy))
+
+        """do a bfs-like approach from obstacles"""
+        is_inside = lambda tp: 0 <= tp[0] < max_x and 0 <= tp[1] < max_y
+        is_obstacle = lambda tp: self.get_cell_type(tp) == const.MAP_OBSTACLE
+        que: list[tuple[int, int]] = []
+        for x in range(max_x):
+            for y in range(max_y):
+                if is_obstacle((x, y)):
+                    self.nearest_obstacle[x][y] = 0
+                    que.append((x, y))
+        adjacent = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        while len(que):
+            cx, cy = que[0]
+            del que[:1]
+            if self.nearest_obstacle[cx][cy] > 0:
+                dist = int(min(filter(
+                    lambda d: d >= 0,
+                    [self.nearest_obstacle[cx + dx][cy + dy] for dx, dy in adjacent if is_inside((cx + dx, cy + dy))])
+                ))
+                min_dist = len(offset_by_dist)
+                while min_dist == len(offset_by_dist):
+                    for dx, dy in offset_by_dist[dist]:
+                        if is_inside((cx + dx, cy + dy)) and is_obstacle((cx + dx, cy + dy)):
+                            min_dist = min(min_dist, (dx ** 2 + dy ** 2) ** 0.5)
+                    dist += 1
+                self.nearest_obstacle[cx][cy] = min_dist
+            for dx, dy in adjacent:
+                nx, ny = cx + dx, cy + dy
+                if is_inside((nx, ny)) and self.nearest_obstacle[nx][ny] < 0:
+                    self.nearest_obstacle[nx][ny] = len(offset_by_dist)
+                    que.append((nx, ny))
+
+
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
         """
         Return the coordinate based on self.size of position.
@@ -189,6 +238,8 @@ def load_map(map_dir):
         for y, row in enumerate(rows):
             for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
-    return Map(
+    map = Map(
         name, size, map_list, images, fountains, neutral_towers, map_dir
     )
+    map.generate_nearest()
+    return map
