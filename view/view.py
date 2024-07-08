@@ -133,6 +133,8 @@ class View:
             self.render_play()
         elif model.state is const.State.SELECT_PARTY:
             self.render_party_selection()
+        elif model.state is const.State.SETTLEMENT:
+            self.render_settlement()
         pg.display.flip()
 
     def render_cover(self):
@@ -146,6 +148,10 @@ class View:
 
     def render_party_selection(self):
         """Render party selection process"""
+        pass
+
+    def render_settlement(self):
+        """Render the game settlement screen"""
         pass
 
     def render_play(self):

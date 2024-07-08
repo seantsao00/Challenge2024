@@ -16,3 +16,4 @@ class State(Enum):
     SELECT_PARTY = auto()
     PLAY = auto()
     PAUSE = auto()
+    SETTLEMENT = auto()  # 結算畫面
