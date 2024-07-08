@@ -40,7 +40,7 @@ class Melee(Character):
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
                 and (now_time - self.attack_time) * self.attribute.attack_speed >= 1):
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
+            get_event_manager().post(EventAttack(attacker=self, victim=enemy, damage=self.attribute.attack_damage), enemy.id)
             self.attack_time = now_time
 
     def take_damage(self, event: EventAttack):
@@ -52,6 +52,14 @@ class Melee(Character):
         self.health -= new_damage
         if self.health <= 0:
             self.die()
+    
+    def cast_ability(self, *args, **kwargs):
+        now_time = get_model().get_time()
+        if now_time - self.abilities_time < self.attribute.ability_cd:
+            return
+        print("cast abilities")
+        self.abilities_time = now_time
+        self.ability()
 
-    def ability(self, *args, **kwargs):
+    def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables

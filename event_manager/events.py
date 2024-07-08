@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Bullet, BulletRanger, BulletSniper, Character, Entity, LivingEntity, Tower
+    from model import Bullet, BulletCommon, BulletRanger, Character, Entity, LivingEntity, Tower
 
 
 @dataclass(kw_only=True)
@@ -120,6 +120,7 @@ class EventDiscardEntity(BaseEvent):
 class EventAttack(BaseEvent):
     attacker: LivingEntity
     victim: LivingEntity
+    damage: float
 
 
 @dataclass(kw_only=True)
@@ -166,18 +167,19 @@ class EventBulletCreate(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventSniperBulletDamage(BaseEvent):
-    bullet: BulletSniper
+class EventBulletDamage(BaseEvent):
+    bullet: BulletCommon
 
 
 @dataclass(kw_only=True)
-class EventRangerBulletDamage(BaseEvent):
+class EventRangedBulletDamage(BaseEvent):
     bullet: BulletRanger
 
 
 @dataclass(kw_only=True)
 class EventBulletDisappear(BaseEvent):
     bullet: Bullet
+
 
 @dataclass(kw_only=True)
 class EventViewChangeTeam(BaseEvent):

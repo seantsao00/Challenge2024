@@ -8,7 +8,7 @@ import const
 import const.map
 import util
 import view
-from event_manager import EventBulletCreate, EventBulletDisappear, EventRangerBulletDamage
+from event_manager import EventRangedBulletDamage
 from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
@@ -20,21 +20,19 @@ from model.bullet import Bullet
 
 
 class BulletRanger(Bullet):
-    def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = const.BULLET_SPEED, target: LivingEntity = None,
-                 team: Team = None, range: float = 0.0, attacker: LivingEntity = None) -> None:
-        super().__init__(position=position, entity_type=entity_type,
-                         team=team, speed=speed, attacker=attacker)
+    def __init__(self, target: pg.Vector2 | tuple[float, float], position, team, attacker):
+        super().__init__(position=position, team=team, speed=const.BULLET_RANGER_SPEED, attacker=attacker, damage=damage)
         self.target = target
-        self.range = range
+        damage = const.RANGER_ATTRIBUTE.ability_variables[1]
+        self.range = const.RANGER_ATTRIBUTE.ability_variables[0]
 
     def judge(self):
         """
         Move the bullet in the given direction.
         """
         original_pos = self.position
-        target_pos = self.target.position
+        target_pos = self.target
         if (target_pos - original_pos).length() <= self.speed:
-            get_event_manager().post(EventRangerBulletDamage(bullet=self, original_pos=original_pos))
+            get_event_manager().post(EventRangedBulletDamage(bullet=self, original_pos=original_pos))
         else:
             self.position += self.direction*self.speed

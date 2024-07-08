@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-import const.map
 import util
 import view
 from instances_manager import get_event_manager, get_model
@@ -18,9 +17,13 @@ if TYPE_CHECKING:
 
 
 class Bullet(Entity):
-    def __init__(self, position: pg.Vector2 | tuple[float, float], entity_type: str = 'bullet',
-                 speed: float = 0.0, team: Team = None, damage: float = 0.0, attacker: LivingEntity = None) -> None:
-        super().__init__(position, entity_type=entity_type, team=team)
+    def __init__(self, 
+                 position: pg.Vector2 | tuple[float, float], 
+                 team: Team = None,
+                 speed: float = 0.0, 
+                 damage: float = 0.0, 
+                 attacker: LivingEntity = None):
+        super().__init__(position=position, entity_type='bullet', team=team)
         self.direction: pg.Vector2 | tuple[float, float] = None
         self.speed: float = speed
         self.damage: float = damage

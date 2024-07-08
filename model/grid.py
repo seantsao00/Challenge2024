@@ -29,7 +29,6 @@ class Cell:
     def __init__(self, position: pg.Vector2):
         self.position: pg.Vector2 = position
         self.towers: set[Tower] = set()
-        self.bullet = None
         self.characters: set[Character] = set()
         self.tower_occupied: set[Tower] = set()
 
@@ -39,7 +38,7 @@ class Cell:
         elif isinstance(entity, Tower):
             self.towers.add(entity)
         elif isinstance(entity, Bullet):
-            self.bullet = entity
+            pass
         else:
             raise NotImplementedError
 

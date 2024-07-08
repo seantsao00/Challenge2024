@@ -6,6 +6,7 @@ import api.prototype as api
 
 destination = []
 
+
 def every_tick(api: api.API):
     character = api.get_characters()
     # if len(character) < 100:
@@ -19,4 +20,5 @@ def every_tick(api: api.API):
         # print(ch._Character__position)
         mx = max(mx, ch._Character__position.x)
         my = max(mx, ch._Character__position.y)
-        api.action_move_along([ch], pg.Vector2(destination[i].x - ch._Character__position.x, destination[i].y - ch._Character__position.y))
+        api.action_move_along([ch], pg.Vector2(
+            destination[i].x - ch._Character__position.x, destination[i].y - ch._Character__position.y))

@@ -148,7 +148,7 @@ class Character(LivingEntity):
         return True
 
     def take_damage(self, event: EventAttack):
-        self.health -= event.attacker.attribute.attack_damage
+        self.health -= event.damage
         if self.health <= 0:
             self.die()
 
@@ -163,12 +163,4 @@ class Character(LivingEntity):
         super().discard()
 
     def cast_ability(self, *args, **kwargs):
-        now_time = get_model().get_time()
-        if now_time - self.abilities_time < self.attribute.ability_cd:
-            return
-        print("cast abilities")
-        self.abilities_time = now_time
-        self.ability(*args, **kwargs)
-
-    def ability(self, *args, **kwargs):
         pass

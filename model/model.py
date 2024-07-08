@@ -15,7 +15,8 @@ from api.internal import call_ai, load_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
                            EventQuit, EventRestartGame, EventResumeModel, EventSpawnCharacter,
-                           EventStartGame, EventUnconditionalTick)
+                           EventStartGame, EventUnconditionalTick, EventAttack,
+                           EventBulletCreate, EventBulletDisappear, EventBulletDamage, EventRangedBulletDamage)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -24,6 +25,8 @@ from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
+from model.timer import Timer
+from model.bullet import Bullet
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -77,6 +80,7 @@ class Model:
         load_ai(self.__team_files_names)
 
         self.teams: list[Team] = []
+        self.bullet_pool: list[Bullet] = []
 
         for i, team_master in enumerate(self.__team_files_names):
             new_position = pg.Vector2(self.map.fountains[i])
@@ -163,6 +167,32 @@ class Model:
 
     def __restart_game(self, _: EventRestartGame):
         get_event_manager().post(EventInitialize())
+    
+    def create_bullet(self, event: EventBulletCreate):
+        if event.bullet.team == self:
+            event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
+                                       function=event.bullet.judge, once=False)
+            self.bullet_pool.append(event.bullet)
+
+    def ranged_bullet_damage(self, event: EventRangedBulletDamage):
+        event.bullet.timer.__stop()
+        for entity in self.entities:
+            if (entity.position-event.bullet.target).length() < event.bullet.range and entity.team is not self:
+                get_event_manager().post(EventAttack(victim=entity, 
+                                                     attacker=event.bullet.attacker, 
+                                                     damage=event.bullet.damage), channel_id=entity.id)
+        get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
+
+    def bullet_damage(self, event: EventBulletDamage):
+        event.bullet.timer.__stop()
+        get_event_manager().post(EventAttack(victim=event.bullet.victim,
+                                             attacker=event.bullet.attacker,
+                                             damage=event.bullet.damage), channel_id=event.bullet.victim.id)
+        get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
+
+    def bullet_disappear(self, event: EventBulletDisappear):
+        event.bullet.timer.__stop()
+        event.bullet.hidden = True
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
@@ -178,6 +208,10 @@ class Model:
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
         ev_manager.register_listener(EventRestartGame, self.__restart_game)
         ev_manager.register_listener(EventGameOver, self.handle_game_over)
+        ev_manager.register_listener(EventBulletCreate, self.create_bullet)
+        ev_manager.register_listener(EventRangedBulletDamage, self.ranged_bullet_damage)
+        ev_manager.register_listener(EventBulletDamage, self.bullet_damage)
+        ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
 
     def get_time(self):
         return self.__game_clock.get_time()

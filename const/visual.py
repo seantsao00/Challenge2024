@@ -52,6 +52,7 @@ CHARACTER_IMAGE: dict[CharacterType, str] = {
 
 BULLET_DIR = 'bullet/'
 BULLET_IMAGE: dict[CharacterType, str] = {
+    BulletType.COMMON: 'common.png',
     BulletType.SNIPER: 'sniper.png',
     BulletType.RANGER: 'ranger.png',
     BulletType.EXPLODE: 'explode.png'

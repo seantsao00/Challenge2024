@@ -156,7 +156,7 @@ class Internal(prototype.API):
             if internal == None:
                 continue
             internal.set_move_direction(direction)
-    
+
     def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
         if not isinstance(characters, Iterable):
             raise TypeError("Character is not iterable.")
