@@ -3,6 +3,7 @@ from __future__ import annotations
 from model.character import Character
 
 
+
 class Node:
     def __init__(self, character: Character, time: float):
         self.prev: Node | None = None
@@ -52,6 +53,7 @@ class LinkedList:
 
     def front(self):
         return self.head
+
 
     def back(self):
         return self.tail

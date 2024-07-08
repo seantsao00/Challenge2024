@@ -10,6 +10,9 @@ from model.character.character import Character
 
 if TYPE_CHECKING:
     from model.team import Team
+from model.entity import Entity
+from event_manager import EventAttack
+from instances_manager import get_event_manager, get_model
 
 
 class Melee(Character):
@@ -27,9 +30,18 @@ class Melee(Character):
 
     """
 
-    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
+    def __init__(self, team, position):
         super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
         self.__defense: float = 0
+
+    def attack(self, enemy: Entity):
+        now_time = get_model().get_time()
+        dist = self.position.distance_to(enemy.position)
+        if (self.team != enemy.team
+            and dist <= self.attribute.attack_range
+                and (now_time - self.attack_time) * self.attribute.attack_speed >= 1):
+            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
+            self.attack_time = now_time
 
     def take_damage(self, event: EventAttack):
         if self.__defense > 0:

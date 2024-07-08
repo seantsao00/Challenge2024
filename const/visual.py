@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
+from const.bullet import BulletType
 
 if TYPE_CHECKING:
     from const.entity import EntityState, EntityType
@@ -40,19 +41,33 @@ TOWER_IMAGE: dict[TowerType, str] = {
     TowerType.PYLON: 'neutral_pylon.png'
 }
 
-CHARACTER_DIR = 'character'
+CHARACTER_DIR = 'character/'
 CHARACTER_IMAGE: dict[CharacterType, str] = {
     CharacterType.MELEE: 'melee.png',
     CharacterType.RANGER: 'ranger.png',
     CharacterType.SNIPER: 'sniper.png'
 }
 
+BULLET_DIR = 'bullet/'
+BULLET_IMAGE: dict[CharacterType, str] = {
+    BulletType.SNIPER: 'sniper.png',
+    BulletType.RANGER: 'ranger.png',
+    BulletType.EXPLODE: 'explode.png'
+}
+
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
         {
-            tower: {
-                None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
-            } for tower in TowerType if tower is not TowerType.FOUNTAIN
+            **{
+                tower: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
+                } for tower in TowerType if tower is not TowerType.FOUNTAIN
+            },
+            **{
+                bullet: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
+                } for bullet in BulletType
+            }
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
@@ -77,7 +92,10 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     } for character in CharacterType},
     **{tower: {
         None: 10
-    } for tower in TowerType}
+    } for tower in TowerType},
+    **{bullet: {
+        None: 2
+    } for bullet in BulletType}
 }
 """
 structure: ENTITY_SIZE[entity][state]
