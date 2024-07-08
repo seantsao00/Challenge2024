@@ -45,6 +45,7 @@ class Team_Vision:
         self.mask: pg.Surface = pg.Surface((self.N, self.M), pg.SRCALPHA)
         self.mask.fill([0, 0, 0])
         self.mask.set_alpha(192)
+        self.boolmask: list[list[bool]] = [[ False for _ in range(self.N)] for __ in range(self.M)]
         self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)] 
                                                  for __ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
         for x in range(self.N):
@@ -59,7 +60,7 @@ class Team_Vision:
 
     def inside_vision(self, entity: Entity):
         position = self.transfer_to_pixel(entity.position)
-        return self.mask.get_at(position.x, position.y)[3] == 0
+        return self.boolmask[int(position.x)][int(position.y)]
     
     def get_mask(self):
         return self.mask
@@ -71,6 +72,8 @@ class Team_Vision:
             for y in range(max(0, by - 1), min(len(self.vision_not_open[0]), by + 2)):
                 if self.vision_not_open[x][y] > 0:
                     return True
+                if self.vision_not_open[x][y] < 0:
+                    raise ("wtffffffffffffffff")
         return False
     
     def brute_modify(self, position: pg.Vector2, radius: float):
@@ -85,6 +88,7 @@ class Team_Vision:
                     if a[3] != 0:
                         a[3] = 0
                         self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] -= 1
+                        self.boolmask[x][y] = True
                         self.mask.set_at((x, y), a)
 
     def update_vision(self, entity: LivingEntity):

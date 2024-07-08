@@ -175,8 +175,7 @@ class View:
             mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
             objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
             for obj in self.__entities:
-                position = my_team.vision.transfer_to_pixel(obj.entity.position)
-                if my_team.vision.get_mask().get_at((int(position.x), int(position.y)))[3] == 0:
+                if my_team.vision.inside_vision(obj.entity) is True:
                     objects.append(obj)
 
         objects.sort(key=lambda x: x.priority)
