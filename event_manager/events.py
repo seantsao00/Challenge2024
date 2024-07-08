@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Bullet, BulletRanger, BulletSniper, Character, Entity, LivingEntity, Tower
+    from model import Character, Entity, LivingEntity, Tower
 
 
 @dataclass(kw_only=True)
@@ -154,23 +154,3 @@ class EventSelectParty(BaseEvent):
     """Event posted when player is selecting parties"""
     index: int
     increase: bool
-
-
-@dataclass(kw_only=True)
-class EventBulletCreate(BaseEvent):
-    bullet: Bullet
-
-
-@dataclass(kw_only=True)
-class EventSniperBulletDamage(BaseEvent):
-    bullet: BulletSniper
-
-
-@dataclass(kw_only=True)
-class EventRangerBulletDamage(BaseEvent):
-    bullet: BulletRanger
-
-
-@dataclass(kw_only=True)
-class EventBulletDisappear(BaseEvent):
-    bullet: Bullet

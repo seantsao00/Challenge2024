@@ -1,25 +1,18 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from itertools import chain
 from typing import TYPE_CHECKING
 
 import const
-import const.character
 import const.team
-from event_manager import (EventAttack, EventBulletCreate, EventBulletDisappear,
-                           EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventRangerBulletDamage, EventSelectCharacter, EventSniperBulletDamage,
-                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower,
-                           EventBulletCreate, EventBulletDisappear, EventRangerBulletDamage, EventSniperBulletDamage)
+from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
-from model.character import Character, Melee, Character, Ranger, Sniper
-from model.timer import Timer
 from model.building import Tower
+from model.character import Character, Ranger
 
 if TYPE_CHECKING:
-    from model.building import Tower
-    from model.bullet import Bullet
     from model.entity import Entity, LivingEntity
 
 
@@ -81,26 +74,6 @@ class Team(NeutralTeam):
         """
         Handles input by human. This method is only used by human controlled teams.
         """
-        def check_movable(entity: Entity, my_team: Team) -> bool:
-            """
-            This function checks if the clicked entity is actually movable by the human controlled team.
-            """
-            if entity is None:
-                return False
-            if isinstance(entity, Character) and entity.team is my_team and hasattr(entity, 'move'):
-                return True
-            return False
-
-        def check_attackable(attacker: Entity, victim: Entity) -> bool:
-            """
-            This function checks if the clicked entity is able to be attacked and if the attacker is able to attack.
-            """
-            if attacker is None or not hasattr(attacker, 'attack') or not isinstance(attacker, Character):
-                return False
-            if victim is None or isinstance(attacker, Tower) and victim.is_fountain:
-                return False
-            return True
-
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
@@ -108,20 +81,20 @@ class Team(NeutralTeam):
                 if self.__controlling is not None and isinstance(self.__controlling, Character):
                     self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
-            elif clicked_entity is not None:
+            else:
                 print('picked a non interactable entity')
 
         if self.__controlling is None:
             return
 
-        if event.input_type == const.InputTypes.MOVE and check_movable(self.__controlling, self):
-            self.__controlling.move(event.displacement)
+        if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
+            self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
             if isinstance(self.__controlling, Character):
                 if self.__choosing_position is True:
                     self.__controlling.cast_ability(event.displacement)
                     self.__choosing_position = False
-                elif check_attackable(victim=clicked_entity, attacker=self.__controlling):
+                elif isinstance(clicked_entity, (Tower, Character)):
                     self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
@@ -185,35 +158,8 @@ class Team(NeutralTeam):
                     break
 
     def select_character(self, event: EventSelectCharacter):
-        if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
-            print(f'Character type of Team {self.team_id} is modified to {event.character_type}')
+        if isinstance(self.__controlling, Tower):
             self.__controlling.update_character_type(event.character_type)
-
-    def create_bullet(self, event: EventBulletCreate):
-        if event.bullet.team == self:
-            event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
-                                       function=event.bullet.judge, once=False)
-
-    def ranger_damage(self, event: EventRangerBulletDamage):
-        if event.bullet.team == self:
-            event.bullet.timer.__stop()
-            model = get_model()
-            for entity in model.entities:
-                if (entity.position-event.bullet.target.position).length() < event.bullet.range and entity.team is not self:
-                    get_event_manager().post(EventAttack(victim=entity, attacker=event.bullet.attacker), channel_id=entity.id)
-            get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
-
-    def sniper_damage(self, event: EventSniperBulletDamage):
-        if event.bullet.team == self:
-            event.bullet.timer.__stop()
-            get_event_manager().post(EventAttack(victim=event.bullet.victim,
-                                                 attacker=event.bullet.attacker), channel_id=event.bullet.victim.id)
-            get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
-
-    def bullet_disappear(self, event: EventBulletDisappear):
-        if event.bullet.team == self:
-            event.bullet.timer.__stop()
-            event.bullet.hidden = True
 
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
@@ -226,10 +172,6 @@ class Team(NeutralTeam):
         ev_manager.register_listener(EventSpawnCharacter, self.gain_character, self.team_id)
         ev_manager.register_listener(EventSelectCharacter, self.select_character)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
-        ev_manager.register_listener(EventBulletCreate, self.create_bullet)
-        ev_manager.register_listener(EventRangerBulletDamage, self.ranger_damage)
-        ev_manager.register_listener(EventSniperBulletDamage, self.sniper_damage)
-        ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
 
     @property
     def team_name(self) -> str:
@@ -246,7 +188,3 @@ class Team(NeutralTeam):
     @property
     def visible_entities_list(self):
         return self.__visible_entities_list
-        if self.controlling is not None and hasattr(self.controlling, 'update_character_type'):
-            if self.controlling.character_type != event.character:
-                print(f'The character produced by team{self.id} is modified to {event.character}')
-            self.controlling.update_character_type(event.character)

@@ -75,7 +75,7 @@ class Tower(LivingEntity):
             raise TypeError(f'Character type error: {self.__character_type}')
         new_position = pg.Vector2()
         new_position.from_polar((random.uniform(0, 10), random.uniform(0, 360)))
-        new_character = character_type(position=self.position + new_position, team=self.team)
+        new_character = character_type(self.position + new_position, self.team)
         get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.team_id)
         self.set_timer()
 
@@ -115,7 +115,6 @@ class Tower(LivingEntity):
                 victim = self.__enemies[i].front()
         if victim is not None:
             get_event_manager().post(EventAttack(attacker=self, victim=victim.character), victim.character.id)
-
 
     def enemy_in_range(self, character: Character):
         if (character.id in self.__enemies[character.team.team_id].map

@@ -9,12 +9,10 @@ from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEn
                            EventCreateTower)
 from instances_manager import get_event_manager
 from model.building import Tower
-from model.bullet import Bullet
 from model.character import Character
 
 if TYPE_CHECKING:
-    from model.entity import Entity
-    from model.team import Team
+    from model import Entity, Team
 
 
 class Cell:
@@ -29,7 +27,6 @@ class Cell:
     def __init__(self, position: pg.Vector2):
         self.position: pg.Vector2 = position
         self.towers: set[Tower] = set()
-        self.bullet = None
         self.characters: set[Character] = set()
         self.tower_occupied: set[Tower] = set()
 
@@ -38,8 +35,6 @@ class Cell:
             self.characters.add(entity)
         elif isinstance(entity, Tower):
             self.towers.add(entity)
-        elif isinstance(entity, Bullet):
-            self.bullet = entity
         else:
             raise NotImplementedError
 
