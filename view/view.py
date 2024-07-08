@@ -57,6 +57,7 @@ class View:
         self.__entities: list[EntityView] = []
 
         self.vision_of = 0
+        self.scoreboard_image = pg.image.load(os.path.join(const.visual.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -154,6 +155,9 @@ class View:
     def render_play(self):
         """Render scenes when the game is being played"""
         model = get_model()
+
+        self.scoreboard_image = pg.transform.scale(self.scoreboard_image, self.screen_size)
+        self.__screen.blit(self.scoreboard_image, (0, 0))
 
         discarded_entities: list[type[EntityView]] = []
 
