@@ -9,6 +9,8 @@ import cv2
 import pygame as pg
 
 import const
+import const.model
+import const.visual
 from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
@@ -178,6 +180,13 @@ class View:
             obj.draw()
 
         self.__screen.blit(self.__arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
+
+        # show time remaining
+        time_remaining = int(const.model.GAME_TIME - model.get_time())
+        (min, sec) = divmod(time_remaining, 60)
+        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
+        self.__screen.blit(time_remaining_surface, (100, 100))
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
