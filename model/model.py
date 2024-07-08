@@ -10,11 +10,12 @@ import pygame as pg
 
 import const
 import const.map
+import const.model
 from api.internal import call_ai, load_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
-                           EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
-                           EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,
-                           EventUnconditionalTick)
+                           EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
+                           EventQuit, EventRestartGame, EventResumeModel, EventSpawnCharacter,
+                           EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -135,6 +136,12 @@ class Model:
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
 
+    def handle_game_over(self, _: EventGameOver):
+        """
+        End the game and show scoreboard on the settlement screen
+        """
+        self.state = const.State.SETTLEMENT
+
     def __register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
@@ -169,6 +176,7 @@ class Model:
         ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
         ev_manager.register_listener(EventRestartGame, self.__restart_game)
+        ev_manager.register_listener(EventGameOver, self.handle_game_over)
 
     def get_time(self):
         return self.__game_clock.get_time()
@@ -183,4 +191,7 @@ class Model:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
+                running_time = self.get_time()
+                if running_time >= const.model.GAME_TIME:
+                    ev_manager.post(EventGameOver())
             self.global_clock.tick(const.FPS)

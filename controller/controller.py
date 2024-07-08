@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSelectCharacter, EventSelectParty,
+from event_manager import (EventGameOver, EventHumanInput, EventInitialize, EventPauseModel,
+                           EventQuit, EventResumeModel, EventSelectCharacter, EventSelectParty,
                            EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
@@ -173,3 +173,4 @@ class Controller:
         # Listeners for TimerManager
         ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
         ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
+        ev_manager.register_listener(EventGameOver, TimerManager.handle_game_over)

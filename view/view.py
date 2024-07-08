@@ -152,7 +152,10 @@ class View:
 
     def render_settlement(self):
         """Render the game settlement screen"""
-        pass
+        # setting up a temporary screen till we have a scoreboard image and settlement screen
+        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
+        self.__screen.blit(text_surface, (100, 100))
 
     def render_play(self):
         """Render scenes when the game is being played"""

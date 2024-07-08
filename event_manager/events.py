@@ -58,6 +58,15 @@ class EventResumeModel(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventGameOver(BaseEvent):
+    """
+    Event posted upon game over.
+
+    It happens when either one of the team wins, or the game reaches total game time).
+    """
+
+
+@dataclass(kw_only=True)
 class EventEveryTick(BaseEvent):
     """Event posted every tick when the game is not in pause state"""
 
@@ -88,11 +97,6 @@ class EventHumanInput(BaseEvent):
         if self.input_type is const.InputTypes.PICK:
             return f"Clicked at {self.clicked_entity.id}"
         return f"Move {self.displacement}"
-
-
-@dataclass(kw_only=True)
-class EventPartySelection(BaseEvent):
-    """Event posted when player is selecting parties"""
 
 
 @dataclass(kw_only=True)
