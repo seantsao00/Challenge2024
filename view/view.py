@@ -9,7 +9,7 @@ import cv2
 import pygame as pg
 
 import const
-from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick
+from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick, EventViewChangeTeam
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
                          HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
@@ -20,7 +20,7 @@ class View:
     The class that presents the actual game content on the screen.
     """
 
-    def __init__(self, vision_of):
+    def __init__(self):
         """
         Initialize the View instance upon its creation.
 
@@ -54,6 +54,7 @@ class View:
 
         self.__entities: list[EntityView] = []
 
+        self.vision_of = 0
         self.__background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -74,7 +75,6 @@ class View:
                 self.__arena, int(model.map.images[i]), (x, y), picture))
 
         EntityView.init_convert()
-        self.vision_of = vision_of
 
         self.register_listeners()
 
@@ -91,12 +91,6 @@ class View:
         """
         Initialize components that require initialization at the start of every game.
         """
-        model = get_model()
-        for i, team in enumerate(model.teams):
-            if self.vision_of == team.team_name:
-                self.vision_of = i + 1
-                break
-        
 
     def handle_create_entity(self, event: EventCreateEntity):
         from model import Character, Tower
@@ -162,7 +156,7 @@ class View:
 
         objects += self.__background_images
 
-        if self.vision_of == 'all':
+        if self.vision_of == 0:
             for entity in self.__entities:
                 objects.append(entity)
         else:
@@ -183,12 +177,16 @@ class View:
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
 
+    def change_vision_of(self, event: EventViewChangeTeam):
+        self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
+
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
 
     def display_fps(self):
         """Display the current fps on the window caption."""
