@@ -44,5 +44,5 @@ TOWER_DEFAULT_GENERATE_CHARACTER = CharacterType.RANGER
 TOWER_GENERATE_DISPLACEMENT = 10
 """The distance between generated character and the tower will be less than this value."""
 
-INITIAL_PERIOD_MS = 5000
+INITIAL_PERIOD_MS = 10
 FORMULA_K = 1000

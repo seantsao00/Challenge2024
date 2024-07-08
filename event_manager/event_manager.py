@@ -58,6 +58,7 @@ class EventManager:
         Invoke all registered listeners associated with the event.
         """
         if (type(event), channel_id) not in self.listeners:
-            raise KeyError("The event hasn't been registered")
+            return
+            # raise KeyError("The event hasn't been registered")
         for listener in self.listeners[(type(event), channel_id)]:
             listener(event)

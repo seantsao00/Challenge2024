@@ -158,3 +158,7 @@ class EventSelectParty(BaseEvent):
     """Event posted when player is selecting parties"""
     index: int
     increase: bool
+
+@dataclass(kw_only=True)
+class EventViewChangeTeam(BaseEvent):
+    """Event to change view team"""

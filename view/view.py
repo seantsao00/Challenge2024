@@ -11,7 +11,7 @@ import pygame as pg
 import const
 import const.model
 import const.visual
-from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick
+from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick, EventViewChangeTeam
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
                          HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
@@ -22,7 +22,7 @@ class View:
     The class that presents the actual game content on the screen.
     """
 
-    def __init__(self, vision_of):
+    def __init__(self):
         """
         Initialize the View instance upon its creation.
 
@@ -36,6 +36,10 @@ class View:
                        const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
         window_h = int(min(screen_info.current_h, screen_info.current_w /
                        const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
+
+        self.window_w = window_w
+        self.window_h = window_h
+
         self.__screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
@@ -52,6 +56,7 @@ class View:
 
         self.__entities: list[EntityView] = []
 
+        self.vision_of = 0
         self.__background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -72,17 +77,6 @@ class View:
                 self.__arena, int(model.map.images[i]), (x, y), picture))
 
         EntityView.init_convert()
-
-        if vision_of == 'all':
-            self.vision_of = const.VIEW_EVERYTHING
-        else:
-            try:
-                self.vision_of = int(vision_of)
-            except ValueError:
-                for i, team_name in enumerate(model.team_names):
-                    if vision_of == team_name:
-                        self.vision_of = i+1
-                        break
 
         self.register_listeners()
 
@@ -173,16 +167,17 @@ class View:
 
         objects += self.__background_images
 
-        if self.vision_of == const.VIEW_EVERYTHING:
+        if self.vision_of == 0:
             for entity in self.__entities:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            for entity in self.__entities:
-                if (entity.entity in my_team.towers or
-                    entity.entity in my_team.character_list or
-                        entity.entity in my_team.visible_entities_list):
-                    objects.append(entity)
+            mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
+            objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
+            for obj in self.__entities:
+                position = my_team.vision.transfer_to_pixel(obj.entity.position)
+                if my_team.vision.get_mask().get_at((int(position.x), int(position.y)))[3] == 0:
+                    objects.append(obj)
 
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
@@ -200,12 +195,16 @@ class View:
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
 
+    def change_vision_of(self, event: EventViewChangeTeam):
+        self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
+
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
 
     def display_fps(self):
         """Display the current fps on the window caption."""
