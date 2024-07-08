@@ -21,60 +21,6 @@ class Map:
     neutral_towers: list[tuple[int, int]]
     map_dir: str
 
-    def generate_nearest(self):
-        """
-        For every cell on the map, calculate its distance to the nearest obstacle cell.
-        Takes ~2 seconds on the test map.
-        """
-        max_x, max_y = self.size
-
-        self.nearest_obstacle: list[list[float]] = [
-            [-1 for _ in range(max_y)] for _ in range(max_x)]
-        """distance to the nearest obstacle cell"""
-
-        offset_by_dist: list[list[tuple[int, int]]] = [[] for _ in range(int(max_x * 1.415 + 3))]
-        """offset_by_dist[x] loads all cells at distances within [x, x + 1)"""
-        for dx in range(-max_x, max_x + 1):
-            for dy in range(-max_y, max_y + 1):
-                dist = (dx ** 2 + dy ** 2) ** 0.5
-                offset_by_dist[int(dist)].append((dx, dy))
-
-        """do a bfs-like approach from obstacles"""
-        def is_inside(tp): return 0 <= tp[0] < max_x and 0 <= tp[1] < max_y
-
-        def is_obstacle(tp): return (
-            tp[0] == 0 or tp[0] == max_x - 1 or
-            tp[1] == 0 or tp[1] == max_y - 1 or
-            self.get_cell_type(tp) == const.MAP_OBSTACLE
-        )
-        que: list[tuple[int, int]] = []
-        for x in range(max_x):
-            for y in range(max_y):
-                if is_obstacle((x, y)):
-                    self.nearest_obstacle[x][y] = 0
-                    que.append((x, y))
-        adjacent = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-        while len(que):
-            cx, cy = que[0]
-            del que[:1]
-            if self.nearest_obstacle[cx][cy] > 0:
-                dist = int(min(filter(
-                    lambda d: d >= 0,
-                    [self.nearest_obstacle[cx + dx][cy + dy] for dx, dy in adjacent if is_inside((cx + dx, cy + dy))])
-                ))
-                min_dist = len(offset_by_dist)
-                while min_dist == len(offset_by_dist):
-                    for dx, dy in offset_by_dist[dist]:
-                        if is_inside((cx + dx, cy + dy)) and is_obstacle((cx + dx, cy + dy)):
-                            min_dist = min(min_dist, (dx ** 2 + dy ** 2) ** 0.5)
-                    dist += 1
-                self.nearest_obstacle[cx][cy] = min_dist
-            for dx, dy in adjacent:
-                nx, ny = cx + dx, cy + dy
-                if is_inside((nx, ny)) and self.nearest_obstacle[nx][ny] < 0:
-                    self.nearest_obstacle[nx][ny] = len(offset_by_dist)
-                    que.append((nx, ny))
-
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
         """
         Return the coordinate based on self.size of position.
@@ -117,46 +63,45 @@ class Map:
         """
         return self.get_cell_type(self.position_to_cell(position))
 
-    def is_cell_passable(self, cell: tuple[int, int], hitbox_radius: float = 0.001) -> bool:
+    def is_cell_passable(self, cell: tuple[int, int]) -> bool:
         """
         Checks if a cell is open for characters to pass through
         Cell takes in *integer* coordinates in range [0, Map.size)
-        Hitbox radius is for the character to test for
         """
         return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
-                and self.nearest_obstacle[cell[0]][cell[1]] > hitbox_radius)
+                and self.get_cell_type(cell) != const.MAP_OBSTACLE)
 
-    def is_position_passable(self, position: pg.Vector2, hitbox_radius: float = 0.001) -> bool:
+    def is_position_passable(self, position: pg.Vector2) -> bool:
         """
         Checks if a cell is open for characters to pass through
         Position takes in *real-valued* coordinates in range [0, const.ARENA_SIZE)
-        Hitbox radius is for the character to test for
         """
-        return self.is_cell_passable(self.position_to_cell(position), hitbox_radius)
+        return self.is_cell_passable(self.position_to_cell(position))
 
-    def get_random_pos(self, hitbox_radius: float = 0.001) -> pg.Vector2:
+    def get_random_pos(self, r: int) -> pg.Vector2:
         """
-        Return a random position in map that is passable for a character with
-        a certain hitbox radius
+        Return a random position in map that is not of type "obstacle"
         """
-        def random_pos(): return pg.Vector2(
-            random.uniform(hitbox_radius, const.ARENA_SIZE[0] - hitbox_radius),
-            random.uniform(hitbox_radius, const.ARENA_SIZE[1] - hitbox_radius),
+        ret = pg.Vector2(
+            random.randint(r, const.ARENA_SIZE[0] - r),
+            random.randint(r, const.ARENA_SIZE[1] - r),
         )
-        ret = random_pos()
-        while not self.is_position_passable(ret, hitbox_radius):
-            ret = random_pos()
+        while not self.is_position_passable(ret):
+            ret = pg.Vector2(
+                random.randint(r, const.ARENA_SIZE[0] - r),
+                random.randint(r, const.ARENA_SIZE[1] - r),
+            )
         return ret
 
-    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2, hitbox_radius: float = 0.001) -> list[pg.Vector2] | None:
+    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
         """
         Find a path from position_begin to position_end. Positions take values
         in range [0, const.ARENA_SIZE).
         Returns a list of positions describing the path, or None if the algorithm
         did not find a path.
         """
-        if (not self.is_position_passable(position_begin, hitbox_radius) or
-                not self.is_position_passable(position_end, hitbox_radius)):
+        if (not self.is_position_passable(position_begin) or
+                not self.is_position_passable(position_end)):
             return None
 
         max_x, max_y = self.size
@@ -193,7 +138,7 @@ class Map:
             ]
             for dx, dy, dd in diff:
                 nx, ny, nd = cur_cell[0] + dx, cur_cell[1] + dy, cur_dist + dd
-                if self.is_cell_passable((nx, ny), hitbox_radius):
+                if self.is_cell_passable((nx, ny)):
                     yield (nx, ny, nd)
 
         # find single source shortest path
@@ -244,8 +189,6 @@ def load_map(map_dir):
         for y, row in enumerate(rows):
             for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
-    map = Map(
+    return Map(
         name, size, map_list, images, fountains, neutral_towers, map_dir
     )
-    map.generate_nearest()
-    return map
