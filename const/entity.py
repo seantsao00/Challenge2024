@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING, TypeAlias
 if TYPE_CHECKING:
     from character import CharacterState, CharacterType
     from tower import TowerState, TowerType
-    from bullet import BulletState, BulletType
-    EntityType: TypeAlias = CharacterType | TowerType | BulletType
-    EntityState: TypeAlias = CharacterState | TowerState | BulletState
+    EntityType: TypeAlias = CharacterType | TowerType
+    EntityState: TypeAlias = CharacterState | TowerState
 
 
 @dataclass(kw_only=True)

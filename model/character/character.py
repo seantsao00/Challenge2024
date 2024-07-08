@@ -47,7 +47,7 @@ class Character(LivingEntity):
                  entity_type: const.CharacterType,
                  state: const.CharacterState):
         self.abilities_time: float = -attribute.ability_cd
-        self.attack_time: float = -1 / attribute.attack_speed
+        self.__attack_time: float = -1 / attribute.attack_speed
 
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
@@ -87,7 +87,7 @@ class Character(LivingEntity):
                 new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
                 new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
-                if not game_map.is_position_passable(new_position):
+                if not game_map.is_position_passable(new_position, self.attribute.hitbox_radius):
                     self.position = new_position - min_direction
                     break
 
@@ -105,7 +105,7 @@ class Character(LivingEntity):
         it = 0
         game_map = get_model().map
         while (it < len(self.__move_path) and
-               game_map.is_position_passable(self.__move_path[it]) and
+               game_map.is_position_passable(self.__move_path[it], self.attribute.hitbox_radius) and
                (self.__move_path[it] - self.position).length() <= self.attribute.speed):
             it += 1
         if it == 0:
@@ -140,7 +140,7 @@ class Character(LivingEntity):
 
     def set_move_position(self, destination: pg.Vector2):
         """Set character movement toward a target position. Returns True/False on success/failure."""
-        path = get_model().map.find_path(self.position, destination)
+        path = get_model().map.find_path(self.position, destination, self.attribute.hitbox_radius)
         if path is None:
             return False
         self.__move_state = CharacterMovingState.TO_POSITION
@@ -152,8 +152,14 @@ class Character(LivingEntity):
         if self.health <= 0:
             self.die()
 
-    def attack(self, *args, **kwargs):
-        pass
+    def attack(self, enemy: Entity):
+        now_time = get_model().get_time()
+        dist = self.position.distance_to(enemy.position)
+        if (self.team != enemy.team
+            and dist <= self.attribute.attack_range
+                and (now_time - self.__attack_time) * self.attribute.attack_speed >= 1):
+            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
+            self.__attack_time = now_time
 
     def die(self):
         print(f"Character {self.id} in Team {self.team.team_id} died")
