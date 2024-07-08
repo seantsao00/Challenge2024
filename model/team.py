@@ -3,7 +3,6 @@ from __future__ import annotations
 from itertools import chain
 from typing import TYPE_CHECKING
 import pygame as pg
-import view
 import const
 import const.team
 from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
@@ -39,6 +38,61 @@ class NeutralTeam:
         return self.__party
 
 
+class Team_Vision:
+    def __init__(self):
+        self.N = int(const.ARENA_SIZE[0] / const.VISION_BLOCK_SIZE)
+        self.M = int(const.ARENA_SIZE[1] / const.VISION_BLOCK_SIZE)
+        self.mask: pg.Surface = pg.Surface((self.N, self.M), pg.SRCALPHA)
+        self.mask.fill([0, 0, 0])
+        self.mask.set_alpha(192)
+        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)] 
+                                                 for __ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
+        for x in range(self.N):
+            for y in range(self.M):
+                self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] += 1
+    
+    def transfer_to_pixel(self, position: pg.Vector2):
+        return pg.Vector2(int(position.x / const.VISION_BLOCK_SIZE), int(position.y / const.VISION_BLOCK_SIZE))
+
+    def transfer_to_heuristic(self, position: pg.Vector2):
+        return pg.Vector2(int(position.x / const.VISION_BLOCK_SIZE / const.TEAM_VISION_BLOCK), int(position.y / const.VISION_BLOCK_SIZE / const.TEAM_VISION_BLOCK))
+
+    def inside_vision(self, entity: Entity):
+        position = self.transfer_to_pixel(entity.position)
+        return self.mask.get_at(position.x, position.y)[3] == 0
+    
+    def get_mask(self):
+        return self.mask
+
+    def heuristic_test(self, position: pg.Vector2):
+        bx, by = self.transfer_to_heuristic(position)
+        bx, by = int(bx), int(by)
+        for x in range(max(0, bx - 1), min(len(self.vision_not_open), bx + 2)):
+            for y in range(max(0, by - 1), min(len(self.vision_not_open[0]), by + 2)):
+                if self.vision_not_open[x][y] > 0:
+                    return True
+        return False
+    
+    def brute_modify(self, position: pg.Vector2, radius: float):
+        real_position = self.transfer_to_pixel(position)
+        real_radius = radius / const.VISION_BLOCK_SIZE
+        for x in range(max(0, int(real_position.x - real_radius)), 
+                       min(self.N, int(position.x + real_radius + 1))):
+            for y in range(max(0, int(real_position.y - real_radius)),
+                           min(self.M, int(position.y + real_radius + 1))):
+                if position.distance_to(pg.Vector2(const.VISION_BLOCK_SIZE * (x + 0.5), const.VISION_BLOCK_SIZE * (y + 0.5))) <= radius:
+                    a = self.mask.get_at((x, y))
+                    if a[3] != 0:
+                        a[3] = 0
+                        self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] -= 1
+                        self.mask.set_at((x, y), a)
+
+    def update_vision(self, entity: LivingEntity):
+        if entity.alive is False or self.heuristic_test(entity.position) is False:
+            return
+        self.brute_modify(entity.position, entity.attribute.vision)
+
+
 class Team(NeutralTeam):
 
     """
@@ -68,15 +122,7 @@ class Team(NeutralTeam):
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
-        self.mask: pg.Surface = pg.Surface((int(const.ARENA_SIZE[0]), int(const.ARENA_SIZE[1])), pg.SRCALPHA)
-        self.mask.fill([0, 0, 0])
-        self.mask.set_alpha(192)
-
-        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(const.ARENA_SIZE[0] // const.TEAM_VISION_BLOCK) + 1)] 
-                                                 for __ in range(int(const.ARENA_SIZE[1] // const.TEAM_VISION_BLOCK) + 1)]
-        for x in range(int(const.ARENA_SIZE[0])):
-            for y in range(int(const.ARENA_SIZE[1])):
-                self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] += 1
+        self.vision = Team_Vision()
         self.register_listeners()
 
     def handle_input(self, event: EventHumanInput):
@@ -144,26 +190,7 @@ class Team(NeutralTeam):
             self.update_vision(event.character)
 
     def update_vision(self, entity: LivingEntity): # to do
-        if not entity.alive:
-            return
-        position = entity.position
-        bx, by = int(position.x // const.TEAM_VISION_BLOCK), int(position.y // const.TEAM_VISION_BLOCK)
-        need_to_brute = 0
-        for x in range(max(0, bx - 1), min(len(self.vision_not_open), bx + 2)):
-            for y in range(max(0, by - 1), min(len(self.vision_not_open[0]), by + 2)):
-                if self.vision_not_open[x][y] > 0:
-                    need_to_brute = 1
-        if need_to_brute == 1:
-            radius = entity.attribute.vision
-            for x in range(max(0, int(position.x - radius)), min(250, int(position.x + radius + 1))):
-                for y in range(max(0, int(position.y - radius)), min(250, int(position.y + radius + 1))):
-                    if position.distance_to(pg.Vector2(x, y)) <= radius:
-                        a = entity.team.mask.get_at((x, y))
-                        if a[3] != 0:
-                            a[3] = 0
-                            self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] -= 1
-                            entity.team.mask.set_at((x, y), a)
-
+        self.vision.update_vision(entity)
 
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower):
