@@ -15,8 +15,10 @@ ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
 CD_BAR_COLOR = 'blue'
 
-HEALTH_BAR_UPPER = 7
-CD_BAR_UPPER = 5
+HEALTH_BAR_UPPER = 5
+CD_BAR_UPPER = 3
+TEAM_VISION_BLOCK = 8
+VISION_BLOCK_SIZE = 2
 
 VIEW_EVERYTHING = 0
 
@@ -53,6 +55,13 @@ BULLET_IMAGE: dict[CharacterType, str] = {
     BulletType.SNIPER: 'sniper.png',
     BulletType.RANGER: 'ranger.png',
     BulletType.EXPLODE: 'explode.png'
+}
+
+WEAPON_DIR = 'weapon/'
+WEAPON_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: os.path.join(IMAGE_DIR, WEAPON_DIR, 'melee.png'),
+    CharacterType.RANGER: os.path.join(IMAGE_DIR, WEAPON_DIR, 'ranger.png'),
+    CharacterType.SNIPER: os.path.join(IMAGE_DIR, WEAPON_DIR, 'sniper.png')
 }
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {

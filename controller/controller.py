@@ -11,7 +11,7 @@ import pygame as pg
 import const
 from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
                            EventResumeModel, EventSelectCharacter, EventSelectParty,
-                           EventStartGame, EventUnconditionalTick)
+                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam, EventGameOver)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
 
@@ -90,6 +90,8 @@ class Controller:
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
                     ev_manager.post(EventSelectCharacter(character_type=character_type))
+                if key == const.CHANGE_TEAM_VISION:
+                    ev_manager.post(EventViewChangeTeam())
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
@@ -173,3 +175,4 @@ class Controller:
         # Listeners for TimerManager
         ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
         ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
+        ev_manager.register_listener(EventGameOver, TimerManager.handle_game_over)

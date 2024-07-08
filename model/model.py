@@ -10,11 +10,12 @@ import pygame as pg
 
 import const
 import const.map
+import const.model
 from api.internal import call_ai, load_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
-                           EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
-                           EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,
-                           EventUnconditionalTick)
+                           EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
+                           EventQuit, EventRestartGame, EventResumeModel, EventSpawnCharacter,
+                           EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -50,13 +51,11 @@ class Model:
 
         self.global_clock: pg.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock = Clock()
-        """The clock since game start, and will be paused when the game pause."""
 
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.grid: Grid = Grid(900, 900)
-        self.teams: list[Team]
+        self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
 
@@ -97,6 +96,9 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
+        self.__game_clock: Clock = Clock()
+        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
+
     def __handle_every_tick(self, _: EventEveryTick):
         """
         Do actions that should be executed every tick.
@@ -134,6 +136,12 @@ class Model:
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
 
+    def handle_game_over(self, _: EventGameOver):
+        """
+        End the game and show scoreboard on the settlement screen
+        """
+        self.state = const.State.SETTLEMENT
+
     def __register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
@@ -150,7 +158,8 @@ class Model:
             tower.enemy_out_range(event.character)
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_in_range(event.character)
-        event.character.team.update_visible_entities_list(event.character)
+        if event.original_pos.distance_to(event.character.position) > 0.1:
+            event.character.team.update_vision(event.character)
 
     def __restart_game(self, _: EventRestartGame):
         get_event_manager().post(EventInitialize())
@@ -168,6 +177,7 @@ class Model:
         ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
         ev_manager.register_listener(EventRestartGame, self.__restart_game)
+        ev_manager.register_listener(EventGameOver, self.handle_game_over)
 
     def get_time(self):
         return self.__game_clock.get_time()
@@ -182,4 +192,7 @@ class Model:
             ev_manager.post(EventUnconditionalTick())
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
+                running_time = self.get_time()
+                if running_time >= const.model.GAME_TIME:
+                    ev_manager.post(EventGameOver())
             self.global_clock.tick(const.FPS)

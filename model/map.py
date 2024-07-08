@@ -54,7 +54,7 @@ class Map:
         """
         x, y = cell
         return self.map_list[x][y]
-    
+
     def get_position_type(self, position: pg.Vector2) -> int:
         """
         Get the type of terrain at a certain position on the map
@@ -69,8 +69,8 @@ class Map:
         Cell takes in *integer* coordinates in range [0, Map.size)
         """
         return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
-                        and self.get_cell_type(cell) != const.MAP_OBSTACLE)
-    
+                and self.get_cell_type(cell) != const.MAP_OBSTACLE)
+
     def is_position_passable(self, position: pg.Vector2) -> bool:
         """
         Checks if a cell is open for characters to pass through
@@ -101,7 +101,7 @@ class Map:
         did not find a path.
         """
         if (not self.is_position_passable(position_begin) or
-            not self.is_position_passable(position_end)):
+                not self.is_position_passable(position_end)):
             return None
 
         max_x, max_y = self.size

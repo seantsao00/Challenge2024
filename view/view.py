@@ -9,7 +9,9 @@ import cv2
 import pygame as pg
 
 import const
-from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick
+import const.model
+import const.visual
+from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick, EventViewChangeTeam
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
                          HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
@@ -20,7 +22,7 @@ class View:
     The class that presents the actual game content on the screen.
     """
 
-    def __init__(self, vision_of):
+    def __init__(self):
         """
         Initialize the View instance upon its creation.
 
@@ -34,6 +36,10 @@ class View:
                        const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
         window_h = int(min(screen_info.current_h, screen_info.current_w /
                        const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
+
+        self.window_w = window_w
+        self.window_h = window_h
+
         self.__screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
@@ -50,6 +56,7 @@ class View:
 
         self.__entities: list[EntityView] = []
 
+        self.vision_of = 0
         self.__background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -70,17 +77,6 @@ class View:
                 self.__arena, int(model.map.images[i]), (x, y), picture))
 
         EntityView.init_convert()
-
-        if vision_of == 'all':
-            self.vision_of = const.VIEW_EVERYTHING
-        else:
-            try:
-                self.vision_of = int(vision_of)
-            except ValueError:
-                for i, team_name in enumerate(model.team_names):
-                    if vision_of == team_name:
-                        self.vision_of = i+1
-                        break
 
         self.register_listeners()
 
@@ -131,6 +127,8 @@ class View:
             self.render_play()
         elif model.state is const.State.SELECT_PARTY:
             self.render_party_selection()
+        elif model.state is const.State.SETTLEMENT:
+            self.render_settlement()
         pg.display.flip()
 
     def render_cover(self):
@@ -145,6 +143,13 @@ class View:
     def render_party_selection(self):
         """Render party selection process"""
         pass
+
+    def render_settlement(self):
+        """Render the game settlement screen"""
+        # setting up a temporary screen till we have a scoreboard image and settlement screen
+        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
+        self.__screen.blit(text_surface, (100, 100))
 
     def render_play(self):
         """Render scenes when the game is being played"""
@@ -162,16 +167,16 @@ class View:
 
         objects += self.__background_images
 
-        if self.vision_of == const.VIEW_EVERYTHING:
+        if self.vision_of == 0:
             for entity in self.__entities:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            for entity in self.__entities:
-                if (entity.entity in my_team.towers or
-                    entity.entity in my_team.character_list or
-                        entity.entity in my_team.visible_entities_list):
-                    objects.append(entity)
+            mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
+            objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
+            for obj in self.__entities:
+                if my_team.vision.inside_vision(obj.entity) is True:
+                    objects.append(obj)
 
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
@@ -179,8 +184,18 @@ class View:
 
         self.__screen.blit(self.__arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
 
+        # show time remaining
+        time_remaining = int(const.model.GAME_TIME - model.get_time())
+        (min, sec) = divmod(time_remaining, 60)
+        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
+        self.__screen.blit(time_remaining_surface, (100, 100))
+
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
+
+    def change_vision_of(self, event: EventViewChangeTeam):
+        self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
 
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
@@ -188,6 +203,7 @@ class View:
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
 
     def display_fps(self):
         """Display the current fps on the window caption."""

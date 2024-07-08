@@ -26,7 +26,7 @@ class HealthView(EntityObject):
         top = (self.entity.position.x - entity_size) * self.resize_ratio
         left = (self.entity.position.y - entity_size -
                 const.HEALTH_BAR_UPPER) * self.resize_ratio
-        pg.draw.rect(self.canvas, (0, 0, 0),
-                     (top, left, entity_size * 2 * self.resize_ratio, 3*self.resize_ratio))
+        pg.draw.rect(self.canvas, (0, 0, 0),    
+                     (top, left, entity_size * 2 * self.resize_ratio, 2 * self.resize_ratio))
         pg.draw.rect(self.canvas, (255, 0, 0),
-                     (top, left, blood_width, 3*self.resize_ratio))
+                     (top, left, blood_width, 2 * self.resize_ratio))

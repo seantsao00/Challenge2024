@@ -26,33 +26,33 @@ class CharacterAttribute(LivingEntityAttribute):
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(
-    speed=2,
+    speed=1,
     attack_range=10,
-    attack_damage=75,
+    attack_damage=3,
     max_health=500,
-    vision=30,
+    vision=15,
     ability_cd=1.5,
     attack_speed=0.8,
     ability_variables=5
 )
 
 RANGER_ATTRIBUTE = CharacterAttribute(
-    speed=2,
+    speed=0.7,
     attack_range=25,
     attack_damage=50,
     max_health=200,
-    vision=30,
+    vision=10,
     ability_cd=1.5,
     attack_speed=1,
     ability_variables=100
 )
 
 SNIPER_ATTRIBUTE = CharacterAttribute(
-    speed=1.5,
+    speed=0.4,
     attack_range=50,
     attack_damage=150,
     max_health=300,
-    vision=50,
+    vision=10,
     ability_cd=1.5,
     attack_speed=0.5,
     ability_variables=None

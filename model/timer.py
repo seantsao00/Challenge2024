@@ -5,7 +5,7 @@ from typing import Callable
 
 import pygame as pg
 
-from event_manager import EventPauseModel, EventResumeModel
+from event_manager import EventGameOver, EventPauseModel, EventResumeModel
 
 
 class TimerManager:
@@ -39,6 +39,11 @@ class TimerManager:
     def resume_all_timer(cls, _: EventResumeModel):
         for timer in cls.__timers.values():
             timer.resume()
+
+    @classmethod
+    def handle_game_over(cls, _: EventGameOver):
+        for timer in cls.__timers.values():
+            timer.pause()
 
 
 class Timer:
@@ -95,7 +100,7 @@ class Timer:
         """Resume the timer."""
         if not self.__running:
             pg.time.set_timer(self.event_type, self.remaining_time)
-            self.remaining_time = None
+            self.last_time = time.time()
             self.__running = True
 
     def set_interval(self, interval: int):

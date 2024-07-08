@@ -33,8 +33,8 @@ def main():
                         help='If added, the view range of entities will be shown')
     parser.add_argument('-a', '--show-attack-range', action='store_true',
                         help='If added, the attack range of entities will be shown')
-    parser.add_argument('--vision-of', default='all',
-                        help='Display the vision of which player. If not assigned or assigned "all", all visible entities are displayed. Team id or team name can be assigned.')
+    # parser.add_argument('--vision-of', default='all',
+    #                     help='Display the vision of which player. If not assigned or assigned "all", all visible entities are displayed. Team id or team name can be assigned.')
     parser.add_argument('-m', '--music', action='store_true', help='play the BGM')
 
     args = parser.parse_args()
@@ -48,7 +48,7 @@ def main():
     instances_manager.register_model(model)
 
     Controller()
-    View(args.vision_of)
+    View()
 
     if args.music:
         BackgroundMusic()
