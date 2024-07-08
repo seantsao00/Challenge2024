@@ -21,12 +21,14 @@ class CharacterType(Enum):
 @dataclass(kw_only=True)
 class CharacterAttribute(LivingEntityAttribute):
     speed: float
+    hitbox_radius: float
     ability_cd: float | None
     ability_variables: Optional[Any]
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(
     speed=2,
+    hitbox_radius=6.25,
     attack_range=10,
     attack_damage=75,
     max_health=500,
@@ -38,6 +40,7 @@ MELEE_ATTRIBUTE = CharacterAttribute(
 
 RANGER_ATTRIBUTE = CharacterAttribute(
     speed=2,
+    hitbox_radius=6.25,
     attack_range=25,
     attack_damage=50,
     max_health=200,
@@ -49,6 +52,7 @@ RANGER_ATTRIBUTE = CharacterAttribute(
 
 SNIPER_ATTRIBUTE = CharacterAttribute(
     speed=1.5,
+    hitbox_radius=6.25,
     attack_range=50,
     attack_damage=150,
     max_health=300,
