@@ -2,6 +2,8 @@
 This module defines constants associated with controller.
 """
 
+from enum import Enum, auto
+
 import pygame as pg
 
 from const.character import CharacterType
@@ -24,28 +26,27 @@ CHANGE_TEAM_VISION = pg.K_TAB
 
 PAUSE_BUTTON = pg.K_ESCAPE
 
-START_BUTTON = pg.K_SPACE
+LEAVE_COVER_BUTTON = pg.K_SPACE
 
-"""input buttons defined for party-selection process"""
-PARTY_SELECT_BUTTONS_MAP = {
-    'team1': {
-        'left': pg.K_r,
-        'right': pg.K_f,
-        'enter': pg.K_v
-    },
-    'team2': {
-        'left': pg.K_t,
-        'right': pg.K_g,
-        'enter': pg.K_b
-    },
-    'team3': {
-        'left': pg.K_y,
-        'right': pg.K_h,
-        'enter': pg.K_n
-    },
-    'team4': {
-        'left': pg.K_u,
-        'right': pg.K_j,
-        'enter': pg.K_m
-    }
+
+class PartySelectInput(Enum):
+    CONFIRM = auto()
+    CHANGE = auto()
+
+
+PARTY_SELECT_BUTTONS_MAP: dict[int, tuple[PartySelectInput, tuple[int, int] | None]] = {
+    pg.K_a: (PartySelectInput.CHANGE, (1, -1)),
+    pg.K_d: (PartySelectInput.CHANGE, (1, 1)),
+    pg.K_f: (PartySelectInput.CHANGE, (2, -1)),
+    pg.K_h: (PartySelectInput.CHANGE, (2, 1)),
+    pg.K_j: (PartySelectInput.CHANGE, (3, -1)),
+    pg.K_l: (PartySelectInput.CHANGE, (3, 1)),
+    pg.K_LEFT: (PartySelectInput.CHANGE, (4, -1)),
+    pg.K_RIGHT: (PartySelectInput.CHANGE, (4, 1)),
+    pg.K_SPACE: (PartySelectInput.CONFIRM, None),
+    pg.K_RETURN: (PartySelectInput.CONFIRM, None)
 }
+"""
+Input buttons defined for party-selection process
+structure: (operation, (team, operation))
+"""

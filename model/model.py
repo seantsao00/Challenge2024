@@ -15,14 +15,15 @@ import const.model
 from api.internal import load_ai, start_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventResumeModel, EventSpawnCharacter, EventStartGame,
-                           EventUnconditionalTick)
+                           EventQuit, EventResumeModel, EventSelectParty, EventSpawnCharacter,
+                           EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
+from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
 from util import log_critical
@@ -62,6 +63,7 @@ class Model:
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
         self.grid: Grid = Grid(900, 900)
+        self.party_selector: PartySelector = PartySelector(len(team_files))
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
@@ -85,10 +87,12 @@ class Model:
 
         self.teams: list[Team] = []
 
+        selected_parties = self.party_selector.selected_parties()
+
         for i, team_master in enumerate(self.__team_files_names):
             new_position = pg.Vector2(self.map.fountains[i])
             team = Team(team_master == 'human',
-                        [party for party in const.PartyType if party is not const.PartyType.NEUTRAL][i],
+                        selected_parties[i],
                         team_master)
             self.teams.append(team)
             self.__tower.append(Tower(new_position, team, True))
@@ -122,39 +126,6 @@ class Model:
                     log_critical(
                         f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
-    def __handle_quit(self, _: EventQuit):
-        """
-        Exit the main loop.
-        """
-        self.__running = False
-
-    def __handle_pause(self, _: EventPauseModel):
-        """
-        Pause the game
-        """
-        self.state = const.State.PAUSE
-        self.pause_menu.enable_menu()
-
-    def __handle_resume(self, _: EventResumeModel):
-        """
-        Resume the game
-        """
-        self.state = const.State.PLAY
-        self.pause_menu.disable_menu()
-
-    def __handle_start(self, _: EventStartGame):
-        """
-        Start the game and post EventInitialize
-        """
-        ev_manager = get_event_manager()
-        ev_manager.post(EventInitialize())
-
-    def handle_game_over(self, _: EventGameOver):
-        """
-        End the game and show scoreboard on the settlement screen
-        """
-        self.state = const.State.SETTLEMENT
-
     def __register_entity(self, event: EventCreateEntity):
         self.entities.append(event.entity)
         if isinstance(event.entity, Character):
@@ -174,20 +145,6 @@ class Model:
         if event.original_pos.distance_to(event.character.position) > 0.1:
             event.character.team.update_vision(event.character)
 
-    def __register_listeners(self):
-        """Register every listeners of this object into the event manager."""
-        ev_manager = get_event_manager()
-        ev_manager.register_listener(EventInitialize, self.__initialize)
-        ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
-        ev_manager.register_listener(EventQuit, self.__handle_quit)
-        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
-        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
-        ev_manager.register_listener(EventStartGame, self.__handle_start)
-        ev_manager.register_listener(EventCreateEntity, self.__register_entity)
-        ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
-        ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
-        ev_manager.register_listener(EventGameOver, self.handle_game_over)
-
     def get_time(self):
         return self.__game_clock.get_time()
 
@@ -205,3 +162,54 @@ class Model:
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
             self.dt = self.global_clock.tick(const.FPS) / 1000
+
+    def __register_listeners(self):
+        """Register every listeners of this object into the event manager."""
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(EventInitialize, self.__initialize)
+        ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
+        ev_manager.register_listener(EventQuit, self.__handle_quit)
+        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
+        ev_manager.register_listener(EventStartGame, self.__handle_start)
+        ev_manager.register_listener(EventCreateEntity, self.__register_entity)
+        ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
+        ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
+        ev_manager.register_listener(EventGameOver, self.handle_game_over)
+        ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
+
+    def __handle_quit(self, _: EventQuit):
+        """
+        Exit the main loop.
+        """
+        self.__running = False
+
+    def __handle_pause(self, _: EventPauseModel):
+        """
+        Pause the game.
+        """
+        self.state = const.State.PAUSE
+        self.pause_menu.enable_menu()
+
+    def __handle_resume(self, _: EventResumeModel):
+        """
+        Resume the game.
+        """
+        self.state = const.State.PLAY
+        self.pause_menu.disable_menu()
+
+    def __handle_start(self, _: EventStartGame):
+        """
+        Start the game and post EventInitialize.
+        """
+        ev_manager = get_event_manager()
+        ev_manager.post(EventInitialize())
+
+    def handle_game_over(self, _: EventGameOver):
+        """
+        End the game and show scoreboard on the settlement screen.
+        """
+        self.state = const.State.SETTLEMENT
+
+    def __handle_select_party(self, _: EventSelectParty):
+        self.state = const.State.SELECT_PARTY

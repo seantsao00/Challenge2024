@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import (EventGameOver, EventHumanInput, EventInitialize, EventPauseModel,
-                           EventQuit, EventResumeModel, EventSelectCharacter, EventSelectParty,
-                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam)
+from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
+                           EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
+                           EventSelectParty, EventUnconditionalTick, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
 from util import log_info
@@ -154,8 +154,8 @@ class Controller:
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 # For pausing the game
-                if pg_event.key == const.START_BUTTON:
-                    ev_manager.post(EventStartGame())
+                if pg_event.key == const.LEAVE_COVER_BUTTON:
+                    ev_manager.post(EventSelectParty())
 
     def ctrl_select_party(self, pg_events: list[pg.Event]):
         """Select party for each team."""
@@ -163,11 +163,9 @@ class Controller:
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 key = pg_event.key
-                for i, controls in enumerate(list(const.PARTY_SELECT_BUTTONS_MAP)):
-                    if key == controls['left']:
-                        ev_manager.post(EventSelectParty(index=i, increase=False))
-                    elif key == controls['right']:
-                        ev_manager.post(EventSelectParty(index=i, increase=True))
+                if key in const.PARTY_SELECT_BUTTONS_MAP:
+                    ev_manager.post(EventChangeParty(
+                        select_input=const.PARTY_SELECT_BUTTONS_MAP[key]))
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
