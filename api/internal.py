@@ -245,8 +245,15 @@ class Internal(prototype.API):
                 path = get_model().map.find_path(inter.position, destination)
                 inter.set_move_position(path)
 
-    def action_move_clear(self, characters: Iterable[prototype.Character]):
-        self.action_move_along(characters, pg.Vector2(0, 0))
+    def action_clear(self, characters: Iterable[prototype.Character]):
+        enforce_type('characters', characters, Iterable)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+
+        for ch in characters:
+            internal = self.__access_character(ch)
+            if internal == None:
+                continue
+            internal.set_move_stop()
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
         enforce_type('characters', characters, Iterable)
@@ -294,6 +301,12 @@ class Internal(prototype.API):
             return
 
         internal_tower.character_type = spawn_type
+
+    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2):
+        enforce_type('characters', characters, Iterable)
+        enforce_type('target', target, pg.Vector2)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
 
 
 class TimeoutException(BaseException):

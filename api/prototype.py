@@ -182,5 +182,10 @@ class API:
         """
         pass
 
+    def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
+        """改變特定塔生成的兵種"""
+        pass
+
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
-        raise NotImplementedError
+        """將各角色依據其與目標的距離排序，若距離一樣則隨意排序。"""
+        pass
