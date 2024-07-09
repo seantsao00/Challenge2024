@@ -38,14 +38,11 @@ class Internal(prototype.API):
         self.team_id = team_id
         self.__character_map = {}
         self.__tower_map = {}
-        self.__action_map: dict[int, tuple[model.Character,
-                                           model.CharacterMovingState, dict[str, Any]]] = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
 
     def clear(self):
         self.__character_map = {}
-        self.__action_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
@@ -61,6 +58,33 @@ class Internal(prototype.API):
     def __recast_id(cls, id: int):
         return id - 1
 
+    def __convert_character(self, internal: model.Character) -> prototype.Character:
+        """
+        Convert a `model.Character` to `api.Character`.
+        """
+        character_class = prototype.CharacterClass.unknown
+        if isinstance(internal, model.Melee):
+            character_class = prototype.CharacterClass.melee
+        elif isinstance(internal, model.Ranger):
+            character_class = prototype.CharacterClass.ranger
+        elif isinstance(internal, model.Sniper):
+            character_class = prototype.CharacterClass.sniper
+        else:
+            raise GameError("Unknown character type")
+        extern = prototype.Character(
+            _id=internal.id,
+            _type=character_class,
+            _position=internal.position,
+            _speed=internal.attribute.attack_speed,
+            _attack_range=internal.attribute.attack_range,
+            _damage=internal.attribute.attack_damage,
+            _vision=internal.attribute.vision,
+            _health=internal.health,
+            _max_health=internal.attribute.max_health,
+            _team_id=Internal.__cast_id(internal.team.team_id)
+        )
+        return extern
+
     def __register_character(self, internal: model.Character) -> prototype.Character:
         """
         Register a `model.Character` to `api.Character`.
@@ -69,34 +93,14 @@ class Internal(prototype.API):
         """
 
         if internal.id not in self.__character_map:
-            character_class = prototype.CharacterClass.unknown
-            if isinstance(internal, model.Melee):
-                character_class = prototype.CharacterClass.melee
-            elif isinstance(internal, model.Ranger):
-                character_class = prototype.CharacterClass.ranger
-            elif isinstance(internal, model.Sniper):
-                character_class = prototype.CharacterClass.sniper
-            else:
-                raise GameError("Unknown character type")
-            extern = prototype.Character(
-                _id=internal.id,
-                _type=character_class,
-                _position=internal.position,
-                _speed=internal.attribute.attack_speed,
-                _attack_range=internal.attribute.attack_range,
-                _damage=internal.attribute.attack_damage,
-                _vision=internal.attribute.vision,
-                _health=internal.health,
-                _max_health=internal.attribute.max_health,
-                _team_id=Internal.__cast_id(internal.team.team_id)
-            )
+            extern = self.__convert_character(internal)
             self.__character_map[internal.id] = extern
             self.__reverse_character_map[id(extern)] = internal
         return self.__character_map[internal.id]
 
-    def __register_tower(self, internal: model.Tower) -> prototype.Tower:
+    def __convert_tower(self, internal: model.Tower) -> prototype.Tower:
         """
-        Register a `model.Tower` to `api.Tower` like above.
+        Convert a `model.Tower` to `api.Tower`
         """
         if internal.id not in self.__tower_map:
             character_class = prototype.CharacterClass.unknown
@@ -121,6 +125,14 @@ class Internal(prototype.API):
                 _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.id),
                 _spwan_character_type=character_class
             )
+        return extern
+
+    def __register_tower(self, internal: model.Tower) -> prototype.Tower:
+        """
+        Register a `model.Tower` to `api.Tower` like above.
+        """
+        if internal.id not in self.__tower_map:
+            extern = self.__convert_tower(internal)
             self.__tower_map[internal.id] = extern
             self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
@@ -175,34 +187,34 @@ class Internal(prototype.API):
         return team.points
 
     def look_characters(self) -> list[prototype.Character]:
-        team = self.__team()
+        vision = self.__team().vision
+        entities = get_model().entities
         character_list: list[prototype.Character] = []
-        for entity in team.visible_entities_list:
-            if not isinstance(entity, model.Tower):
+        for entity in entities:
+            if not isinstance(entity, model.Tower) and vision.mask.get_at((int(entity.position.x / const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)))[3] == 0:
                 character_list.append(self.__register_character(entity))
         return character_list
 
     def look_towers(self) -> list[prototype.Tower]:
-        team = self.__team()
+        vision = self.__team().vision
+        entities = get_model().entities
         tower_list: list[prototype.Tower] = []
-        for entity in team.visible_entities_list:
-            if isinstance(entity, model.Tower):
+        for entity in entities:
+            if isinstance(entity, model.Tower) and vision.mask.get_at((int(entity.position.x / const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)))[3] == 0:
                 tower_list.append(self.__register_tower(entity))
         return tower_list
 
-    def look_grid(self) -> list[list[int]]:
-        team = self.__team()
-        # TODO: Find an efficient way to find vision
+    def look_grid(self) -> list[list[bool]]:
+        mask = self.__team().vision.mask
+        vision_grid = pg.surfarray.array_alpha(mask)
+        vision_grid[vision_grid == 0] = 1
+        vision_grid[vision_grid == 255] = 0
+        return vision_grid.tolist()
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         enforce_type('characters', characters, Iterable)
         enforce_type('direction', direction, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
-        for character, action, kwargs in self.__action_map.values():
-            if action == model.CharacterMovingState.TO_DIRECTION:
-                character.set_move_direction(**kwargs)
-            elif action == model.CharacterMovingState.TO_POSITION:
-                character.set_move_position(**kwargs)
 
         for ch in characters:
             internal = self.__access_character(ch)
@@ -220,9 +232,7 @@ class Internal(prototype.API):
         for inter in internals:
             inter.set_move_stop()
         for inter in internals:
-            print(inter.position)
             path = get_model().map.find_path(inter.position, destination)
-            print(inter.position, path[:5])
             inter.set_move_position(path)
 
     def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
@@ -252,6 +262,18 @@ class Internal(prototype.API):
             if internal is None:
                 continue
             internal.attack(target_internal)
+
+    def change_spawn_type(self, tower: model.Tower, spawn_type: prototype.CharacterClass):
+        """change the type of character the tower spawns"""
+        if not isinstance(spawn_type, prototype.Character):
+            raise TypeError("Invalid type of spawn_type.")
+        if not isinstance(tower, model.Tower):
+            raise TypeError("Invalid type of tower.")
+        internal_tower = self.__access_tower(tower)
+        if internal_tower is None:
+            return
+
+        internal_tower.character_type = spawn_type
 
 
 class Timer():

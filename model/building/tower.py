@@ -143,3 +143,7 @@ class Tower(LivingEntity):
     @property
     def character_type(self) -> const.CharacterType:
         return self.__character_type
+
+    @property
+    def period(self) -> int:
+        return self.__period

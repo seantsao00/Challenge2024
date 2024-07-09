@@ -3,11 +3,13 @@ from __future__ import annotations
 from itertools import chain
 from typing import TYPE_CHECKING
 
+import pygame as pg
+
 import const
 import const.team
-from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower)
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
+                           EventEveryTick, EventHumanInput, EventSelectCharacter,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building import Tower
 from model.character import Character, Ranger
@@ -38,6 +40,63 @@ class NeutralTeam:
         return self.__party
 
 
+class Team_Vision:
+    def __init__(self):
+        self.N = int(const.ARENA_SIZE[0] / const.VISION_BLOCK_SIZE)
+        self.M = int(const.ARENA_SIZE[1] / const.VISION_BLOCK_SIZE)
+        self.mask: pg.Surface = pg.Surface((self.N, self.M), pg.SRCALPHA)
+        self.mask.fill([0, 0, 0])
+        self.mask.set_alpha(192)
+        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)]
+                                                 for __ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
+        for x in range(self.N):
+            for y in range(self.M):
+                self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
+                                                                   const.TEAM_VISION_BLOCK] += 1
+
+    def transfer_to_pixel(self, position: pg.Vector2):
+        return pg.Vector2(int(position.x / const.VISION_BLOCK_SIZE), int(position.y / const.VISION_BLOCK_SIZE))
+
+    def transfer_to_heuristic(self, position: pg.Vector2):
+        return pg.Vector2(int(position.x / const.VISION_BLOCK_SIZE / const.TEAM_VISION_BLOCK), int(position.y / const.VISION_BLOCK_SIZE / const.TEAM_VISION_BLOCK))
+
+    def inside_vision(self, entity: Entity):
+        position = self.transfer_to_pixel(entity.position)
+        return self.mask.get_at(position.x, position.y)[3] == 0
+
+    def get_mask(self):
+        return self.mask
+
+    def heuristic_test(self, position: pg.Vector2):
+        bx, by = self.transfer_to_heuristic(position)
+        bx, by = int(bx), int(by)
+        for x in range(max(0, bx - 1), min(len(self.vision_not_open), bx + 2)):
+            for y in range(max(0, by - 1), min(len(self.vision_not_open[0]), by + 2)):
+                if self.vision_not_open[x][y] > 0:
+                    return True
+        return False
+
+    def brute_modify(self, position: pg.Vector2, radius: float):
+        real_position = self.transfer_to_pixel(position)
+        real_radius = radius / const.VISION_BLOCK_SIZE
+        for x in range(max(0, int(real_position.x - real_radius)),
+                       min(self.N, int(position.x + real_radius + 1))):
+            for y in range(max(0, int(real_position.y - real_radius)),
+                           min(self.M, int(position.y + real_radius + 1))):
+                if position.distance_to(pg.Vector2(const.VISION_BLOCK_SIZE * (x + 0.5), const.VISION_BLOCK_SIZE * (y + 0.5))) <= radius:
+                    a = self.mask.get_at((x, y))
+                    if a[3] != 0:
+                        a[3] = 0
+                        self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
+                                                                           const.TEAM_VISION_BLOCK] -= 1
+                        self.mask.set_at((x, y), a)
+
+    def update_vision(self, entity: LivingEntity):
+        if entity.alive is False or self.heuristic_test(entity.position) is False:
+            return
+        self.brute_modify(entity.position, entity.attribute.vision)
+
+
 class Team(NeutralTeam):
 
     """
@@ -64,10 +123,10 @@ class Team(NeutralTeam):
         self.__points: int = 0
         self.__towers: set[Tower] = set()
         self.character_list: list[Character] = []
-        self.__visible_entities_list: set[Entity] = set()
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
+        self.vision = Team_Vision()
         self.register_listeners()
 
     def handle_input(self, event: EventHumanInput):
@@ -127,35 +186,17 @@ class Team(NeutralTeam):
             self.__controlling = None
         if event.character in self.character_list:
             self.character_list.remove(event.character)
-        if event.character in self.visible_entities_list:
-            self.visible_entities_list.remove(event.character)
 
     def handle_create_tower(self, event: EventCreateTower):
-        self.update_visible_entities_list(event.tower)
+        if event.tower.team is self:
+            self.update_vision(event.tower)
 
     def handle_others_character_spawn(self, event: EventSpawnCharacter):
-        self.update_visible_entities_list(event.character)
+        if event.character.team is self:
+            self.update_vision(event.character)
 
-    def update_visible_entities_list(self, entity: LivingEntity):
-        """
-        This function updates the current entities visible to the instance of Team.
-        """
-        if not entity.alive:
-            return
-
-        model = get_model()
-
-        if entity.team is self:
-            for other_entity in model.entities:
-                if (other_entity.team is not self
-                        and other_entity.position.distance_to(entity.position) <= entity.attribute.vision):
-                    self.visible_entities_list.add(other_entity)
-        else:
-            for my_entity in chain(self.__towers, self.character_list):
-                if (my_entity.alive
-                        and entity.position.distance_to(my_entity.position) <= my_entity.attribute.vision):
-                    self.visible_entities_list.add(entity)
-                    break
+    def update_vision(self, entity: LivingEntity):  # to do
+        self.vision.update_vision(entity)
 
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower):
@@ -185,6 +226,6 @@ class Team(NeutralTeam):
     def towers(self) -> const.PartyType:
         return self.__towers
 
-    @property
-    def visible_entities_list(self):
-        return self.__visible_entities_list
+    # @property
+    # def visible_entities_list(self):
+    #     return self.__visible_entities_list
