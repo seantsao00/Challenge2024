@@ -4,7 +4,7 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os
-from multiprocessing import Process
+import threading
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -60,7 +60,7 @@ class Model:
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
-        self.__team_thread: list[Process] = []
+        self.__team_thread: list[threading.Thread] = [None] * len(team_files)
         self.__team_files_names: list[str] = team_files
         self.show_view_range: bool = show_view_range
         self.show_attack_range: bool = show_attack_range
@@ -111,11 +111,16 @@ class Model:
         self.__ticks += 1
         self.__ticks %= const.TICKS_PER_CYCLE
         if self.__ticks == 0:
-            self.__team_thread = [start_ai(i) for i in range(len(self.teams))]
-        elif self.__ticks + 1 == const.TICKS_PER_CYCLE:
-            for t in self.__team_thread:
-                assert not t.is_alive()
-            self.__team_thread = []
+            for i in range(len(self.teams)):
+                if self.__team_thread[i] == None or not self.__team_thread[i].is_alive():
+                    self.__team_thread[i] = start_ai(i)
+                else:
+                    print(
+                        f"\033[93m[API] WARNING: AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.\033[0m")
+        # elif self.__ticks + 1 == const.TICKS_PER_CYCLE:
+        #     for t in self.__team_thread:
+        #         assert not t.is_alive()
+        #     self.__team_thread = []
 
     def __handle_quit(self, _: EventQuit):
         """
