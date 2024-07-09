@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from instances_manager import get_event_manager, get_model
 from event_manager import EventAttack
 from model.character.character import Character
 
@@ -35,6 +36,8 @@ class Melee(Character):
         if self.__defense > 0:
             new_damage = 0.5 * event.attacker.attribute.attack_damage
             self.__defense -= 1
+            if self.__defense == 0:
+                self.abilities_time = get_model().get_time()
         else:
             new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
@@ -43,3 +46,4 @@ class Melee(Character):
 
     def ability(self, *args, **kwargs):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables
+        self.abilities_time = 1e9
