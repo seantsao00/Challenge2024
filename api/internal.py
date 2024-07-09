@@ -58,6 +58,17 @@ class Internal(prototype.API):
     def __recast_id(cls, id: int):
         return id - 1
 
+    @classmethod
+    def __cast_character_type(cls, type: int):
+        if type == prototype.CharacterClass.melee:
+            return const.CharacterType.MELEE
+        elif type == prototype.CharacterClass.ranger:
+            return const.CharacterType.RANGER
+        elif type == prototype.CharacterClass.sniper:
+            return const.CharacterType.SNIPER
+        else:
+            raise ValueError
+
     def __convert_character(self, internal: model.Character) -> prototype.Character:
         """
         Convert a `model.Character` to `api.Character`.
@@ -302,7 +313,7 @@ class Internal(prototype.API):
         if not self.__is_controllable(internal_tower):
             return
 
-        internal_tower.character_type = spawn_type
+        internal_tower.update_character_type(Internal.__cast_character_type(spawn_type))
 
     def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2):
         enforce_type('characters', characters, Iterable)
