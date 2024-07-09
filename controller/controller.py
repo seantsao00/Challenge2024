@@ -96,6 +96,7 @@ class Controller:
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
                 x, y = self.transform(x, y)
+                y -= const.DRAW_DISPLACEMENT_Y
 
                 if pg_event.button == 1:  # Left mouse button
                     print(f"Mouse click position: ({x}, {y})")

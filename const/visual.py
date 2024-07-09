@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+import pygame as pg
+
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
@@ -91,3 +93,6 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
 """
 structure: ENTITY_SIZE[entity][state]
 """
+
+DRAW_DISPLACEMENT = pg.Vector2(0, -3.125)
+DRAW_DISPLACEMENT_Y = -3.125

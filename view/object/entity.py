@@ -52,7 +52,8 @@ class EntityView(EntityObject):
         if entity.hidden:
             return
         img = self.images[entity.team.party][entity.entity_type][entity.state]
-        self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
+        self.canvas.blit(img, img.get_rect(center=self.resize_ratio *
+                         (entity.position + const.DRAW_DISPLACEMENT)))
 
     def update(self):
         if not self.exist:

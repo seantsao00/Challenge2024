@@ -39,7 +39,8 @@ class TowerCDView(EntityObject):
 
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
         radius = entity_size / 1.5 * self.resize_ratio
-        position = self.resize_ratio * (entity.position + pg.Vector2(entity_size, entity_size))
+        position = self.resize_ratio * \
+            (entity.position + pg.Vector2(entity_size, entity_size) + const.DRAW_DISPLACEMENT)
         pg.draw.circle(self.canvas, 'black', position, radius, width=int(3 * self.resize_ratio))
         inner_radius = radius - int(3 * self.resize_ratio)
         pg.draw.circle(self.canvas, 'white', position, inner_radius, 0)
@@ -58,5 +59,5 @@ class TowerCDView(EntityObject):
                 weapon_image, (position[0] - inner_radius / 2 ** 0.5, position[1] - inner_radius / 2 ** 0.5))
         cd_remaining = (entity.spawn_timer.interval -
                         entity.spawn_timer.get_remaining_time()) / entity.spawn_timer.interval
-        pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((self.resize_ratio*entity.position + pg.Vector2(self.resize_ratio*entity_size - radius,
+        pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((self.resize_ratio*(entity.position+const.DRAW_DISPLACEMENT) + pg.Vector2(self.resize_ratio*entity_size - radius,
                     self.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2, pi / 2 - pi * 2 * cd_remaining, width=int(3*self.resize_ratio))
