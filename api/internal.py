@@ -245,6 +245,16 @@ class Internal(prototype.API):
                 path = get_model().map.find_path(inter.position, destination)
                 inter.set_move_position(path)
 
+    def action_clear(self, characters: Iterable[prototype.Character]):
+        enforce_type('characters', characters, Iterable)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+
+        for ch in characters:
+            internal = self.__access_character(ch)
+            if internal == None:
+                continue
+            internal.set_move_stop()
+
     def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
         enforce_type('characters', characters, Iterable)
         enforce_type('target', target, prototype.Character)
