@@ -263,12 +263,11 @@ class Internal(prototype.API):
                 continue
             internal.attack(target_internal)
 
-    def change_spawn_type(self, tower: model.Tower, spawn_type: prototype.CharacterClass):
+    def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
-        if not isinstance(spawn_type, prototype.Character):
-            raise TypeError("Invalid type of spawn_type.")
-        if not isinstance(tower, model.Tower):
-            raise TypeError("Invalid type of tower.")
+        enforce_type('tower', tower, prototype.Tower)
+        enforce_type('spawn_type', spawn_type, prototype.CharacterClass)
+
         internal_tower = self.__access_tower(tower)
         if internal_tower is None:
             return
