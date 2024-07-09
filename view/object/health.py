@@ -18,8 +18,6 @@ class HealthView(EntityObject):
 
     def draw(self):
         entity = self.entity
-        if entity.hidden:
-            return
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
         blood_width = (entity.health / entity.attribute.max_health) * \
             entity_size * 2 * self.resize_ratio

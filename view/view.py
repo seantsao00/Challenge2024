@@ -161,14 +161,17 @@ class View:
         self.scoreboard_image = pg.transform.scale(self.scoreboard_image, self.screen_size)
         self.__screen.blit(self.scoreboard_image, (0, 0))
 
-        discarded_entities: list[type[EntityView]] = []
+        discarded_entities: set[type[EntityView]] = set()
 
         for entity in self.__entities:
             if not entity.update():
-                discarded_entities.append(entity)
+                discarded_entities.add(entity)
         self.__entities = [
             entity for entity in self.__entities if entity not in discarded_entities]
 
+        for entity in discarded_entities:
+            entity.unregister_listeners()
+        
         objects: list[type[ObjectBase]] = []
 
         objects += self.__background_images

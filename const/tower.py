@@ -27,17 +27,17 @@ class TowerAttribute(LivingEntityAttribute):
 FOUNTAIN_ATTRIBUTE = TowerAttribute(
     attack_damage=150,
     attack_speed=1,
-    attack_range=40,
+    attack_range=45,
     max_health=1000,
-    vision=40
+    vision=45
 )
 
 NEUTRAL_TOWER_ATTRIBUTE = TowerAttribute(
     attack_damage=150,
     attack_speed=1,
-    attack_range=40,
+    attack_range=45,
     max_health=1000,
-    vision=40
+    vision=45
 )
 
 TOWER_DEFAULT_GENERATE_CHARACTER = CharacterType.RANGER

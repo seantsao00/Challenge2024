@@ -20,9 +20,6 @@ class AbilitiesCDView(EntityObject):
 
     def draw(self):
         entity = self.entity
-        if entity.hidden:
-            return
-
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
         cd_width = min(max(get_model().get_time() - entity.abilities_time, 0), entity.attribute.ability_cd) / \
             entity.attribute.ability_cd * entity_size * 2 * self.resize_ratio

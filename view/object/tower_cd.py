@@ -34,7 +34,7 @@ class TowerCDView(EntityObject):
 
     def draw(self):
         entity = self.entity
-        if entity.hidden or entity.spawn_timer is None:
+        if entity.spawn_timer is None:
             return
 
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
