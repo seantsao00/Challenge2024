@@ -302,6 +302,12 @@ class Internal(prototype.API):
 
         internal_tower.character_type = spawn_type
 
+    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2):
+        enforce_type('characters', characters, Iterable)
+        enforce_type('target', target, pg.Vector2)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
+
 
 class TimeoutException(BaseException):
     """
