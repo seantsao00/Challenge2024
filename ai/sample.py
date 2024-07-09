@@ -7,7 +7,6 @@ import api.prototype as api
 
 
 def every_tick(api: api.API):
-    print("begin compute")
     visible = [character for character in api.look_characters() if character.team_id !=
                api.get_team_id()]
     api.action_move_along(api.get_characters()[:1],
@@ -16,4 +15,3 @@ def every_tick(api: api.API):
     if len(visible):
         api.action_move_to(api.get_characters()[1:], visible[0].position)
         api.action_attack(api.get_characters()[1:], visible[0])
-    print("end compute")

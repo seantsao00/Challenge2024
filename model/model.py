@@ -11,7 +11,7 @@ import pygame as pg
 
 import const
 import const.map
-from api.internal import finalize_ai, load_ai, start_ai
+from api.internal import load_ai, start_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventInitialize, EventPauseModel, EventQuit,
                            EventRestartGame, EventResumeModel, EventSpawnCharacter, EventStartGame,

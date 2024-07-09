@@ -88,7 +88,7 @@ class Internal(prototype.API):
     def __register_character(self, internal: model.Character) -> prototype.Character:
         """
         Register a `model.Character` to `api.Character`.
-        Therefore, API can only manipulate a character using the given interface 
+        Therefore, API can only manipulate a character using the given interface
         while we still know the original `model.Character`.
         """
 
@@ -220,7 +220,8 @@ class Internal(prototype.API):
             internal = self.__access_character(ch)
             if internal == None:
                 continue
-            internal.set_move_direction(direction)
+            with internal.moving_lock:
+                internal.set_move_direction(direction)
 
     def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
         enforce_type('characters', characters, Iterable)
@@ -230,10 +231,10 @@ class Internal(prototype.API):
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if inter != None]
         for inter in internals:
-            inter.set_move_stop()
-        for inter in internals:
-            path = get_model().map.find_path(inter.position, destination)
-            inter.set_move_position(path)
+            with inter.moving_lock:
+                inter.set_move_stop()
+                path = get_model().map.find_path(inter.position, destination)
+                inter.set_move_position(path)
 
     def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
         enforce_type('characters', characters, Iterable)
@@ -261,7 +262,15 @@ class Internal(prototype.API):
             internal = self.__access_character(ch)
             if internal is None:
                 continue
-            internal.attack(target_internal)
+            attackable = internal.attackable(target_internal)
+            if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
+                print(f"[API] team {self.team_id} tried to attack themselves.")
+            elif attackable == model.CharacterAttackResult.COOLDOWN:
+                print(f"[API] team {self.team_id} is attacking too fast!")
+            elif attackable == model.CharacterAttackResult.OUT_OF_RANGE:
+                print(f"[API] team {self.team_id} is attacking too far!")
+            else:
+                internal.attack(target_internal)
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -352,7 +361,3 @@ def start_ai(team_id: int):
     t.start()
     timer.set_timer(1 / FPS * DECISION_TICKS, team_id, t.ident)
     return t
-
-
-def finalize_ai(team_id: int):
-    helpers[team_id].finalize_movement()

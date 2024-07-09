@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
+from threading import Lock
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -20,6 +21,16 @@ class CharacterMovingState(Enum):
     STOPPED = auto()
     TO_POSITION = auto()
     TO_DIRECTION = auto()
+
+
+class CharacterAttackResult(Enum):
+    SUCCESS = auto()
+    OUT_OF_RANGE = auto()
+    COOLDOWN = auto()
+    FRIENDLY_FIRE = auto()
+
+    def __bool__(self):
+        return self == self.SUCCESS
 
 
 class Character(LivingEntity):
@@ -48,7 +59,7 @@ class Character(LivingEntity):
                  state: const.CharacterState):
         self.abilities_time: float = -attribute.ability_cd
         self.__attack_time: float = -1 / attribute.attack_speed
-
+        self.moving_lock = Lock()
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
@@ -113,7 +124,7 @@ class Character(LivingEntity):
                (self.__move_path[it] - self.position).length() <= self.attribute.speed):
             it += 1
         if it == 0:
-            print(f"[API] Character {self.id}: no move for me")
+            print(f"[API] Character {self.id}: no move for me, criteria: {it < len(self.__move_path)}, {game_map.is_position_passable(self.__move_path[it])}, {(self.__move_path[it] - self.position).length() <= self.attribute.speed}")
             return
 
         pos_init = self.position
@@ -131,10 +142,11 @@ class Character(LivingEntity):
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
-        if self.__move_state == CharacterMovingState.TO_DIRECTION:
-            self.__move_toward_direction()
-        elif self.__move_state == CharacterMovingState.TO_POSITION:
-            self.__move_toward_position()
+        with self.moving_lock:
+            if self.__move_state == CharacterMovingState.TO_DIRECTION:
+                self.__move_toward_direction()
+            elif self.__move_state == CharacterMovingState.TO_POSITION:
+                self.__move_toward_position()
 
     def set_move_stop(self) -> bool:
         """Stop movement of the character. Returns True/False on success/failure."""
@@ -151,8 +163,8 @@ class Character(LivingEntity):
         """Set character movement toward a target position. Returns True/False on success/failure."""
         if path is None:
             return False
-        self.__move_state = CharacterMovingState.TO_POSITION
         self.__move_path = path
+        self.__move_state = CharacterMovingState.TO_POSITION
         return True
 
     def take_damage(self, event: EventAttack):
@@ -160,12 +172,21 @@ class Character(LivingEntity):
         if self.health <= 0:
             self.die()
 
-    def attack(self, enemy: Entity):
+    def attackable(self, enemy: Entity) -> CharacterAttackResult:
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
-        if (self.team != enemy.team
-            and dist <= self.attribute.attack_range
-                and (now_time - self.__attack_time) * self.attribute.attack_speed >= 1):
+        if self.team == enemy.team:
+            return CharacterAttackResult.FRIENDLY_FIRE
+        elif dist > self.attribute.attack_range:
+            return CharacterAttackResult.OUT_OF_RANGE
+        elif (now_time - self.__attack_time) * self.attribute.attack_speed < 1:
+            return CharacterAttackResult.COOLDOWN
+        else:
+            return CharacterAttackResult.SUCCESS
+
+    def attack(self, enemy: Entity):
+        now_time = get_model().get_time()
+        if self.attackable(enemy):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
             self.__attack_time = now_time
 
