@@ -1,0 +1,13 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+    - repo: https://github.com/pycqa/isort
+      rev: 5.13.2
+      hooks:
+          - id: isort
+            name: isort (python)
+
+    - repo: https://github.com/hhatto/autopep8
+      rev: v2.3.1 # select the tag or revision you want, or run `pre-commit autoupdate`
+      hooks:
+          - id: autopep8

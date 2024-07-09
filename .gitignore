@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.python-version
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -127,6 +128,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+bin
+lib
+lib64
+include
+pyvenv.cfg
 
 # Spyder project settings
 .spyderproject
@@ -158,3 +164,13 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# VScode
+.vscode/
+
+# Some test files
+test.py
+debug.py
+
+# Windows
+*Zone.Identifier
