@@ -51,6 +51,8 @@ class EntityView(EntityObject):
         if entity.hidden:
             return
         img = self.images[entity.team.party][entity.entity_type][entity.state]
+        if (hasattr(entity, 'view_rotate')):
+            img = pg.transform.rotate(img, entity.view_rotate)
         self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
 
     def update(self):

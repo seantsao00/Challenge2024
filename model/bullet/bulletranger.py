@@ -21,7 +21,8 @@ from model.bullet import Bullet
 
 class BulletRanger(Bullet):
     def __init__(self, target: pg.Vector2 | tuple[float, float], position, team, attacker):
-        super().__init__(position=position, team=team, speed=const.BULLET_RANGER_SPEED, attacker=attacker, damage=damage)
+        super().__init__(position=position, entity_type=const.BulletType.RANGER,
+                         team=team, speed=const.BULLET_RANGER_SPEED, attacker=attacker, damage=damage)
         self.target = target
         damage = const.RANGER_ATTRIBUTE.ability_variables[1]
         self.range = const.RANGER_ATTRIBUTE.ability_variables[0]
@@ -36,3 +37,4 @@ class BulletRanger(Bullet):
             get_event_manager().post(EventRangedBulletDamage(bullet=self, original_pos=original_pos))
         else:
             self.position += self.direction*self.speed
+            self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))

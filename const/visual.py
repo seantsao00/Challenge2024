@@ -3,10 +3,10 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+from const.bullet import BulletType
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
-from const.bullet import BulletType
 
 if TYPE_CHECKING:
     from const.entity import EntityState, EntityType
@@ -51,7 +51,7 @@ CHARACTER_IMAGE: dict[CharacterType, str] = {
 }
 
 BULLET_DIR = 'bullet/'
-BULLET_IMAGE: dict[CharacterType, str] = {
+BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.COMMON: 'common.png',
     BulletType.SNIPER: 'sniper.png',
     BulletType.RANGER: 'ranger.png',
@@ -88,6 +88,11 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 tower: {
                     None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
                 } for tower in TowerType
+            },
+            **{
+                bullet: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
+                } for bullet in BulletType
             }
         }
     ) for party in PartyType

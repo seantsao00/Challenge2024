@@ -7,12 +7,12 @@ import pygame as pg
 import const
 from event_manager import EventBulletCreate
 from instances_manager import get_event_manager, get_model
+from model.bullet import BulletCommon, BulletRanger
 from model.character import Character
-from model.bullet import BulletRanger, BulletCommon
 
 if TYPE_CHECKING:
-    from model.team import Team
     from model.entity import Entity
+    from model.team import Team
 
 
 class Ranger(Character):
@@ -30,13 +30,13 @@ class Ranger(Character):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-            and (now_time - self.attack_time) * self.attribute.attack_speed >= 1):
-            bullet = BulletCommon(position=self.position, 
+                and (now_time - self.attack_time) * self.attribute.attack_speed >= 1):
+            bullet = BulletCommon(position=self.position,
                                   victim=enemy,
-                                  team=self.team, 
-                                  attacker=self, 
+                                  team=self.team,
+                                  attacker=self,
                                   damage=const.RANGER_ATTRIBUTE.attack_damage,
-                                  speed=const.BULLET_COMMON_RANGER_SPEED)
+                                  speed=const.BULLET_RANGER_SPEED)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self.attack_time = now_time
 
@@ -47,12 +47,12 @@ class Ranger(Character):
         dist = self.position.distance_to(origin)
         if dist <= self.attribute.attack_range:
             print("ranged abilities attack")
-            bullet = BulletRanger(position=self.position, 
+            bullet = BulletRanger(position=self.position,
                                   target=origin,
-                                  team=self.team, 
+                                  team=self.team,
                                   attacker=self)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
-        
+
     def cast_ability(self, *args, **kwargs):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:

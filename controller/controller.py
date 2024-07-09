@@ -9,11 +9,12 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSelectCharacter, EventSelectParty,
-                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam, EventGameOver)
+from event_manager import (EventGameOver, EventHumanInput, EventInitialize, EventPauseModel,
+                           EventQuit, EventResumeModel, EventSelectCharacter, EventSelectParty,
+                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
+from model.entity import LivingEntity
 
 if TYPE_CHECKING:
     from model import Character
@@ -110,7 +111,7 @@ class Controller:
                     print(f"Right click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
-                        if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                        if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
                             clicked = entity
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked_entity=clicked, displacement=pg.Vector2(x, y)))

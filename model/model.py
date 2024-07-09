@@ -12,13 +12,14 @@ import const
 import const.map
 import const.model
 from api.internal import call_ai, load_ai
-from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
+from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
+                           EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventRestartGame, EventResumeModel, EventSpawnCharacter,
-                           EventStartGame, EventUnconditionalTick, EventAttack,
-                           EventBulletCreate, EventBulletDisappear, EventBulletDamage, EventRangedBulletDamage)
+                           EventQuit, EventRangedBulletDamage, EventRestartGame, EventResumeModel,
+                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
+from model.bullet import Bullet
 from model.character import Character
 from model.clock import Clock
 from model.grid import Grid
@@ -26,7 +27,6 @@ from model.map import load_map
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
 from model.timer import Timer
-from model.bullet import Bullet
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -167,31 +167,31 @@ class Model:
 
     def __restart_game(self, _: EventRestartGame):
         get_event_manager().post(EventInitialize())
-    
+
     def create_bullet(self, event: EventBulletCreate):
-        if event.bullet.team == self:
-            event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
-                                       function=event.bullet.judge, once=False)
-            self.bullet_pool.append(event.bullet)
+        # if event.bullet.team == self:
+        event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
+                                   function=event.bullet.judge, once=False)
+        self.bullet_pool.append(event.bullet)
 
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
-        event.bullet.timer.__stop()
+        event.bullet.timer._Timer__stop()
         for entity in self.entities:
             if (entity.position-event.bullet.target).length() < event.bullet.range and entity.team is not self:
-                get_event_manager().post(EventAttack(victim=entity, 
-                                                     attacker=event.bullet.attacker, 
+                get_event_manager().post(EventAttack(victim=entity,
+                                                     attacker=event.bullet.attacker,
                                                      damage=event.bullet.damage), channel_id=entity.id)
         get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
 
     def bullet_damage(self, event: EventBulletDamage):
-        event.bullet.timer.__stop()
+        event.bullet.timer._Timer__stop()
         get_event_manager().post(EventAttack(victim=event.bullet.victim,
                                              attacker=event.bullet.attacker,
                                              damage=event.bullet.damage), channel_id=event.bullet.victim.id)
         get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
 
     def bullet_disappear(self, event: EventBulletDisappear):
-        event.bullet.timer.__stop()
+        event.bullet.timer._Timer__stop()
         event.bullet.hidden = True
 
     def __register_listeners(self):

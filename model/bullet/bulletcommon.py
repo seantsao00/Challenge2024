@@ -7,7 +7,7 @@ import pygame as pg
 import const
 import util
 import view
-from event_manager import EventBulletDisappear, EventBulletDamage
+from event_manager import EventBulletDamage, EventBulletDisappear
 from instances_manager import get_event_manager, get_model
 
 if TYPE_CHECKING:
@@ -19,8 +19,9 @@ from model.bullet import Bullet
 
 
 class BulletCommon(Bullet):
-    def __init__(self, position, team, damage, attacker, speed, victim: LivingEntity = None):
-        super().__init__(position=position, team=team, speed=speed, attacker=attacker, damage=damage)
+    def __init__(self, position, team, damage, attacker, speed, victim: LivingEntity = None, entity_type=const.BulletType.COMMON):
+        super().__init__(position=position, entity_type=entity_type,
+                         team=team, speed=speed, attacker=attacker, damage=damage)
         self.victim = victim
 
     def judge(self):
@@ -36,3 +37,4 @@ class BulletCommon(Bullet):
             get_event_manager().post(EventBulletDamage(bullet=self))
         else:
             self.position += self.direction*self.speed
+            self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))

@@ -13,11 +13,13 @@ if TYPE_CHECKING:
 
 from model.bullet import BulletCommon
 
+
 class BulletSniper(BulletCommon):
     def __init__(self, position, team, attacker, victim: LivingEntity = None):
-        super().__init__(position=position, 
-                         team=team, 
-                         speed=const.BULLET_SNIPER_SPEED, 
-                         attacker=attacker, 
+        super().__init__(position=position,
+                         team=team,
+                         speed=const.BULLET_SNIPER_SPEED,
+                         attacker=attacker,
                          damage=const.SNIPER_ATTRIBUTE.ability_variables,
-                         victim=victim)
+                         victim=victim,
+                         entity_type=const.BulletType.SNIPER)
