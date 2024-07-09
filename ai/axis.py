@@ -16,7 +16,7 @@ def every_tick(api: api.API):
     if len(owned) > 0 and st == None:
         st = time.time()
 
-    if time.time() - st > 2 and len(owned) > 2:
+    if st != None and time.time() - st > 2 and len(owned) > 2:
         api.action_move_along([api.get_visible_characters()[1]],
                               pg.Vector2(0, 1))
     elif len(owned) >= 1:
