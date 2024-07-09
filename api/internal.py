@@ -9,6 +9,7 @@ import traceback
 import warnings
 from typing import Any, Iterable
 
+import numpy as np
 import pygame as pg
 
 import api.prototype as prototype
@@ -36,6 +37,7 @@ def enforce_type(name, obj, *args):
 class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
+        self.transform: np.ndarray = None
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
@@ -57,6 +59,47 @@ class Internal(prototype.API):
     @classmethod
     def __recast_id(cls, id: int):
         return id - 1
+
+    def __build_transform_matrix(self):
+        assert const.ARENA_SIZE[0] == const.ARENA_SIZE[1]
+        W = const.ARENA_SIZE[1]
+
+        self.transform = np.array([[1, 0, 0],
+                                   [0, -1, W],
+                                   [0, 0, 1]], dtype=float)
+        rotate = np.array([[0, -1, W],
+                           [1, 0, 0],
+                           [0, 0, 1]])
+        fountain_position = self.__team().fountain.position
+        respect = np.array([[fountain_position.x],
+                            [fountain_position.y],
+                            [1]])
+        best = 1e9
+        EPS = 1e-9
+        for i in range(4):
+            self.transform = np.dot(rotate, self.transform)
+            transformed = np.dot(self.transform, respect)
+            if np.linalg.norm(transformed) < best:
+                best = np.linalg.norm(transformed)
+        for i in range(4):
+            self.transform = np.dot(rotate, self.transform)
+            transformed = np.dot(self.transform, respect)
+            if abs(np.linalg.norm(transformed) - best) < EPS:
+                break
+
+    def __transform(self, position: pg.Vector2, is_vector: int, inverse: bool = False):
+        """
+        Transform internal positions into real math positions.
+        """
+        if self.transform is None:
+            self.__build_transform_matrix()
+
+        vector = np.array([[position.x],
+                           [position.y],
+                           [0 if is_vector else 1]])
+        vector = np.dot(np.linalg.inv(self.transform) if inverse else self.transform,
+                        vector)
+        return pg.Vector2(vector[0][0], vector[1][0])
 
     @classmethod
     def __cast_character_type(cls, type: int):
@@ -85,7 +128,7 @@ class Internal(prototype.API):
         extern = prototype.Character(
             _id=internal.id,
             _type=character_class,
-            _position=internal.position,
+            _position=self.__transform(internal.position, is_vector=False),
             _speed=internal.attribute.attack_speed,
             _attack_range=internal.attribute.attack_range,
             _damage=internal.attribute.attack_damage,
@@ -125,8 +168,8 @@ class Internal(prototype.API):
                 raise GameError("Unknown spawn character type")
             extern = prototype.Tower(
                 _id=internal.id,
-                _position=internal.position,
-                _period=internal.period,
+                _position=self.__transform(internal.position, is_vector=False),
+                _period=internal.__period,
                 _is_fountain=internal.is_fountain,
                 _attack_range=internal.attribute.attack_range,
                 _damage=internal.attribute.attack_damage,
@@ -222,21 +265,23 @@ class Internal(prototype.API):
             entity.health > 0]
         return tower_list
 
-    def get_visibility(self) -> list[list[int]]:
-        mask = self.__team().vision.mask
-        vision_grid = pg.surfarray.array_alpha(mask)
-        vision_grid[vision_grid == 0] = 1
-        vision_grid[vision_grid == 255] = 0
-        return vision_grid.tolist()
+    # I don't want to deal with transform yet
+    # def get_visibility(self) -> list[list[int]]:
+    #     mask = self.__team().vision.mask
+    #     vision_grid = pg.surfarray.array_alpha(mask)
+    #     vision_grid[vision_grid == 0] = 1
+    #     vision_grid[vision_grid == 255] = 0
+    #     return vision_grid.tolist()
 
     def is_visible(self, position: pg.Vector2) -> bool:
-        return self.__team().vision.position_inside_vision(position)
+        return self.__team().vision.position_inside_vision(self.__transform(position, is_vector=False, inverse=True))
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         enforce_type('characters', characters, Iterable)
         enforce_type('direction', direction, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
+        direction = self.__transform(direction, is_vector=True, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
@@ -252,6 +297,7 @@ class Internal(prototype.API):
             print(f"[API] team {self.team_id} tried to move to a point outside of vision!")
             return
 
+        destination = self.__transform(destination, is_vector=False, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
@@ -319,6 +365,7 @@ class Internal(prototype.API):
         enforce_type('characters', characters, Iterable)
         enforce_type('target', target, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        target = self.__transform(target, is_vector=False, inverse=True)
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
 
 
