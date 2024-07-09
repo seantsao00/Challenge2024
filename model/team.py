@@ -47,9 +47,9 @@ class Team_Vision:
         self.mask: pg.Surface = pg.Surface((self.N, self.M), pg.SRCALPHA)
         self.mask.fill([0, 0, 0])
         self.mask.set_alpha(192)
-        self.boolmask: list[list[bool]] = [[False for _ in range(self.N)] for __ in range(self.M)]
-        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)]
-                                                 for __ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
+        self.boolmask: list[list[bool]] = [[False for _ in range(self.M)] for __ in range(self.N)]
+        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
+                                                 for __ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)]
         for x in range(self.N):
             for y in range(self.M):
                 self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
@@ -61,9 +61,14 @@ class Team_Vision:
     def transfer_to_heuristic(self, position: pg.Vector2):
         return pg.Vector2(int(position.x / const.VISION_BLOCK_SIZE / const.TEAM_VISION_BLOCK), int(position.y / const.VISION_BLOCK_SIZE / const.TEAM_VISION_BLOCK))
 
-    def inside_vision(self, entity: Entity):
-        position = self.transfer_to_pixel(entity.position)
-        return self.boolmask[int(position.x)][int(position.y)]
+    def position_inside_vision(self, position: pg.Vector2) -> bool:
+        pixel = self.transfer_to_pixel(position)
+        if 0 <= pixel.x < self.N and 0 <= pixel.y < self.M:
+            return self.boolmask[int(pixel.x)][int(pixel.y)]
+        return False
+
+    def entity_inside_vision(self, entity: Entity):
+        return self.position_inside_vision(entity.position)
 
     def get_mask(self):
         return self.mask

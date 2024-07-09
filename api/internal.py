@@ -189,19 +189,21 @@ class Internal(prototype.API):
     def look_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision
         entities = get_model().entities
-        character_list: list[prototype.Character] = []
-        for entity in entities:
-            if not isinstance(entity, model.Tower) and vision.mask.get_at((int(entity.position.x / const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)))[3] == 0:
-                character_list.append(self.__register_character(entity))
+        character_list: list[prototype.Character] = [
+            self.__register_character(entity) for entity in entities
+            if (isinstance(entity, model.Character) and
+                vision.entity_inside_vision(entity)) and
+            entity.health > 0]
         return character_list
 
     def look_towers(self) -> list[prototype.Tower]:
         vision = self.__team().vision
         entities = get_model().entities
-        tower_list: list[prototype.Tower] = []
-        for entity in entities:
-            if isinstance(entity, model.Tower) and vision.mask.get_at((int(entity.position.x / const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)))[3] == 0:
-                tower_list.append(self.__register_tower(entity))
+        tower_list: list[prototype.Tower] = [
+            self.__register_tower(entity) for entity in entities
+            if (isinstance(entity, model.Tower) and
+                vision.entity_inside_vision(entity)) and
+            entity.health > 0]
         return tower_list
 
     def look_grid(self) -> list[list[bool]]:
@@ -210,6 +212,9 @@ class Internal(prototype.API):
         vision_grid[vision_grid == 0] = 1
         vision_grid[vision_grid == 255] = 0
         return vision_grid.tolist()
+
+    def look_position(self, position: pg.Vector2) -> bool:
+        return self.__team().vision.position_inside_vision(position)
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         enforce_type('characters', characters, Iterable)
@@ -227,6 +232,10 @@ class Internal(prototype.API):
         enforce_type('characters', characters, Iterable)
         enforce_type('destination', destination, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+
+        if not self.look_position(destination):
+            print(f"[API] team {self.team_id} tried to move to a point outside of vision!")
+            return
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if inter != None]
