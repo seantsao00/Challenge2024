@@ -102,21 +102,30 @@ class Character(LivingEntity):
         """
         move along the predetermined path as far as it can
         """
+        if len(self.__move_path) == 0:
+            return
+
         it = 0
         game_map = get_model().map
+
         while (it < len(self.__move_path) and
                game_map.is_position_passable(self.__move_path[it]) and
                (self.__move_path[it] - self.position).length() <= self.attribute.speed):
             it += 1
         if it == 0:
+            print(f"[API] Character {self.id}: no move for me")
             return
+
         pos_init = self.position
         pos_dest = self.__move_path[it - 1]
+
         if it == len(self.__move_path):
             self.__move_path = []
             self.__move_state = CharacterMovingState.STOPPED
+            print(f"[API] Character {self.id}: arrive at destination")
         else:
             del self.__move_path[:it]
+
         self.position = pos_dest
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
 
@@ -138,9 +147,8 @@ class Character(LivingEntity):
         self.__move_direction = direction
         return True
 
-    def set_move_position(self, destination: pg.Vector2):
+    def set_move_position(self, path: list[pg.Vector2]):
         """Set character movement toward a target position. Returns True/False on success/failure."""
-        path = get_model().map.find_path(self.position, destination)
         if path is None:
             return False
         self.__move_state = CharacterMovingState.TO_POSITION
@@ -166,6 +174,7 @@ class Character(LivingEntity):
         self.alive = False
         # self.hidden = True
         get_event_manager().post(EventCharacterDied(character=self))
+        get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
 
     def cast_ability(self, *args, **kwargs):

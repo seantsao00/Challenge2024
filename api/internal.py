@@ -7,7 +7,7 @@ import signal
 import threading
 import traceback
 import warnings
-from typing import Iterable
+from typing import Any, Iterable
 
 import pygame as pg
 
@@ -27,16 +27,25 @@ class GameError(Exception):
         super().__init__("The game broke. This is not your fault. Please contact us so we can fix it." + message)
 
 
+def enforce_type(name, obj, *args):
+    if not isinstance(obj, args):
+        types = " | ".join(list(map(lambda x: x.__name__, args)))
+        raise TypeError(f"{name} must be type {types}.")
+
+
 class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.__character_map = {}
         self.__tower_map = {}
+        self.__action_map: dict[int, tuple[model.Character,
+                                           model.CharacterMovingState, dict[str, Any]]] = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
 
-    def clear_map(self):
+    def clear(self):
         self.__character_map = {}
+        self.__action_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
@@ -152,10 +161,10 @@ class Internal(prototype.API):
         return Internal.__cast_id(self.__team().team_id)
 
     def get_score(self, index=None) -> int:
+        enforce_type('index', index, int, type(None))
+
         if index == None:
             index = self.team_id
-        if not isinstance(index, int):
-            raise TypeError("Team index must be type int or None.")
         if index < 0 or index >= MAX_TEAMS:
             raise IndexError
         team = get_model().teams[index]
@@ -186,71 +195,59 @@ class Internal(prototype.API):
         # TODO: Find an efficient way to find vision
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
-        if not isinstance(characters, Iterable):
-            raise TypeError("Character is not iterable.")
-        if not isinstance(direction, pg.Vector2):
-            raise TypeError("Direction is not a vector.")
+        enforce_type('characters', characters, Iterable)
+        enforce_type('direction', direction, pg.Vector2)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        for character, action, kwargs in self.__action_map.values():
+            if action == model.CharacterMovingState.TO_DIRECTION:
+                character.set_move_direction(**kwargs)
+            elif action == model.CharacterMovingState.TO_POSITION:
+                character.set_move_position(**kwargs)
+
         for ch in characters:
-            if not isinstance(ch, prototype.Character):
-                raise TypeError("List contains non-character.")
             internal = self.__access_character(ch)
             if internal == None:
                 continue
             internal.set_move_direction(direction)
 
     def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
-        if not isinstance(characters, Iterable):
-            raise TypeError("Character is not iterable.")
-        if not isinstance(destination, pg.Vector2):
-            raise TypeError("Destination is not a vector.")
-        for ch in characters:
-            if not isinstance(ch, prototype.Character):
-                raise TypeError("List contains non-character.")
-            internal = self.__access_character(ch)
-            if internal == None:
-                continue
-            internal.set_move_position(destination)
+        enforce_type('characters', characters, Iterable)
+        enforce_type('destination', destination, pg.Vector2)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-    def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
-        if not isinstance(characters, Iterable):
-            raise TypeError("Character is not iterable.")
-        for ch in characters:
-            if not isinstance(ch, prototype.Character):
-                raise TypeError("List contains non-character.")
-            internal = self.__access_character(ch)
-            if internal == None:
-                continue
-            internal.set_move_direction(direction)
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if inter != None]
+        for inter in internals:
+            inter.set_move_stop()
+        for inter in internals:
+            print(inter.position)
+            path = get_model().map.find_path(inter.position, destination)
+            print(inter.position, path[:5])
+            inter.set_move_position(path)
 
     def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
-        if not isinstance(characters, Iterable):
-            raise TypeError("Character is not iterable.")
+        enforce_type('characters', characters, Iterable)
+        enforce_type('target', target, prototype.Character)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         for ch in characters:
-            if not isinstance(ch, prototype.Character):
-                raise TypeError("List contains non-character.")
             internal = self.__access_character(ch)
             if internal == None:
                 continue
             internal.cast_ability()
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
-        if not isinstance(characters, Iterable):
-            raise TypeError("Characters is not iterable.")
+        enforce_type('characters', characters, Iterable)
+        enforce_type('target', target, prototype.Character, prototype.Tower)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         target_internal = None
         if isinstance(target, prototype.Character):
             target_internal = self.__access_character(target)
         elif isinstance(target, prototype.Tower):
             target_internal = self.__access_tower(target)
-        else:
-            raise TypeError("Invalid type of target.")
-        if target_internal is None:
-            return
 
         for ch in characters:
-            if not isinstance(ch, prototype.Character):
-                raise TypeError("List contains non-character.")
             internal = self.__access_character(ch)
             if internal is None:
                 continue
@@ -258,14 +255,18 @@ class Internal(prototype.API):
 
 
 class Timer():
-    def __init__(self, tid: int):
+    def __init__(self):
         if os.name == 'nt':
             self.is_windows = True
         elif os.name == 'posix':
             self.is_windows = False
         else:  # os.name == 'java' or unknown
             raise OSError
+        self.timer = None
+        self.started = False
+        self.for_player_id = None
 
+    def set_timer(self, interval: float, player_id: int, tid: int):
         if not self.is_windows:
             def handler(sig, frame):
                 res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
@@ -274,10 +275,7 @@ class Timer():
                     print(f"Tried to raise exception inside a thread, the return value is {res}.")
 
             signal.signal(signal.SIGALRM, handler)
-        self.timer = None
-        self.for_player_id = None
 
-    def set_timer(self, interval: float, player_id: int):
         if not self.is_windows:
             signal.setitimer(signal.ITIMER_REAL, interval)
         else:
@@ -287,6 +285,7 @@ class Timer():
             self.timer = threading.Timer(interval=interval, function=timeout_alarm,
                                          args=[player_id])
             self.timer.start()
+        self.started = True
 
     def cancel_timer(self):
         try:
@@ -309,9 +308,12 @@ def load_ai(files: list[str]):
         ai[i] = importlib.import_module('ai.' + file)
 
 
-def threading_ai(team_id, helper):
+def threading_ai(team_id: int, helper: Internal, timer: Timer):
     if ai[team_id] == None:
         return
+    # busy wating til timer start, to prevent cancel earlier than start
+    while not timer.started:
+        pass
     try:
         ai[team_id].every_tick(helper)
     except Exception as e:
@@ -319,12 +321,17 @@ def threading_ai(team_id, helper):
         print(traceback.format_exc())
         return
     finally:
-        pass
+        timer.cancel_timer()
 
 
-def start_ai(team_id):
-    t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id]))
+def start_ai(team_id: int):
+    helpers[team_id].clear()
+    timer = Timer()
+    t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id], timer))
     t.start()
-    timer = Timer(t.ident)
-    timer.set_timer(1 / FPS * DECISION_TICKS, team_id)
+    timer.set_timer(1 / FPS * DECISION_TICKS, team_id, t.ident)
     return t
+
+
+def finalize_ai(team_id: int):
+    helpers[team_id].finalize_movement()
