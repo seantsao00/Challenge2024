@@ -3,10 +3,10 @@ import random
 
 import pygame as pg
 
-import api.prototype as api
+from api.prototype import *
 
 
-def every_tick(api: api.API):
+def every_tick(api: API):
     visible = [character for character in api.get_visible_characters() if character.team_id !=
                api.get_team_id()]
     api.action_move_along(api.get_visible_characters()[:1],
