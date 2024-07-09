@@ -114,7 +114,7 @@ class Character(LivingEntity):
         """
         move along the predetermined path as far as it can
         """
-        EPS = 1e-8
+        esp = 1e-8
 
         if len(self.__move_path) == 0:
             return
@@ -122,10 +122,11 @@ class Character(LivingEntity):
         it = 0
         pos_init = self.position
         movement = 0
-        while (it < len(self.__move_path) and
-               movement + EPS <= self.attribute.speed):
-            ratio = (self.attribute.speed - movement) / \
-                (self.__move_path[it] - self.position).length()
+        model = get_model()
+        while (it < len(self.__move_path)
+               and movement + esp <= self.attribute.speed * model.dt):
+            ratio = ((self.attribute.speed * model.dt - movement)
+                     / (self.__move_path[it] - self.position).length())
             if ratio >= 1:
                 movement += (self.__move_path[it] - self.position).length()
                 self.position = self.__move_path[it]
