@@ -140,7 +140,7 @@ class Character(LivingEntity):
         else:
             del self.__move_path[:it]
 
-        get_event_manager().post(EventCharacterMove(character=self, original_pos=self.position))
+        get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
