@@ -26,9 +26,7 @@ class Map:
         Return the coordinate based on self.size of position.
         position is a coordinate based on const.ARENA_SIZE.
         """
-        x = util.clamp(
-            int(position[0] * self.size[0] / const.ARENA_SIZE[0]), 0, self.size[0] - 1
-        )
+        x = util.clamp(int(position[0] * self.size[0] / const.ARENA_SIZE[0]), 0, self.size[0] - 1)
         y = util.clamp(
             int(position[1] * self.size[1] / const.ARENA_SIZE[1]), 0, self.size[1] - 1
         )
