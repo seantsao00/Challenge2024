@@ -158,21 +158,21 @@ class Internal(prototype.API):
     def __team(self):
         return get_model().teams[self.team_id]
 
-    def get_time(self):
+    def get_current_time(self):
         return get_model().get_time()
 
-    def get_characters(self) -> list[prototype.Character]:
+    def get_owned_characters(self) -> list[prototype.Character]:
         return [self.__register_character(character)
                 for character in self.__team().character_list if character.health > 0]
 
-    def get_towers(self) -> list[prototype.Tower]:
+    def get_owned_towers(self) -> list[prototype.Tower]:
         return [self.__register_tower(tower)
                 for tower in self.__team().towers]
 
     def get_team_id(self) -> int:
         return Internal.__cast_id(self.__team().team_id)
 
-    def get_score(self, index=None) -> int:
+    def get_score_of_team(self, index=None) -> int:
         enforce_type('index', index, int, type(None))
 
         if index == None:
@@ -186,7 +186,7 @@ class Internal(prototype.API):
             raise GameError("Team ID implement has changed.")
         return team.points
 
-    def look_characters(self) -> list[prototype.Character]:
+    def get_visible_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision
         entities = get_model().entities
         character_list: list[prototype.Character] = [
@@ -196,7 +196,7 @@ class Internal(prototype.API):
             entity.health > 0]
         return character_list
 
-    def look_towers(self) -> list[prototype.Tower]:
+    def get_visible_towers(self) -> list[prototype.Tower]:
         vision = self.__team().vision
         entities = get_model().entities
         tower_list: list[prototype.Tower] = [
@@ -206,14 +206,14 @@ class Internal(prototype.API):
             entity.health > 0]
         return tower_list
 
-    def look_grid(self) -> list[list[bool]]:
+    def get_visibility(self) -> list[list[int]]:
         mask = self.__team().vision.mask
         vision_grid = pg.surfarray.array_alpha(mask)
         vision_grid[vision_grid == 0] = 1
         vision_grid[vision_grid == 255] = 0
         return vision_grid.tolist()
 
-    def look_position(self, position: pg.Vector2) -> bool:
+    def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(position)
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
@@ -245,16 +245,8 @@ class Internal(prototype.API):
                 path = get_model().map.find_path(inter.position, destination)
                 inter.set_move_position(path)
 
-    def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
-        enforce_type('characters', characters, Iterable)
-        enforce_type('target', target, prototype.Character)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
-
-        for ch in characters:
-            internal = self.__access_character(ch)
-            if internal == None:
-                continue
-            internal.cast_ability()
+    def action_move_clear(self, characters: Iterable[prototype.Character]):
+        self.action_move_along(characters, pg.Vector2(0, 0))
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
         enforce_type('characters', characters, Iterable)
@@ -280,6 +272,17 @@ class Internal(prototype.API):
                 print(f"[API] team {self.team_id} is attacking too far!")
             else:
                 internal.attack(target_internal)
+
+    def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
+        enforce_type('characters', characters, Iterable)
+        enforce_type('target', target, prototype.Character)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+
+        for ch in characters:
+            internal = self.__access_character(ch)
+            if internal == None:
+                continue
+            internal.cast_ability()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
