@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import (EventHumanInput, EventInitialize, EventPauseModel, EventQuit,
-                           EventResumeModel, EventSelectCharacter, EventSelectParty,
-                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam, EventGameOver)
+from event_manager import (EventGameOver, EventHumanInput, EventInitialize, EventPauseModel,
+                           EventQuit, EventResumeModel, EventSelectCharacter, EventSelectParty,
+                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
 

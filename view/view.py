@@ -11,7 +11,8 @@ import pygame as pg
 import const
 import const.model
 import const.visual
-from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick, EventViewChangeTeam
+from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
+                           EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
                          HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
@@ -40,6 +41,9 @@ class View:
         self.window_w = window_w
         self.window_h = window_h
 
+        self.window_w = window_w
+        self.window_h = window_h
+
         self.__screen: pg.Surface = pg.display.set_mode(
             size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
         self.screen_size: tuple[int, int] = (window_w, window_h)
@@ -57,7 +61,8 @@ class View:
         self.__entities: list[EntityView] = []
 
         self.vision_of = 0
-        self.scoreboard_image = pg.image.load(os.path.join(const.visual.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
+        self.scoreboard_image = pg.image.load(os.path.join(
+            const.visual.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -201,12 +206,16 @@ class View:
     def change_vision_of(self, event: EventViewChangeTeam):
         self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
 
+    def change_vision_of(self, event: EventViewChangeTeam):
+        self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
+
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
         ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
 
     def display_fps(self):

@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from itertools import chain
 from typing import TYPE_CHECKING
+
 import pygame as pg
+
 import const
 import const.team
-from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterMove)
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
+                           EventEveryTick, EventHumanInput, EventSelectCharacter,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building import Tower
 from model.character import Character, Ranger
@@ -45,13 +47,14 @@ class Team_Vision:
         self.mask: pg.Surface = pg.Surface((self.N, self.M), pg.SRCALPHA)
         self.mask.fill([0, 0, 0])
         self.mask.set_alpha(192)
-        self.boolmask: list[list[bool]] = [[ False for _ in range(self.N)] for __ in range(self.M)]
-        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)] 
+        self.boolmask: list[list[bool]] = [[False for _ in range(self.N)] for __ in range(self.M)]
+        self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)]
                                                  for __ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
         for x in range(self.N):
             for y in range(self.M):
-                self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] += 1
-    
+                self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
+                                                                   const.TEAM_VISION_BLOCK] += 1
+
     def transfer_to_pixel(self, position: pg.Vector2):
         return pg.Vector2(int(position.x / const.VISION_BLOCK_SIZE), int(position.y / const.VISION_BLOCK_SIZE))
 
@@ -61,7 +64,7 @@ class Team_Vision:
     def inside_vision(self, entity: Entity):
         position = self.transfer_to_pixel(entity.position)
         return self.boolmask[int(position.x)][int(position.y)]
-    
+
     def get_mask(self):
         return self.mask
 
@@ -75,11 +78,11 @@ class Team_Vision:
                 if self.vision_not_open[x][y] < 0:
                     raise ("wtffffffffffffffff")
         return False
-    
+
     def brute_modify(self, position: pg.Vector2, radius: float):
         real_position = self.transfer_to_pixel(position)
         real_radius = radius / const.VISION_BLOCK_SIZE
-        for x in range(max(0, int(real_position.x - real_radius)), 
+        for x in range(max(0, int(real_position.x - real_radius)),
                        min(self.N, int(position.x + real_radius + 1))):
             for y in range(max(0, int(real_position.y - real_radius)),
                            min(self.M, int(position.y + real_radius + 1))):
@@ -87,7 +90,8 @@ class Team_Vision:
                     a = self.mask.get_at((x, y))
                     if a[3] != 0:
                         a[3] = 0
-                        self.vision_not_open[x // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] -= 1
+                        self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
+                                                                           const.TEAM_VISION_BLOCK] -= 1
                         self.boolmask[x][y] = True
                         self.mask.set_at((x, y), a)
 
@@ -195,7 +199,7 @@ class Team(NeutralTeam):
         if event.character.team is self:
             self.update_vision(event.character)
 
-    def update_vision(self, entity: LivingEntity): # to do
+    def update_vision(self, entity: LivingEntity):  # to do
         self.vision.update_vision(entity)
 
     def select_character(self, event: EventSelectCharacter):

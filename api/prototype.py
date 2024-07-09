@@ -33,28 +33,26 @@ class Character:
                  _health: float,
                  _max_health: float,
                  _team_id: int):
-        self.__id = _id
-        self.__type = _type
-        self.__position = _position
-        self.__speed = _speed
-        self.__attack_range = _attack_range
-        self.__damage = _damage
-        self.__vision = _vision
-        self.__health = _health
-        self.__max_health = _max_health
-        self.__team_id = _team_id
-
-    @property
-    def id(self) -> int:
-        """回傳獨一的編號。編號可以用來識別不同時間的角色是否是相同的一個實體。"""
-        return self.__id
-
-    @property
-    def type(self) -> CharacterClass:
-        """回傳角色的兵種。"""
-        return self.__type
-
-    # TODO: add other properties
+        self.id = _id
+        """角色獨一的編號。編號可以用來識別不同時間的角色是否是相同的一個實體。"""
+        self.type = _type
+        """角色的兵種。"""
+        self.position = _position
+        """角色的位置。"""
+        self.speed = _speed
+        """角色的最大移動速度。"""
+        self.attack_range = _attack_range
+        """角色的最大攻擊範圍。"""
+        self.damage = _damage
+        """角色的傷害。"""
+        self.vision = _vision
+        """角色的視野半徑。"""
+        self.health = _health
+        """角色的當下血量。"""
+        self.max_health = _max_health
+        """角色的最大血量。"""
+        self.team_id = _team_id
+        """角色所屬的隊伍編號。"""
 
 
 class Tower:
@@ -72,19 +70,28 @@ class Tower:
                  _health: float,
                  _max_health: float,
                  _team_id: int):
-        self.__id = _id
-        self.__period = _period
-        self.__position = _position
-        self.__is_fountain = _is_fountain
-        self.__spwan_character_type = _spwan_character_type
-        self.__attack_range = _attack_range
-        self.__damage = _damage
-        self.__vision = _vision
-        self.__health = _health
-        self.__max_health = _max_health
-        self.__team_id = _team_id
-
-    # TODO: add other properties
+        self.id = _id
+        """建築物獨一的編號。編號可以用來識別不同時間的建築物是否是相同的一個實體。"""
+        self.period = _period
+        """建築物產生角色的所需時間。"""
+        self.position = _position
+        """建築物所在的位置。"""
+        self.is_fountain = _is_fountain
+        """建築物是否是溫泉（每個隊伍一開始的建築）。"""
+        self.spwan_character_type = _spwan_character_type
+        """建築物即將生成的角色種類。"""
+        self.attack_range = _attack_range
+        """建築物的攻擊範圍。"""
+        self.damage = _damage
+        """建築物的傷害。"""
+        self.vision = _vision
+        """建築物的視野範圍。"""
+        self.health = _health
+        """建築物的血量。"""
+        self.max_health = _max_health
+        """建築物的最大血量。"""
+        self.team_id = _team_id
+        """建築物所屬的隊伍編號。"""
 
 
 class API:
@@ -115,7 +122,7 @@ class API:
         """Return the list of tower visible from the team."""
         pass
 
-    def look_grid(self) -> list[Tower]:
+    def look_grid(self) -> list[list[int]]:
         """Return a grid of current vision."""
         pass
 
