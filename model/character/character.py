@@ -79,8 +79,9 @@ class Character(LivingEntity):
         direction = self.__move_direction
         original_pos = self.position
 
+        model = get_model()
         if direction.length() > 0:
-            direction = self.attribute.speed * direction.normalize()
+            direction = self.attribute.speed * model.dt * direction.normalize()
 
         game_map = get_model().map
 
