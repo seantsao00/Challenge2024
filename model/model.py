@@ -4,7 +4,7 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os
-from multiprocessing import Process
+import threading
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -52,7 +52,11 @@ class Model:
 
         self.global_clock: pg.Clock = pg.time.Clock()
         """The clock since program start."""
+        self.__game_clock: Clock
+        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
+        self.dt: float
+        """Real-world-passing time since last tick in second."""
 
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
@@ -60,7 +64,7 @@ class Model:
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
-        self.__team_thread: list[Process] = []
+        self.__team_thread: list[threading.Thread] = [None] * len(team_files)
         self.__team_files_names: list[str] = team_files
         self.show_view_range: bool = show_view_range
         self.show_attack_range: bool = show_attack_range
@@ -98,8 +102,7 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
-        self.__game_clock: Clock = Clock()
-        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
+        self.__game_clock = Clock()
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -111,11 +114,16 @@ class Model:
         self.__ticks += 1
         self.__ticks %= const.TICKS_PER_CYCLE
         if self.__ticks == 0:
-            self.__team_thread = [start_ai(i) for i in range(len(self.teams))]
-        elif self.__ticks + 1 == const.TICKS_PER_CYCLE:
-            for t in self.__team_thread:
-                assert not t.is_alive()
-            self.__team_thread = []
+            for i in range(len(self.teams)):
+                if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
+                    self.__team_thread[i] = start_ai(i)
+                else:
+                    print(
+                        f"\033[93m[API] WARNING: AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.\033[0m")
+        # elif self.__ticks + 1 == const.TICKS_PER_CYCLE:
+        #     for t in self.__team_thread:
+        #         assert not t.is_alive()
+        #     self.__team_thread = []
 
     def __handle_quit(self, _: EventQuit):
         """
@@ -199,4 +207,4 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-            self.global_clock.tick(const.FPS)
+            self.dt = self.global_clock.tick(const.FPS) / 1000

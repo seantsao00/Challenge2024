@@ -3,14 +3,11 @@ The module defines View class.
 """
 
 import os
-from itertools import chain
 
 import cv2
 import pygame as pg
 
 import const
-import const.model
-import const.visual
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
@@ -33,10 +30,10 @@ class View:
         model = get_model()
 
         screen_info = pg.display.Info()
-        window_w = int(min(screen_info.current_w, screen_info.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
-        window_h = int(min(screen_info.current_h, screen_info.current_w /
-                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
+        window_w = int(min(screen_info.current_w, screen_info.current_h
+                           / const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
+        window_h = int(min(screen_info.current_h, screen_info.current_w
+                           / const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
 
         self.window_w = window_w
         self.window_h = window_h
@@ -62,7 +59,7 @@ class View:
 
         self.vision_of = 0
         self.scoreboard_image = pg.image.load(os.path.join(
-            const.visual.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
+            const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
         for i in model.map.images:
             loaded_image = cv2.imread(
@@ -153,7 +150,7 @@ class View:
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
@@ -194,19 +191,16 @@ class View:
         self.__screen.blit(self.__arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
 
         # show time remaining
-        time_remaining = int(const.model.GAME_TIME - model.get_time())
+        time_remaining = int(const.GAME_TIME - model.get_time())
         (min, sec) = divmod(time_remaining, 60)
-        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
 
-    def change_vision_of(self, event: EventViewChangeTeam):
-        self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
-
-    def change_vision_of(self, event: EventViewChangeTeam):
+    def change_vision_of(self, _: EventViewChangeTeam):
         self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
 
     def register_listeners(self):

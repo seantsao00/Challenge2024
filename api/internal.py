@@ -115,14 +115,14 @@ class Internal(prototype.API):
             extern = prototype.Tower(
                 _id=internal.id,
                 _position=internal.position,
-                _period=internal.__period,
+                _period=internal.period,
                 _is_fountain=internal.is_fountain,
                 _attack_range=internal.attribute.attack_range,
                 _damage=internal.attribute.attack_damage,
                 _vision=internal.attribute.vision,
                 _health=internal.health,
                 _max_health=internal.attribute.max_health,
-                _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.id),
+                _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.team_id),
                 _spwan_character_type=character_class
             )
         return extern
@@ -293,6 +293,13 @@ class Internal(prototype.API):
         internal_tower.character_type = spawn_type
 
 
+class TimeoutException(BaseException):
+    """
+    Different from builtin `TimeoutError`, this error is not catchable by `except: Exception`.
+    It makes more sense for the AI to catch some error without accidentally killed by this exception.
+    """
+
+
 class Timer():
     def __init__(self):
         if os.name == 'nt':
@@ -309,9 +316,9 @@ class Timer():
         if not self.is_windows:
             def handler(sig, frame):
                 res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-                    ctypes.c_long(tid), ctypes.py_object(TimeoutError))
+                    ctypes.c_long(tid), ctypes.py_object(TimeoutException))
                 if res != 0:
-                    print(f"Tried to raise exception inside a thread, the return value is {res}.")
+                    print(f"Exception killed thread {tid}.")
 
             signal.signal(signal.SIGALRM, handler)
 
@@ -348,17 +355,17 @@ def load_ai(files: list[str]):
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
-    if ai[team_id] == None:
-        return
     # busy wating til timer start, to prevent cancel earlier than start
     while not timer.started:
         pass
     try:
-        ai[team_id].every_tick(helper)
+        if ai[team_id] != None:
+            ai[team_id].every_tick(helper)
     except Exception as e:
         print(f"Caught exception in AI of team {team_id}:")
         print(traceback.format_exc())
-        return
+    except TimeoutException as e:
+        print(f"[API] AI of team {team_id} timed out!")
     finally:
         timer.cancel_timer()
 

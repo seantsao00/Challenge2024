@@ -79,8 +79,9 @@ class Character(LivingEntity):
         direction = self.__move_direction
         original_pos = self.position
 
+        model = get_model()
         if direction.length() > 0:
-            direction = self.attribute.speed * direction.normalize()
+            direction = self.attribute.speed * model.dt * direction.normalize()
 
         game_map = get_model().map
 
@@ -140,7 +141,7 @@ class Character(LivingEntity):
         else:
             del self.__move_path[:it]
 
-        get_event_manager().post(EventCharacterMove(character=self, original_pos=self.position))
+        get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
