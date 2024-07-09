@@ -1,4 +1,4 @@
-from event_manager import EventQuit, EventRestartGame, EventResumeModel
+from event_manager import EventQuit, EventResumeModel
 from instances_manager import get_event_manager
 
 
@@ -19,8 +19,6 @@ class PauseMenu:
         ev_manager = get_event_manager()
         if self.selected == 0:
             ev_manager.post(EventResumeModel())
-        elif self.selected == 1:
-            ev_manager.post(EventRestartGame())
         elif self.selected == 2:
             ev_manager.post(EventQuit())
 
