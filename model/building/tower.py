@@ -60,8 +60,7 @@ class Tower(LivingEntity):
         get_event_manager().post(EventCreateTower(tower=self))
 
     def update_period(self):
-        self.__period = (const.INITIAL_PERIOD_MS +
-                         int(const.FORMULA_K * len(self.team.towers) ** 0.5))
+        self.__period = int(const.COUNT_PERIOD_MS(len(self.team.character_list)))
 
     def generate_character(self):
         character_type: type[Character]

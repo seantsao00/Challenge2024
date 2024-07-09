@@ -47,5 +47,5 @@ TOWER_GENERATE_DISPLACEMENT = 10
 INITIAL_PERIOD_MS = 1000
 FORMULA_K = 1000
 
-def COUNT_PERIOD_MS(entity_number):
+def COUNT_PERIOD_MS(entity_number: int):
     return INITIAL_PERIOD_MS * (1 + (entity_number / 40) ** (2.5))
