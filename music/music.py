@@ -3,6 +3,7 @@ import pygame as pg
 import const
 from event_manager import EventInitialize, EventPauseModel, EventResumeModel
 from instances_manager import get_event_manager, get_model
+from util import log_info
 
 
 class BackgroundMusic:
@@ -29,7 +30,7 @@ class BackgroundMusic:
         if missing_party is not None:
             pg.mixer.music.fadeout(500)
             pg.mixer.music.unload()
-            print(const.BGM_PATH[missing_party])
+            log_info(const.BGM_PATH[missing_party])
             pg.mixer.music.load(const.BGM_PATH[missing_party])
             pg.mixer.music.play(-1)
             self.default_volume = pg.mixer.music.get_volume()

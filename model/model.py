@@ -25,6 +25,7 @@ from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
+from util import log_critical
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -118,12 +119,8 @@ class Model:
                 if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
                     self.__team_thread[i] = start_ai(i)
                 else:
-                    print(
-                        f"\033[93m[API] WARNING: AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.\033[0m")
-        # elif self.__ticks + 1 == const.TICKS_PER_CYCLE:
-        #     for t in self.__team_thread:
-        #         assert not t.is_alive()
-        #     self.__team_thread = []
+                    log_critical(
+                        f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __handle_quit(self, _: EventQuit):
         """

@@ -11,6 +11,7 @@ import util
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove, EventEveryTick
 from instances_manager import get_event_manager, get_model
 from model.entity import LivingEntity
+from util import log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -138,7 +139,7 @@ class Character(LivingEntity):
         if it == len(self.__move_path):
             self.__move_path = []
             self.__move_state = CharacterMovingState.STOPPED
-            print(f"[API] Character {self.id}: arrive at destination")
+            log_info(f"[API] Character {self.id}: arrive at destination")
         else:
             del self.__move_path[:it]
 
@@ -195,7 +196,7 @@ class Character(LivingEntity):
             self.__attack_time = now_time
 
     def die(self):
-        print(f"Character {self.id} in Team {self.team.team_id} died")
+        log_info(f"Character {self.id} in Team {self.team.team_id} died")
         self.alive = False
         # self.hidden = True
         get_event_manager().post(EventCharacterDied(character=self))
@@ -206,7 +207,7 @@ class Character(LivingEntity):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        print("cast abilities")
+        log_info("cast abilities")
         self.abilities_time = now_time
         self.ability(*args, **kwargs)
 

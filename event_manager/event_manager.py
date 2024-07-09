@@ -6,6 +6,7 @@ from collections import defaultdict
 from typing import Callable, Optional, TypeAlias
 
 from event_manager.events import BaseEvent
+from util import log_info
 
 ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
 """
@@ -51,7 +52,7 @@ class EventManager:
         try:
             self.listeners[(event_class, channel_id)].remove(listener)
         except ValueError:
-            print(f'{listener} is not listening to ({event_class}, {channel_id})')
+            log_info(f'{listener} is not listening to ({event_class}, {channel_id})')
 
     def post(self, event: BaseEvent, channel_id: Optional[int] = None):
         """

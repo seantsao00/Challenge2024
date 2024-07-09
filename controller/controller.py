@@ -14,6 +14,7 @@ from event_manager import (EventGameOver, EventHumanInput, EventInitialize, Even
                            EventStartGame, EventUnconditionalTick, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
+from util import log_info
 
 if TYPE_CHECKING:
     from model import Character
@@ -99,7 +100,7 @@ class Controller:
                 y -= const.DRAW_DISPLACEMENT_Y
 
                 if pg_event.button == 1:  # Left mouse button
-                    print(f"Mouse click position: ({x}, {y})")
+                    log_info(f"[Controller] Mouse click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
                         if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
@@ -108,7 +109,7 @@ class Controller:
                         input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
-                    print(f"Right click position: ({x}, {y})")
+                    log_info(f"[Controller] Right click position: ({x}, {y})")
                     clicked = None
                     for entity in model.entities:
                         if entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:

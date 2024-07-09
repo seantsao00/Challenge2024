@@ -3,8 +3,9 @@ import time
 import pygame as pg
 
 import api.prototype as api
+from util import log_info
 
-print("[Info] AI axis: test whether the transformed axis is working properly.")
+log_info("AI axis: test whether the transformed axis is working properly.")
 
 st = None
 

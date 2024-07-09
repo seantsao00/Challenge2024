@@ -21,6 +21,7 @@ import model.character.ranger
 import model.character.sniper
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
+from util import log_critical, log_info, log_warning
 
 
 class GameError(Exception):
@@ -241,7 +242,7 @@ class Internal(prototype.API):
         team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
         if not team.team_id == index:
-            print(team.team_id, index)
+            log_critical("[API] Team ID mismatch: team.team_id, index")
             raise GameError("Team ID implement has changed.")
         return team.points
 
@@ -294,7 +295,7 @@ class Internal(prototype.API):
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         if not self.is_visible(destination):
-            print(f"[API] team {self.team_id} tried to move to a point outside of vision!")
+            log_info(f"[API] team {self.team_id} tried to move to a point outside of vision!")
             return
 
         destination = self.__transform(destination, is_vector=False, inverse=True)
@@ -332,11 +333,11 @@ class Internal(prototype.API):
         for internal in internals:
             attackable = internal.attackable(target_internal)
             if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
-                print(f"[API] team {self.team_id} tried to attack themselves.")
+                log_info(f"[API] team {self.team_id} tried to attack themselves.")
             elif attackable == model.CharacterAttackResult.COOLDOWN:
-                print(f"[API] team {self.team_id} is attacking too fast!")
+                log_info(f"[API] team {self.team_id} is attacking too fast!")
             elif attackable == model.CharacterAttackResult.OUT_OF_RANGE:
-                print(f"[API] team {self.team_id} is attacking too far!")
+                log_info(f"[API] team {self.team_id} is attacking too far!")
             else:
                 internal.attack(target_internal)
 
@@ -394,7 +395,7 @@ class Timer():
                 res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
                     ctypes.c_long(tid), ctypes.py_object(TimeoutException))
                 if res != 0:
-                    print(f"Exception killed thread {tid}.")
+                    log_warning(f"[API] TimeoutException killed thread {tid}.")
 
             signal.signal(signal.SIGALRM, handler)
 
@@ -402,7 +403,7 @@ class Timer():
             signal.setitimer(signal.ITIMER_REAL, interval)
         else:
             def timeout_alarm(player_id: int):
-                print(f"The AI of player {player_id} time out!")
+                log_critical(f"[API] The AI of player {player_id} timed out!")
 
             self.timer = threading.Timer(interval=interval, function=timeout_alarm,
                                          args=[player_id])
@@ -416,7 +417,7 @@ class Timer():
             else:
                 self.timer.cancel()
         except:
-            print("Perhaps some very slightly timeout.")
+            log_warning("[API] Perhaps some very slightly timeout.")
 
 
 helpers = [Internal(i) for i in range(MAX_TEAMS)]
@@ -438,10 +439,10 @@ def threading_ai(team_id: int, helper: Internal, timer: Timer):
         if ai[team_id] != None:
             ai[team_id].every_tick(helper)
     except Exception as e:
-        print(f"Caught exception in AI of team {team_id}:")
-        print(traceback.format_exc())
+        log_warning(f"Caught exception in AI of team {team_id}:")
+        log_info(traceback.format_exc())
     except TimeoutException as e:
-        print(f"[API] AI of team {team_id} timed out!")
+        log_critical(f"[API] AI of team {team_id} timed out!")
     finally:
         timer.cancel_timer()
 

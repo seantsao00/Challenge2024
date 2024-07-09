@@ -13,6 +13,7 @@ from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTo
 from instances_manager import get_event_manager, get_model
 from model.building import Tower
 from model.character import Character, Ranger
+from util import log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity, LivingEntity
@@ -151,7 +152,7 @@ class Team(NeutralTeam):
                     self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             else:
-                print('picked a non interactable entity')
+                log_info('picked a non interactable entity')
 
         if self.__controlling is None:
             return
@@ -180,10 +181,10 @@ class Team(NeutralTeam):
             self.__towers.add(event.tower)
         if self.fountain == None:
             self.fountain = event.tower
-        print(f'{self.__team_name} gained a tower with id {event.tower.id} at {event.tower.position}')
+        log_info(f'{self.__team_name} gained a tower with id {event.tower.id} at {event.tower.position}')
 
     def lose_tower(self, event: EventTeamLoseTower):
-        print(f'{self.__team_name} lost a tower with id {event.tower.id} at {event.tower.position}')
+        log_info(f'{self.__team_name} lost a tower with id {event.tower.id} at {event.tower.position}')
         if event.tower in self.__towers:
             self.__towers.remove(event.tower)
 

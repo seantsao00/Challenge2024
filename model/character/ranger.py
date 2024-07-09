@@ -8,6 +8,7 @@ import const
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
 from model.character import Character
+from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
@@ -29,7 +30,7 @@ class Ranger(Character):
         target: pg.Vector2 = args[0]
         dist = self.position.distance_to(target)
         if dist <= self.attribute.attack_range:
-            print("ranged ability attack")
+            log_info("ranged ability attack")
             all_victim = get_model().grid.all_entity_in_range(target, self.attribute.ability_variables)
             for victim in all_victim:
                 if self.team != victim.team:

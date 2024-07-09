@@ -6,6 +6,7 @@ import pygame as pg
 
 import const
 from model.character.character import Character
+from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
@@ -23,4 +24,4 @@ class Sniper(Character):
         super().__init__(position, team, const.SNIPER_ATTRIBUTE, const.CharacterType.SNIPER, None)
 
     def ability(self, *args, **kwargs):
-        print("sniper use ability")
+        log_info("sniper use ability")

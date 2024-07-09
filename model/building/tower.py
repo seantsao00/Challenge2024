@@ -16,6 +16,7 @@ from model.building.linked_list import LinkedList, Node
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
+from util import log_info
 
 if TYPE_CHECKING:
     from model.character import Character
@@ -88,7 +89,7 @@ class Tower(LivingEntity):
     def take_damage(self, event: EventAttack):
         ev_manager = get_event_manager()
         if self.team is event.attacker.team or self.is_fountain:
-            print('same team or is fountain')
+            log_info('same team or is fountain')
             return
         if self.health - event.attacker.attribute.attack_damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:
@@ -120,14 +121,12 @@ class Tower(LivingEntity):
             or character.position.distance_to(self.position) > self.attribute.attack_range
                 or not character.alive):
             return
-        # print(character.type, 'get in tower')
         self.__enemies[character.team.team_id].push_back(character, get_model().get_time())
 
     def enemy_out_range(self, character: Character):
         if character.id not in self.__enemies[character.team.team_id].map:
             return
         if character.position.distance_to(self.position) > self.attribute.attack_range or not character.alive:
-            # print(character.type, 'get out of tower')
             self.__enemies[character.team.team_id].delete(character)
 
     def register_listeners(self):
