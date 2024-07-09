@@ -115,14 +115,14 @@ class Internal(prototype.API):
             extern = prototype.Tower(
                 _id=internal.id,
                 _position=internal.position,
-                _period=internal.__period,
+                _period=internal.period,
                 _is_fountain=internal.is_fountain,
                 _attack_range=internal.attribute.attack_range,
                 _damage=internal.attribute.attack_damage,
                 _vision=internal.attribute.vision,
                 _health=internal.health,
                 _max_health=internal.attribute.max_health,
-                _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.id),
+                _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.team_id),
                 _spwan_character_type=character_class
             )
         return extern
