@@ -39,7 +39,7 @@ class Tower(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team, is_fountain: bool = False):
-        self.__period = const.INITIAL_PERIOD_MS
+        self.__period = const.TOWER_SPAWN_INITIAL_PERIOD
         self.__is_fountain = is_fountain
         self.__character_type: const.CharacterType = const.CharacterType.RANGER
         self.__enemies: list[LinkedList] = [LinkedList() for _ in range(4)]
@@ -52,7 +52,7 @@ class Tower(LivingEntity):
 
         self.register_listeners()
 
-        self.attack_timer = Timer(int(1 / self.attribute.attack_speed * 1000),
+        self.attack_timer = Timer(1 / self.attribute.attack_speed,
                                   self.attack, once=False)
 
         if self.team.party is not const.PartyType.NEUTRAL:
@@ -61,7 +61,7 @@ class Tower(LivingEntity):
         get_event_manager().post(EventCreateTower(tower=self))
 
     def update_period(self):
-        self.__period = int(const.COUNT_PERIOD_MS(len(self.team.character_list)))
+        self.__period = const.count_period_ms(len(self.team.character_list))
 
     def generate_character(self):
         character_type: type[Character]
@@ -143,5 +143,5 @@ class Tower(LivingEntity):
         return self.__character_type
 
     @property
-    def period(self) -> int:
+    def period(self) -> float:
         return self.__period
