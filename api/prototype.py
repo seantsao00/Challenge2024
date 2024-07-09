@@ -96,15 +96,15 @@ class Tower:
 
 class API:
     def get_time(self):
-        """Return the current in-game time."""
+        """回傳現在的遊戲時間。"""
         pass
 
     def get_characters(self) -> list[Character]:
-        """Return the list of character owned by the team."""
+        """回傳隊伍擁有的所有角色。"""
         pass
 
     def get_towers(self) -> list[Tower]:
-        """Return the list of tower owned by the team."""
+        """回傳隊伍擁有的所有建築。"""
         pass
 
     def get_team_id(self) -> int:
@@ -115,11 +115,11 @@ class API:
         pass
 
     def look_characters(self) -> list[Character]:
-        """Return the list of charactervisible from the team."""
+        """回傳該隊伍視野可及的所有角色。"""
         pass
 
     def look_towers(self) -> list[Tower]:
-        """Return the list of tower visible from the team."""
+        """回傳該隊伍視野可及的所有建築。"""
         pass
 
     def look_grid(self) -> list[list[int]]:
@@ -128,22 +128,22 @@ class API:
 
     def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2):
         """
-        Make all characters in the list move to the destination, using internal A* algorithm.
-        This function override previous action.
+        讓所有角色移動到目的地。
+        此功能會覆蓋先前的指令。
         """
         pass
 
     def action_attack(self, characters: Iterable[Character], target: Character | Tower):
         """
-        Make all characters in the list attack the target. Target has to be in their attack radii.
-        This function override previous action.
+        讓所有角色攻擊目標，目標需要在其攻擊範圍內。
+        此功能會覆蓋先前的指令。
         """
         pass
 
     def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2):
         """
-        Make all characters in the list move along the direction. May bump into the wall or border.
-        This function override previous action.
+        讓所有角色朝 direction 的方向移動，直到被指派新的指令，可能會撞到牆或障礙物。
+        此功能會覆蓋先前的指令。
         """
         pass
 
@@ -155,14 +155,14 @@ class API:
 
     def action_clear(self, characters: Iterable[Character]):
         """
-        Clear previous assigned action of all characters in the list. (They will stand still)
+        清除所有角色先前的指令 (讓所有角色靜止不動)。
         """
         pass
 
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
-        """改變特定塔生成的兵種"""
+        """改變特定塔生成的兵種。"""
         pass
 
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
-        """Sort the whole character list according to the distance from target. Tie breaked arbitrarily."""
+        """將各角色依據其與目標的距離排序，若距離一樣則隨意排序。"""
         pass
