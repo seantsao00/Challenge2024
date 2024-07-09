@@ -113,22 +113,25 @@ class Character(LivingEntity):
         """
         move along the predetermined path as far as it can
         """
+        EPS = 1e-8
+
         if len(self.__move_path) == 0:
             return
 
         it = 0
-        game_map = get_model().map
-
-        while (it < len(self.__move_path) and
-               game_map.is_position_passable(self.__move_path[it]) and
-               (self.__move_path[it] - self.position).length() <= self.attribute.speed):
-            it += 1
-        if it == 0:
-            print(f"[API] Character {self.id}: no move for me, criteria: {it < len(self.__move_path)}, {game_map.is_position_passable(self.__move_path[it])}, {(self.__move_path[it] - self.position).length() <= self.attribute.speed}")
-            return
-
         pos_init = self.position
-        pos_dest = self.__move_path[it - 1]
+        movement = 0
+        while (it < len(self.__move_path) and
+               movement + EPS <= self.attribute.speed):
+            ratio = (self.attribute.speed - movement) / \
+                (self.__move_path[it] - self.position).length()
+            if ratio >= 1:
+                movement += (self.__move_path[it] - self.position).length()
+                self.position = self.__move_path[it]
+                it += 1
+            else:
+                self.position = self.__move_path[it] * ratio + self.position * (1 - ratio)
+                break
 
         if it == len(self.__move_path):
             self.__move_path = []
@@ -137,8 +140,7 @@ class Character(LivingEntity):
         else:
             del self.__move_path[:it]
 
-        self.position = pos_dest
-        get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
+        get_event_manager().post(EventCharacterMove(character=self, original_pos=self.position))
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
