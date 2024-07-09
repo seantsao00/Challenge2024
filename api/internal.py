@@ -158,6 +158,11 @@ class Internal(prototype.API):
     def __team(self):
         return get_model().teams[self.team_id]
 
+    def __is_controllable(self, obj: None | model.Character | model.Tower):
+        return (obj is not None and
+                obj.team == self.__team() and
+                obj.health > 0)
+
     def get_current_time(self):
         return get_model().get_time()
 
@@ -221,24 +226,23 @@ class Internal(prototype.API):
         enforce_type('direction', direction, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        for ch in characters:
-            internal = self.__access_character(ch)
-            if internal == None:
-                continue
-            with internal.moving_lock:
-                internal.set_move_direction(direction)
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for inter in internals:
+            with inter.moving_lock:
+                inter.set_move_direction(direction)
 
     def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
         enforce_type('characters', characters, Iterable)
         enforce_type('destination', destination, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        if not self.look_position(destination):
+        if not self.is_visible(destination):
             print(f"[API] team {self.team_id} tried to move to a point outside of vision!")
             return
 
         internals = [self.__access_character(ch) for ch in characters]
-        internals = [inter for inter in internals if inter != None]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
                 inter.set_move_stop()
@@ -249,11 +253,11 @@ class Internal(prototype.API):
         enforce_type('characters', characters, Iterable)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        for ch in characters:
-            internal = self.__access_character(ch)
-            if internal == None:
-                continue
-            internal.set_move_stop()
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for inter in internals:
+            with inter.moving_lock:
+                inter.set_move_stop()
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
         enforce_type('characters', characters, Iterable)
@@ -266,10 +270,9 @@ class Internal(prototype.API):
         elif isinstance(target, prototype.Tower):
             target_internal = self.__access_tower(target)
 
-        for ch in characters:
-            internal = self.__access_character(ch)
-            if internal is None:
-                continue
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for internal in internals:
             attackable = internal.attackable(target_internal)
             if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
                 print(f"[API] team {self.team_id} tried to attack themselves.")
@@ -285,11 +288,10 @@ class Internal(prototype.API):
         enforce_type('target', target, prototype.Character)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        for ch in characters:
-            internal = self.__access_character(ch)
-            if internal == None:
-                continue
-            internal.cast_ability()
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for inter in internals:
+            inter.cast_ability()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -297,7 +299,7 @@ class Internal(prototype.API):
         enforce_type('spawn_type', spawn_type, prototype.CharacterClass)
 
         internal_tower = self.__access_tower(tower)
-        if internal_tower is None:
+        if not self.__is_controllable(internal_tower):
             return
 
         internal_tower.character_type = spawn_type
