@@ -77,11 +77,6 @@ class EventUnconditionalTick(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventRestartGame(BaseEvent):
-    """Post this event when the game needs to restart."""
-
-
-@dataclass(kw_only=True)
 class EventHumanInput(BaseEvent):
     """
     Event posted upon moving a human controlled team.
@@ -158,6 +153,7 @@ class EventSelectParty(BaseEvent):
     """Event posted when player is selecting parties"""
     index: int
     increase: bool
+
 
 @dataclass(kw_only=True)
 class EventViewChangeTeam(BaseEvent):

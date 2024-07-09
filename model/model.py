@@ -15,8 +15,8 @@ import const.model
 from api.internal import load_ai, start_ai
 from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventRestartGame, EventResumeModel, EventSpawnCharacter,
-                           EventStartGame, EventUnconditionalTick)
+                           EventQuit, EventResumeModel, EventSpawnCharacter, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character
@@ -177,9 +177,6 @@ class Model:
         if event.original_pos.distance_to(event.character.position) > 0.1:
             event.character.team.update_vision(event.character)
 
-    def __restart_game(self, _: EventRestartGame):
-        get_event_manager().post(EventInitialize())
-
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -192,7 +189,6 @@ class Model:
         ev_manager.register_listener(EventCreateEntity, self.__register_entity)
         ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
-        ev_manager.register_listener(EventRestartGame, self.__restart_game)
         ev_manager.register_listener(EventGameOver, self.handle_game_over)
 
     def get_time(self):
