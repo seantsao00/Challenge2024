@@ -132,6 +132,7 @@ class Team(NeutralTeam):
         self.__points: int = 0
         self.__towers: set[Tower] = set()
         self.character_list: list[Character] = []
+        self.fountain: Tower = None
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
@@ -177,6 +178,8 @@ class Team(NeutralTeam):
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.__towers:
             self.__towers.add(event.tower)
+        if self.fountain == None:
+            self.fountain = event.tower
         print(f'{self.__team_name} gained a tower with id {event.tower.id} at {event.tower.position}')
 
     def lose_tower(self, event: EventTeamLoseTower):

@@ -127,7 +127,7 @@ class API:
         pass
 
     def get_visibility(self) -> list[list[int]]:
-        """回傳視野範圍，每個元素為 `1` 則為能見；`0` 表示不可見。"""
+        """Deprecated. use `is_visible` instead."""
         pass
 
     def is_visible(self, position: pg.Vector2) -> bool:
@@ -180,10 +180,6 @@ class API:
         @tower: 指定的建築。
         @spawn_type: 指定的兵種。
         """
-        pass
-
-    def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
-        """改變特定塔生成的兵種"""
         pass
 
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
