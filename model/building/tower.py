@@ -4,7 +4,7 @@ The module defines Building class.
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -59,16 +59,12 @@ class Tower(LivingEntity):
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.team_id)
         get_event_manager().post(EventCreateTower(tower=self))
 
-    @property
-    def character_type(self) -> const.CharacterType:
-        return self.__character_type
-
     def update_period(self):
-        self.__period = const.INITIAL_PERIOD_MS + \
-            int(const.FORMULA_K * len(self.team.towers) ** 0.5)
+        self.__period = (const.INITIAL_PERIOD_MS +
+                         int(const.FORMULA_K * len(self.team.towers) ** 0.5))
 
     def generate_character(self):
-        character_type: Type[Character]
+        character_type: type[Character]
         if self.__character_type is const.CharacterType.MELEE:
             character_type = Melee
         elif self.__character_type is const.CharacterType.RANGER:

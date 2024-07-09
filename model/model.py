@@ -52,7 +52,11 @@ class Model:
 
         self.global_clock: pg.Clock = pg.time.Clock()
         """The clock since program start."""
+        self.__game_clock: Clock
+        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
+        self.dt: float
+        """Real-world-passing time since last tick in second."""
 
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
@@ -98,8 +102,7 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
-        self.__game_clock: Clock = Clock()
-        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
+        self.__game_clock = Clock()
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -112,7 +115,7 @@ class Model:
         self.__ticks %= const.TICKS_PER_CYCLE
         if self.__ticks == 0:
             for i in range(len(self.teams)):
-                if self.__team_thread[i] == None or not self.__team_thread[i].is_alive():
+                if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
                     self.__team_thread[i] = start_ai(i)
                 else:
                     print(
@@ -208,4 +211,4 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-            self.global_clock.tick(const.FPS)
+            self.dt = self.global_clock.tick(const.FPS) / 1000
