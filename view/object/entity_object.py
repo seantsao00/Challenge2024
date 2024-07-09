@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
+import const
 from event_manager import EventDiscardEntity
 from instances_manager import get_event_manager
 from view.object.object_base import ObjectBase
@@ -14,10 +15,10 @@ if TYPE_CHECKING:
 
 class EntityObject(ObjectBase):
 
-    def __init__(self, canvas: pg.Surface, entity: Entity):
+    def __init__(self, canvas: pg.Surface, entity: Entity, priority: float = const.WINDOW_SIZE[1] + 10):
         self.entity: Entity = entity
         self.position: pg.Vector2 = self.entity.position.copy()
-        super().__init__(canvas, self.position[1])
+        super().__init__(canvas, priority)
         self.register_listeners()
 
     def handle_discard_entity(self, _: EventDiscardEntity):

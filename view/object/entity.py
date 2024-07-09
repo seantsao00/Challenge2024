@@ -30,7 +30,8 @@ class EntityView(EntityObject):
     """
 
     def __init__(self, canvas: pg.Surface, entity: Entity):
-        super().__init__(canvas, entity)
+        self.entity: Entity = entity
+        super().__init__(canvas, entity, self.entity.position[1])
         self.register_listeners()
 
     @classmethod
