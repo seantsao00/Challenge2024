@@ -224,7 +224,6 @@ class View:
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
         ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
-        ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
 
     def display_fps(self):
         """Display the current fps on the window caption."""
