@@ -8,6 +8,7 @@ import pygame as pg
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
+from const.visual import IMAGE_DIR
 
 if TYPE_CHECKING:
     from const.entity import EntityState, EntityType
@@ -24,8 +25,6 @@ VISION_BLOCK_SIZE = 2
 VIEW_EVERYTHING = 0
 
 REGULAR_FONT = './font/Cubic_11_1.300_R.ttf'
-
-IMAGE_DIR = 'image/'
 
 PARTY_PATH: dict[PartyType, str] = {
     PartyType.NEUTRAL: 'entity/neutral/',
@@ -44,7 +43,7 @@ TOWER_IMAGE: dict[TowerType, str] = {
     TowerType.PYLON: 'neutral_pylon.png'
 }
 
-CHARACTER_DIR = 'character'
+CHARACTER_DIR = 'character/'
 CHARACTER_IMAGE: dict[CharacterType, str] = {
     CharacterType.MELEE: 'melee.png',
     CharacterType.RANGER: 'ranger.png',

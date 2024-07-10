@@ -162,7 +162,6 @@ class Model:
                 tower.enemy_in_range(event.entity)
 
     def __handle_character_died(self, event: EventCharacterDied):
-        self.grid.delete_from_grid(event.character, event.character.position)
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_out_range(event.character)
 

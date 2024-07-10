@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import Callable
 
 import pygame as pg
@@ -69,6 +70,7 @@ class Timer:
         self.__running: bool = False
         self.__once: bool = once
         self.__remaining_time: float | None = None
+        self.__last_start_time: float | None = None
 
         Timer.__next_event_type += 1
 
@@ -81,6 +83,7 @@ class Timer:
         if not self.__running:
             pg.time.set_timer(self.event_type, int(self.__interval * 1000))
             self.__remaining_time = self.__interval
+            self.__last_start_time = time.time()
             self.__running = True
 
     def __stop(self):
@@ -113,7 +116,7 @@ class Timer:
         return self.__interval
 
     def get_remaining_time(self) -> float:
-        return self.__remaining_time
+        return self.__remaining_time - (time.time() - self.__last_start_time)
 
     def get_count(self):
         """Get the count of how many times the timer has triggered."""

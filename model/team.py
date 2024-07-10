@@ -67,7 +67,7 @@ class Team(NeutralTeam):
             self.__team_name = 'team' + str(self.__team_id)
         self.__points: int = 0
         self.__towers: set[Tower] = set()
-        self.character_list: list[Character] = []
+        self.character_list: set[Character] = set()
         self.fountain: Tower = None
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
@@ -109,7 +109,7 @@ class Team(NeutralTeam):
                     self.__controlling.cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
-        self.character_list.append(event.character)
+        self.character_list.add(event.character)
 
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.__towers:
