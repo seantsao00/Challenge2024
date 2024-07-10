@@ -43,7 +43,6 @@ class PartySelectionView(ObjectBase):
         team_number = 0
         for party in self.__party_selector.selected_parties():
             img = self.party_images[party]
-            print(transform_coordinate(point[team_number], self.ratio))
             self.canvas.blit(img, transform_coordinate(point[team_number], self.ratio))
             team_number += 1
 

@@ -21,7 +21,7 @@ class PartySelector:
         if operation is const.PartySelectInput.CONFIRM:
             if None in self.__selected_party_indices:
                 return
-            ev_manager.post(EventStartGame)
+            ev_manager.post(EventStartGame())
         elif operation is const.PartySelectInput.CHANGE:
             team_index, change_direction = change
             if team_index > self.__number_of_teams:
