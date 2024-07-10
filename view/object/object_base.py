@@ -4,8 +4,6 @@ from typing import Iterable
 
 import pygame as pg
 
-from const.visual.priority import PRIORITY_HIGHEST
-
 
 class ObjectBase:
     """
@@ -42,7 +40,7 @@ class ObjectBase:
         """
         cls.image_initialized = True
 
-    def __init__(self, canvas: pg.Surface, priority: Iterable[float] = [PRIORITY_HIGHEST]):
+    def __init__(self, canvas: pg.Surface, priority: Iterable[float]):
         self.canvas: pg.Surface = canvas
         self.priority: Iterable[float] = priority
         self.exist: bool = True
