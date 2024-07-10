@@ -118,8 +118,8 @@ class Tower(LivingEntity):
             bullet = BulletCommon(position=self.position,
                                   team=self.team,
                                   damage=self.attribute.attack_damage,
-                                  victim=victim.character, 
-                                  speed=const.BULLET_COMMON_SPEED, 
+                                  victim=victim.character,
+                                  speed=const.BULLET_COMMON_SPEED,
                                   attacker=self)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
 

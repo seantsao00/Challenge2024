@@ -176,10 +176,10 @@ class EventBulletDisappear(BaseEvent):
     bullet: Bullet
 
 
-
 @dataclass(kw_only=True)
 class EventViewChangeTeam(BaseEvent):
     """Event to change view team"""
+
 
 @dataclass(kw_only=True)
 class EventUseRangerAbility(BaseEvent):

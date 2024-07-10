@@ -7,6 +7,7 @@ from api.prototype import *
 
 destination = []
 
+
 def every_tick(api: API):
     character = api.get_characters()
     # if len(character) < 250:

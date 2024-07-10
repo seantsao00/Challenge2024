@@ -112,8 +112,6 @@ class Controller:
                         ev_manager.post(EventHumanInput(
                             input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
-                    
-
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
                     if model.RangerAbility:

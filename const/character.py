@@ -45,7 +45,7 @@ RANGER_ATTRIBUTE = CharacterAttribute(
     vision=15,
     ability_cd=2,
     attack_speed=1.2,
-    ability_variables=[15, 60] # [range, damage] of ability
+    ability_variables=[15, 60]  # [range, damage] of ability
     # damage per second = 72
 )
 
@@ -57,7 +57,7 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     vision=0,
     ability_cd=4,
     attack_speed=0.5,
-    ability_variables=300 # damage of ability
+    ability_variables=300  # damage of ability
     # damage per second = 150
 )
 

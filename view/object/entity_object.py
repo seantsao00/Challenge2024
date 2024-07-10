@@ -38,4 +38,3 @@ class EntityObject(ObjectBase):
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventDiscardEntity, self.handle_discard_entity,
                                        self.entity.id)
-

@@ -189,8 +189,8 @@ class Model:
         for entity in self.entities:
             if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
                 get_event_manager().post(EventAttack(victim=entity,
-                                                    attacker=event.bullet.attacker,
-                                                    damage=event.bullet.damage), channel_id=entity.id)
+                                                     attacker=event.bullet.attacker,
+                                                     damage=event.bullet.damage), channel_id=entity.id)
 
     def bullet_damage(self, event: EventBulletDamage):
         event.bullet.timer._Timer__stop()
