@@ -335,8 +335,8 @@ class Internal(prototype.API):
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
-        for inter in internals:
-            inter.cast_ability()
+        for internal in internals:
+            internal.cast_ability()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
