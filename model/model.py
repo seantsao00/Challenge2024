@@ -54,7 +54,7 @@ class Model:
 
         self.global_clock: pg.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock
+        self.__game_clock: Clock = Clock()
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
         self.dt: float
@@ -107,7 +107,7 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
-        self.__game_clock = Clock()
+        # self.__game_clock
 
     def __handle_every_tick(self, _: EventEveryTick):
         """

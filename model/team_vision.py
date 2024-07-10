@@ -152,7 +152,7 @@ class Team_Vision(Team_Vision_Grid):
     def modify_vision(self):
         if len(self.set) == 0:
             return
-        if len(self.set) >= 40:
+        if len(self.set) >= 35:
             self.special_modify(self.set)
         else:
             for st in self.set:
