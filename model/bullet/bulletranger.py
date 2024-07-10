@@ -5,29 +5,29 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-import const.map
-import util
-import view
 from event_manager import EventRangedBulletDamage
-from instances_manager import get_event_manager, get_model
+from instances_manager import get_event_manager
+from model.bullet.bullet import Bullet
 
 if TYPE_CHECKING:
-    from model.character import Character
-    from model.team import Team
     from model.entity import LivingEntity
+    from model.team import Team
 
-from model.bullet import Bullet
 
-
-class BulletRanger(Bullet):
-    def __init__(self, target: pg.Vector2 | tuple[float, float], position, team, attacker):
-        super().__init__(position=position, entity_type=const.BulletType.RANGER,
-                         team=team, speed=const.BULLET_RANGER_SPEED, attacker=attacker, damage=const.RANGER_ATTRIBUTE.ability_variables[1])
+class BulletRanger(Bullet[None]):
+    def __init__(self,
+                 target: pg.Vector2 | tuple[float, float],
+                 position: pg.Vector2 | tuple[float, float],
+                 team: Team,
+                 attacker: LivingEntity):
+        super().__init__(position=position, entity_type=const.BulletType.RANGER, team=team,
+                         speed=const.BULLET_RANGER_SPEED, attacker=attacker,
+                         damage=const.RANGER_ATTRIBUTE.ability_variables[1])
         self.target = target
         self.range = const.RANGER_ATTRIBUTE.ability_variables[0]
         self.direction = (self.target - self.position).normalize()
 
-    def judge(self):
+    def judge(self, args: None = None):
         """
         Move the bullet in the given direction.
         """

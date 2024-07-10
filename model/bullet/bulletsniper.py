@@ -2,16 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pygame as pg
-
 import const
-from instances_manager import get_event_manager, get_model
+from model.bullet.bulletcommon import BulletCommon
 
 if TYPE_CHECKING:
-    from model.team import Team
     from model.entity import LivingEntity
-
-from model.bullet import BulletCommon
 
 
 class BulletSniper(BulletCommon):
