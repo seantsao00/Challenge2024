@@ -169,8 +169,8 @@ class View:
         """Render scenes when the game is being played"""
         model = get_model()
 
-        self.scoreboard_image = pg.transform.scale(self.scoreboard_image, self.screen_size)
-        self.__screen.blit(self.scoreboard_image, (0, 0))
+        # self.scoreboard_image = pg.transform.scale(self.scoreboard_image, self.screen_size)
+        # self.__screen.blit(self.scoreboard_image, (0, 0))
 
         discarded_entities: set[type[EntityView]] = set()
 

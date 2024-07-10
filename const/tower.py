@@ -44,9 +44,9 @@ TOWER_DEFAULT_GENERATE_CHARACTER = CharacterType.RANGER
 TOWER_GENERATE_DISPLACEMENT = 10
 """The distance between generated character and the tower will be less than this value."""
 
-TOWER_SPAWN_INITIAL_PERIOD = 0.1
+TOWER_SPAWN_INITIAL_PERIOD = 1
 """The initial period of tower to spawn in second."""
 
 
 def count_period_ms(entity_number: int) -> float:
-    return TOWER_SPAWN_INITIAL_PERIOD# * (1 + (entity_number / 40) ** (2.5))
+    return TOWER_SPAWN_INITIAL_PERIOD * (1 + (entity_number / 40) ** (2.5))

@@ -46,7 +46,7 @@ class TimerManager:
 
 
 class Timer:
-    __next_event_type = pg.USEREVENT + 30
+    __next_event_type = pg.USEREVENT + 50
 
     def __init__(self, interval: float, function: Callable, *args, once: bool = False, **kwargs):
         """

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
 import pygame as pg
 
 import const
@@ -28,6 +27,7 @@ class Team_Vision_Grid:
         self.bool_mask: list[list[bool]] = [[False for _ in range(self.M)] for __ in range(self.N)]
         self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
                                                  for __ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)]
+        self.visit = [[ False for _ in range(self.M)] for __ in range(self.N)]
         for x in range(self.N):
             for y in range(self.M):
                 self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
@@ -62,14 +62,14 @@ class Team_Vision_Grid:
                     raise NotImplementedError
         return False
 
-    def brute_modify(self, position: pg.Vector2, radius: float):
-        real_position = self.transfer_to_pixel(position)
-        real_radius = radius / const.VISION_BLOCK_SIZE
-        for x in range(max(0, int(real_position.x - real_radius)),
-                       min(self.N, int(position.x + real_radius + 1))):
-            for y in range(max(0, int(real_position.y - real_radius)),
-                           min(self.M, int(position.y + real_radius + 1))):
-                if position.distance_to(pg.Vector2(const.VISION_BLOCK_SIZE * (x + 0.5), const.VISION_BLOCK_SIZE * (y + 0.5))) <= radius:
+    def brute_modify(self, position: pg.Vector2, real_radius: float):
+        real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE, position.y * const.VISION_BLOCK_SIZE)
+        radius = real_radius / const.VISION_BLOCK_SIZE
+        for x in range(max(0, int(position.x - radius)),
+                       min(self.N, int(position.x + radius + 1))):
+            for y in range(max(0, int(position.y - radius)),
+                           min(self.M, int(position.y + radius + 1))):
+                if real_position.distance_to(pg.Vector2(const.VISION_BLOCK_SIZE * (x + 0.5), const.VISION_BLOCK_SIZE * (y + 0.5))) <= real_radius:
                     a = self.mask.get_at((x, y))
                     if a[3] != 0:
                         a[3] = 0
@@ -124,14 +124,11 @@ class Team_Vision_Grid:
                     self.bool_mask[x][y] = True
                     self.mask.set_at((x, y), a)
 
-
-                
-
-
     def update_vision(self, entity: LivingEntity):
-        # if entity.alive is False or self.heuristic_test(entity.position) is False:
-        #     return
-        self.brute_modify(entity.position, entity.attribute.vision)
+        x, y = int(entity.position.x / const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)
+        if entity.alive is False or self.visit[x][y] is True or self.heuristic_test(entity.position) is False:
+            return
+        self.brute_modify(pg.Vector2(x, y), entity.attribute.vision)
 
 
 class Team_Vision(Team_Vision_Grid):
@@ -140,7 +137,6 @@ class Team_Vision(Team_Vision_Grid):
         self.team = team
         self.set: set[tuple[int, int, int]] = set()
         self.timer = Timer(0.05, self.modify_vision, once=False)
-        self.visit = [[ False for _ in range(self.M)] for __ in range(self.N)]
 
     def handle_character_move(self, event: EventCharacterMove):
         x, y = int(event.character.position.x / const.VISION_BLOCK_SIZE), int(event.character.position.y / const.VISION_BLOCK_SIZE)
@@ -151,20 +147,14 @@ class Team_Vision(Team_Vision_Grid):
             return
         self.set.add((x, y, event.character.attribute.vision))
         self.visit[x][y] = True
+        # self.modify_vision()
 
     def modify_vision(self):
         if len(self.set) == 0:
             return
-        print(self.team, self.set)
-        if len(self.set) >= 150:
-            print("special modify")
+        if len(self.set) >= 40:
             self.special_modify(self.set)
         else:
-            print("brute modify")
             for st in self.set:
                 self.brute_modify(pg.Vector2(st[0], st[1]), st[2])
         self.set.clear()
-        print("OK")
-
-
-
