@@ -56,5 +56,5 @@ class EntityView(EntityObject):
     def update(self):
         if not self.exist:
             return False
-        self.priority = self.entity.position[1]
+        self.priority[1] = self.entity.position[1]
         return True

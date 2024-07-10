@@ -52,13 +52,11 @@ def log_critical(msg: str):
 
 def log_warning(msg: str):
     """Print warning logging message."""
-    global verbosity
     if verbosity >= 1:
         print(f"\033[93m[Warn] {msg}\033[0m")
 
 
 def log_info(msg: str):
     """Print info logging message."""
-    global verbosity
     if verbosity >= 2:
         print(f"[Info] {msg}")

@@ -151,11 +151,13 @@ class Grid:
     def all_entity_in_range(self, position: pg.Vector2, radius: float) -> list[Character | Tower]:
         x, y = self.__transfer(position)
         result = []
-        for dx in range(max(0, int(x - radius / self.__radius)), min(self.__height, int(x + radius / self.__radius + 1))):
-            for dy in range(max(0, int(y - radius / self.__radius)), min(self.__width, int(y + radius / self.__radius + 1))):
+        for dx in range(max(0, int(x - radius / self.__radius)),
+                        min(self.__height, int(x + radius / self.__radius + 1))):
+            for dy in range(max(0, int(y - radius / self.__radius)),
+                            min(self.__width, int(y + radius / self.__radius + 1))):
                 cell = self.__cells[dx][dy]
-                result.extend(
-                    [tower for tower in cell.towers if tower.position.distance_to(position) <= radius])
-                result.extend(
-                    [character for character in cell.characters if character.position.distance_to(position) <= radius])
+                result.extend([tower for tower in cell.towers
+                               if tower.position.distance_to(position) <= radius])
+                result.extend([character for character in cell.characters
+                               if character.position.distance_to(position) <= radius])
         return result

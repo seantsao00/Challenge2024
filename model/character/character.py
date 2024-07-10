@@ -84,8 +84,6 @@ class Character(LivingEntity):
         if direction.length() > 0:
             direction = self.attribute.speed * model.dt * direction.normalize()
 
-        game_map = get_model().map
-
         component_dirs = [pg.Vector2(direction.x, 0), pg.Vector2(0, direction.y)]
 
         for component_dir in component_dirs:
@@ -95,12 +93,11 @@ class Character(LivingEntity):
 
             # try further distance
             for i in range(4):
-
                 new_position = self.position + cur_direction
                 new_position.x = util.clamp(new_position.x, 0, const.ARENA_SIZE[0] - 1)
                 new_position.y = util.clamp(new_position.y, 0, const.ARENA_SIZE[1] - 1)
 
-                if not game_map.is_position_passable(new_position):
+                if not model.map.is_position_passable(new_position):
                     self.position = new_position - min_direction
                     break
 
@@ -115,7 +112,7 @@ class Character(LivingEntity):
         """
         move along the predetermined path as far as it can
         """
-        esp = 1e-8
+        EPS = 1e-8
 
         if len(self.__move_path) == 0:
             return
@@ -125,7 +122,10 @@ class Character(LivingEntity):
         movement = 0
         model = get_model()
         while (it < len(self.__move_path)
-               and movement + esp <= self.attribute.speed * model.dt):
+               and movement + EPS <= self.attribute.speed * model.dt):
+            if (self.__move_path[it] - self.position).length() < EPS:
+                it += 1
+                continue
             ratio = ((self.attribute.speed * model.dt - movement)
                      / (self.__move_path[it] - self.position).length())
             if ratio >= 1:
@@ -158,13 +158,13 @@ class Character(LivingEntity):
         self.__move_state = CharacterMovingState.STOPPED
         return True
 
-    def set_move_direction(self, direction: pg.Vector2):
+    def set_move_direction(self, direction: pg.Vector2) -> bool:
         """Set character movement toward a direction. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.TO_DIRECTION
         self.__move_direction = direction
         return True
 
-    def set_move_position(self, path: list[pg.Vector2]):
+    def set_move_position(self, path: list[pg.Vector2] | None):
         """Set character movement toward a target position. Returns True/False on success/failure."""
         if path is None:
             return False
@@ -177,21 +177,20 @@ class Character(LivingEntity):
         if self.health <= 0:
             self.die()
 
-    def attackable(self, enemy: Entity) -> CharacterAttackResult:
+    def assailable(self, enemy: Entity) -> CharacterAttackResult:
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
-        if self.team == enemy.team:
+        if self.team is enemy.team:
             return CharacterAttackResult.FRIENDLY_FIRE
-        elif dist > self.attribute.attack_range:
+        if dist > self.attribute.attack_range:
             return CharacterAttackResult.OUT_OF_RANGE
-        elif (now_time - self.__attack_time) * self.attribute.attack_speed < 1:
+        if (now_time - self.__attack_time) * self.attribute.attack_speed < 1:
             return CharacterAttackResult.COOLDOWN
-        else:
-            return CharacterAttackResult.SUCCESS
+        return CharacterAttackResult.SUCCESS
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
-        if self.attackable(enemy):
+        if self.assailable(enemy):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
             self.__attack_time = now_time
 

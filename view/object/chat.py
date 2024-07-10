@@ -5,28 +5,20 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from const.visual.priority import PRIORITY_PAUSEMENU
+from const.visual.priority import PRIORITY_CHAT
 from view.object.object_base import ObjectBase
 
-if TYPE_CHECKING:
-    from model import PauseMenu
 
-
-class PauseMenuView(ObjectBase):
-    def __init__(self, canvas: pg.Surface, pause_menu: PauseMenu):
+class ChatView(ObjectBase):
+    def __init__(self, canvas: pg.Surface):
         self.image_initialized = True
-        super().__init__(canvas, [PRIORITY_PAUSEMENU])
-        self.pause_menu = pause_menu
-        self.title_font = pg.font.Font(const.REGULAR_FONT, int(20*self.resize_ratio))
-        self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(12*self.resize_ratio))
-        self.options = self.pause_menu.options
+        super().__init__(canvas, [PRIORITY_CHAT])
+        self.font = pg.font.Font(const.REGULAR_FONT, int(12*self.resize_ratio))
 
     def draw(self):
-        if not self.pause_menu.enabled:
-            return
-
+        print()
         bg_surf = pg.Surface((self.canvas.get_size()), pg.SRCALPHA)
-        bg_surf.fill((200, 200, 200, 230))
+        bg_surf.fill((255, 255, 255, 230))
 
         center = (bg_surf.get_width() // 2, bg_surf.get_height() // 2)
 

@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from itertools import chain
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
 import const.team
-from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
-                           EventEveryTick, EventHumanInput, EventSelectCharacter,
-                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
-from instances_manager import get_event_manager, get_model
+from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
+                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
+                           EventTeamLoseTower)
+from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger
 from util import log_info
@@ -48,7 +47,7 @@ class Team_Vision:
         self.mask: pg.Surface = pg.Surface((self.N, self.M), pg.SRCALPHA)
         self.mask.fill([0, 0, 0])
         self.mask.set_alpha(192)
-        self.boolmask: list[list[bool]] = [[False for _ in range(self.M)] for __ in range(self.N)]
+        self.bool_mask: list[list[bool]] = [[False for _ in range(self.M)] for __ in range(self.N)]
         self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.M // const.TEAM_VISION_BLOCK) + 1)]
                                                  for __ in range(int(self.N // const.TEAM_VISION_BLOCK) + 1)]
         for x in range(self.N):
@@ -65,7 +64,7 @@ class Team_Vision:
     def position_inside_vision(self, position: pg.Vector2) -> bool:
         pixel = self.transfer_to_pixel(position)
         if 0 <= pixel.x < self.N and 0 <= pixel.y < self.M:
-            return self.boolmask[int(pixel.x)][int(pixel.y)]
+            return self.bool_mask[int(pixel.x)][int(pixel.y)]
         return False
 
     def entity_inside_vision(self, entity: Entity):
@@ -82,7 +81,7 @@ class Team_Vision:
                 if self.vision_not_open[x][y] > 0:
                     return True
                 if self.vision_not_open[x][y] < 0:
-                    raise ("wtffffffffffffffff")
+                    raise NotImplementedError
         return False
 
     def brute_modify(self, position: pg.Vector2, radius: float):
@@ -96,9 +95,9 @@ class Team_Vision:
                     a = self.mask.get_at((x, y))
                     if a[3] != 0:
                         a[3] = 0
-                        self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
-                                                                           const.TEAM_VISION_BLOCK] -= 1
-                        self.boolmask[x][y] = True
+                        self.vision_not_open[x
+                                             // const.TEAM_VISION_BLOCK][y // const.TEAM_VISION_BLOCK] -= 1
+                        self.bool_mask[x][y] = True
                         self.mask.set_at((x, y), a)
 
     def update_vision(self, entity: LivingEntity):
@@ -181,10 +180,12 @@ class Team(NeutralTeam):
             self.__towers.add(event.tower)
         if self.fountain == None:
             self.fountain = event.tower
-        log_info(f'{self.__team_name} gained a tower with id {event.tower.id} at {event.tower.position}')
+        log_info(f'{self.__team_name} gained a tower '
+                 f'with id {event.tower.id} at {event.tower.position}')
 
     def lose_tower(self, event: EventTeamLoseTower):
-        log_info(f'{self.__team_name} lost a tower with id {event.tower.id} at {event.tower.position}')
+        log_info(f'{self.__team_name} lost a tower '
+                 f'with id {event.tower.id} at {event.tower.position}')
         if event.tower in self.__towers:
             self.__towers.remove(event.tower)
 
