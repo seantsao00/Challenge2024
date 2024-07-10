@@ -180,12 +180,11 @@ class Model:
             event.character.team.update_vision(event.character)
 
     def create_bullet(self, event: EventBulletCreate):
-        event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
-                                   function=event.bullet.judge, once=False)
+        get_event_manager().post(EventEveryTick(event.bullet.judge))
         self.bullet_pool.append(event.bullet)
 
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
-        event.bullet.timer._Timer__stop()
+        get_event_manager().unregister_listener(EventEveryTick(event.bullet.judge))
         for entity in self.entities:
             if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
                 get_event_manager().post(EventAttack(victim=entity,
@@ -193,13 +192,13 @@ class Model:
                                                      damage=event.bullet.damage), channel_id=entity.id)
 
     def bullet_damage(self, event: EventBulletDamage):
-        event.bullet.timer._Timer__stop()
+        get_event_manager().unregister_listener(EventEveryTick(event.bullet.judge))
         get_event_manager().post(EventAttack(victim=event.bullet.victim,
                                              attacker=event.bullet.attacker,
                                              damage=event.bullet.damage), channel_id=event.bullet.victim.id)
 
     def bullet_disappear(self, event: EventBulletDisappear):
-        event.bullet.timer._Timer__stop()
+        get_event_manager().unregister_listener(EventEveryTick(event.bullet.judge))
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
