@@ -67,6 +67,7 @@ class Model:
         self.show_attack_range: bool = show_attack_range
 
         self.pause_menu: PauseMenu = PauseMenu()
+        self.RangerAbility = False
 
         self.__register_listeners()
 
@@ -169,7 +170,6 @@ class Model:
         get_event_manager().post(EventInitialize())
 
     def create_bullet(self, event: EventBulletCreate):
-        # if event.bullet.team == self:
         event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
                                    function=event.bullet.judge, once=False)
         self.bullet_pool.append(event.bullet)
@@ -177,10 +177,10 @@ class Model:
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
         event.bullet.timer._Timer__stop()
         for entity in self.entities:
-            if (entity.position-event.bullet.target).length() < event.bullet.range and entity.team is not self:
+            if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
                 get_event_manager().post(EventAttack(victim=entity,
-                                                     attacker=event.bullet.attacker,
-                                                     damage=event.bullet.damage), channel_id=entity.id)
+                                                    attacker=event.bullet.attacker,
+                                                    damage=event.bullet.damage), channel_id=entity.id)
 
     def bullet_damage(self, event: EventBulletDamage):
         event.bullet.timer._Timer__stop()

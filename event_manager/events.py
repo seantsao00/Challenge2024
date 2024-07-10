@@ -184,3 +184,7 @@ class EventBulletDisappear(BaseEvent):
 @dataclass(kw_only=True)
 class EventViewChangeTeam(BaseEvent):
     """Event to change view team"""
+
+@dataclass(kw_only=True)
+class EventUseRangerAbility(BaseEvent):
+    position: pg.Vector2 | tuple[float, float]

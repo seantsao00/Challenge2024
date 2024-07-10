@@ -156,18 +156,11 @@ class Team(NeutralTeam):
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
-            if isinstance(self.__controlling, Character):
-                if self.__choosing_position is True:
-                    self.__controlling.cast_ability(event.displacement)
-                    self.__choosing_position = False
-                elif isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain:
-                    self.__controlling.attack(clicked_entity)
+            if isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
+                self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
-                if isinstance(self.__controlling, Ranger):
-                    self.__choosing_position = True
-                else:
-                    self.__controlling.cast_ability()
+                self.__controlling.cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.append(event.character)

@@ -53,7 +53,7 @@ class Sniper(Character):
                                       team=self.team, 
                                       attacker=self, 
                                       damage=const.SNIPER_ATTRIBUTE.attack_damage,
-                                      speed=const.BULLET_COMMON_SNIPER_SPEED)
+                                      speed=const.BULLET_COMMON_SPEED)
             else:
                 bullet = BulletSniper(position=self.position, 
                                       victim=enemy,

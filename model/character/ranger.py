@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventBulletCreate
+from event_manager import EventBulletCreate, EventUseRangerAbility
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon, BulletRanger
 from model.character import Character
@@ -24,6 +24,7 @@ class Ranger(Character):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
         super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
+        get_event_manager().register_listener(EventUseRangerAbility, listener=self.use_ability)
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
@@ -40,23 +41,24 @@ class Ranger(Character):
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self.attack_time = now_time
 
-    def ability(self, *args, **kwargs):
-        if len(args) < 1 or not isinstance(args[0], pg.Vector2):
-            raise ValueError()
-        origin: pg.Vector2 = args[0]
-        dist = self.position.distance_to(origin)
-        if dist <= self.attribute.attack_range:
-            print("ranged abilities attack")
-            bullet = BulletRanger(position=self.position,
-                                  target=origin,
-                                  team=self.team,
-                                  attacker=self)
-            get_event_manager().post(EventBulletCreate(bullet=bullet))
-
     def cast_ability(self, *args, **kwargs):
+        """This function is called after clicked Q, it wouldn't generate bullet"""
+
+        print("Ranger ability is on")
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        print("cast abilities")
         self.abilities_time = now_time
-        self.ability(*args, **kwargs)
+        get_model().RangerAbility = True
+
+    def use_ability(self, event: EventUseRangerAbility):
+        """This function is called after clicked Q and left button, it would generate bullet"""
+
+        if self.position.distance_to(event.position) <= self.attribute.attack_range:
+            get_model().RangerAbility = False
+            print("Ranger cast ablility")
+            bullet = BulletRanger(position=self.position,
+                                  target=event.position,
+                                  team=self.team,
+                                  attacker=self)
+            get_event_manager().post(EventBulletCreate(bullet=bullet))
