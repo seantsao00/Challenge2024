@@ -68,7 +68,7 @@ class Timer:
         self.__count: int = 0
         self.__running: bool = False
         self.__once: bool = once
-        self.__remaining_time: int | None = None
+        self.__remaining_time: float | None = None
 
         Timer.__next_event_type += 1
 
@@ -98,7 +98,7 @@ class Timer:
     def resume(self):
         """Resume the timer."""
         if not self.__running:
-            pg.time.set_timer(self.event_type, self.__remaining_time)
+            pg.time.set_timer(self.event_type, int(self.__remaining_time * 1000))
             self.__running = True
 
     def set_interval(self, interval: float):
