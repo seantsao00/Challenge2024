@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
+from const.bullet import BulletType
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
@@ -57,12 +58,27 @@ WEAPON_IMAGE: dict[CharacterType, str] = {
     CharacterType.SNIPER: os.path.join(IMAGE_DIR, WEAPON_DIR, 'sniper.png')
 }
 
+BULLET_DIR = 'bullet/'
+BULLET_IMAGE: dict[BulletType, str] = {
+    BulletType.COMMON: 'common.png',
+    BulletType.SNIPER: 'sniper.png',
+    BulletType.RANGER: 'ranger.png',
+    BulletType.EXPLODE: 'explode.png'
+}
+
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
         {
-            tower: {
-                None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
-            } for tower in TowerType if tower is not TowerType.FOUNTAIN
+            **{
+                tower: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
+                } for tower in TowerType if tower is not TowerType.FOUNTAIN
+            },
+            **{
+                bullet: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
+                } for bullet in BulletType
+            }
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
@@ -73,6 +89,11 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 tower: {
                     None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
                 } for tower in TowerType
+            },
+            **{
+                bullet: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
+                } for bullet in BulletType
             }
         }
     ) for party in PartyType
@@ -87,7 +108,10 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     } for character in CharacterType},
     **{tower: {
         None: 10
-    } for tower in TowerType}
+    } for tower in TowerType},
+    **{bullet: {
+        None: 2
+    } for bullet in BulletType}
 }
 """
 structure: ENTITY_SIZE[entity][state]

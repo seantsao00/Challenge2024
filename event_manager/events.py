@@ -163,13 +163,6 @@ class EventCharacterDied(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventSelectParty(BaseEvent):
-    """Event posted when player is selecting parties"""
-    index: int
-    increase: bool
-
-
-@dataclass(kw_only=True)
 class EventBulletCreate(BaseEvent):
     bullet: Bullet
 

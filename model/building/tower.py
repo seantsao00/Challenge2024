@@ -8,20 +8,21 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 from ordered_set import OrderedSet
+
 import const
-from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventEveryTick, EventBulletCreate)
+from event_manager import (EventAttack, EventBulletCreate, EventCreateTower, EventEveryTick,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
+from model.bullet import BulletCommon
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
 from util import log_info
-from model.bullet import BulletCommon
 
 if TYPE_CHECKING:
     from model.character import Character
-    from model.team import Team
     from model.model import Model
+    from model.team import Team
 
 
 class Tower(LivingEntity):
@@ -110,11 +111,11 @@ class Tower(LivingEntity):
         for character in self.__enemies:
             if character.team != self.team:
                 bullet = BulletCommon(position=self.position,
-                                  team=self.team,
-                                  damage=self.attribute.attack_damage,
-                                  victim=character.character,
-                                  speed=const.BULLET_COMMON_SPEED,
-                                  attacker=self)
+                                      team=self.team,
+                                      damage=self.attribute.attack_damage,
+                                      victim=character,
+                                      speed=const.BULLET_COMMON_SPEED,
+                                      attacker=self)
                 get_event_manager().post(EventBulletCreate(bullet=bullet))
                 break
 
@@ -142,4 +143,3 @@ class Tower(LivingEntity):
     @property
     def character_type(self) -> const.CharacterType:
         return self.__character_type
-

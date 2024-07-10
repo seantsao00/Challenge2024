@@ -9,13 +9,14 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import (EventGameOver, EventHumanInput, EventInitialize, EventPauseModel,
-                           EventQuit, EventResumeModel, EventSelectCharacter, EventSelectParty,
-                           EventStartGame, EventUnconditionalTick, EventViewChangeTeam, EventUseRangerAbility)
+from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
+                           EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
+                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
+                           EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
-from util import log_info
 from model.entity import LivingEntity
+from util import log_info
 
 if TYPE_CHECKING:
     from model import Character

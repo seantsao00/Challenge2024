@@ -16,8 +16,8 @@ from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventRangedBulletDamage, EventResumeModel, EventStartGame,
-                           EventSpawnCharacter, EventUnconditionalTick)
+                           EventQuit, EventRangedBulletDamage, EventResumeModel, EventSelectParty,
+                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.bullet import Bullet
@@ -28,8 +28,8 @@ from model.map import load_map
 from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
-from util import log_critical
 from model.timer import Timer
+from util import log_critical
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -147,8 +147,6 @@ class Model:
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_in_range(event.character)
         event.character.team.vision.handle_character_move(event)
-        if event.original_pos.distance_to(event.character.position) > 0.1:
-            event.character.team.update_vision(event.character)
 
     def create_bullet(self, event: EventBulletCreate):
         get_event_manager().post(EventEveryTick(event.bullet.judge))
