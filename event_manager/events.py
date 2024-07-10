@@ -31,6 +31,19 @@ class EventQuit(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventSelectParty(BaseEvent):
+    """
+    Event posted upon starting selecting party.
+    """
+
+
+@dataclass(kw_only=True)
+class EventChangeParty(BaseEvent):
+    """Event posted when player is selecting parties"""
+    select_input: tuple[const.PartySelectInput, tuple[int, int] | None]
+
+
+@dataclass(kw_only=True)
 class EventStartGame(BaseEvent):
     """
     Event posted upon starting the game.

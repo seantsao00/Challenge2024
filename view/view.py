@@ -10,12 +10,13 @@ import pygame as pg
 import const
 import const.model
 import const.visual
-from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND
+from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND, PRIORITY_VISION_MASK
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
+                         HealthView, ObjectBase, PartySelectionView, PauseMenuView, TowerCDView,
+                         ViewRangeView)
 
 
 class View:
@@ -54,6 +55,9 @@ class View:
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
+        self.__party_selecyion_view = PartySelectionView(self.__screen, model.party_selector)
+
+        PartySelectionView.init_convert()
 
         self.__entities: list[EntityView] = []
 
@@ -102,6 +106,7 @@ class View:
         AbilitiesCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
         HealthView.set_screen_info(self.__resize_ratio, *self.screen_size)
         TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        PartySelectionView.set_screen_info(self.__resize_ratio, *self.screen_size)
 
     def initialize(self, _: EventInitialize):
         """
@@ -156,7 +161,7 @@ class View:
 
     def render_party_selection(self):
         """Render party selection process"""
-        pass
+        self.__party_selecyion_view.draw()
 
     def render_settlement(self):
         """Render the game settlement screen"""
@@ -193,7 +198,7 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
-            objects.append(BackgroundObject(self.__arena, 0, (0, 0), mask))
+            objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)

@@ -69,7 +69,7 @@ class TowerCDView(BarCDView):
 
     def draw(self):
         entity = self.entity
-        if entity.spawn_timer is None:
+        if entity.last_generate < 0:
             return
 
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
@@ -92,8 +92,6 @@ class TowerCDView(BarCDView):
                 weapon_image, (int(inner_radius * 2 / 2 ** 0.5), int(inner_radius * 2 / 2 ** 0.5)))
             self.canvas.blit(
                 weapon_image, (position[0] - inner_radius / 2 ** 0.5, position[1] - inner_radius / 2 ** 0.5))
-        cd_remaining = ((entity.spawn_timer.get_interval() - entity.spawn_timer.get_remaining_time())
-                        / entity.spawn_timer.get_interval())
-        print(pi / 2 - pi * 2 * cd_remaining, pi / 2)
+        cd_remaining = ((get_model().get_time() - entity.last_generate) / entity.period)
         pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((self.resize_ratio*(entity.position+const.DRAW_DISPLACEMENT) + pg.Vector2(self.resize_ratio*entity_size - radius,
                     self.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2 - pi * 2 * cd_remaining, pi / 2, width=int(3*self.resize_ratio))
