@@ -3,6 +3,7 @@ from __future__ import annotations
 import ctypes
 import importlib
 import os
+import random
 import signal
 import threading
 import traceback
@@ -349,6 +350,24 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             inter.cast_ability()
+
+    def action_wander(self, characters: Iterable[prototype.Character]):
+        enforce_type('characters', characters, Iterable)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for inter in internals:
+            with inter.moving_lock:
+                inter.set_move_stop()
+                # path = get_model().map.find_path(inter.position, destination)
+                destination = pg.Vector2(random.uniform(
+                    0, const.ARENA_SIZE[0]), random.uniform(0, const.ARENA_SIZE[1]))
+                while self.is_visible(destination):
+                    destination = pg.Vector2(random.uniform(
+                        0, const.ARENA_SIZE[0]), random.uniform(0, const.ARENA_SIZE[1]))
+                path = get_model().map.find_path(inter.position, destination)
+                inter.set_move_position(path)
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""

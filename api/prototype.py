@@ -174,6 +174,13 @@ class API:
         """
         pass
 
+    def action_wander(self, characters: Iterable[Character]):
+        """
+        將所有列表內的角色設定為遊蕩。
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        """
+        pass
+
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
         """
         改變指定塔所生成的兵種。
