@@ -33,7 +33,8 @@ class BulletRanger(Bullet):
         """
         original_pos = self.position
         target_pos = self.target
-        if (target_pos - original_pos).length() <= self.speed:
+        if (target_pos - original_pos).length() <= self.speed and not self.hidden:
+            self.hidden = True
             get_event_manager().post(EventRangedBulletDamage(bullet=self, original_pos=original_pos))
         else:
             self.position += self.direction*self.speed

@@ -181,18 +181,15 @@ class Model:
                 get_event_manager().post(EventAttack(victim=entity,
                                                      attacker=event.bullet.attacker,
                                                      damage=event.bullet.damage), channel_id=entity.id)
-        get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
 
     def bullet_damage(self, event: EventBulletDamage):
         event.bullet.timer._Timer__stop()
         get_event_manager().post(EventAttack(victim=event.bullet.victim,
                                              attacker=event.bullet.attacker,
                                              damage=event.bullet.damage), channel_id=event.bullet.victim.id)
-        get_event_manager().post(EventBulletDisappear(bullet=event.bullet))
 
     def bullet_disappear(self, event: EventBulletDisappear):
         event.bullet.timer._Timer__stop()
-        event.bullet.hidden = True
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
