@@ -10,8 +10,9 @@ destination = []
 
 def every_tick(api: API):
     character = api.get_characters()
-    # if len(character) < 250:
-    #     return
+    print(len(character))
+    if len(character) < 70:
+        return
     while len(character) > len(destination):
         destination.append(pg.Vector2(10 + random.random() * 200, 10 + random.random() * 200))
     mx, my = 0, 0

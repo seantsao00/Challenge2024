@@ -2,7 +2,7 @@
 This module defines constants associated with teams.
 """
 
-from enum import Enum, IntEnum, auto
+from enum import Enum, auto
 
 MAX_TEAMS = 4
 
@@ -14,7 +14,7 @@ class InputTypes(Enum):
     ABILITY = auto()
 
 
-class PartyType(IntEnum):
+class PartyType(Enum):
     """This is for party selection"""
     NEUTRAL = auto()
     JUNIOR = auto()

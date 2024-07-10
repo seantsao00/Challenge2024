@@ -5,7 +5,7 @@ Import paths should be relative to the location of this file.
 """
 
 import argparse
-
+import faulthandler
 import pygame as pg
 
 import instances_manager
@@ -20,7 +20,7 @@ from view import View
 def main():
     # Initialization
     pg.init()
-
+    faulthandler.enable()
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument(

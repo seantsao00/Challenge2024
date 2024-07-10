@@ -38,6 +38,8 @@ class EventManager:
 
         self.__wait_remove_listeners: list[tuple[tuple[type[BaseEvent], ChannelId | None],
                                                  ListenerCallback]] = []
+        self.__wait_add_listeners: list[tuple[tuple[type[BaseEvent], ChannelId | None],
+                                                 ListenerCallback]] = []
         self.__read_lock: int = 0
         """The lock to ensure one can modify self.listeners only when no one is iterating it."""
 
@@ -49,7 +51,10 @@ class EventManager:
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        self.__listeners[(event_class, channel_id)].add(listener)
+        if self.__read_lock > 0:
+            self.__wait_add_listeners.append(((event_class, channel_id), listener))
+        else:
+            self.__listeners[(event_class, channel_id)].add(listener)
 
     def unregister_listener(self, event_class: type[BaseEvent],
                             listener: ListenerCallback, channel_id: ChannelId | None = None):
@@ -77,4 +82,11 @@ class EventManager:
                 except KeyError:
                     log_warning(f'{listener} is not listening to ({e}, {c})')
 
+            for (e, c), listener in self.__wait_add_listeners:
+                try:
+                    self.__listeners[(e, c)].add(listener)
+                except KeyError:
+                    log_warning(f'{listener} is not listening to ({e}, {c})')
+
             self.__wait_remove_listeners.clear()
+            self.__wait_add_listeners.clear()
