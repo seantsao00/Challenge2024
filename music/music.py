@@ -15,6 +15,7 @@ class BackgroundMusic:
         pg.mixer.music.load(const.BGM_PATH[const.PartyType.NEUTRAL])
         pg.mixer.music.play(-1)
         self.default_volume: float = pg.mixer.music.get_volume()
+        pg.mixer.music.set_volume(self.default_volume/3)
         self.__register_listeners()
 
     def __initialize(self, _: EventInitialize):
@@ -32,7 +33,7 @@ class BackgroundMusic:
             print(const.BGM_PATH[missing_party])
             pg.mixer.music.load(const.BGM_PATH[missing_party])
             pg.mixer.music.play(-1)
-            self.default_volume = pg.mixer.music.get_volume()
+            pg.mixer.music.set_volume(self.default_volume)
 
     def __handle_pause(self, _: EventPauseModel):
         if pg.mixer.music.get_busy():
