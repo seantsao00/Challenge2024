@@ -25,7 +25,6 @@ class EntityObject(ObjectBase):
         self.register_listeners()
 
     def handle_discard_entity(self, _: EventDiscardEntity):
-        from view.object.range import AttackRangeView, ViewRangeView
         self.exist = False
 
     def register_listeners(self):
