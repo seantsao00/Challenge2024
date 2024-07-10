@@ -341,9 +341,8 @@ class Internal(prototype.API):
             else:
                 internal.attack(target_internal)
 
-    def action_cast_spell(self, characters: Iterable[prototype.Character], target: prototype.Character):
+    def action_cast_spell(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
-        enforce_type('target', target, prototype.Character)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         internals = [self.__access_character(ch) for ch in characters]
