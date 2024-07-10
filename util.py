@@ -35,3 +35,28 @@ def crop_image(picture: pg.Surface, desire_width: int, desire_height: int,
     cropped_image = pg.transform.scale(
         cropped_image, (width*ratio, height*ratio))
     return cropped_image
+
+
+verbosity = 0
+
+
+def set_verbosity(verb: int):
+    global verbosity
+    verbosity = verb
+
+
+def log_critical(msg: str):
+    """Print critical logging message."""
+    print(f"\033[91m[Crit] {msg}\033[0m")
+
+
+def log_warning(msg: str):
+    """Print warning logging message."""
+    if verbosity >= 1:
+        print(f"\033[93m[Warn] {msg}\033[0m")
+
+
+def log_info(msg: str):
+    """Print info logging message."""
+    if verbosity >= 2:
+        print(f"[Info] {msg}")

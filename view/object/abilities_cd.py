@@ -20,15 +20,12 @@ class AbilitiesCDView(EntityObject):
 
     def draw(self):
         entity = self.entity
-        if entity.hidden:
-            return
-
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
-        cd_width = min(get_model().get_time() - entity.abilities_time, entity.attribute.ability_cd) / \
+        cd_width = min(max(get_model().get_time() - entity.abilities_time, 0), entity.attribute.ability_cd) / \
             entity.attribute.ability_cd * entity_size * 2 * self.resize_ratio
         top = (self.entity.position.x - entity_size) * self.resize_ratio
         left = (self.entity.position.y - entity_size -
-                const.CD_BAR_UPPER) * self.resize_ratio
+                const.CD_BAR_UPPER + const.DRAW_DISPLACEMENT_Y) * self.resize_ratio
         pg.draw.rect(self.canvas, (0, 0, 0),
                      (top, left, entity_size * 2 * self.resize_ratio, 2 * self.resize_ratio))
         pg.draw.rect(self.canvas, (0, 0, 255),

@@ -3,9 +3,10 @@ The module defines EventManager.
 """
 
 from collections import defaultdict
-from typing import Callable, Optional, TypeAlias
+from typing import Callable, TypeAlias
 
 from event_manager.events import BaseEvent
+from util import log_info
 
 ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
 """
@@ -31,17 +32,18 @@ class EventManager:
     """
 
     def __init__(self):
-        self.listeners: defaultdict[tuple[type[BaseEvent], Optional[int]],
-                                    list[ListenerCallback]] = defaultdict(list)
+        self.listeners: defaultdict[tuple[type[BaseEvent], int | None],
+                                    set[ListenerCallback]] = defaultdict(set)
 
-    def register_listener(self, event_class: type[BaseEvent], listener: ListenerCallback, channel_id: Optional[int] = None):
+    def register_listener(self, event_class: type[BaseEvent],
+                          listener: ListenerCallback, channel_id: int | None = None):
         """
         Register a listener by adding it to the event's listener list.
 
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        self.listeners[(event_class, channel_id)].append(listener)
+        self.listeners[(event_class, channel_id)].add(listener)
 
     def unregister_listener(self, event_class: type[BaseEvent],
                             listener: ListenerCallback, channel_id: int | None = None):
@@ -49,16 +51,18 @@ class EventManager:
         Unregister a listener.
         """
         try:
-            self.listeners[(event_class, channel_id)].remove(listener)
+            del self.listeners[(event_class, channel_id)]
+            # self.listeners[(event_class, channel_id)].remove(listener)
         except ValueError:
-            print(f'{listener} is not listening to ({event_class}, {channel_id})')
+            log_info(f'{listener} is not listening to ({event_class}, {channel_id})')
+        except KeyError:
+            pass
 
-    def post(self, event: BaseEvent, channel_id: Optional[int] = None):
+    def post(self, event: BaseEvent, channel_id: int | None = None):
         """
         Invoke all registered listeners associated with the event.
         """
         if (type(event), channel_id) not in self.listeners:
             return
-            # raise KeyError("The event hasn't been registered")
         for listener in self.listeners[(type(event), channel_id)]:
             listener(event)

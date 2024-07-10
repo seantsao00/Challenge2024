@@ -16,7 +16,8 @@ class Map:
     name: str
     size: tuple[int, int]
     map_list: list[list[int]]
-    images: dict[str, int]
+    backgrounds: list[str]
+    objects: dict[str, int]
     fountains: list[tuple[int, int]]
     neutral_towers: list[tuple[int, int]]
     map_dir: str
@@ -26,9 +27,7 @@ class Map:
         Return the coordinate based on self.size of position.
         position is a coordinate based on const.ARENA_SIZE.
         """
-        x = util.clamp(
-            int(position[0] * self.size[0] / const.ARENA_SIZE[0]), 0, self.size[0] - 1
-        )
+        x = util.clamp(int(position[0] * self.size[0] / const.ARENA_SIZE[0]), 0, self.size[0] - 1)
         y = util.clamp(
             int(position[1] * self.size[1] / const.ARENA_SIZE[1]), 0, self.size[1] - 1
         )
@@ -176,7 +175,8 @@ def load_map(map_dir):
     map_file = os.path.abspath(map_file)
     with open(json_file, encoding='utf-8') as f:
         data = json.load(f)
-    images = data['images']
+    backgrounds = data['images']['backgrounds']
+    objects = data['images']['objects']
 
     name = os.path.basename(os.path.dirname(json_file))
     size = (data['width'], data['height'])
@@ -190,5 +190,5 @@ def load_map(map_dir):
             for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
     return Map(
-        name, size, map_list, images, fountains, neutral_towers, map_dir
+        name, size, map_list, backgrounds, objects, fountains, neutral_towers, map_dir
     )

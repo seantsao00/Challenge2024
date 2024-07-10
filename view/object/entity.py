@@ -30,7 +30,8 @@ class EntityView(EntityObject):
     """
 
     def __init__(self, canvas: pg.Surface, entity: Entity):
-        super().__init__(canvas, entity)
+        self.entity: Entity = entity
+        super().__init__(canvas, entity, self.entity.position[1])
         self.register_listeners()
 
     @classmethod
@@ -48,15 +49,12 @@ class EntityView(EntityObject):
 
     def draw(self):
         entity = self.entity
-        if entity.hidden:
-            return
         img = self.images[entity.team.party][entity.entity_type][entity.state]
-        if (hasattr(entity, 'view_rotate')):
-            img = pg.transform.rotate(img, entity.view_rotate)
-        self.canvas.blit(img, img.get_rect(center=self.resize_ratio*entity.position))
+        self.canvas.blit(img, img.get_rect(center=self.resize_ratio *
+                         (entity.position + const.DRAW_DISPLACEMENT)))
 
     def update(self):
         if not self.exist:
             return False
-        self.priority = self.entity.position[1]
+        self.priority[1] = self.entity.position[1]
         return True

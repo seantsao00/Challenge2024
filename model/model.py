@@ -4,6 +4,7 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os
+import threading
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -11,12 +12,12 @@ import pygame as pg
 import const
 import const.map
 import const.model
-from api.internal import call_ai, load_ai
+from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventRangedBulletDamage, EventRestartGame, EventResumeModel,
-                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
+                           EventQuit, EventRangedBulletDamage, EventResumeModel, EventStartGame,
+                           EventSpawnCharacter, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.bullet import Bullet
@@ -26,6 +27,7 @@ from model.grid import Grid
 from model.map import load_map
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
+from util import log_critical
 from model.timer import Timer
 
 if TYPE_CHECKING:
@@ -54,6 +56,11 @@ class Model:
 
         self.global_clock: pg.Clock = pg.time.Clock()
         """The clock since program start."""
+        self.__game_clock: Clock
+        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
+        self.__ticks: int = 0
+        self.dt: float
+        """Real-world-passing time since last tick in second."""
 
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
@@ -61,7 +68,7 @@ class Model:
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
-
+        self.__team_thread: list[threading.Thread] = [None] * len(team_files)
         self.__team_files_names: list[str] = team_files
         self.show_view_range: bool = show_view_range
         self.show_attack_range: bool = show_attack_range
@@ -101,8 +108,7 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
-        self.__game_clock: Clock = Clock()
-        """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
+        self.__game_clock = Clock()
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -111,8 +117,15 @@ class Model:
         This method is called every tick.
         For example, if players will get point every tick, it might be done here. 
         """
-        for i in range(len(self.teams)):
-            call_ai(i)
+        self.__ticks += 1
+        self.__ticks %= const.TICKS_PER_CYCLE
+        if self.__ticks == 0:
+            for i in range(len(self.teams)):
+                if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
+                    self.__team_thread[i] = start_ai(i)
+                else:
+                    log_critical(
+                        f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __handle_quit(self, _: EventQuit):
         """
@@ -166,9 +179,6 @@ class Model:
         if event.original_pos.distance_to(event.character.position) > 0.1:
             event.character.team.update_vision(event.character)
 
-    def __restart_game(self, _: EventRestartGame):
-        get_event_manager().post(EventInitialize())
-
     def create_bullet(self, event: EventBulletCreate):
         event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
                                    function=event.bullet.judge, once=False)
@@ -203,7 +213,6 @@ class Model:
         ev_manager.register_listener(EventCreateEntity, self.__register_entity)
         ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
-        ev_manager.register_listener(EventRestartGame, self.__restart_game)
         ev_manager.register_listener(EventGameOver, self.handle_game_over)
         ev_manager.register_listener(EventBulletCreate, self.create_bullet)
         ev_manager.register_listener(EventRangedBulletDamage, self.ranged_bullet_damage)
@@ -226,4 +235,4 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-            self.global_clock.tick(const.FPS)
+            self.dt = self.global_clock.tick(const.FPS) / 1000

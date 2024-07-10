@@ -9,6 +9,7 @@ from event_manager import EventBulletCreate, EventUseRangerAbility
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon, BulletRanger
 from model.character import Character
+from util import log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity

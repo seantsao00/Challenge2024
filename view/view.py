@@ -3,7 +3,6 @@ The module defines View class.
 """
 
 import os
-from itertools import chain
 
 import cv2
 import pygame as pg
@@ -11,9 +10,11 @@ import pygame as pg
 import const
 import const.model
 import const.visual
-from event_manager import EventCreateEntity, EventInitialize, EventUnconditionalTick, EventViewChangeTeam
+from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND
+from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
+                           EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
+from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
                          HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
 
 
@@ -48,7 +49,7 @@ class View:
         pg.display.set_caption(const.WINDOW_CAPTION)
 
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
-        self.set_resize_ratio()
+        self.set_screen_info()
         # self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
 
@@ -57,10 +58,13 @@ class View:
         self.__entities: list[EntityView] = []
 
         self.vision_of = 0
+        self.scoreboard_image = pg.image.load(os.path.join(
+            const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
-        for i in model.map.images:
+
+        def load_image(filename: str):
             loaded_image = cv2.imread(
-                os.path.join(model.map.map_dir, i), cv2.IMREAD_UNCHANGED
+                os.path.join(model.map.map_dir, filename), cv2.IMREAD_UNCHANGED
             )
             loaded_image = cv2.resize(
                 loaded_image, (window_h, window_h), interpolation=cv2.INTER_AREA
@@ -70,24 +74,34 @@ class View:
             #         (loaded_image.shape[0], loaded_image.shape[1]), dtype=loaded_image.dtype) * 255
             #     loaded_image = np.dstack((loaded_image, alpha_channel))
             x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
-            picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
+            picture = pg.image.load(os.path.join(model.map.map_dir, filename)).convert_alpha()
             picture = pg.transform.scale(picture, (window_h, window_h))
             picture = picture.subsurface(pg.Rect(x, y, w, h))
-            self.__background_images.append(BackGroundObject(
-                self.__arena, int(model.map.images[i]), (x, y), picture))
+            return x, y, picture
+
+        bg_image_counter = 0
+        for i in model.map.backgrounds:
+            x, y, picture = load_image(i)
+            self.__background_images.append(BackgroundObject(
+                self.__arena, [PRIORITY_BACKGROUD, bg_image_counter], (x, y), picture))
+            bg_image_counter += 1
+        for i in model.map.objects:
+            x, y, picture = load_image(i)
+            self.__background_images.append(BackgroundObject(
+                self.__arena, [PRIORITY_FOREGROUND, model.map.objects[i]], (x, y), picture))
 
         EntityView.init_convert()
 
         self.register_listeners()
 
-    def set_resize_ratio(self):
-        PauseMenuView.set_resize_ratio(self.__resize_ratio)
-        EntityView.set_resize_ratio(self.__resize_ratio)
-        ViewRangeView.set_resize_ratio(self.__resize_ratio)
-        AttackRangeView.set_resize_ratio(self.__resize_ratio)
-        AbilitiesCDView.set_resize_ratio(self.__resize_ratio)
-        HealthView.set_resize_ratio(self.__resize_ratio)
-        TowerCDView.set_resize_ratio(self.__resize_ratio)
+    def set_screen_info(self):
+        PauseMenuView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        EntityView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        ViewRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        AttackRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        AbilitiesCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        HealthView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
 
     def initialize(self, _: EventInitialize):
         """
@@ -147,7 +161,7 @@ class View:
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
@@ -155,13 +169,19 @@ class View:
         """Render scenes when the game is being played"""
         model = get_model()
 
-        discarded_entities: list[type[EntityView]] = []
+        self.scoreboard_image = pg.transform.scale(self.scoreboard_image, self.screen_size)
+        self.__screen.blit(self.scoreboard_image, (0, 0))
+
+        discarded_entities: set[type[EntityView]] = set()
 
         for entity in self.__entities:
             if not entity.update():
-                discarded_entities.append(entity)
+                discarded_entities.add(entity)
         self.__entities = [
             entity for entity in self.__entities if entity not in discarded_entities]
+
+        for entity in discarded_entities:
+            entity.unregister_listeners()
 
         objects: list[type[ObjectBase]] = []
 
@@ -173,9 +193,9 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
-            objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
+            objects.append(BackgroundObject(self.__arena, 0, (0, 0), mask))
             for obj in self.__entities:
-                if my_team.vision.inside_vision(obj.entity) is True:
+                if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)
 
         objects.sort(key=lambda x: x.priority)
@@ -185,16 +205,16 @@ class View:
         self.__screen.blit(self.__arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
 
         # show time remaining
-        time_remaining = int(const.model.GAME_TIME - model.get_time())
+        time_remaining = int(const.GAME_TIME - model.get_time())
         (min, sec) = divmod(time_remaining, 60)
-        font = pg.font.Font(const.visual.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
 
-    def change_vision_of(self, event: EventViewChangeTeam):
+    def change_vision_of(self, _: EventViewChangeTeam):
         self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
 
     def register_listeners(self):

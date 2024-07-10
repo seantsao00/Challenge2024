@@ -6,13 +6,48 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from const.visual.priority import PRIORITY_CD
+from instances_manager import get_model
 from view.object.entity_object import EntityObject
 
 if TYPE_CHECKING:
-    from model import Tower
+    from model import Character, Tower
 
 
-class TowerCDView(EntityObject):
+class BarCDView(EntityObject):
+    """View of cooldown indicators, such as bar or circle."""
+
+    def __init__(self, canvas: pg.Surface, entity: Character):
+        super().__init__(canvas, entity)
+        self.priority = [PRIORITY_CD, entity.position[1]]
+        self.entity: Character
+        self.register_listeners()
+
+
+class AbilitiesCDView(BarCDView):
+    def __init__(self, canvas: pg.Surface, entity: Character):
+        super().__init__(canvas, entity)
+        self.entity: Character
+        self.register_listeners()
+
+    def draw(self):
+        entity = self.entity
+        if entity.hidden:
+            return
+
+        entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
+        cd_width = min(get_model().get_time() - entity.abilities_time, entity.attribute.ability_cd) / \
+            entity.attribute.ability_cd * entity_size * 2 * self.resize_ratio
+        top = (self.entity.position.x - entity_size) * self.resize_ratio
+        left = (self.entity.position.y - entity_size -
+                const.CD_BAR_UPPER) * self.resize_ratio
+        pg.draw.rect(self.canvas, (0, 0, 0),
+                     (top, left, entity_size * 2 * self.resize_ratio, 2 * self.resize_ratio))
+        pg.draw.rect(self.canvas, (0, 0, 255),
+                     (top, left, cd_width, 2 * self.resize_ratio))
+
+
+class TowerCDView(BarCDView):
     images = {}
     image_initialized = False
 
@@ -59,5 +94,6 @@ class TowerCDView(EntityObject):
                 weapon_image, (position[0] - inner_radius / 2 ** 0.5, position[1] - inner_radius / 2 ** 0.5))
         cd_remaining = ((entity.spawn_timer.get_interval() - entity.spawn_timer.get_remaining_time())
                         / entity.spawn_timer.get_interval())
+        print(pi / 2 - pi * 2 * cd_remaining, pi / 2)
         pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((self.resize_ratio*(entity.position+const.DRAW_DISPLACEMENT) + pg.Vector2(self.resize_ratio*entity_size - radius,
-                    self.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2, pi / 2 - pi * 2 * cd_remaining, width=int(3*self.resize_ratio))
+                    self.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2 - pi * 2 * cd_remaining, pi / 2, width=int(3*self.resize_ratio))

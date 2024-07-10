@@ -1,15 +1,15 @@
 import math
+import random
 
 import pygame as pg
-import random
-import api.prototype as api
+
+from api.prototype import *
 
 destination = []
 
-
-def every_tick(api: api.API):
+def every_tick(api: API):
     character = api.get_characters()
-    # if len(character) < 100:
+    # if len(character) < 250:
     #     return
     while len(character) > len(destination):
         destination.append(pg.Vector2(10 + random.random() * 200, 10 + random.random() * 200))

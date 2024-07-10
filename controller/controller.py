@@ -14,6 +14,7 @@ from event_manager import (EventGameOver, EventHumanInput, EventInitialize, Even
                            EventStartGame, EventUnconditionalTick, EventViewChangeTeam, EventUseRangerAbility)
 from instances_manager import get_event_manager, get_model
 from model import TimerManager
+from util import log_info
 from model.entity import LivingEntity
 
 if TYPE_CHECKING:
@@ -97,9 +98,10 @@ class Controller:
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
                 x, y = self.transform(x, y)
+                y -= const.DRAW_DISPLACEMENT_Y
 
                 if pg_event.button == 1:  # Left mouse button
-                    print(f"Mouse click position: ({x}, {y})")
+                    log_info(f"[Controller] Mouse click position: ({x}, {y})")
                     if model.RangerAbility:
                         ev_manager.post(EventUseRangerAbility(position=pg.Vector2(x, y)))
                     else:
@@ -113,7 +115,7 @@ class Controller:
                     
 
                 if pg_event.button == 3:  # Right mouse button
-                    print(f"Right click position: ({x}, {y})")
+                    log_info(f"[Controller] Right click position: ({x}, {y})")
                     if model.RangerAbility:
                         model.RangerAbility = False
                     clicked = None

@@ -6,6 +6,7 @@ import pygame as pg
 
 import const
 from model.character import Character
+from util import log_info
 from event_manager import EventBulletCreate
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletSniper, BulletCommon
@@ -38,7 +39,7 @@ class Sniper(Character):
     def ability(self):
         """Make the bullet become BulletSniper"""
         self.ability_active = True
-        print("sniper use ability")
+        log_info("sniper use ability")
 
     def attack(self, enemy: Entity):
 

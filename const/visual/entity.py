@@ -3,10 +3,12 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from const.bullet import BulletType
+import pygame as pg
+
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
+from const.visual import IMAGE_DIR
 
 if TYPE_CHECKING:
     from const.entity import EntityState, EntityType
@@ -23,8 +25,6 @@ VISION_BLOCK_SIZE = 2
 VIEW_EVERYTHING = 0
 
 REGULAR_FONT = './font/Cubic_11_1.300_R.ttf'
-
-IMAGE_DIR = 'image/'
 
 PARTY_PATH: dict[PartyType, str] = {
     PartyType.NEUTRAL: 'entity/neutral/',
@@ -50,14 +50,6 @@ CHARACTER_IMAGE: dict[CharacterType, str] = {
     CharacterType.SNIPER: 'sniper.png'
 }
 
-BULLET_DIR = 'bullet/'
-BULLET_IMAGE: dict[BulletType, str] = {
-    BulletType.COMMON: 'common.png',
-    BulletType.SNIPER: 'sniper.png',
-    BulletType.RANGER: 'ranger.png',
-    BulletType.EXPLODE: 'explode.png'
-}
-
 WEAPON_DIR = 'weapon/'
 WEAPON_IMAGE: dict[CharacterType, str] = {
     CharacterType.MELEE: os.path.join(IMAGE_DIR, WEAPON_DIR, 'melee.png'),
@@ -68,16 +60,9 @@ WEAPON_IMAGE: dict[CharacterType, str] = {
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
         {
-            **{
-                tower: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
-                } for tower in TowerType if tower is not TowerType.FOUNTAIN
-            },
-            **{
-                bullet: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
-                } for bullet in BulletType
-            }
+            tower: {
+                None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
+            } for tower in TowerType if tower is not TowerType.FOUNTAIN
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
@@ -88,11 +73,6 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 tower: {
                     None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
                 } for tower in TowerType
-            },
-            **{
-                bullet: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
-                } for bullet in BulletType
             }
         }
     ) for party in PartyType
@@ -107,11 +87,11 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     } for character in CharacterType},
     **{tower: {
         None: 10
-    } for tower in TowerType},
-    **{bullet: {
-        None: 2
-    } for bullet in BulletType}
+    } for tower in TowerType}
 }
 """
 structure: ENTITY_SIZE[entity][state]
 """
+
+DRAW_DISPLACEMENT = pg.Vector2(0, -3.125)
+DRAW_DISPLACEMENT_Y = -3.125

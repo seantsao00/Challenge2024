@@ -4,7 +4,7 @@ The module defines Building class.
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -16,6 +16,7 @@ from model.building.linked_list import LinkedList, Node
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
+from util import log_info
 from model.bullet import BulletCommon
 
 if TYPE_CHECKING:
@@ -39,7 +40,7 @@ class Tower(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team, is_fountain: bool = False):
-        self.__period = const.INITIAL_PERIOD_MS
+        self.__period = const.TOWER_SPAWN_INITIAL_PERIOD
         self.__is_fountain = is_fountain
         self.__character_type: const.CharacterType = const.CharacterType.RANGER
         self.__enemies: list[LinkedList] = [LinkedList() for _ in range(4)]
@@ -52,7 +53,7 @@ class Tower(LivingEntity):
 
         self.register_listeners()
 
-        self.attack_timer = Timer(int(1 / self.attribute.attack_speed * 1000),
+        self.attack_timer = Timer(1 / self.attribute.attack_speed,
                                   self.attack, once=False)
 
         if self.team.party is not const.PartyType.NEUTRAL:
@@ -60,16 +61,11 @@ class Tower(LivingEntity):
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.team_id)
         get_event_manager().post(EventCreateTower(tower=self))
 
-    @property
-    def character_type(self) -> const.CharacterType:
-        return self.__character_type
-
     def update_period(self):
-        self.__period = const.INITIAL_PERIOD_MS + \
-            int(const.FORMULA_K * len(self.team.towers) ** 0.5)
+        self.__period = const.count_period_ms(len(self.team.character_list))
 
     def generate_character(self):
-        character_type: Type[Character]
+        character_type: type[Character]
         if self.__character_type is const.CharacterType.MELEE:
             character_type = Melee
         elif self.__character_type is const.CharacterType.RANGER:
@@ -94,7 +90,7 @@ class Tower(LivingEntity):
     def take_damage(self, event: EventAttack):
         ev_manager = get_event_manager()
         if self.team is event.attacker.team or self.is_fountain:
-            print('same team or is fountain')
+            log_info('same team or is fountain')
             return
         if self.health - event.damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:
@@ -132,14 +128,12 @@ class Tower(LivingEntity):
             or character.position.distance_to(self.position) > self.attribute.attack_range
                 or not character.alive):
             return
-        # print(character.type, 'get in tower')
         self.__enemies[character.team.team_id].push_back(character, get_model().get_time())
 
     def enemy_out_range(self, character: Character):
         if character.id not in self.__enemies[character.team.team_id].map:
             return
         if character.position.distance_to(self.position) > self.attribute.attack_range or not character.alive:
-            # print(character.type, 'get out of tower')
             self.__enemies[character.team.team_id].delete(character)
 
     def register_listeners(self):
@@ -150,3 +144,11 @@ class Tower(LivingEntity):
     @property
     def is_fountain(self) -> bool:
         return self.__is_fountain
+
+    @property
+    def character_type(self) -> const.CharacterType:
+        return self.__character_type
+
+    @property
+    def period(self) -> float:
+        return self.__period
