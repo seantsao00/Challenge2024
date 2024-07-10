@@ -35,14 +35,14 @@ class PartySelectInput(Enum):
 
 
 PARTY_SELECT_BUTTONS_MAP: dict[int, tuple[PartySelectInput, tuple[int, int] | None]] = {
-    pg.K_a: (PartySelectInput.CHANGE, (1, -1)),
-    pg.K_d: (PartySelectInput.CHANGE, (1, 1)),
-    pg.K_f: (PartySelectInput.CHANGE, (2, -1)),
-    pg.K_h: (PartySelectInput.CHANGE, (2, 1)),
-    pg.K_j: (PartySelectInput.CHANGE, (3, -1)),
-    pg.K_l: (PartySelectInput.CHANGE, (3, 1)),
-    pg.K_LEFT: (PartySelectInput.CHANGE, (4, -1)),
-    pg.K_RIGHT: (PartySelectInput.CHANGE, (4, 1)),
+    pg.K_a: (PartySelectInput.CHANGE, (0, -1)),
+    pg.K_d: (PartySelectInput.CHANGE, (0, 1)),
+    pg.K_f: (PartySelectInput.CHANGE, (1, -1)),
+    pg.K_h: (PartySelectInput.CHANGE, (1, 1)),
+    pg.K_j: (PartySelectInput.CHANGE, (2, -1)),
+    pg.K_l: (PartySelectInput.CHANGE, (2, 1)),
+    pg.K_LEFT: (PartySelectInput.CHANGE, (3, -1)),
+    pg.K_RIGHT: (PartySelectInput.CHANGE, (3, 1)),
     pg.K_SPACE: (PartySelectInput.CONFIRM, None),
     pg.K_RETURN: (PartySelectInput.CONFIRM, None)
 }

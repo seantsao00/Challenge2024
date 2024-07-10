@@ -60,3 +60,8 @@ def log_info(msg: str):
     """Print info logging message."""
     if verbosity >= 2:
         print(f"[Info] {msg}")
+
+
+def transform_coordinate(point: tuple[float, float], ratio: float) -> tuple[float, float]:
+    x, y = point
+    return (x * ratio, y * ratio)

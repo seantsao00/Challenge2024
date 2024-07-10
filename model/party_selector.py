@@ -24,13 +24,21 @@ class PartySelector:
             ev_manager.post(EventStartGame)
         elif operation is const.PartySelectInput.CHANGE:
             team_index, change_direction = change
+            if team_index > self.__number_of_teams:
+                return
             if self.__selected_party_indices[team_index] is None:
                 if change_direction == 1:
                     self.__selected_party_indices[team_index] = 0
                 else:
                     self.__selected_party_indices[team_index] = 4
             else:
-                self.__selected_party_indices[team_index] = (self.__selected_party_indices[team_index] + change_direction) % 5
+                self.__selected_party_indices[team_index] = (
+                    self.__selected_party_indices[team_index] + change_direction) % 5
 
     def selected_parties(self) -> list[const.PartyType]:
-        return [self.__party_list[index] for index in self.__selected_party_indices]
+
+        return [None if index is None else self.__party_list[index] for index in self.__selected_party_indices]
+
+    @property
+    def number_of_teams(self) -> int:
+        return self.__number_of_teams
