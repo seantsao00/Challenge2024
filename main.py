@@ -6,12 +6,13 @@ Import paths should be relative to the location of this file.
 
 import argparse
 import faulthandler
+
 import pygame as pg
 
 import instances_manager
 from controller import Controller
 from event_manager import EventManager
-from model import Model
+from model import Model, ModelArguments
 from music.music import BackgroundMusic
 from util import set_verbosity
 from view import View
@@ -27,7 +28,7 @@ def main():
         'map', help='The name of maps. It can be test_map'
     )
     parser.add_argument(
-        'team_control', nargs='+', help='assign ai to teams or "human" if the team is controlled by human.'
+        'team_controls', nargs='+', help='assign ai to teams or "human" if the team is controlled by human.'
     )
 
     parser.add_argument('-r', '--range', action='store_true',
@@ -39,17 +40,22 @@ def main():
     parser.add_argument('-v', '--verbose', action='count', default=0,
                         help='Increase verbosity (can be used multiple times).')
     parser.add_argument('-m', '--music', action='store_true', help='play the BGM')
+    parser.add_argument('-q', '--skip-character-selection', action='store_true',
+                        help='skip the character selection and quick start')
 
     args = parser.parse_args()
     set_verbosity(args.verbose)
 
-    teams: list[str] = args.team_control
-
     ev_manager = EventManager()
     instances_manager.register_event_manager(ev_manager)
 
-    model = Model(args.map, teams,
-                  args.show_view_range or args.range, args.show_attack_range or args.range)
+    model = Model(ModelArguments(
+        topography=args.map,
+        team_controls=args.team_controls,
+        show_view_range=args.show_view_range or args.range,
+        show_attack_range=args.show_attack_range or args.range,
+        skip_character_selection=args.skip_character_selection
+    ))
     instances_manager.register_model(model)
 
     Controller()

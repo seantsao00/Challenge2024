@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import threading
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -33,6 +34,15 @@ if TYPE_CHECKING:
     from model.map import Map
 
 
+@dataclass(kw_only=True)
+class ModelArguments:
+    topography: str
+    team_controls: list[str]
+    show_view_range: bool
+    show_attack_range: bool
+    skip_character_selection: bool
+
+
 class Model:
     """
     The main game engine.
@@ -40,7 +50,8 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool):
+    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool):
+    def __init__(self, model_arguments: ModelArguments):
         """
         Initialize the Model object.
 
@@ -61,16 +72,18 @@ class Model:
         """Real-world-passing time since last tick in second."""
 
         self.entities: list[Entity] = []
-        self.map: Map = load_map(os.path.join(const.MAP_DIR, map_name))
+        self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.grid: Grid = Grid(900, 900)
-        self.party_selector: PartySelector = PartySelector(len(team_files))
+        self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
+        if model_arguments.skip_character_selection:
+            self.party_selector.select_random_party()
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
-        self.__team_thread: list[threading.Thread] = [None] * len(team_files)
-        self.__team_files_names: list[str] = team_files
-        self.show_view_range: bool = show_view_range
-        self.show_attack_range: bool = show_attack_range
+        self.__team_thread: list[threading.Thread] = [None] * len(model_arguments.team_controls)
+        self.__team_files_names: list[str] = model_arguments.team_controls
+        self.show_view_range: bool = model_arguments.show_view_range
+        self.show_attack_range: bool = model_arguments.show_attack_range
 
         self.pause_menu: PauseMenu = PauseMenu()
 

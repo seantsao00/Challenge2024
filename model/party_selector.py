@@ -1,3 +1,5 @@
+import random
+
 import const
 from event_manager import EventChangeParty, EventStartGame
 from instances_manager import get_event_manager
@@ -11,6 +13,10 @@ class PartySelector:
             [party for party in const.PartyType if party is not const.PartyType.NEUTRAL]
         self.__selected_party_indices: tuple[None | int] = [None for _ in range(number_of_teams)]
         get_event_manager().register_listener(EventChangeParty, self.__handle_change_party)
+
+    def select_random_party(self):
+        self.__selected_party_indices = [random.randint(
+            0, 4) for _ in range(self.__number_of_teams)]
 
     def __handle_change_party(self, event: EventChangeParty):
         """
