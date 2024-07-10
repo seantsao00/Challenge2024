@@ -4,9 +4,8 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
-from util import crop_image
-
 import const
+from util import crop_image
 from view.object.object_base import ObjectBase
 
 if TYPE_CHECKING:
@@ -22,22 +21,17 @@ class PartySelectionView(ObjectBase):
         super().__init__(canvas)
         self.__party_selector = party_selector
         self.__font = pg.font.Font(const.REGULAR_FONT, int(12*self.resize_ratio))
-    
+
     @classmethod
     def init_convert(cls):
-        screen_info = pg.display.Info()
-        window_w = int(min(screen_info.current_w, screen_info.current_h
-                           / const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
-        window_h = int(min(screen_info.current_h, screen_info.current_w
-                           / const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
         img = pg.image.load(const.PARTY_SELECTION_BACKGROUND)
 
-        cls.background_image = crop_image(img, window_w, window_h).convert_alpha()
+        cls.background_image = crop_image(img, cls.screen_width, cls.screen_height).convert_alpha()
         cls.image_initialized = True
 
     def draw(self):
         img = self.background_image
-        self.canvas.blit(img, (0,0))
+        self.canvas.blit(img, (0, 0))
 
 
 def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):

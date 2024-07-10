@@ -55,8 +55,9 @@ class View:
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
-
         self.__party_selecyion_view = PartySelectionView(self.__screen, model.party_selector)
+
+        PartySelectionView.init_convert()
 
         self.__entities: list[EntityView] = []
 
@@ -105,6 +106,7 @@ class View:
         AbilitiesCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
         HealthView.set_screen_info(self.__resize_ratio, *self.screen_size)
         TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        PartySelectionView.set_screen_info(self.__resize_ratio, *self.screen_size)
 
     def initialize(self, _: EventInitialize):
         """
