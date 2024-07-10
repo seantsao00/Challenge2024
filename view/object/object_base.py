@@ -1,6 +1,10 @@
+from __future__ import annotations
+
+from typing import Iterable
+
 import pygame as pg
 
-import const
+from const.visual.priority import PRIORITY_HIGHEST
 
 
 class ObjectBase:
@@ -36,9 +40,9 @@ class ObjectBase:
         """
         cls.image_initialized = True
 
-    def __init__(self, canvas: pg.Surface, priority: float = const.WINDOW_SIZE[1]+10):
+    def __init__(self, canvas: pg.Surface, priority: Iterable[float] = [PRIORITY_HIGHEST]):
         self.canvas: pg.Surface = canvas
-        self.priority: float = priority
+        self.priority: Iterable[float] = priority
         self.exist: bool = True
         """If the object is still exist."""
         if not self.image_initialized:

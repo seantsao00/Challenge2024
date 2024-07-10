@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from const.visual.priority import PRIORITY_PAUSEMENU
 from view.object.object_base import ObjectBase
 
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 class PauseMenuView(ObjectBase):
     def __init__(self, canvas: pg.Surface, pause_menu: PauseMenu):
         self.image_initialized = True
-        super().__init__(canvas)
+        super().__init__(canvas, [PRIORITY_PAUSEMENU])
         self.pause_menu = pause_menu
         self.title_font = pg.font.Font(const.REGULAR_FONT, int(20*self.resize_ratio))
         self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(12*self.resize_ratio))

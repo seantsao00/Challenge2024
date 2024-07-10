@@ -8,10 +8,13 @@ import cv2
 import pygame as pg
 
 import const
+import const.model
+import const.visual
+from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
+from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
                          HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
 
 
@@ -30,13 +33,10 @@ class View:
         model = get_model()
 
         screen_info = pg.display.Info()
-        window_w = int(min(screen_info.current_w, screen_info.current_h
-                           / const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
-        window_h = int(min(screen_info.current_h, screen_info.current_w
-                           / const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
-
-        self.window_w = window_w
-        self.window_h = window_h
+        window_w = int(min(screen_info.current_w, screen_info.current_h /
+                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
+        window_h = int(min(screen_info.current_h, screen_info.current_w /
+                       const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
 
         self.window_w = window_w
         self.window_h = window_h
@@ -61,9 +61,10 @@ class View:
         self.scoreboard_image = pg.image.load(os.path.join(
             const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
-        for i in model.map.images:
+
+        def load_image(filename: str):
             loaded_image = cv2.imread(
-                os.path.join(model.map.map_dir, i), cv2.IMREAD_UNCHANGED
+                os.path.join(model.map.map_dir, filename), cv2.IMREAD_UNCHANGED
             )
             loaded_image = cv2.resize(
                 loaded_image, (window_h, window_h), interpolation=cv2.INTER_AREA
@@ -73,11 +74,21 @@ class View:
             #         (loaded_image.shape[0], loaded_image.shape[1]), dtype=loaded_image.dtype) * 255
             #     loaded_image = np.dstack((loaded_image, alpha_channel))
             x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
-            picture = pg.image.load(os.path.join(model.map.map_dir, i)).convert_alpha()
+            picture = pg.image.load(os.path.join(model.map.map_dir, filename)).convert_alpha()
             picture = pg.transform.scale(picture, (window_h, window_h))
             picture = picture.subsurface(pg.Rect(x, y, w, h))
-            self.__background_images.append(BackGroundObject(
-                self.__arena, int(model.map.images[i]), (x, y), picture))
+            return x, y, picture
+
+        bg_image_counter = 0
+        for i in model.map.backgrounds:
+            x, y, picture = load_image(i)
+            self.__background_images.append(BackgroundObject(
+                self.__arena, [PRIORITY_BACKGROUD, bg_image_counter], (x, y), picture))
+            bg_image_counter += 1
+        for i in model.map.objects:
+            x, y, picture = load_image(i)
+            self.__background_images.append(BackgroundObject(
+                self.__arena, [PRIORITY_FOREGROUND, model.map.objects[i]], (x, y), picture))
 
         EntityView.init_convert()
 
@@ -182,7 +193,7 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
-            objects.append(BackGroundObject(self.__arena, 0, (0, 0), mask))
+            objects.append(BackgroundObject(self.__arena, 0, (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)
