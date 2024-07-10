@@ -12,7 +12,7 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackGroundObject, EntityView,
-                         HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView)
+                         HealthView, ObjectBase, PauseMenuView, TowerCDView, ViewRangeView, PartySelectionView)
 
 
 class View:
@@ -54,6 +54,8 @@ class View:
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
+
+        self.__party_selecyion_view = PartySelectionView(self.__screen, model.party_selector)
 
         self.__entities: list[EntityView] = []
 
@@ -145,7 +147,7 @@ class View:
 
     def render_party_selection(self):
         """Render party selection process"""
-        pass
+        self.__party_selecyion_view.draw()
 
     def render_settlement(self):
         """Render the game settlement screen"""
