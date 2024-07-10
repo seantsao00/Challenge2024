@@ -171,8 +171,7 @@ class Model:
             tower.enemy_out_range(event.character)
         for tower in self.grid.get_attacker_tower(event.character.position):
             tower.enemy_in_range(event.character)
-        if event.original_pos.distance_to(event.character.position) > 0.1:
-            event.character.team.update_vision(event.character)
+        event.character.team.vision.handle_character_move(event)
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
