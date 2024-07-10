@@ -1,22 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import pygame as pg
+from abc import abstractmethod
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 import const
-import util
-import view
-from instances_manager import get_event_manager, get_model
-from model.entity import Entity, LivingEntity
-from model.timer import Timer
+from model.entity import Entity
 
 if TYPE_CHECKING:
-    from model.character import Character
+    import pygame as pg
+
+    from model.entity import LivingEntity
     from model.team import Team
+    from model.timer import Timer
+
+T = TypeVar('T')
 
 
-class Bullet(Entity):
+class Bullet(Entity, Generic[T]):
     def __init__(self,
                  position: pg.Vector2 | tuple[float, float],
                  entity_type: const.BulletType,
@@ -25,12 +25,13 @@ class Bullet(Entity):
                  damage: float = 0.0,
                  attacker: LivingEntity = None):
         super().__init__(position=position, entity_type=entity_type, team=team)
-        self.direction: pg.Vector2 | tuple[float, float] = None
+        self.direction: pg.Vector2 | tuple[float, float] | None = None
         self.speed: float = speed
         self.damage: float = damage
-        self.timer: Timer = None
+        self.timer: Timer | None = None
         self.attacker: LivingEntity = attacker
-        self.view_rotate: float = 0
+        self.view_rotate: float = 0.0
 
-    def judge(self, *args, **kwargs):
+    @abstractmethod
+    def judge(self, args: T):
         pass

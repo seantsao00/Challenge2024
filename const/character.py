@@ -4,7 +4,7 @@ This module defines constants associated with characters.
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Any, Optional, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from const.entity import LivingEntityAttribute
 
@@ -22,7 +22,7 @@ class CharacterType(Enum):
 class CharacterAttribute(LivingEntityAttribute):
     speed: float
     ability_cd: float | None
-    ability_variables: Optional[Any]
+    ability_variables: Any | None
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(

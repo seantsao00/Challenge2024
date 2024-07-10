@@ -5,26 +5,29 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-import util
-import view
 from event_manager import EventBulletDamage, EventBulletDisappear
-from instances_manager import get_event_manager, get_model
+from instances_manager import get_event_manager
+from model.bullet.bullet import Bullet
 
 if TYPE_CHECKING:
-    from model.character import Character
-    from model.team import Team
     from model.entity import LivingEntity
+    from model.team import Team
 
-from model.bullet import Bullet
 
-
-class BulletCommon(Bullet):
-    def __init__(self, position, team, damage, attacker, speed, victim: LivingEntity = None, entity_type=const.BulletType.COMMON):
+class BulletCommon(Bullet[None]):
+    def __init__(self,
+                 position: pg.Vector2 | tuple[float, float],
+                 team: Team,
+                 damage: float,
+                 attacker: LivingEntity,
+                 speed: float,
+                 victim: LivingEntity | None = None,
+                 entity_type: const.EntityType = const.BulletType.COMMON):
         super().__init__(position=position, entity_type=entity_type,
                          team=team, speed=speed, attacker=attacker, damage=damage)
         self.victim = victim
 
-    def judge(self):
+    def judge(self, args: None = None):
         """
         Move the bullet in the given direction.
         """
