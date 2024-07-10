@@ -49,7 +49,7 @@ class View:
         pg.display.set_caption(const.WINDOW_CAPTION)
 
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
-        self.set_resize_ratio()
+        self.set_screen_info()
         # self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
 
@@ -94,14 +94,14 @@ class View:
 
         self.register_listeners()
 
-    def set_resize_ratio(self):
-        PauseMenuView.set_resize_ratio(self.__resize_ratio)
-        EntityView.set_resize_ratio(self.__resize_ratio)
-        ViewRangeView.set_resize_ratio(self.__resize_ratio)
-        AttackRangeView.set_resize_ratio(self.__resize_ratio)
-        AbilitiesCDView.set_resize_ratio(self.__resize_ratio)
-        HealthView.set_resize_ratio(self.__resize_ratio)
-        TowerCDView.set_resize_ratio(self.__resize_ratio)
+    def set_screen_info(self):
+        PauseMenuView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        EntityView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        ViewRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        AttackRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        AbilitiesCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        HealthView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
 
     def initialize(self, _: EventInitialize):
         """
@@ -182,7 +182,7 @@ class View:
 
         for entity in discarded_entities:
             entity.unregister_listeners()
-        
+
         objects: list[type[ObjectBase]] = []
 
         objects += self.__background_images

@@ -25,8 +25,10 @@ class ObjectBase:
     """the ratio between model's coordinate and the canvas size."""
 
     @classmethod
-    def set_resize_ratio(cls, resize_ratio: float):
+    def set_screen_info(cls, resize_ratio: float, screen_width: int, screen_height: int):
         cls.resize_ratio = resize_ratio
+        cls.screen_width = screen_width
+        cls.screen_height = screen_height
 
     @classmethod
     def init_convert(cls):
