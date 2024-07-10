@@ -10,7 +10,7 @@ import pygame as pg
 import const
 import const.model
 import const.visual
-from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND
+from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND, PRIORITY_VISION_MASK
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
@@ -193,7 +193,7 @@ class View:
         else:
             my_team = model.teams[self.vision_of - 1]
             mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
-            objects.append(BackgroundObject(self.__arena, 0, (0, 0), mask))
+            objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)

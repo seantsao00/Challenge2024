@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from const.visual.priority import PRIORITY_CD
 from view.object.entity_object import EntityObject
 
 if TYPE_CHECKING:
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 class HealthView(EntityObject):
     def __init__(self, canvas: pg.Surface, entity: LivingEntity):
         super().__init__(canvas, entity)
+        self.priority[0] = PRIORITY_CD
         self.entity: LivingEntity
 
     def draw(self):
