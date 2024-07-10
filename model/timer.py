@@ -102,6 +102,7 @@ class Timer:
         """Resume the timer."""
         if not self.__running:
             pg.time.set_timer(self.event_type, int(self.__remaining_time * 1000))
+            self.__last_start_time = time.time()
             self.__running = True
 
     def set_interval(self, interval: float):
