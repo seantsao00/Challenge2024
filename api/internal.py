@@ -170,7 +170,7 @@ class Internal(prototype.API):
             extern = prototype.Tower(
                 _id=internal.id,
                 _position=self.__transform(internal.position, is_vector=False),
-                _period=internal.__period,
+                _period=internal.period,
                 _is_fountain=internal.is_fountain,
                 _attack_range=internal.attribute.attack_range,
                 _damage=internal.attribute.attack_damage,
