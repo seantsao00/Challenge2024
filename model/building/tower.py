@@ -7,12 +7,11 @@ import random
 from typing import TYPE_CHECKING
 
 import pygame as pg
-
+from ordered_set import OrderedSet
 import const
 from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
-from model.building.linked_list import LinkedList, Node
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
@@ -42,7 +41,7 @@ class Tower(LivingEntity):
         self.__period = const.TOWER_SPAWN_INITIAL_PERIOD
         self.__is_fountain = is_fountain
         self.__character_type: const.CharacterType = const.CharacterType.RANGER
-        self.__enemies: list[LinkedList] = [LinkedList() for _ in range(4)]
+        self.__enemies: OrderedSet[Character] = OrderedSet()
         self.spawn_timer: Timer | None = None
 
         if is_fountain:
@@ -107,27 +106,21 @@ class Tower(LivingEntity):
             self.health -= event.attacker.attribute.attack_damage
 
     def attack(self):
-        victim: Node | None = None
-        for i in range(0, 4):
-            if ((self.team.party is const.PartyType.NEUTRAL or self.team.team_id != i)
-                and self.__enemies[i].front() is not None
-                    and (victim is None or victim.time > self.__enemies[i].front().time)):
-                victim = self.__enemies[i].front()
-        if victim is not None:
-            get_event_manager().post(EventAttack(attacker=self, victim=victim.character), victim.character.id)
+        for character in self.__enemies:
+            if character.team != self.team:
+                get_event_manager().post(EventAttack(attacker=self, victim=character), character.id)
+                break
 
     def enemy_in_range(self, character: Character):
-        if (character.id in self.__enemies[character.team.team_id].map
-            or character.position.distance_to(self.position) > self.attribute.attack_range
-                or not character.alive):
+        if character in self.__enemies or character.position.distance_to(self.position) > self.attribute.attack_range or not character.alive:
             return
-        self.__enemies[character.team.team_id].push_back(character, get_model().get_time())
+        self.__enemies.add(character)
 
     def enemy_out_range(self, character: Character):
-        if character.id not in self.__enemies[character.team.team_id].map:
+        if character not in self.__enemies:
             return
         if character.position.distance_to(self.position) > self.attribute.attack_range or not character.alive:
-            self.__enemies[character.team.team_id].delete(character)
+            self.__enemies.remove(character)
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""
