@@ -15,7 +15,7 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PartySelectionView, PauseMenuView, TowerCDView,
+                         HealthView, ObjectBase, PartySelectorView, PauseMenuView, TowerCDView,
                          ViewRangeView)
 from view.screen_info import ScreenInfo
 
@@ -49,9 +49,9 @@ class View:
         self.__arena: pg.Surface = pg.Surface(size=(screen_h, screen_h))
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
-        self.__party_selection_view = PartySelectionView(self.__screen, model.party_selector)
+        self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
 
-        PartySelectionView.init_convert()
+        PartySelectorView.init_convert()
 
         self.__entities: list[EntityView] = []
 
@@ -129,7 +129,7 @@ class View:
         elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
             self.render_play()
         elif model.state is const.State.SELECT_PARTY:
-            self.render_party_selection()
+            self.render_party_selector()
         elif model.state is const.State.SETTLEMENT:
             self.render_settlement()
         pg.display.flip()
@@ -143,9 +143,9 @@ class View:
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
-    def render_party_selection(self):
-        """Render party selection process"""
-        self.__party_selection_view.draw()
+    def render_party_selector(self):
+        """Render party selecting process"""
+        self.__party_selector_view.draw()
 
     def render_settlement(self):
         """Render the game settlement screen"""
