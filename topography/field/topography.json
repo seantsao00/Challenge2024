@@ -1,0 +1,23 @@
+{
+    "name": "field",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [20, 20], [20, 230], [230, 20], [230, 230]
+    ],
+    "neutral_towers": [
+        [94, 151]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": 
+        {
+            "trees/tree1.png": 42,
+            "trees/tree2.png": 16,
+            "trees/tree3.png": 36,
+            "trees/tree4.png": 41,
+            "trees/tree5.png": 30,
+            "trees/tree6.png": 36
+        }
+    }
+}
