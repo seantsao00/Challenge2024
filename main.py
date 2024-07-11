@@ -68,8 +68,8 @@ def main():
     ))
     instances_manager.register_model(model)
 
-    Controller()
     View()
+    Controller()
 
     if args.music:
         BackgroundMusic()

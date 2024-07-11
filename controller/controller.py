@@ -16,13 +16,13 @@ from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, Eve
 from instances_manager import get_event_manager, get_model
 from model import Character, LivingEntity, TimerManager
 from util import log_info
+from view import ScreenInfo
 
 
 class Controller:
     """
     The object handles the control input, either from keyboard or from AI.
     """
-    __resize_ratio: float
 
     def __init__(self):
         """
@@ -32,10 +32,7 @@ class Controller:
         For more specific objects related to a game instance,
         they should be initialized in Controller.initialize()
         """
-        screen_info = pg.display.Info()
-        window_w = int(min(screen_info.current_w, screen_info.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
-        self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
+        self.__resize_ratio: float = ScreenInfo.resize_ratio
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):

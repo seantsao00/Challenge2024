@@ -7,6 +7,7 @@ import pygame as pg
 import const
 from util import crop_image, transform_coordinate
 from view.object.object_base import ObjectBase
+from view.screen_info import ScreenInfo
 
 if TYPE_CHECKING:
     from model import PartySelector
@@ -21,16 +22,16 @@ class PartySelectionView(ObjectBase):
         self.image_initialized = True
         super().__init__(canvas, [const.PRIORITY_PARTYSELECTION])
         self.__party_selector = party_selector
-        self.__font = pg.font.Font(const.REGULAR_FONT, int(12*self.resize_ratio))
+        self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
 
     @classmethod
     def init_convert(cls):
         img = pg.image.load(const.PARTY_SELECTION_BACKGROUND)
 
         cls.background_image = crop_image(
-            img, cls.screen_width, cls.screen_height, True).convert_alpha()
+            img, *ScreenInfo.screen_size, True).convert_alpha()
 
-        cls.ratio = cls.screen_width / 1600
+        cls.ratio = ScreenInfo.screen_size[0] / 1600
         for key, path in const.PARTY_SELECTION_IMAGE.items():
             img = pg.image.load(path)
             cls.party_images[key] = crop_image(
@@ -53,7 +54,7 @@ class PartySelectionView(ObjectBase):
         self.canvas.blit(img, (0, 0))
 
         if self.__party_selector.is_ready():
-            draw_text(self.canvas, self.screen_width / 2, self.screen_height -
+            draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
                       40, 'Press ENTER to continue', 'white', self.__font)
 
 
