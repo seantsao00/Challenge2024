@@ -41,13 +41,20 @@ class PartySelectionView(ObjectBase):
     def draw(self):
         point: list = [(107, 124), (107, 527), (868, 124), (868, 527)]
         team_number = 0
+        check = 0
         for party in self.__party_selector.selected_parties():
+            if party is not None:
+                check += 1
             img = self.party_images[party]
             self.canvas.blit(img, transform_coordinate(point[team_number], self.ratio))
             team_number += 1
 
         img = self.background_image
         self.canvas.blit(img, (0, 0))
+
+        if check == 4:
+            draw_text(self.canvas, self.screen_width / 2, self.screen_height -
+                      40, 'Press ENTER to continue', 'white', self.__font)
 
 
 def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):
