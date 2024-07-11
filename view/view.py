@@ -15,8 +15,8 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PartySelectionView, PauseMenuView, TowerCDView,
-                         ViewRangeView)
+                         HealthView, ObjectBase, ParticleView, PartySelectionView, PauseMenuView,
+                         TowerCDView, ViewRangeView)
 
 
 class View:
@@ -51,11 +51,12 @@ class View:
 
         self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
         self.set_screen_info()
-        # self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
         self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selecyion_view = PartySelectionView(self.__screen, model.party_selector)
+
+        self.__particle_view = ParticleView(self.__screen, pg.Vector2(100, 100), pg.Vector2(0, 1))
 
         PartySelectionView.init_convert()
 
@@ -99,6 +100,7 @@ class View:
         self.register_listeners()
 
     def set_screen_info(self):
+        ParticleView.set_screen_info(self.__resize_ratio, *self.screen_size)
         PauseMenuView.set_screen_info(self.__resize_ratio, *self.screen_size)
         EntityView.set_screen_info(self.__resize_ratio, *self.screen_size)
         ViewRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
@@ -215,6 +217,8 @@ class View:
         font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         time_remaining_surface = font.render(f'{minute:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
+
+        self.__particle_view.draw()
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
