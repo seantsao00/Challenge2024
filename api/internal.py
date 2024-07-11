@@ -160,29 +160,28 @@ class Internal(prototype.API):
         """
         Convert a `model.Tower` to `api.Tower`
         """
-        if internal.id not in self.__tower_map:
-            character_class = prototype.CharacterClass.UNKNOWN
-            if internal.character_type == const.CharacterType.MELEE:
-                character_class = prototype.CharacterClass.MELEE
-            elif internal.character_type == const.CharacterType.RANGER:
-                character_class = prototype.CharacterClass.RANGER
-            elif internal.character_type == const.CharacterType.SNIPER:
-                character_class = prototype.CharacterClass.SNIPER
-            else:
-                raise GameError("Unknown spawn character type")
-            extern = prototype.Tower(
-                _id=internal.id,
-                _position=self.__transform(internal.position, is_vector=False),
-                _period=internal.period,
-                _is_fountain=internal.is_fountain,
-                _attack_range=internal.attribute.attack_range,
-                _damage=internal.attribute.attack_damage,
-                _vision=internal.attribute.vision,
-                _health=internal.health,
-                _max_health=internal.attribute.max_health,
-                _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.team_id),
-                _spwan_character_type=character_class
-            )
+        character_class = prototype.CharacterClass.UNKNOWN
+        if internal.character_type == const.CharacterType.MELEE:
+            character_class = prototype.CharacterClass.MELEE
+        elif internal.character_type == const.CharacterType.RANGER:
+            character_class = prototype.CharacterClass.RANGER
+        elif internal.character_type == const.CharacterType.SNIPER:
+            character_class = prototype.CharacterClass.SNIPER
+        else:
+            raise GameError("Unknown spawn character type")
+        extern = prototype.Tower(
+            _id=internal.id,
+            _position=self.__transform(internal.position, is_vector=False),
+            _period=internal.period,
+            _is_fountain=internal.is_fountain,
+            _attack_range=internal.attribute.attack_range,
+            _damage=internal.attribute.attack_damage,
+            _vision=internal.attribute.vision,
+            _health=internal.health,
+            _max_health=internal.attribute.max_health,
+            _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.team_id),
+            _spwan_character_type=character_class
+        )
         return extern
 
     def __register_tower(self, internal: model.Tower) -> prototype.Tower:
