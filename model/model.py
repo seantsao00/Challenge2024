@@ -103,6 +103,7 @@ class Model:
         even for the second or more rounds of the game.
         """
 
+        self.__game_clock = Clock()
         self.teams: list[Team] = []
 
         selected_parties = self.party_selector.selected_parties()
@@ -260,7 +261,6 @@ class Model:
         """
         Start the game and post EventInitialize.
         """
-        self.__game_clock = Clock()
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
         ev_manager.post(EventPostInitialize())
