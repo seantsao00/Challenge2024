@@ -211,9 +211,9 @@ class View:
 
         # show time remaining
         time_remaining = int(const.GAME_TIME - model.get_time())
-        (min, sec) = divmod(time_remaining, 60)
+        (minute, sec) = divmod(time_remaining, 60)
         font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
-        time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
+        time_remaining_surface = font.render(f'{minute:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
 
         if model.state == const.State.PAUSE:

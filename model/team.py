@@ -2,21 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pygame as pg
-
 import const
 import const.team
 from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
                            EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterMove)
+                           EventTeamLoseTower)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger
-from model.team_vision import Team_Vision
+from model.team_vision import TeamVision
 from util import log_info
 
 if TYPE_CHECKING:
-    from model.entity import Entity, LivingEntity
+    from model.entity import Entity
 
 
 class NeutralTeam:
@@ -39,7 +37,6 @@ class NeutralTeam:
     @property
     def party(self) -> const.PartyType:
         return self.__party
-
 
 
 class Team(NeutralTeam):
@@ -72,7 +69,7 @@ class Team(NeutralTeam):
         self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
-        self.vision = Team_Vision(self)
+        self.vision = TeamVision(self)
         self.register_listeners()
 
     def handle_input(self, event: EventHumanInput):
@@ -114,7 +111,7 @@ class Team(NeutralTeam):
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.__towers:
             self.__towers.add(event.tower)
-        if self.fountain == None:
+        if self.fountain is None:
             self.fountain = event.tower
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from instances_manager import get_event_manager, get_model
 from event_manager import EventAttack
+from instances_manager import get_model
 from model.character.character import Character
 
 if TYPE_CHECKING:

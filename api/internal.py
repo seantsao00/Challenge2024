@@ -7,18 +7,14 @@ import signal
 import threading
 import traceback
 import warnings
-from typing import Any, Iterable
+from typing import Iterable
 
 import numpy as np
 import pygame as pg
 
-import api.prototype as prototype
 import const
 import model
-import model.character
-import model.character.melee
-import model.character.ranger
-import model.character.sniper
+from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
 from util import log_critical, log_info, log_warning

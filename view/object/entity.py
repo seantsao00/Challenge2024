@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventDiscardEntity
-from instances_manager import get_event_manager
 from util import crop_image
 from view.object.entity_object import EntityObject
 

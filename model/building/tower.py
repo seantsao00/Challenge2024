@@ -8,9 +8,10 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 from ordered_set import OrderedSet
+
 import const
-from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventEveryTick)
+from event_manager import (EventAttack, EventCreateTower, EventEveryTick, EventSpawnCharacter,
+                           EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
@@ -19,8 +20,8 @@ from util import log_info
 
 if TYPE_CHECKING:
     from model.character import Character
-    from model.team import Team
     from model.model import Model
+    from model.team import Team
 
 
 class Tower(LivingEntity):
@@ -63,7 +64,7 @@ class Tower(LivingEntity):
     def update_period(self):
         self.period = const.count_period_ms(len(self.team.character_list))
 
-    def generate_character(self, event: EventEveryTick):
+    def generate_character(self, _: EventEveryTick):
         if self.team.party is const.PartyType.NEUTRAL:
             return
         self.update_period()
@@ -135,4 +136,3 @@ class Tower(LivingEntity):
     @property
     def character_type(self) -> const.CharacterType:
         return self.__character_type
-

@@ -39,7 +39,7 @@ class EventManager:
         self.__wait_remove_listeners: list[tuple[tuple[type[BaseEvent], ChannelId | None],
                                                  ListenerCallback]] = []
         self.__wait_add_listeners: list[tuple[tuple[type[BaseEvent], ChannelId | None],
-                                                 ListenerCallback]] = []
+                                              ListenerCallback]] = []
         self.__read_lock: int = 0
         """The lock to ensure one can modify self.listeners only when no one is iterating it."""
 

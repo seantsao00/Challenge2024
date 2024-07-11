@@ -7,7 +7,7 @@ import pygame as pg
 import const
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
-from model.character import Character
+from model.character.character import Character
 from util import log_info
 
 if TYPE_CHECKING:

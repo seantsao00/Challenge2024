@@ -63,7 +63,7 @@ class Model:
         self.__running: bool = False
         self.state: const.State = const.State.COVER
 
-        self.global_clock: pg.Clock = pg.time.Clock()
+        self.global_clock: pg.time.Clock = pg.time.Clock()
         """The clock since program start."""
         self.__game_clock: Clock = Clock()
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
