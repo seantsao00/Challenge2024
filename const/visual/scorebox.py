@@ -6,3 +6,4 @@ SCOREBOX_ANCHORS = [
     (365, 15),
     (365, 175),
 ]
+SCOREBOX_AVATAR_SIZE = 25

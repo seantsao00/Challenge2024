@@ -10,8 +10,6 @@ from view.object import components
 from view.object.object_base import ObjectBase
 from view.textutil import font_loader
 
-AVATAR_SIZE = 25
-
 
 class Scorebox:
     def __init__(self, canvas: pg.Surface, resize_ratio, position: tuple[int, int], team: Team):
@@ -23,7 +21,7 @@ class Scorebox:
         self.__team_name_surface = font_loader.get_font(
             size=16).render(str(team.team_name), False, 'black')
         self.__team_avatar = components.createTeamAvatar(
-            self.__team, int(self.translate(AVATAR_SIZE)))
+            self.__team, int(self.translate(scorebox.SCOREBOX_AVATAR_SIZE)))
         self.update()
 
     def translate(self, x: float, y: float | None = None):
@@ -54,7 +52,6 @@ class Scorebox:
 class ScoreboxesView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
         super().__init__(canvas, [PRIORITY_SCOREBOXES])
-        self.__initialized: bool = False
         self.__boxes: list[Scorebox] = []
 
     def initialize(self):
