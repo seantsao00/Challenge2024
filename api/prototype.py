@@ -233,7 +233,7 @@ class API:
         """
         raise NotImplementedError
 
-    def action_cast_spell(self, characters: Iterable[Character]):
+    def action_cast_ability(self, characters: Iterable[Character]):
         """
         將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
