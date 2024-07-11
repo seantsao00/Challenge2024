@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
 CD_BAR_COLOR = 'blue'
+# open for color recommandation
+HEALTH_BAR_COLOR = ['yellow', 'green', 'orange', 'violet', 'red']
 
 HEALTH_BAR_UPPER = 5
 CD_BAR_UPPER = 3
