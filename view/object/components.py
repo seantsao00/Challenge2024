@@ -3,9 +3,10 @@ import pygame as pg
 import const
 from const.character import CharacterType
 from model.team import Team
+from view.textutil import draw_text, split_text
 
 
-def createTeamAvatar(team: Team, size: int):
+def createTeamAvatar(team: Team, size: int) -> pg.Surface:
     if not isinstance(size, int):
         raise ValueError("Avatar size must be a ineteger")
 
@@ -27,3 +28,15 @@ def createTeamAvatar(team: Team, size: int):
     avatar.blit(rect_mask, (0, 0), None, pg.BLEND_RGBA_MIN)
 
     return avatar
+
+
+def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) -> pg.Surface:
+    line_height = font.get_linesize()
+    lines = split_text(text, font, width)
+    height = line_height * len(lines)
+    textbox = pg.Surface((width, height), pg.SRCALPHA)
+    cur_y = line_height / 2
+    for ln in lines:
+        draw_text(textbox, 0, cur_y, ln, color, font, align_text='midleft')
+        cur_y += line_height
+    return textbox
