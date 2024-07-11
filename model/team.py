@@ -99,7 +99,9 @@ class Team(NeutralTeam):
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
-            if isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
+            if isinstance(clicked_entity, Tower) and clicked_entity.team is self:  # Utilize ATTACK to pick tower
+                self.__controlling = clicked_entity
+            elif isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
                 self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
