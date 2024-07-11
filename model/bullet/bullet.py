@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
     from model.entity import LivingEntity
     from model.team import Team
-    from model.timer import Timer
 
 T = TypeVar('T')
 

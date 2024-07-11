@@ -4,7 +4,6 @@ The module defines Entity class.
 
 from __future__ import annotations
 
-from threading import Lock
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -43,7 +42,6 @@ class Entity:
         self.team: Team = team
         self.__entity_type: const.EntityType = entity_type
         self.state: const.EntityState = state
-        self.hidden: bool = False
         get_event_manager().post(EventCreateEntity(entity=self))
 
     def __str__(self):
@@ -69,11 +67,12 @@ class LivingEntity(Entity):
                  team: Team,
                  entity_type: const.EntityType,
                  state: const.EntityState = None,
-                 invulnerablility: bool = False):
+                 invulnerability: bool = False):
         self.alive: bool = True
         self.attribute: const.LivingEntityAttribute = attribute
-        self.invulnerablility: bool = invulnerablility
         self.health: float = self.attribute.max_health
+
+        self.__invulnerability: bool = invulnerability
 
         super().__init__(position, team, entity_type, state)
 
@@ -81,7 +80,7 @@ class LivingEntity(Entity):
         """
         Test vulerability. `Enemy` is only used for logging.
         """
-        if self.invulnerablility:
+        if self.__invulnerability:
             log_info(f"[Attack] {self} is invulnerable, {enemy}'s attack failed")
             return False
         if not self.alive:

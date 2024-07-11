@@ -164,6 +164,7 @@ class Character(LivingEntity):
             return False
         self.__move_path = path
         self.__move_state = CharacterMovingState.TO_POSITION
+        self.__move_direction = pg.Vector2(0, 0)
         return True
 
     def take_damage(self, event: EventAttack):
@@ -175,7 +176,8 @@ class Character(LivingEntity):
             self.die()
             if event.attacker.team.party is not const.PartyType.NEUTRAL:
                 event.attacker.team.gain_point_kill()
-                log_info(f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
+                log_info(
+                    f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
     def attackable(self, enemy: LivingEntity):
         """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
@@ -208,3 +210,15 @@ class Character(LivingEntity):
     @abstractmethod
     def cast_ability(self, *args, **kwargs):
         pass
+
+    @property
+    def move_direction(self) -> pg.Vector2:
+        return self.__move_direction
+
+    @property
+    def move_destination(self) -> pg.Vector2:
+        return self.__move_path[-1]
+
+    @property
+    def move_state(self) -> CharacterMovingState:
+        return self.__move_state
