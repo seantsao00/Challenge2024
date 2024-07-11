@@ -69,7 +69,7 @@ class Model:
 
         self.global_clock: pg.time.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock = Clock()
+        self.__game_clock: Clock
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
         self.dt: float
@@ -91,8 +91,8 @@ class Model:
         self.show_attack_range: bool = model_arguments.show_attack_range
 
         self.pause_menu: PauseMenu = PauseMenu()
-        self.RangerAbility = False
-        self.RangerControlling: Ranger = None
+        self.ranger_ability = False
+        self.ranger_controlling: Ranger = None
 
         self.__register_listeners()
 
@@ -103,9 +103,9 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
+        self.__game_clock = Clock()
 
         self.teams: list[Team] = []
-        self.bullet_pool: list[Bullet] = []
 
         selected_parties = self.party_selector.selected_parties()
 
@@ -169,7 +169,6 @@ class Model:
 
     def create_bullet(self, event: EventBulletCreate):
         get_event_manager().register_listener(EventEveryTick, event.bullet.judge)
-        self.bullet_pool.append(event.bullet)
 
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)

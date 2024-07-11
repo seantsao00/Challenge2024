@@ -4,7 +4,14 @@ The program's entry point is the main function in this module.
 Import paths should be relative to the location of this file.
 """
 
+import os
+
+# pylint: disable=wrong-import-position
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # nopep8
+
 import argparse
+import os
+import sys
 
 import pygame as pg
 
@@ -45,6 +52,8 @@ def main():
                         help='skip the character selection and quick start')
 
     args = parser.parse_args()
+    if not check_input_validity(args):
+        sys.exit()
     set_verbosity(args.verbose)
 
     ev_manager = EventManager()
@@ -67,6 +76,27 @@ def main():
 
     # Main loop
     model.run()
+
+
+def check_input_validity(args) -> bool:
+    team_controls = args.team_controls
+    map = args.map
+
+    if len(team_controls) > 4:
+        print('Too many teams')
+        return False
+    if team_controls.count('human') > 1:
+        print('At most one human')
+        return False
+    for team in team_controls:
+        if team != 'human' and not os.path.isfile(f'./ai/{team}.py'):
+            print(f'{team}.py does not exist')
+            return False
+    if not os.path.isdir(f'./topography/{map}'):
+        print(f'{map} map does not exist')
+        return False
+
+    return True
 
 
 if __name__ == "__main__":

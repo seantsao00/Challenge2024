@@ -50,15 +50,15 @@ class Ranger(Character):
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
         self.abilities_time = now_time
-        get_model().RangerAbility = True
-        get_model().RangerControlling = self
+        get_model().ranger_ability = True
+        get_model().ranger_controlling = self
         log_info("[Ranger] Ability is on")
 
     def use_ability(self, event: EventUseRangerAbility):
         """This function is called after clicked Q and left button, it would generate bullet"""
         print(self.position.distance_to(event.position))
         if self.position.distance_to(event.position) <= self.attribute.attack_range:
-            get_model().RangerAbility = False
+            get_model().ranger_ability = False
             log_info("[Ranger] Cast ablility")
             bullet = BulletRanger(position=self.position,
                                   target=event.position,

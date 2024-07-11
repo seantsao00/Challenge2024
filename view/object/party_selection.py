@@ -52,7 +52,7 @@ class PartySelectionView(ObjectBase):
         img = self.background_image
         self.canvas.blit(img, (0, 0))
 
-        if check == 4:
+        if self.__party_selector.is_ready():
             draw_text(self.canvas, self.screen_width / 2, self.screen_height -
                       40, 'Press ENTER to continue', 'white', self.__font)
 
