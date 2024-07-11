@@ -22,7 +22,7 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.bullet import Bullet
-from model.character import Character
+from model.character import Character, Ranger
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
@@ -90,6 +90,7 @@ class Model:
 
         self.pause_menu: PauseMenu = PauseMenu()
         self.RangerAbility = False
+        self.RangerControlling: Ranger = None
 
         self.__register_listeners()
 
@@ -163,8 +164,6 @@ class Model:
 
     def create_bullet(self, event: EventBulletCreate):
         get_event_manager().register_listener(EventEveryTick, event.bullet.judge)
-        # event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
-        #                            function=event.bullet.judge, once=False)
         self.bullet_pool.append(event.bullet)
 
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):

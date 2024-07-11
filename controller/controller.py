@@ -100,7 +100,8 @@ class Controller:
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
                     if model.RangerAbility:
-                        ev_manager.post(EventUseRangerAbility(position=pg.Vector2(x, y)))
+                        ev_manager.post(EventUseRangerAbility(position=pg.Vector2(
+                            x, y)), channel_id=model.RangerControlling.id)
                     else:
                         clicked = None
                         for entity in model.entities:

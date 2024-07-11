@@ -28,5 +28,5 @@ class HealthView(EntityObject):
                 const.HEALTH_BAR_UPPER + const.DRAW_DISPLACEMENT_Y) * self.resize_ratio
         pg.draw.rect(self.canvas, (0, 0, 0),
                      (top, left, entity_size * 2 * self.resize_ratio, 2 * self.resize_ratio))
-        pg.draw.rect(self.canvas, (255, 0, 0),
+        pg.draw.rect(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id],
                      (top, left, blood_width, 2 * self.resize_ratio))
