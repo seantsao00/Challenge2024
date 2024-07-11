@@ -17,8 +17,9 @@ from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventRangedBulletDamage, EventResumeModel, EventSelectParty,
-                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
+                           EventPostInitialize, EventQuit, EventRangedBulletDamage,
+                           EventResumeModel, EventSelectParty, EventSpawnCharacter, EventStartGame,
+                           EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.bullet import Bullet
@@ -100,7 +101,6 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        load_ai(self.__team_files_names)
 
         self.teams: list[Team] = []
         self.bullet_pool: list[Bullet] = []
@@ -112,8 +112,10 @@ class Model:
             team = Team(team_master == 'human',
                         selected_parties[i],
                         team_master)
+            fountain = Tower(new_position, team, True)
             self.teams.append(team)
-            self.__tower.append(Tower(new_position, team, True))
+            self.__tower.append(fountain)
+            team.fountain = fountain
         for team in self.teams:
             for i in (team.team_id for team in self.teams):
                 if i != team.team_id:
@@ -125,7 +127,8 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
-        # self.__game_clock
+    def __post_initialize(self, _: EventPostInitialize):
+        load_ai(self.__team_files_names)
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -191,6 +194,7 @@ class Model:
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.__initialize)
+        ev_manager.register_listener(EventInitialize, self.__post_initialize)
         ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
         ev_manager.register_listener(EventQuit, self.__handle_quit)
         ev_manager.register_listener(EventPauseModel, self.__handle_pause)
@@ -250,6 +254,7 @@ class Model:
         """
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
+        ev_manager.post(EventPostInitialize())
 
     def handle_game_over(self, _: EventGameOver):
         """

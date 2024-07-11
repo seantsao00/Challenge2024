@@ -26,6 +26,14 @@ class EventInitialize(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventPostInitialize(BaseEvent):
+    """
+    Event posted after a new round of game starts.
+    This event is a workaround of AI, because everything should be started before AI.
+    """
+
+
+@dataclass(kw_only=True)
 class EventQuit(BaseEvent):
     """Event posted upon quitting the game (closing the program)."""
 

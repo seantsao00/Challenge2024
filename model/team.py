@@ -107,8 +107,6 @@ class Team(NeutralTeam):
     def gain_tower(self, event: EventTeamGainTower):
         if event.tower not in self.__towers:
             self.__towers.add(event.tower)
-        if self.fountain is None:
-            self.fountain = event.tower
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
 

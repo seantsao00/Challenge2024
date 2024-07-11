@@ -17,6 +17,18 @@ class CharacterClass(IntEnum):
     UNKNOWN = auto()
 
 
+class MapTerrain(IntEnum):
+    """地圖地形。"""
+    OUT_OF_BOUNDS = auto()
+    """界外。"""
+    ROAD = auto()
+    """道路。走路的速度是正常的。"""
+    OFFROAD = auto()
+    """道路外，走路會減速。"""
+    OBSTACLE = auto()
+    """障礙物，無法通過。"""
+
+
 class Character:
     """角色。"""
 
@@ -119,7 +131,7 @@ class API:
 
     def get_score_of_team(self, index=None) -> int:
         """
-        回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。
+        回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。  
         @index: 隊伍的編號或者是 `None`（代表自己的小隊）
         """
         raise NotImplementedError
@@ -143,14 +155,19 @@ class API:
         raise NotImplementedError
 
     def is_visible(self, position: pg.Vector2) -> bool:
-        """回傳某個位置是否在視野範圍內。如果位置在地圖之外，永遠回傳 `False`。
+        """回傳某個位置是否在視野範圍內。如果位置在地圖之外，永遠回傳 `False`。  
         @position: 要檢查的位置。"""
         raise NotImplementedError
 
+    def get_terrain(self, position: pg.Vector2) -> MapTerrain:
+        """回傳某個位置的地形，不需在視野範圍內就能呼叫。  
+        如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
+        @position: 要檢查的位置。"""
+
     def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2):
         """
-        將所有列表中的角色設定為沿著某個向量移動。
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        將所有列表中的角色設定為沿著某個向量移動。  
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @direction: 移動的向量。
         """
         raise NotImplementedError
@@ -158,38 +175,38 @@ class API:
     def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2):
         """
         將所有列表中的角色設定為朝著某個目的地移動。如果目標不在視野範圍內或者不是可以行走的位置則不會生效。
-        這個函數會使用內建的巡路，可能會耗費大量時間，使用時請注意耗用時間。
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        這個函數會使用內建的巡路，可能會耗費大量時間，使用時請注意耗用時間。  
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
 
     def action_move_clear(self, characters: Iterable[Character]):
         """
-        將所有列表中的角色設定為不移動。
+        將所有列表中的角色設定為不移動。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         raise NotImplementedError
 
     def action_attack(self, characters: Iterable[Character], target: Character | Tower):
         """
-        將所有列表中的角色設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        將所有列表中的角色設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
 
     def action_cast_spell(self, characters: Iterable[Character]):
         """
-        將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。
+        將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         raise NotImplementedError
 
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
         """
-        改變指定塔所生成的兵種。
-        @tower: 指定的建築。
+        改變指定塔所生成的兵種。  
+        @tower: 指定的建築。  
         @spawn_type: 指定的兵種。
         """
         raise NotImplementedError

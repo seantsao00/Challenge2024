@@ -17,6 +17,7 @@ import numpy as np
 import pygame as pg
 
 import const
+import const.map
 import model
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
@@ -280,6 +281,19 @@ class Internal(prototype.API):
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(self.__transform(position, is_vector=False, inverse=True))
 
+    def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
+        W = const.ARENA_SIZE[1]
+        if position.x < 0 or position.x > W or position.y < 0 or position.x > W:
+            return prototype.MapTerrain.OUT_OF_BOUNDS
+        terrain = get_model().map.get_position_type(self.__transform(position, inverse=True))
+        if terrain == const.map.MAP_ROAD:
+            return prototype.MapTerrain.ROAD
+        if terrain == const.map.MAP_PUDDLE:
+            return prototype.MapTerrain.OFFROAD
+        if terrain == const.map.MAP_OBSTACLE:
+            return prototype.MapTerrain.OBSTACLE
+        raise GameError("Unkown terrain type.")
+
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         enforce_type('characters', characters, Iterable)
         enforce_type('direction', direction, pg.Vector2)
@@ -296,10 +310,6 @@ class Internal(prototype.API):
         enforce_type('characters', characters, Iterable)
         enforce_type('destination', destination, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
-
-        if not self.is_visible(destination):
-            log_info(f"[API] team {self.team_id} tried to move to a point outside of vision!")
-            return
 
         destination = self.__transform(destination, is_vector=False, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
