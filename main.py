@@ -4,6 +4,11 @@ The program's entry point is the main function in this module.
 Import paths should be relative to the location of this file.
 """
 
+import os
+
+# pylint: disable=wrong-import-position
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # nopep8
+
 import argparse
 
 import pygame as pg
