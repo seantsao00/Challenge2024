@@ -9,12 +9,15 @@
         [125, 125]
     ],
     "images": {
-        "background.png": -1,
-        "horizontal1.png": 53,
-        "horizontal2.png": 53,
-        "horizontal3.png": 184,
-        "vertical1.png": 184,
-        "vertical2.png": 117,
-        "vertical3.png": 250
+        "backgrounds": ["background.png"],
+        "objects":
+        {
+            "horizontal1.png": 53,
+            "horizontal2.png": 53,
+            "horizontal3.png": 184,
+            "vertical1.png": 184,
+            "vertical2.png": 117,
+            "vertical3.png": 250
+        }
     }
 }

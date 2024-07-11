@@ -84,7 +84,7 @@ class LivingEntity(Entity):
         if self.invulnerablility:
             log_info(f"[Attack] {self} is invulnerable, {enemy}'s attack failed")
             return False
-        if self.alive:
+        if not self.alive:
             log_info(f"[Attack] {self} is already dead, {enemy}'s attack failed")
-            return True
+            return False
         return True
