@@ -23,7 +23,7 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.bullet import Bullet
-from model.character import Character, Ranger
+from model.character import Character, Ranger, Sniper
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
@@ -184,9 +184,12 @@ class Model:
     def bullet_damage(self, event: EventBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
         event.bullet.discard()
+        damage = event.bullet.damage
+        if isinstance(event.bullet.attacker, Sniper) and isinstance(event.bullet.victim, Tower):
+            damage /= const.BULLET_SNIPER_ATTACK_TOWER_DEBUFF
         get_event_manager().post(EventAttack(victim=event.bullet.victim,
                                              attacker=event.bullet.attacker,
-                                             damage=event.bullet.damage), channel_id=event.bullet.victim.id)
+                                             damage=damage), channel_id=event.bullet.victim.id)
 
     def bullet_disappear(self, event: EventBulletDisappear):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
