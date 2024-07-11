@@ -6,7 +6,7 @@ import random
 import pygame as pg
 
 from const.visual.priority import PRIORITY_PARTICLE
-from event_manager import EventEveryTick
+from event_manager import EventEveryTick, EventTestParticle
 from instances_manager import get_event_manager
 from view.object.object_base import ObjectBase
 from view.object.particle import Particle
@@ -20,8 +20,7 @@ class ParticleManager(ObjectBase):
         self.particles = []
 
         get_event_manager().register_listener(EventEveryTick, self.on_every_tick)
-
-        self.explode(pg.Vector2(200, 200), 100, 1.0, (200, 0, 0))
+        get_event_manager().register_listener(EventTestParticle, self.test_particle)
 
     def draw(self):
         for p in self.particles:
@@ -47,6 +46,24 @@ class ParticleManager(ObjectBase):
 
             self.particles.append(Particle(self.canvas, _pos, _direction,
                                   _speed, _size, _duration, _color))
+
+    def blood(self, pos, amount, duration):
+        color = (200, 0, 0)
+        for _ in range(amount):
+            _pos = pos + pg.Vector2(random.randint(-7, 7), 0)
+            _speed = random.uniform(50, 100)
+            _duration = random.uniform(0.8, 1.2) * duration
+            _size = random.uniform(0.8, 1.2)
+            _direction = pg.Vector2(0, 1)
+            _color = (clamp(color[0] + random.randint(-20, 20), 0, 255),
+                      clamp(color[1] + random.randint(-20, 20), 0, 255),
+                      clamp(color[2] + random.randint(-20, 20), 0, 255))
+
+            self.particles.append(Particle(self.canvas, _pos, _direction,
+                                  _speed, _size, _duration, _color))
+
+    def test_particle(self, _: EventTestParticle):
+        self.explode(pg.Vector2(200, 200), 50, 0.5, (230, 80, 50))
 
 
 def clamp(value, min_val, max_val):
