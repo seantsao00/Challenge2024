@@ -11,3 +11,14 @@ class ScreenInfo:  # nopep8
         cls.resize_ratio = resize_ratio
         cls.screen_size = screen_size
         cls.initialized = True
+
+    @classmethod
+    def rescale(cls, coord: int | float | tuple | list):
+        if isinstance(coord, int):
+            return int(coord * cls.resize_ratio)
+        elif isinstance(coord, float):
+            return coord * cls.resize_ratio
+        converted = [cls.rescale(x) for x in coord]
+        if isinstance(coord, tuple):
+            return tuple(converted)
+        return converted

@@ -11,24 +11,15 @@ from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
 
-class ResizeRatioSoAnnoying:
-    def __init__(self, resize_ratio: float):
-        self.resize_ratio = resize_ratio
-        self.CHAT_POSITION = self.resize(CHAT.CHAT_POSITION)
-        self.CHAT_SIZE = self.resize(CHAT.CHAT_SIZE)
-        self.AVATAR_WIDTH = int(self.resize(CHAT.AVATAR_WIDTH))
-        self.SPACING = self.resize(CHAT.SPACING)
-
-    def resize(self, x: int | float | tuple[float, float] | list[float]):
-        if isinstance(x, float) or isinstance(x, int):
-            return x * self.resize_ratio
-        elif isinstance(x, tuple):
-            return (self.resize(x[0]), self.resize(x[1]))
-        else:
-            return [self.resize(i) for i in x]
+class _RescaledConstants:
+    def __init__(self):
+        self.CHAT_POSITION = ScreenInfo.rescale(CHAT.CHAT_POSITION)
+        self.CHAT_SIZE = ScreenInfo.rescale(CHAT.CHAT_SIZE)
+        self.AVATAR_WIDTH = int(ScreenInfo.rescale(CHAT.AVATAR_WIDTH))
+        self.SPACING = ScreenInfo.rescale(CHAT.SPACING)
 
 
-consts: ResizeRatioSoAnnoying = None
+consts: _RescaledConstants | None = None
 
 
 class CommentBox:
@@ -60,7 +51,7 @@ class ChatView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
         super().__init__(canvas, [8])
         global consts
-        consts = ResizeRatioSoAnnoying(ScreenInfo.resize_ratio)
+        consts = _RescaledConstants()
         self.__initialized = False
         self.__canvas = canvas
         self.__chat_surface = pg.Surface(consts.CHAT_SIZE, pg.SRCALPHA)
