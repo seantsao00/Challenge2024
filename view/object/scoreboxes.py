@@ -7,6 +7,7 @@ from instances_manager import get_model
 from model.team import Team
 from view.object import components
 from view.object.object_base import ObjectBase
+from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
 
@@ -58,7 +59,7 @@ class ScoreboxesView(ObjectBase):
         for i, p in enumerate(scorebox.SCOREBOX_ANCHORS):
             if i < len(get_model().teams):
                 self.__boxes.append(
-                    Scorebox(self.canvas, self.resize_ratio, p, get_model().teams[i]))
+                    Scorebox(self.canvas, ScreenInfo.resize_ratio, p, get_model().teams[i]))
 
     def draw(self):
         if not self.__initialized:

@@ -14,8 +14,8 @@ class BackgroundMusic:
         """
         pg.mixer.init()
         pg.mixer.music.load(const.BGM_PATH[const.PartyType.NEUTRAL])
-        pg.mixer.music.play(-1)
-        self.default_volume: float = pg.mixer.music.get_volume()
+        pg.mixer.music.play(loops=-1)
+        self.__default_volume: float = pg.mixer.music.get_volume()
         self.__register_listeners()
 
     def __initialize(self, _: EventInitialize):
@@ -25,23 +25,22 @@ class BackgroundMusic:
         """
         model = get_model()
         parties = [team.party for team in model.teams]
-        missing_party = [
-            party for party in const.PartyType if party not in parties and party != const.PartyType.NEUTRAL][0]
-        if missing_party is not None:
-            pg.mixer.music.fadeout(500)
-            pg.mixer.music.unload()
-            log_info(const.BGM_PATH[missing_party])
-            pg.mixer.music.load(const.BGM_PATH[missing_party])
-            pg.mixer.music.play(-1)
-            self.default_volume = pg.mixer.music.get_volume()
+        missing_party = [party for party in const.PartyType
+                         if party not in parties and party != const.PartyType.NEUTRAL][0]
+        pg.mixer.music.fadeout(500)
+        pg.mixer.music.unload()
+        log_info(const.BGM_PATH[missing_party])
+        pg.mixer.music.load(const.BGM_PATH[missing_party])
+        pg.mixer.music.play(loops=-1)
+        self.__default_volume = pg.mixer.music.get_volume()
 
     def __handle_pause(self, _: EventPauseModel):
         if pg.mixer.music.get_busy():
-            pg.mixer.music.set_volume(self.default_volume / 4)
+            pg.mixer.music.set_volume(self.__default_volume / 4)
 
     def __handle_resume(self, _: EventResumeModel):
         if pg.mixer.music.get_busy():
-            pg.mixer.music.set_volume(self.default_volume)
+            pg.mixer.music.set_volume(self.__default_volume)
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""

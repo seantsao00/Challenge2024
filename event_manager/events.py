@@ -12,7 +12,7 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Character, Entity, LivingEntity, Tower
+    from model import Bullet, BulletCommon, BulletRanger, Character, Entity, LivingEntity, Tower
 
 
 @dataclass(kw_only=True)
@@ -23,6 +23,14 @@ class BaseEvent:
 @dataclass(kw_only=True)
 class EventInitialize(BaseEvent):
     """Event posted upon a new round of game starts."""
+
+
+@dataclass(kw_only=True)
+class EventPostInitialize(BaseEvent):
+    """
+    Event posted after a new round of game starts.
+    This event is a workaround of AI, because everything should be started before AI.
+    """
 
 
 @dataclass(kw_only=True)
@@ -40,7 +48,7 @@ class EventSelectParty(BaseEvent):
 @dataclass(kw_only=True)
 class EventChangeParty(BaseEvent):
     """Event posted when player is selecting parties"""
-    select_input: tuple[const.PartySelectInput, tuple[int, int] | None]
+    select_input: tuple[const.PartySelectorInputType, tuple[int, int] | None]
 
 
 @dataclass(kw_only=True)
@@ -128,6 +136,7 @@ class EventDiscardEntity(BaseEvent):
 class EventAttack(BaseEvent):
     attacker: LivingEntity
     victim: LivingEntity
+    damage: float
 
 
 @dataclass(kw_only=True)
@@ -162,5 +171,35 @@ class EventCharacterDied(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventBulletCreate(BaseEvent):
+    bullet: Bullet
+
+
+@dataclass(kw_only=True)
+class EventBulletDamage(BaseEvent):
+    bullet: BulletCommon
+
+
+@dataclass(kw_only=True)
+class EventRangedBulletDamage(BaseEvent):
+    bullet: BulletRanger
+
+
+@dataclass(kw_only=True)
+class EventBulletDisappear(BaseEvent):
+    bullet: Bullet
+
+
+@dataclass(kw_only=True)
 class EventViewChangeTeam(BaseEvent):
     """Event to change view team"""
+
+
+@dataclass(kw_only=True)
+class EventUseRangerAbility(BaseEvent):
+    position: pg.Vector2 | tuple[float, float]
+
+
+@dataclass(kw_only=True)
+class EventBulletExplode(BaseEvent):
+    bullet: Bullet

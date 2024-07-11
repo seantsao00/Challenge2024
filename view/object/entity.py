@@ -6,10 +6,9 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventDiscardEntity
-from instances_manager import get_event_manager
 from util import crop_image
 from view.object.entity_object import EntityObject
+from view.screen_info import ScreenInfo
 
 if TYPE_CHECKING:
     from model import Entity
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 class EntityView(EntityObject):
     images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
         = {party: {
-            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType)
+            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType, const.BulletType)
         } for party in const.PartyType}
     """
     structure: images[party][entity][state]
@@ -40,8 +39,8 @@ class EntityView(EntityObject):
             for entity, state_dict in entity_dict.items():
                 for state, path in state_dict.items():
                     img = pg.image.load(path)
-                    width = const.ENTITY_SIZE[entity][state] * 2 * cls.resize_ratio
-                    height = const.ENTITY_SIZE[entity][state] * 2 * cls.resize_ratio
+                    width = const.ENTITY_SIZE[entity][state] * 2 * ScreenInfo.resize_ratio
+                    height = const.ENTITY_SIZE[entity][state] * 2 * ScreenInfo.resize_ratio
                     cls.images[party][entity][state] = crop_image(
                         img, width, height
                     ).convert_alpha()
@@ -50,7 +49,7 @@ class EntityView(EntityObject):
     def draw(self):
         entity = self.entity
         img = self.images[entity.team.party][entity.entity_type][entity.state]
-        self.canvas.blit(img, img.get_rect(center=self.resize_ratio *
+        self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
                          (entity.position + const.DRAW_DISPLACEMENT)))
 
     def update(self):

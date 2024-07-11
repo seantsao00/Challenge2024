@@ -5,12 +5,14 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventAttack
+from event_manager import EventBulletCreate, EventUseRangerAbility
 from instances_manager import get_event_manager, get_model
-from model.character import Character
+from model.bullet import BulletCommon, BulletRanger
+from model.character.character import Character
 from util import log_info
 
 if TYPE_CHECKING:
+    from model.entity import Entity
     from model.team import Team
 
 
@@ -23,15 +25,42 @@ class Ranger(Character):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
         super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
+        get_event_manager().register_listener(EventUseRangerAbility,
+                                              listener=self.use_ability, channel_id=self.id)
 
-    def abilities(self, *args, **kwargs):
-        if len(args) < 1 or not isinstance(args[0], pg.Vector2):
-            raise ValueError()
-        target: pg.Vector2 = args[0]
-        dist = self.position.distance_to(target)
-        if dist <= self.attribute.attack_range:
-            log_info("ranged ability attack")
-            all_victim = get_model().grid.all_entity_in_range(target, self.attribute.ability_variables)
-            for victim in all_victim:
-                if self.team != victim.team:
-                    get_event_manager().post(EventAttack(attacker=self, victim=victim), victim.id)
+    def attack(self, enemy: Entity):
+        now_time = get_model().get_time()
+        dist = self.position.distance_to(enemy.position)
+        if (self.team != enemy.team
+            and dist <= self.attribute.attack_range
+                and (now_time - self._last_attack_time) * self.attribute.attack_speed >= 1):
+            bullet = BulletCommon(position=self.position,
+                                  victim=enemy,
+                                  team=self.team,
+                                  attacker=self,
+                                  damage=const.RANGER_ATTRIBUTE.attack_damage,
+                                  speed=const.BULLET_RANGER_SPEED)
+            get_event_manager().post(EventBulletCreate(bullet=bullet))
+            self._last_attack_time = now_time
+
+    def cast_ability(self, *args, **kwargs):
+        """This function is called after clicked Q, it wouldn't generate bullet"""
+
+        now_time = get_model().get_time()
+        if now_time - self.abilities_time < self.attribute.ability_cd:
+            return
+        self.abilities_time = now_time
+        get_model().ranger_ability = True
+        get_model().ranger_controlling = self
+        log_info("[Ranger] Ability is on")
+
+    def use_ability(self, event: EventUseRangerAbility):
+        """This function is called after clicked Q and left button, it would generate bullet"""
+        if self.position.distance_to(event.position) <= self.attribute.attack_range:
+            get_model().ranger_ability = False
+            log_info("[Ranger] Cast ablility")
+            bullet = BulletRanger(position=self.position,
+                                  target=event.position,
+                                  team=self.team,
+                                  attacker=self)
+            get_event_manager().post(EventBulletCreate(bullet=bullet))

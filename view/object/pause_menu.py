@@ -7,6 +7,7 @@ import pygame as pg
 import const
 from const.visual.priority import PRIORITY_PAUSEMENU
 from view.object.object_base import ObjectBase
+from view.screen_info import ScreenInfo
 from view.textutil import draw_text, font_loader
 
 if TYPE_CHECKING:
@@ -18,7 +19,7 @@ class PauseMenuView(ObjectBase):
         self.image_initialized = True
         super().__init__(canvas, [PRIORITY_PAUSEMENU])
         self.pause_menu = pause_menu
-        self.title_font = font_loader.get_font(size=12)
+        self.title_font = font_loader.get_font(size=20)
         self.font = font_loader.get_font(size=12)
         self.options = self.pause_menu.options
 

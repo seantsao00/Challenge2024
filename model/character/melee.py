@@ -5,12 +5,17 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from instances_manager import get_event_manager, get_model
 from event_manager import EventAttack
+from instances_manager import get_event_manager, get_model
 from model.character.character import Character
+from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
+
+from event_manager import EventAttack
+from instances_manager import get_event_manager, get_model
+from model.entity import Entity
 
 
 class Melee(Character):
@@ -32,7 +37,20 @@ class Melee(Character):
         super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
         self.__defense: float = 0
 
+    def attack(self, enemy: Entity):
+        now_time = get_model().get_time()
+        dist = self.position.distance_to(enemy.position)
+        if (self.team != enemy.team
+            and dist <= self.attribute.attack_range
+                and (now_time - self._last_attack_time) * self.attribute.attack_speed >= 1):
+            get_event_manager().post(EventAttack(attacker=self, victim=enemy,
+                                                 damage=self.attribute.attack_damage), enemy.id)
+            self._last_attack_time = now_time
+
     def take_damage(self, event: EventAttack):
+        if not self.vulnerable(event.attacker):
+            return
+
         if self.__defense > 0:
             new_damage = 0.5 * event.attacker.attribute.attack_damage
             self.__defense -= 1
@@ -44,6 +62,14 @@ class Melee(Character):
         if self.health <= 0:
             self.die()
 
-    def ability(self, *args, **kwargs):
+    def cast_ability(self, *args, **kwargs):
+        now_time = get_model().get_time()
+        if now_time - self.abilities_time < self.attribute.ability_cd:
+            return
+        log_info("[Melee] Cast ability")
+        self.abilities_time = now_time
+        self.ability()
+
+    def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables
         self.abilities_time = 1e9

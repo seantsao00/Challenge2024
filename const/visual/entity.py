@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
+from const.bullet import BulletState, BulletType
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
@@ -16,9 +17,11 @@ if TYPE_CHECKING:
 ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
 CD_BAR_COLOR = 'blue'
+# open for color recommandation
+HEALTH_BAR_COLOR = ['yellow', 'green', 'orange', 'violet', 'red']
 
 HEALTH_BAR_UPPER = 5
-CD_BAR_UPPER = 3
+CD_BAR_UPPER = 6
 TEAM_VISION_BLOCK = 8
 VISION_BLOCK_SIZE = 2
 
@@ -57,12 +60,26 @@ WEAPON_IMAGE: dict[CharacterType, str] = {
     CharacterType.SNIPER: os.path.join(IMAGE_DIR, WEAPON_DIR, 'sniper.png')
 }
 
+BULLET_DIR = 'bullet/'
+BULLET_IMAGE: dict[BulletType, str] = {
+    BulletType.COMMON: 'common.png',
+    BulletType.SNIPER: 'sniper.png',
+    BulletType.RANGER: 'ranger.png',
+}
+
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
         {
-            tower: {
-                None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
-            } for tower in TowerType if tower is not TowerType.FOUNTAIN
+            **{
+                tower: {
+                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
+                } for tower in TowerType if tower is not TowerType.FOUNTAIN
+            },
+            **{
+                bullet: {
+                    BulletState.FLYING: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet]),
+                } for bullet in BulletType
+            }
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
@@ -73,6 +90,13 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 tower: {
                     None: os.path.join(IMAGE_DIR, PARTY_PATH[party], TOWER_DIR, TOWER_IMAGE[tower])
                 } for tower in TowerType
+            },
+            **{
+                bullet: {
+                    BulletState.FLYING: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet]),
+                    BulletState.EXPLODE: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, 'explode.png')
+                } for bullet in BulletType
             }
         }
     ) for party in PartyType
@@ -87,7 +111,11 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     } for character in CharacterType},
     **{tower: {
         None: 10
-    } for tower in TowerType}
+    } for tower in TowerType},
+    **{bullet: {
+        BulletState.FLYING: 2,
+        BulletState.EXPLODE: 15
+    } for bullet in BulletType}
 }
 """
 structure: ENTITY_SIZE[entity][state]

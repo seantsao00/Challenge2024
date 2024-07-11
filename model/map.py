@@ -77,6 +77,21 @@ class Map:
         """
         return self.is_cell_passable(self.position_to_cell(position))
 
+    def is_cell_puddle(self, cell: tuple[int, int]) -> bool:
+        """
+        Checks if a cell is a puddle and will cause the character to slow down
+        Cell takes in *integer* coordinates in range [0, Map.size)
+        """
+        return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
+                and self.get_cell_type(cell) == const.MAP_PUDDLE)
+
+    def is_position_puddle(self, position: pg.Vector2) -> bool:
+        """
+        Checks if a cell is a puddle and will cause the character to slow down
+        Position takes in *real-valued* coordinates in range [0, const.ARENA_SIZE)
+        """
+        return self.is_cell_puddle(self.position_to_cell(position))
+
     def get_random_pos(self, r: int) -> pg.Vector2:
         """
         Return a random position in map that is not of type "obstacle"
@@ -99,8 +114,8 @@ class Map:
         Returns a list of positions describing the path, or None if the algorithm
         did not find a path.
         """
-        if (not self.is_position_passable(position_begin) or
-                not self.is_position_passable(position_end)):
+        if (not self.is_position_passable(position_begin)
+                or not self.is_position_passable(position_end)):
             return None
 
         max_x, max_y = self.size

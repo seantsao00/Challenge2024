@@ -7,6 +7,7 @@ from instances_manager import get_model
 from model.team import Team
 from view.object import components
 from view.object.object_base import ObjectBase
+from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
 
@@ -59,7 +60,7 @@ class ChatView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
         super().__init__(canvas, [8])
         global consts
-        consts = ResizeRatioSoAnnoying(self.resize_ratio)
+        consts = ResizeRatioSoAnnoying(ScreenInfo.resize_ratio)
         self.__initialized = False
         self.__canvas = canvas
         self.__chat_surface = pg.Surface(consts.CHAT_SIZE, pg.SRCALPHA)
