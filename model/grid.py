@@ -9,10 +9,12 @@ from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEn
                            EventCreateTower)
 from instances_manager import get_event_manager
 from model.building import Tower
+from model.bullet import Bullet
 from model.character import Character
 
 if TYPE_CHECKING:
-    from model import Entity, Team
+    from model.entity import Entity
+    from model.team import Team
 
 
 class Cell:
@@ -35,6 +37,8 @@ class Cell:
             self.characters.add(entity)
         elif isinstance(entity, Tower):
             self.towers.add(entity)
+        elif isinstance(entity, Bullet):
+            pass
         else:
             raise NotImplementedError
 

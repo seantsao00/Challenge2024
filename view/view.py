@@ -10,7 +10,7 @@ import pygame as pg
 import const
 import const.model
 import const.visual
-from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND, PRIORITY_VISION_MASK
+from const.visual.priority import PRIORITY_BACKGROUND, PRIORITY_FOREGROUND, PRIORITY_VISION_MASK
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
@@ -87,7 +87,7 @@ class View:
         for i in model.map.backgrounds:
             x, y, picture = load_image(i)
             self.__background_images.append(BackgroundObject(
-                self.__arena, [PRIORITY_BACKGROUD, bg_image_counter], (x, y), picture))
+                self.__arena, [PRIORITY_BACKGROUND, bg_image_counter], (x, y), picture))
             bg_image_counter += 1
         for i in model.map.objects:
             x, y, picture = load_image(i)
@@ -211,9 +211,9 @@ class View:
 
         # show time remaining
         time_remaining = int(const.GAME_TIME - model.get_time())
-        (min, sec) = divmod(time_remaining, 60)
+        (minute, sec) = divmod(time_remaining, 60)
         font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
-        time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
+        time_remaining_surface = font.render(f'{minute:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
 
         if model.state == const.State.PAUSE:

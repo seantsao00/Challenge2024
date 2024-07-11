@@ -1,3 +1,7 @@
+"""
+Defines internal API interaction and AI threading.
+"""
+
 from __future__ import annotations
 
 import ctypes
@@ -8,24 +12,23 @@ import signal
 import threading
 import traceback
 import warnings
-from typing import Any, Iterable
+from typing import Iterable
 
 import numpy as np
 import pygame as pg
 
-import api.prototype as prototype
 import const
+import const.map
 import model
-import model.character
-import model.character.melee
-import model.character.ranger
-import model.character.sniper
+from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
 from util import log_critical, log_info, log_warning
 
 
 class GameError(Exception):
+    """Exception for internal game error occurs when interacting with API."""
+
     def __init__(self, message):
         super().__init__("The game broke. This is not your fault. Please contact us so we can fix it." + message)
 
@@ -52,15 +55,15 @@ class Internal(prototype.API):
         self.__reverse_tower_map = {}
 
     @classmethod
-    def __cast_id(cls, id: int):
+    def __cast_id(cls, index: int):
         """
         AI interprets the team as 1, 2, 3, 4 whereas internal naming uses 0, 1, 2, 3.
         """
-        return id + 1
+        return index + 1
 
     @classmethod
-    def __recast_id(cls, id: int):
-        return id - 1
+    def __recast_id(cls, index: int):
+        return index - 1
 
     def __build_transform_matrix(self):
         assert const.ARENA_SIZE[0] == const.ARENA_SIZE[1]
@@ -78,12 +81,12 @@ class Internal(prototype.API):
                             [1]])
         best = 1e9
         EPS = 1e-9
-        for i in range(4):
+        for _ in range(4):
             self.transform = np.dot(rotate, self.transform)
             transformed = np.dot(self.transform, respect)
             if np.linalg.norm(transformed) < best:
                 best = np.linalg.norm(transformed)
-        for i in range(4):
+        for _ in range(4):
             self.transform = np.dot(rotate, self.transform)
             transformed = np.dot(self.transform, respect)
             if abs(np.linalg.norm(transformed) - best) < EPS:
@@ -104,27 +107,26 @@ class Internal(prototype.API):
         return pg.Vector2(vector[0][0], vector[1][0])
 
     @classmethod
-    def __cast_character_type(cls, type: int):
-        if type == prototype.CharacterClass.melee:
+    def __cast_character_type(cls, class_type: int):
+        if class_type == prototype.CharacterClass.MELEE:
             return const.CharacterType.MELEE
-        elif type == prototype.CharacterClass.ranger:
+        if class_type == prototype.CharacterClass.RANGER:
             return const.CharacterType.RANGER
-        elif type == prototype.CharacterClass.sniper:
+        if class_type == prototype.CharacterClass.SNIPER:
             return const.CharacterType.SNIPER
-        else:
-            raise ValueError
+        raise ValueError
 
     def __convert_character(self, internal: model.Character) -> prototype.Character:
         """
         Convert a `model.Character` to `api.Character`.
         """
-        character_class = prototype.CharacterClass.unknown
+        character_class = prototype.CharacterClass.UNKNOWN
         if isinstance(internal, model.Melee):
-            character_class = prototype.CharacterClass.melee
+            character_class = prototype.CharacterClass.MELEE
         elif isinstance(internal, model.Ranger):
-            character_class = prototype.CharacterClass.ranger
+            character_class = prototype.CharacterClass.RANGER
         elif isinstance(internal, model.Sniper):
-            character_class = prototype.CharacterClass.sniper
+            character_class = prototype.CharacterClass.SNIPER
         else:
             raise GameError("Unknown character type")
         extern = prototype.Character(
@@ -148,10 +150,9 @@ class Internal(prototype.API):
         while we still know the original `model.Character`.
         """
 
-        if internal.id not in self.__character_map:
-            extern = self.__convert_character(internal)
-            self.__character_map[internal.id] = extern
-            self.__reverse_character_map[id(extern)] = internal
+        extern = self.__convert_character(internal)
+        self.__character_map[internal.id] = extern
+        self.__reverse_character_map[id(extern)] = internal
         return self.__character_map[internal.id]
 
     def __convert_tower(self, internal: model.Tower) -> prototype.Tower:
@@ -159,13 +160,13 @@ class Internal(prototype.API):
         Convert a `model.Tower` to `api.Tower`
         """
         if internal.id not in self.__tower_map:
-            character_class = prototype.CharacterClass.unknown
+            character_class = prototype.CharacterClass.UNKNOWN
             if internal.character_type == const.CharacterType.MELEE:
-                character_class = prototype.CharacterClass.melee
+                character_class = prototype.CharacterClass.MELEE
             elif internal.character_type == const.CharacterType.RANGER:
-                character_class = prototype.CharacterClass.ranger
+                character_class = prototype.CharacterClass.RANGER
             elif internal.character_type == const.CharacterType.SNIPER:
-                character_class = prototype.CharacterClass.sniper
+                character_class = prototype.CharacterClass.SNIPER
             else:
                 raise GameError("Unknown spawn character type")
             extern = prototype.Tower(
@@ -187,10 +188,9 @@ class Internal(prototype.API):
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
-        if internal.id not in self.__tower_map:
-            extern = self.__convert_tower(internal)
-            self.__tower_map[internal.id] = extern
-            self.__reverse_tower_map[id(extern)] = internal
+        extern = self.__convert_tower(internal)
+        self.__tower_map[internal.id] = extern
+        self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
     def __access_character(self, extern: prototype.Character) -> model.Character:
@@ -223,12 +223,16 @@ class Internal(prototype.API):
         return get_model().get_time()
 
     def get_owned_characters(self) -> list[prototype.Character]:
-        return [self.__register_character(character)
-                for character in self.__team().character_list if character.health > 0]
+        with self.__team().character_lock:
+            return sorted([self.__register_character(character)
+                           for character in self.__team().character_list if character.health > 0],
+                          key=lambda x: x.id)
 
     def get_owned_towers(self) -> list[prototype.Tower]:
-        return [self.__register_tower(tower)
-                for tower in self.__team().towers]
+        with self.__team().tower_lock:
+            return sorted([self.__register_tower(tower)
+                           for tower in self.__team().towers],
+                          key=lambda x: x.id)
 
     def get_team_id(self) -> int:
         return Internal.__cast_id(self.__team().team_id)
@@ -236,7 +240,7 @@ class Internal(prototype.API):
     def get_score_of_team(self, index=None) -> int:
         enforce_type('index', index, int, type(None))
 
-        if index == None:
+        if index is None:
             index = self.team_id
         if index < 0 or index >= MAX_TEAMS:
             raise IndexError
@@ -249,23 +253,39 @@ class Internal(prototype.API):
 
     def get_visible_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision
-        entities = get_model().entities
+        entities = []
+        with get_model().entity_lock:
+            entities = get_model().entities.copy()
         character_list: list[prototype.Character] = [
             self.__register_character(entity) for entity in entities
             if (isinstance(entity, model.Character) and
                 vision.entity_inside_vision(entity)) and
             entity.health > 0]
-        return character_list
+        return sorted(character_list, key=lambda x: x.id)
 
     def get_visible_towers(self) -> list[prototype.Tower]:
         vision = self.__team().vision
-        entities = get_model().entities
+        entities = []
+        with get_model().entity_lock:
+            entities = get_model().entities
         tower_list: list[prototype.Tower] = [
             self.__register_tower(entity) for entity in entities
             if (isinstance(entity, model.Tower) and
                 vision.entity_inside_vision(entity)) and
             entity.health > 0]
-        return tower_list
+        return sorted(tower_list, key=lambda x: x.id)
+
+    def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        internal = self.__access_character(character)
+        if internal is None or not internal.alive:
+            return None
+        return self.__register_character(internal)
+
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
+        internal = self.__access_tower(tower)
+        if internal is None or not internal.alive:
+            return None
+        return self.__register_tower(tower)
 
     # I don't want to deal with transform yet
     # def get_visibility(self) -> list[list[int]]:
@@ -277,6 +297,19 @@ class Internal(prototype.API):
 
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(self.__transform(position, is_vector=False, inverse=True))
+
+    def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
+        W = const.ARENA_SIZE[1]
+        if position.x < 0 or position.x > W or position.y < 0 or position.x > W:
+            return prototype.MapTerrain.OUT_OF_BOUNDS
+        terrain = get_model().map.get_position_type(self.__transform(position, inverse=True))
+        if terrain == const.map.MAP_ROAD:
+            return prototype.MapTerrain.ROAD
+        if terrain == const.map.MAP_PUDDLE:
+            return prototype.MapTerrain.OFFROAD
+        if terrain == const.map.MAP_OBSTACLE:
+            return prototype.MapTerrain.OBSTACLE
+        raise GameError("Unkown terrain type.")
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         enforce_type('characters', characters, Iterable)
@@ -295,10 +328,6 @@ class Internal(prototype.API):
         enforce_type('destination', destination, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        if not self.is_visible(destination):
-            log_info(f"[API] team {self.team_id} tried to move to a point outside of vision!")
-            return
-
         destination = self.__transform(destination, is_vector=False, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
@@ -308,7 +337,7 @@ class Internal(prototype.API):
                 path = get_model().map.find_path(inter.position, destination)
                 inter.set_move_position(path)
 
-    def action_clear(self, characters: Iterable[prototype.Character]):
+    def action_move_clear(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
@@ -332,15 +361,7 @@ class Internal(prototype.API):
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for internal in internals:
-            attackable = internal.assailable(target_internal)
-            if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
-                log_info(f"[API] team {self.team_id} tried to attack themselves.")
-            elif attackable == model.CharacterAttackResult.COOLDOWN:
-                log_info(f"[API] team {self.team_id} is attacking too fast!")
-            elif attackable == model.CharacterAttackResult.OUT_OF_RANGE:
-                log_info(f"[API] team {self.team_id} is attacking too far!")
-            else:
-                internal.attack(target_internal)
+            internal.attack(target_internal)
 
     def action_cast_spell(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
@@ -396,6 +417,11 @@ class TimeoutException(BaseException):
 
 
 class Timer():
+    """
+    API Timer thread for killing timed-out AI threads. 
+    The timer accepts thread id per timer, which means there should be a timer per AI thread.
+    """
+
     def __init__(self):
         if os.name == 'nt':
             self.is_windows = True
@@ -408,8 +434,10 @@ class Timer():
         self.for_player_id = None
 
     def set_timer(self, interval: float, player_id: int, tid: int):
+        """Start the timer."""
         if not self.is_windows:
-            def handler(sig, frame):
+            # Should be sig, frame but pylint doesn't like it >:(
+            def handler(_, __):
                 res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
                     ctypes.c_long(tid), ctypes.py_object(TimeoutException))
                 if res != 0:
@@ -429,12 +457,13 @@ class Timer():
         self.started = True
 
     def cancel_timer(self):
+        """Cancel the timer."""
         try:
             if not self.is_windows:
                 signal.setitimer(signal.ITIMER_REAL, 0)
             else:
                 self.timer.cancel()
-        except:
+        except TimeoutException:
             log_warning("[API] Perhaps some very slightly timeout.")
 
 
@@ -443,6 +472,7 @@ ai = [None] * len(helpers)
 
 
 def load_ai(files: list[str]):
+    """Load AI modules."""
     for i, file in enumerate(files):
         if file == 'human':
             continue
@@ -450,22 +480,24 @@ def load_ai(files: list[str]):
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
+    """Threading AI helper function."""
     # busy wating til timer start, to prevent cancel earlier than start
     while not timer.started:
         pass
     try:
-        if ai[team_id] != None:
+        if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
-    except Exception as e:
+    except Exception:
         log_warning(f"Caught exception in AI of team {team_id}:")
         log_info(traceback.format_exc())
-    except TimeoutException as e:
+    except TimeoutException:
         log_critical(f"[API] AI of team {team_id} timed out!")
     finally:
         timer.cancel_timer()
 
 
-def start_ai(team_id: int):
+def start_ai(team_id: int) -> threading.Thread:
+    """Start AI thread for one cycle. Returns the AI thread."""
     helpers[team_id].clear()
     timer = Timer()
     t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id], timer))

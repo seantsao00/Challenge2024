@@ -8,10 +8,12 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 from ordered_set import OrderedSet
+
 import const
-from event_manager import (EventAttack, EventCreateTower, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventEveryTick)
+from event_manager import (EventAttack, EventBulletCreate, EventCreateTower, EventEveryTick,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
+from model.bullet import BulletCommon
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
@@ -19,8 +21,8 @@ from util import log_info
 
 if TYPE_CHECKING:
     from model.character import Character
-    from model.team import Team
     from model.model import Model
+    from model.team import Team
 
 
 class Tower(LivingEntity):
@@ -46,7 +48,8 @@ class Tower(LivingEntity):
         self.last_generate: float = -1e9
 
         if is_fountain:
-            super().__init__(position, const.FOUNTAIN_ATTRIBUTE, team, const.TowerType.FOUNTAIN)
+            super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
+                             team, const.TowerType.FOUNTAIN, invulnerablility=True)
         else:
             super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, const.TowerType.HOTEL)
 
@@ -60,10 +63,13 @@ class Tower(LivingEntity):
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.team_id)
         get_event_manager().post(EventCreateTower(tower=self))
 
+    def __str__(self):
+        return f'tower {self.id} (team {self.team.team_id})'
+
     def update_period(self):
         self.period = const.count_period_ms(len(self.team.character_list))
 
-    def generate_character(self, event: EventEveryTick):
+    def generate_character(self, _: EventEveryTick):
         if self.team.party is const.PartyType.NEUTRAL:
             return
         self.update_period()
@@ -88,10 +94,11 @@ class Tower(LivingEntity):
 
     def take_damage(self, event: EventAttack):
         ev_manager = get_event_manager()
-        if self.team is event.attacker.team or self.is_fountain:
-            log_info('same team or is fountain')
+
+        if not self.vulnerable(event.attacker):
             return
-        if self.health - event.attacker.attribute.attack_damage <= 0:
+
+        if self.health - event.damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:
                 ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.team_id)
             else:
@@ -103,12 +110,18 @@ class Tower(LivingEntity):
             self.health = self.attribute.max_health
 
         else:
-            self.health -= event.attacker.attribute.attack_damage
+            self.health -= event.damage
 
     def attack(self):
         for character in self.__enemies:
             if character.team != self.team:
-                get_event_manager().post(EventAttack(attacker=self, victim=character), character.id)
+                bullet = BulletCommon(position=self.position,
+                                      team=self.team,
+                                      damage=self.attribute.attack_damage,
+                                      victim=character,
+                                      speed=const.BULLET_COMMON_SPEED,
+                                      attacker=self)
+                get_event_manager().post(EventBulletCreate(bullet=bullet))
                 break
 
     def enemy_in_range(self, character: Character):
@@ -135,4 +148,3 @@ class Tower(LivingEntity):
     @property
     def character_type(self) -> const.CharacterType:
         return self.__character_type
-

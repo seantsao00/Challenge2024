@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from enum import Enum, auto
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -22,16 +23,6 @@ class CharacterMovingState(Enum):
     STOPPED = auto()
     TO_POSITION = auto()
     TO_DIRECTION = auto()
-
-
-class CharacterAttackResult(Enum):
-    SUCCESS = auto()
-    OUT_OF_RANGE = auto()
-    COOLDOWN = auto()
-    FRIENDLY_FIRE = auto()
-
-    def __bool__(self):
-        return self == self.SUCCESS
 
 
 class Character(LivingEntity):
@@ -59,7 +50,7 @@ class Character(LivingEntity):
                  entity_type: const.CharacterType,
                  state: const.CharacterState):
         self.abilities_time: float = -attribute.ability_cd
-        self.__attack_time: float = -1 / attribute.attack_speed
+        self._last_attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
@@ -72,6 +63,9 @@ class Character(LivingEntity):
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 
         self.attribute: const.CharacterAttribute
+
+    def __str__(self):
+        return f'character {self.id} (team {self.team.team_id})'
 
     def __move_toward_direction(self):
         """
@@ -173,26 +167,35 @@ class Character(LivingEntity):
         return True
 
     def take_damage(self, event: EventAttack):
-        self.health -= event.attacker.attribute.attack_damage
+        if not self.vulnerable(event.attacker):
+            return
+
+        self.health -= event.damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
-    def assailable(self, enemy: Entity) -> CharacterAttackResult:
+    def attackable(self, enemy: LivingEntity):
+        """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
-        if self.team is enemy.team:
-            return CharacterAttackResult.FRIENDLY_FIRE
         if dist > self.attribute.attack_range:
-            return CharacterAttackResult.OUT_OF_RANGE
-        if (now_time - self.__attack_time) * self.attribute.attack_speed < 1:
-            return CharacterAttackResult.COOLDOWN
-        return CharacterAttackResult.SUCCESS
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} out of range")
+            return False
+        if self.team is enemy.team:
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} within the same team")
+            return False
+        if (now_time - self._last_attack_time) * self.attribute.attack_speed < 1:
+            log_info(f"[Attack] {self} is attacking too fast!")
+            return False
+        self._last_attack_time = now_time
+        return True
 
     def attack(self, enemy: Entity):
-        now_time = get_model().get_time()
-        if self.assailable(enemy):
+        if self.attackable():
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self.__attack_time = now_time
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")
@@ -202,13 +205,6 @@ class Character(LivingEntity):
         get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
 
+    @abstractmethod
     def cast_ability(self, *args, **kwargs):
-        now_time = get_model().get_time()
-        if now_time - self.abilities_time < self.attribute.ability_cd:
-            return
-        log_info("cast abilities")
-        self.abilities_time = now_time
-        self.ability(*args, **kwargs)
-
-    def ability(self, *args, **kwargs):
         pass
