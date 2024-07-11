@@ -4,6 +4,7 @@ The module defines Entity class.
 
 from __future__ import annotations
 
+from threading import Lock
 from typing import TYPE_CHECKING
 
 import pygame as pg

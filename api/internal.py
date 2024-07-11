@@ -149,10 +149,9 @@ class Internal(prototype.API):
         while we still know the original `model.Character`.
         """
 
-        if internal.id not in self.__character_map:
-            extern = self.__convert_character(internal)
-            self.__character_map[internal.id] = extern
-            self.__reverse_character_map[id(extern)] = internal
+        extern = self.__convert_character(internal)
+        self.__character_map[internal.id] = extern
+        self.__reverse_character_map[id(extern)] = internal
         return self.__character_map[internal.id]
 
     def __convert_tower(self, internal: model.Tower) -> prototype.Tower:
@@ -188,10 +187,9 @@ class Internal(prototype.API):
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
-        if internal.id not in self.__tower_map:
-            extern = self.__convert_tower(internal)
-            self.__tower_map[internal.id] = extern
-            self.__reverse_tower_map[id(extern)] = internal
+        extern = self.__convert_tower(internal)
+        self.__tower_map[internal.id] = extern
+        self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
     def __access_character(self, extern: prototype.Character) -> model.Character:
@@ -275,6 +273,18 @@ class Internal(prototype.API):
                 vision.entity_inside_vision(entity)) and
             entity.health > 0]
         return sorted(tower_list, key=lambda x: x.id)
+
+    def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        internal = self.__access_character(character)
+        if internal is None or not internal.alive:
+            return None
+        return self.__register_character(internal)
+
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
+        internal = self.__access_tower(tower)
+        if internal is None or not internal.alive:
+            return None
+        return self.__register_tower(tower)
 
     # I don't want to deal with transform yet
     # def get_visibility(self) -> list[list[int]]:

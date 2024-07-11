@@ -111,6 +111,17 @@ class API:
         """回傳當下的遊戲進行時間，單位為秒。"""
         raise NotImplementedError
 
+    def get_team_id(self) -> int:
+        """回傳自己隊伍的編號（`id`）。"""
+        raise NotImplementedError
+
+    def get_score_of_team(self, index=None) -> int:
+        """
+        回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。  
+        @index: 隊伍的編號或者是 `None`（代表自己的小隊）
+        """
+        raise NotImplementedError
+
     def get_owned_characters(self) -> list[Character]:
         """
         回傳自己隊伍所擁有的角色。
@@ -122,17 +133,6 @@ class API:
         """
         回傳自己隊伍所擁有的建築。
         預設回傳按照角色的 `id` 排序。
-        """
-        raise NotImplementedError
-
-    def get_team_id(self) -> int:
-        """回傳自己隊伍的編號（`id`）。"""
-        raise NotImplementedError
-
-    def get_score_of_team(self, index=None) -> int:
-        """
-        回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。  
-        @index: 隊伍的編號或者是 `None`（代表自己的小隊）
         """
         raise NotImplementedError
 
@@ -149,6 +149,16 @@ class API:
         預設回傳按照角色的 `id` 排序。
         """
         raise NotImplementedError
+
+    def refresh_character(self, character: Character) -> Character | None:
+        """
+        更新一個角色的數值。如果角色死亡則回傳 None。
+        """
+
+    def refresh_tower(self, tower: Tower) -> Tower | None:
+        """
+        更新一個建築物的數值。如果建築物死亡則回傳 None。
+        """
 
     def get_visibility(self) -> list[list[int]]:
         """Deprecated. use `is_visible` instead."""
