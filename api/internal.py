@@ -331,7 +331,7 @@ class Internal(prototype.API):
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for internal in internals:
-            attackable = internal.assailable(target_internal)
+            attackable = internal.is_target_assailable(target_internal)
             if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
                 log_info(f"[API] team {self.team_id} tried to attack themselves.")
             elif attackable == model.CharacterAttackResult.COOLDOWN:
