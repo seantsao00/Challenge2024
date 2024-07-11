@@ -501,8 +501,7 @@ def threading_ai(team_id: int, helper: Internal, timer: Timer):
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
     except Exception:
-        log_warning(f"Caught exception in AI of team {team_id}:")
-        log_info(traceback.format_exc())
+        log_critical(f"Caught exception in AI of team {team_id}:\n{traceback.format_exc()}")
     except TimeoutException:
         log_critical(f"[API] AI of team {team_id} timed out!")
     finally:
