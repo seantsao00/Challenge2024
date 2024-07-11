@@ -30,12 +30,13 @@ class MapTerrain(IntEnum):
 
 
 class MovementStatusClass(IntEnum):
-    """角色目前停止。 """
+    """角色移動的狀態。 """
     STOPPED = auto()
-    """角色目前正朝某個方向前進。 """
+    """角色目前停止。 """
     TO_DIRECTION = auto()
-    """角色目前朝著某個點為目的地前進。 """
+    """角色目前正朝某個方向前進。 """
     TO_POSITION = auto()
+    """角色目前朝著某個點為目的地前進。 """
 
 
 class Movement:
@@ -43,12 +44,13 @@ class Movement:
                  _status: MovementStatusClass,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
+        """角色的移動狀態。 """
+        self.vector = _vector
         """
         當停止時，為 `None`。
         當朝某個方向時，為朝著的方向，且為一個正規化後的向量。
         當朝著某個點時，為該點。
         """
-        self.vector = _vector
 
 
 class Character:
