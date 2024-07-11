@@ -181,7 +181,7 @@ class View:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            mask = pg.transform.scale(my_team.vision.get_mask(), ScreenInfo.screen_size)
+            mask = pg.transform.scale(my_team.vision.get_mask(), (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
             objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:

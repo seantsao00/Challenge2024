@@ -66,8 +66,6 @@ class TeamVisionGrid:
     def brute_modify(self, position: pg.Vector2, real_radius: float):
         real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE,
                                    position.y * const.VISION_BLOCK_SIZE)
-        real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE,
-                                   position.y * const.VISION_BLOCK_SIZE)
         radius = real_radius / const.VISION_BLOCK_SIZE
         for x in range(max(0, int(position.x - radius)),
                        min(self.n, int(position.x + radius + 1))):
@@ -176,9 +174,11 @@ class TeamVision(TeamVisionGrid):
     def modify_vision(self):
         if len(self.set) == 0:
             return
+        print("check vision", self.set)
         if len(self.set) >= 35:
             self.special_modify(self.set)
         else:
+            print("brute")
             for st in self.set:
                 self.brute_modify(pg.Vector2(st[0], st[1]), st[2])
         self.set.clear()
