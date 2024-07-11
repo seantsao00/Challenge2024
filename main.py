@@ -10,7 +10,6 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # nopep8
 
 import argparse
-import os
 import sys
 
 import pygame as pg
@@ -29,6 +28,7 @@ from view import View
 def main():
     # Initialization
     pg.init()
+
     # faulthandler.enable()
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
@@ -80,7 +80,7 @@ def main():
 
 def check_input_validity(args) -> bool:
     team_controls = args.team_controls
-    map = args.map
+    game_map = args.map
 
     if len(team_controls) > 4:
         print('Too many teams')
@@ -92,8 +92,8 @@ def check_input_validity(args) -> bool:
         if team != 'human' and not os.path.isfile(f'./ai/{team}.py'):
             print(f'{team}.py does not exist')
             return False
-    if not os.path.isdir(f'./topography/{map}'):
-        print(f'{map} map does not exist')
+    if not os.path.isdir(f'./topography/{game_map}'):
+        print(f'{game_map} map does not exist')
         return False
 
     return True

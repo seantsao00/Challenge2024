@@ -3,7 +3,7 @@ The module defines the main game engine.
 """
 from __future__ import annotations
 
-import os
+import os.path
 import threading
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -22,7 +22,6 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
                            EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
-from model.bullet import Bullet
 from model.character import Character, Ranger, Sniper
 from model.clock import Clock
 from model.grid import Grid
@@ -78,7 +77,7 @@ class Model:
         self.entity_lock = threading.Lock()
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
-        self.grid: Grid = Grid(900, 900)
+        self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
         if model_arguments.skip_character_selection:
             self.party_selector.select_random_party()
