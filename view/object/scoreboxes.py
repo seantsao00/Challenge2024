@@ -3,7 +3,6 @@ from __future__ import annotations
 import pygame as pg
 
 from const.visual import scorebox
-from const.visual.priority import PRIORITY_SCOREBOXES
 from instances_manager import get_model
 from model.team import Team
 from view.object import components
@@ -51,7 +50,7 @@ class Scorebox:
 
 class ScoreboxesView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
-        super().__init__(canvas, [PRIORITY_SCOREBOXES])
+        super().__init__(canvas, [8])
         self.__initialized = False
         self.__boxes: list[Scorebox] = []
 

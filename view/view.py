@@ -210,12 +210,6 @@ class View:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)
 
-        self.__scoreboxes.update()
-        objects.append(self.__scoreboxes)
-
-        self.__chat.update()
-        objects.append(self.__chat)
-
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
             obj.draw()
@@ -223,12 +217,17 @@ class View:
         self.__screen.blit(self.__arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
 
         # show time remaining
-        time_remaining = int(const.GAME_TIME - model.get_time())
-        (min, sec) = divmod(time_remaining, 60)
-        font = font_loader.get_font(size=12)
-        time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
-        self.__screen.blit(time_remaining_surface,
-                           (15 * self.__resize_ratio, 95 * self.__resize_ratio))
+        # time_remaining = int(const.GAME_TIME - model.get_time())
+        # (min, sec) = divmod(time_remaining, 60)
+        # font = font_loader.get_font(size=12)
+        # time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
+        # self.__screen.blit(time_remaining_surface,
+        #                    (15 * self.__resize_ratio, 95 * self.__resize_ratio))
+
+        self.__scoreboxes.update()
+        self.__scoreboxes.draw()
+        self.__chat.update()
+        self.__chat.draw()
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
