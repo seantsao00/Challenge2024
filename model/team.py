@@ -9,7 +9,7 @@ import const.team
 from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
                            EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
                            EventTeamLoseTower)
-from instances_manager import get_event_manager
+from instances_manager import get_event_manager, get_model
 from model.building import Tower
 from model.character import Character, Ranger
 from model.team_vision import TeamVision
@@ -127,7 +127,7 @@ class Team(NeutralTeam):
         self.__points += const.SCORE_KILL
 
     def gain_point_tower(self, _: EventEveryTick):
-        self.__points += const.SCORE_OWN_TOWER * len(self.__towers)
+        self.__points += const.SCORE_OWN_TOWER * len(self.__towers) * get_model().dt
 
     def handle_character_died(self, event: EventCharacterDied):
         if self.__controlling is event.character:
@@ -161,6 +161,8 @@ class Team(NeutralTeam):
         ev_manager.register_listener(EventSpawnCharacter, self.gain_character, self.team_id)
         ev_manager.register_listener(EventSelectCharacter, self.select_character)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
+        ev_manager.register_listener(EventEveryTick, self.gain_point_tower)
+        
 
     @property
     def team_name(self) -> str:

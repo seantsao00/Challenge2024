@@ -173,6 +173,9 @@ class Character(LivingEntity):
         self.health -= event.damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
     def attackable(self, enemy: LivingEntity):
         """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
