@@ -29,17 +29,16 @@ class BulletCommon(Bullet[None]):
 
     def judge(self, args: None = None):
         """
-        Move the bullet in the given direction.
+        Decide if the bullet needs to move, cause damage or disappear.
+        The direction is decided by the current position of bullet and victim.
         """
         original_pos = self.position
         victim_pos = self.victim.position
         self.direction = (victim_pos - original_pos).normalize()
-        if self.victim.alive == False and not self.hidden:
-            self.hidden = True
+        if not self.victim.alive:  # The bullet needs to disappear because the victim has been dead
             get_event_manager().post(EventBulletDisappear(bullet=self))
-        if (victim_pos - original_pos).length() <= self.speed and not self.hidden:
-            self.hidden = True
+        if (victim_pos - original_pos).length() <= self.speed:  # In the next step, the bullet would hit the victim
             get_event_manager().post(EventBulletDamage(bullet=self))
-        else:
+        else:  # The bullet simply moves
             self.position += self.direction*self.speed
             self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))

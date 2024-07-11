@@ -29,12 +29,12 @@ class BulletRanger(Bullet[None]):
 
     def judge(self, args: None = None):
         """
-        Move the bullet in the given direction.
+        Decide if the bullet needs to move, cause damage or disappear.
+        The direction is fixed.
         """
         original_pos = self.position
         target_pos = self.target
-        if (target_pos - original_pos).length() <= self.speed and not self.hidden:
-            self.hidden = True
+        if (target_pos - original_pos).length() <= self.speed:
             get_event_manager().post(EventRangedBulletDamage(bullet=self))
         else:
             self.position += self.direction*self.speed
