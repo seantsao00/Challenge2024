@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from enum import Enum, auto
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -202,5 +203,6 @@ class Character(LivingEntity):
         get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
 
+    @abstractmethod
     def cast_ability(self, *args, **kwargs):
         pass

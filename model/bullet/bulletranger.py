@@ -25,7 +25,9 @@ class BulletRanger(Bullet[None]):
                          damage=const.RANGER_ATTRIBUTE.ability_variables[1])
         self.target = target
         self.range = const.RANGER_ATTRIBUTE.ability_variables[0]
-        self.direction = (self.target - self.position).normalize()
+
+        self.direction = (self.target - self.position)
+        self.direction = self.direction.normalize() if self.direction.length() != 0 else pg.Vector2(1, 0)
 
     def judge(self, args: None = None):
         """
