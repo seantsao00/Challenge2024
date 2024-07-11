@@ -34,7 +34,7 @@ class BulletCommon(Bullet[None]):
         original_pos = self.position
         victim_pos = self.victim.position
         self.direction = (victim_pos - original_pos).normalize()
-        if hasattr(self.victim, 'alive') and self.victim.alive == False and not self.hidden:
+        if self.victim.alive == False and not self.hidden:
             self.hidden = True
             get_event_manager().post(EventBulletDisappear(bullet=self))
         if (victim_pos - original_pos).length() <= self.speed and not self.hidden:

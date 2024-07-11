@@ -59,7 +59,7 @@ class Character(LivingEntity):
                  entity_type: const.CharacterType,
                  state: const.CharacterState):
         self.abilities_time: float = -attribute.ability_cd
-        self.__attack_time: float = -1 / attribute.attack_speed
+        self._attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
@@ -184,7 +184,7 @@ class Character(LivingEntity):
             return CharacterAttackResult.FRIENDLY_FIRE
         if dist > self.attribute.attack_range:
             return CharacterAttackResult.OUT_OF_RANGE
-        if (now_time - self.__attack_time) * self.attribute.attack_speed < 1:
+        if (now_time - self._attack_time) * self.attribute.attack_speed < 1:
             return CharacterAttackResult.COOLDOWN
         return CharacterAttackResult.SUCCESS
 
@@ -192,7 +192,7 @@ class Character(LivingEntity):
         now_time = get_model().get_time()
         if self.assailable(enemy):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self.__attack_time = now_time
+            self._attack_time = now_time
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")

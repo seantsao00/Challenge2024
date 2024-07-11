@@ -5,15 +5,17 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from instances_manager import get_event_manager, get_model
 from event_manager import EventAttack
+from instances_manager import get_event_manager, get_model
 from model.character.character import Character
+from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
-from model.entity import Entity
+
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
+from model.entity import Entity
 
 
 class Melee(Character):
@@ -40,10 +42,10 @@ class Melee(Character):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-                and (now_time - self.attack_time) * self.attribute.attack_speed >= 1):
+                and (now_time - self._attack_time) * self.attribute.attack_speed >= 1):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy,
                                                  damage=self.attribute.attack_damage), enemy.id)
-            self.attack_time = now_time
+            self._attack_time = now_time
 
     def take_damage(self, event: EventAttack):
         if self.__defense > 0:
@@ -61,7 +63,7 @@ class Melee(Character):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        print("cast abilities")
+        log_info("Melee Cast ability")
         self.abilities_time = now_time
         self.ability()
 

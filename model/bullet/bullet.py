@@ -28,7 +28,6 @@ class Bullet(Entity, Generic[T]):
         self.direction: pg.Vector2 | tuple[float, float] | None = None
         self.speed: float = speed
         self.damage: float = damage
-        self.timer: Timer | None = None
         self.attacker: LivingEntity = attacker
         self.view_rotate: float = 0.0
 

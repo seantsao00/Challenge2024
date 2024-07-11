@@ -7,9 +7,9 @@ import pygame as pg
 import const
 import const.character
 import const.team
-from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
-                           EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
-                           EventTeamLoseTower, EventCharacterMove)
+from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateTower,
+                           EventEveryTick, EventHumanInput, EventSelectCharacter,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger
@@ -42,7 +42,6 @@ class NeutralTeam:
     @property
     def party(self) -> const.PartyType:
         return self.__party
-
 
 
 class Team(NeutralTeam):
@@ -144,7 +143,8 @@ class Team(NeutralTeam):
 
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
-            print(f'Character type of Team {self.team_id} is modified to {event.character_type}')
+            log_info(
+                f'Character type of Team {self.team_id} is modified to {event.character_type}')
             self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):

@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from model.character import Character
-from util import log_info
 from event_manager import EventBulletCreate
 from instances_manager import get_event_manager, get_model
-from model.bullet import BulletSniper, BulletCommon
+from model.bullet import BulletCommon, BulletSniper
+from model.character import Character
+from util import log_info
 
 if TYPE_CHECKING:
-    from model.team import Team
     from model.entity import Entity
+    from model.team import Team
 
 
 class Sniper(Character):
@@ -32,14 +32,13 @@ class Sniper(Character):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        print("cast abilities")
         self.abilities_time = now_time
         self.ability()
 
     def ability(self):
         """Make the bullet become BulletSniper"""
         self.ability_active = True
-        log_info("sniper use ability")
+        log_info("Sniper use ability")
 
     def attack(self, enemy: Entity):
 
@@ -47,7 +46,7 @@ class Sniper(Character):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-                and (now_time - self.attack_time) * self.attribute.attack_speed >= 1):
+                and (now_time - self._attack_time) * self.attribute.attack_speed >= 1):
             if not self.ability_active:
                 bullet = BulletCommon(position=self.position,
                                       victim=enemy,
@@ -62,4 +61,4 @@ class Sniper(Character):
                                       attacker=self)
                 self.ability_active = False
             get_event_manager().post(EventBulletCreate(bullet=bullet))
-            self.attack_time = now_time
+            self._attack_time = now_time
