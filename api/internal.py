@@ -394,7 +394,8 @@ class Internal(prototype.API):
 
                 direction = inter.move_direction
                 if direction == pg.Vector2(0, 0):
-                    direction = pg.Vector2(random.random(), random.random())
+                    direction = pg.Vector2()
+                    direction.from_polar((1, random.uniform(0, 360)))
 
                 direction = direction.normalize()
                 new_direction = pg.Vector2()
