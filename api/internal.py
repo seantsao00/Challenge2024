@@ -360,15 +360,7 @@ class Internal(prototype.API):
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for internal in internals:
-            attackable = internal.is_target_assailable(target_internal)
-            if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
-                log_info(f"[API] team {self.team_id} tried to attack themselves.")
-            elif attackable == model.CharacterAttackResult.COOLDOWN:
-                log_info(f"[API] team {self.team_id} is attacking too fast!")
-            elif attackable == model.CharacterAttackResult.OUT_OF_RANGE:
-                log_info(f"[API] team {self.team_id} is attacking too far!")
-            else:
-                internal.attack(target_internal)
+            internal.attack(target_internal)
 
     def action_cast_spell(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)

@@ -48,6 +48,9 @@ class Melee(Character):
             self._last_attack_time = now_time
 
     def take_damage(self, event: EventAttack):
+        if not self.vulnerable(event.attacker):
+            return
+
         if self.__defense > 0:
             new_damage = 0.5 * event.attacker.attribute.attack_damage
             self.__defense -= 1

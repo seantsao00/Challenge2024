@@ -52,7 +52,8 @@ class Team(NeutralTeam):
      - total_buildings: The total buildings that this team has.
      - points: The accumulated points of the team.
      - id: The id of the team.
-     - building_list: list of the building of the team. The first one is the fountain.
+     - building_list: list of the building of the team.
+     - fountain: fountain.
      - character_list: list of the character of the team.
      - visible_entities_list: list of visible entities to the team. Note that entities owned by this team is not in this list.
     """
