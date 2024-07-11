@@ -46,7 +46,7 @@ class Sniper(Character):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-                and (now_time - self._attack_time) * self.attribute.attack_speed >= 1):
+                and (now_time - self._last_attack_time) * self.attribute.attack_speed >= 1):
             if not self.ability_active:
                 bullet = BulletCommon(position=self.position,
                                       victim=enemy,
@@ -61,4 +61,4 @@ class Sniper(Character):
                                       attacker=self)
                 self.ability_active = False
             get_event_manager().post(EventBulletCreate(bullet=bullet))
-            self._attack_time = now_time
+            self._last_attack_time = now_time

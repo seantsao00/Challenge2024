@@ -32,7 +32,7 @@ class Ranger(Character):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-                and (now_time - self._attack_time) * self.attribute.attack_speed >= 1):
+                and (now_time - self._last_attack_time) * self.attribute.attack_speed >= 1):
             bullet = BulletCommon(position=self.position,
                                   victim=enemy,
                                   team=self.team,
@@ -40,7 +40,7 @@ class Ranger(Character):
                                   damage=const.RANGER_ATTRIBUTE.attack_damage,
                                   speed=const.BULLET_RANGER_SPEED)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
-            self._attack_time = now_time
+            self._last_attack_time = now_time
 
     def cast_ability(self, *args, **kwargs):
         """This function is called after clicked Q, it wouldn't generate bullet"""

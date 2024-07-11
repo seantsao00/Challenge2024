@@ -42,10 +42,10 @@ class Melee(Character):
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-                and (now_time - self._attack_time) * self.attribute.attack_speed >= 1):
+                and (now_time - self._last_attack_time) * self.attribute.attack_speed >= 1):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy,
                                                  damage=self.attribute.attack_damage), enemy.id)
-            self._attack_time = now_time
+            self._last_attack_time = now_time
 
     def take_damage(self, event: EventAttack):
         if self.__defense > 0:
