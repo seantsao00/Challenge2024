@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from enum import Enum, auto
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -59,7 +60,7 @@ class Character(LivingEntity):
                  entity_type: const.CharacterType,
                  state: const.CharacterState):
         self.abilities_time: float = -attribute.ability_cd
-        self.__last_attack_time: float = -1 / attribute.attack_speed
+        self._last_attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
@@ -173,7 +174,7 @@ class Character(LivingEntity):
         return True
 
     def take_damage(self, event: EventAttack):
-        self.health -= event.attacker.attribute.attack_damage
+        self.health -= event.damage
         if self.health <= 0:
             self.die()
 
@@ -184,7 +185,7 @@ class Character(LivingEntity):
             return CharacterAttackResult.FRIENDLY_FIRE
         if dist > self.attribute.attack_range:
             return CharacterAttackResult.OUT_OF_RANGE
-        if (now_time - self.__last_attack_time) * self.attribute.attack_speed < 1:
+        if (now_time - self._last_attack_time) * self.attribute.attack_speed < 1:
             return CharacterAttackResult.COOLDOWN
         return CharacterAttackResult.SUCCESS
 
@@ -192,7 +193,7 @@ class Character(LivingEntity):
         now_time = get_model().get_time()
         if self.is_target_assailable(enemy):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self.__last_attack_time = now_time
+            self._last_attack_time = now_time
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")
@@ -202,13 +203,6 @@ class Character(LivingEntity):
         get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
 
+    @abstractmethod
     def cast_ability(self, *args, **kwargs):
-        now_time = get_model().get_time()
-        if now_time - self.abilities_time < self.attribute.ability_cd:
-            return
-        log_info("cast abilities")
-        self.abilities_time = now_time
-        self.ability(*args, **kwargs)
-
-    def ability(self, *args, **kwargs):
         pass

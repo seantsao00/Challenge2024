@@ -14,12 +14,14 @@ import const
 import const.map
 import const.model
 from api.internal import load_ai, start_ai
-from event_manager import (EventCharacterDied, EventCharacterMove, EventCreateEntity,
+from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
+                           EventCharacterDied, EventCharacterMove, EventCreateEntity,
                            EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventResumeModel, EventSelectParty, EventSpawnCharacter,
-                           EventStartGame, EventUnconditionalTick)
+                           EventQuit, EventRangedBulletDamage, EventResumeModel, EventSelectParty,
+                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
+from model.bullet import Bullet
 from model.character import Character
 from model.clock import Clock
 from model.grid import Grid
@@ -27,6 +29,7 @@ from model.map import load_map
 from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
+from model.timer import Timer
 from util import log_critical
 
 if TYPE_CHECKING:
@@ -63,7 +66,7 @@ class Model:
         self.__running: bool = False
         self.state: const.State = const.State.COVER
 
-        self.global_clock: pg.Clock = pg.time.Clock()
+        self.global_clock: pg.time.Clock = pg.time.Clock()
         """The clock since program start."""
         self.__game_clock: Clock = Clock()
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
@@ -86,6 +89,7 @@ class Model:
         self.show_attack_range: bool = model_arguments.show_attack_range
 
         self.pause_menu: PauseMenu = PauseMenu()
+        self.RangerAbility = False
 
         self.__register_listeners()
 
@@ -99,6 +103,7 @@ class Model:
         load_ai(self.__team_files_names)
 
         self.teams: list[Team] = []
+        self.bullet_pool: list[Bullet] = []
 
         selected_parties = self.party_selector.selected_parties()
 
@@ -156,6 +161,51 @@ class Model:
             tower.enemy_in_range(event.character)
         event.character.team.vision.handle_character_move(event)
 
+    def create_bullet(self, event: EventBulletCreate):
+        get_event_manager().register_listener(EventEveryTick, event.bullet.judge)
+        # event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
+        #                            function=event.bullet.judge, once=False)
+        self.bullet_pool.append(event.bullet)
+
+    def ranged_bullet_damage(self, event: EventRangedBulletDamage):
+        get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
+        event.bullet.discard()
+        for entity in self.entities:
+            if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
+                get_event_manager().post(EventAttack(victim=entity,
+                                                     attacker=event.bullet.attacker,
+                                                     damage=event.bullet.damage), channel_id=entity.id)
+
+    def bullet_damage(self, event: EventBulletDamage):
+        get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
+        event.bullet.discard()
+        get_event_manager().post(EventAttack(victim=event.bullet.victim,
+                                             attacker=event.bullet.attacker,
+                                             damage=event.bullet.damage), channel_id=event.bullet.victim.id)
+
+    def bullet_disappear(self, event: EventBulletDisappear):
+        get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
+        event.bullet.discard()
+
+    def __register_listeners(self):
+        """Register every listeners of this object into the event manager."""
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(EventInitialize, self.__initialize)
+        ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
+        ev_manager.register_listener(EventQuit, self.__handle_quit)
+        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
+        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
+        ev_manager.register_listener(EventStartGame, self.__handle_start)
+        ev_manager.register_listener(EventCreateEntity, self.__register_entity)
+        ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
+        ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
+        ev_manager.register_listener(EventGameOver, self.handle_game_over)
+        ev_manager.register_listener(EventBulletCreate, self.create_bullet)
+        ev_manager.register_listener(EventRangedBulletDamage, self.ranged_bullet_damage)
+        ev_manager.register_listener(EventBulletDamage, self.bullet_damage)
+        ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
+        ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
+
     def get_time(self):
         return self.__game_clock.get_time()
 
@@ -173,21 +223,6 @@ class Model:
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
             self.dt = self.global_clock.tick(const.FPS) / 1000
-
-    def __register_listeners(self):
-        """Register every listeners of this object into the event manager."""
-        ev_manager = get_event_manager()
-        ev_manager.register_listener(EventInitialize, self.__initialize)
-        ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
-        ev_manager.register_listener(EventQuit, self.__handle_quit)
-        ev_manager.register_listener(EventPauseModel, self.__handle_pause)
-        ev_manager.register_listener(EventResumeModel, self.__handle_resume)
-        ev_manager.register_listener(EventStartGame, self.__handle_start)
-        ev_manager.register_listener(EventCreateEntity, self.__register_entity)
-        ev_manager.register_listener(EventCharacterMove, self.__handle_character_move)
-        ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
-        ev_manager.register_listener(EventGameOver, self.handle_game_over)
-        ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
 
     def __handle_quit(self, _: EventQuit):
         """

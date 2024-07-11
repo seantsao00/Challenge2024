@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventDiscardEntity
-from instances_manager import get_event_manager
 from util import crop_image
 from view.object.entity_object import EntityObject
 
@@ -18,7 +16,7 @@ if TYPE_CHECKING:
 class EntityView(EntityObject):
     images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
         = {party: {
-            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType)
+            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType, const.BulletType)
         } for party in const.PartyType}
     """
     structure: images[party][entity][state]
