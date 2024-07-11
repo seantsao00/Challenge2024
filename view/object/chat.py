@@ -1,3 +1,8 @@
+"""
+Controls how the chat messages are displayed.
+e.g. storing all the comments currently being displayed, drawing them on the screen, etc.
+"""
+
 from __future__ import annotations
 
 import pygame as pg
