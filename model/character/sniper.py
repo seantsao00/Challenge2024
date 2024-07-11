@@ -38,7 +38,7 @@ class Sniper(Character):
     def ability(self):
         """Make the bullet become BulletSniper"""
         self.ability_active = True
-        log_info("Sniper use ability")
+        log_info("[Sniper] Use ability")
 
     def attack(self, enemy: Entity):
 

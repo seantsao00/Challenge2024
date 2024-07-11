@@ -11,15 +11,10 @@ import pygame as pg
 import const
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam)
+                           EventSelectParty, EventUnconditionalTick, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from model import TimerManager
-from model.entity import LivingEntity
+from model import Character, LivingEntity, TimerManager
 from util import log_info
-
-if TYPE_CHECKING:
-    from model import Character
 
 
 class Controller:
@@ -103,26 +98,26 @@ class Controller:
 
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
-                    if model.RangerAbility:
-                        ev_manager.post(EventUseRangerAbility(position=pg.Vector2(x, y)))
-                    else:
-                        clicked = None
-                        for entity in model.entities:
-                            if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
-                                clicked = entity
+                    clicked = None
+                    for entity in model.entities:
+                        if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                            clicked = entity
+                    if isinstance(clicked, Character):
                         ev_manager.post(EventHumanInput(
                             input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
-                    if model.RangerAbility:
-                        model.RangerAbility = False
                     clicked = None
-                    for entity in model.entities:
+                    for entity in reversed(model.entities):
                         if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
                             clicked = entity
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
-                                    clicked_entity=clicked, displacement=pg.Vector2(x, y)))
+                    if isinstance(clicked, Character):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
+                                        clicked_entity=clicked, displacement=pg.Vector2(x, y)))
+                    else:
+                        ev_manager.post(EventHumanInput(
+                            input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)

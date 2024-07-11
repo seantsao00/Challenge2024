@@ -63,7 +63,7 @@ class Melee(Character):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        log_info("Melee Cast ability")
+        log_info("[Melee] Cast ability")
         self.abilities_time = now_time
         self.ability()
 
