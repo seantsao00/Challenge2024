@@ -99,9 +99,9 @@ class Controller:
 
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
-                    if model.RangerAbility:
+                    if model.ranger_ability:
                         ev_manager.post(EventUseRangerAbility(position=pg.Vector2(
-                            x, y)), channel_id=model.RangerControlling.id)
+                            x, y)), channel_id=model.ranger_controlling.id)
                     else:
                         clicked = None
                         with model.entity_lock:
@@ -114,8 +114,8 @@ class Controller:
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
-                    if model.RangerAbility:
-                        model.RangerAbility = False
+                    if model.ranger_ability:
+                        model.ranger_ability = False
                     clicked = None
                     with model.entity_lock:
                         for entity in reversed(model.entities):  # Tower first
