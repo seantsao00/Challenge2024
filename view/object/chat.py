@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import pygame as pg
 
+from const import ChatMessageType
 from const.visual import chat as CHAT
-from instances_manager import get_model
+from event_manager import EventSendChat
+from instances_manager import get_event_manager, get_model
 from model.team import Team
 from view.object import components
 from view.object.object_base import ObjectBase
@@ -57,10 +59,11 @@ class ChatView(ObjectBase):
         self.__chat_surface = pg.Surface(consts.CHAT_SIZE, pg.SRCALPHA)
         self.__comments: list[CommentBox] = []
         self.__frame_count = 0
+        get_event_manager().register_listener(EventSendChat, self.handle_new_chat)
 
     def initialize(self):
         for idx, team in enumerate(get_model().teams):
-            self.add_comment(f"Comment from Team {idx + 1} =^-w-^= zzzzz", team)
+            self.add_comment(team, f"Comment from Team {idx + 1} =^-w-^= zzzzz")
 
     def draw(self):
         if not self.__initialized:
@@ -80,18 +83,26 @@ class ChatView(ObjectBase):
         self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
     def update(self):
-        import random
-        self.__frame_count += 1
-        if self.__frame_count % 60 == 0:
-            teamid = random.randint(0, 3)
-            team = get_model().teams[teamid]
-            if random.randint(0, 1) > 0:
-                self.add_comment(
-                    f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)", team)
-            else:
-                teamid2 = random.randint(0, 3)
-                self.add_comment(f"Team {teamid}'s Ranger was slain by Team {teamid2}!", team)
+        # import random
+        # self.__frame_count += 1
+        # if self.__frame_count % 60 == 0:
+        #     teamid = random.randint(0, 3)
+        #     team = get_model().teams[teamid]
+        #     if random.randint(0, 1) > 0:
+        #         self.add_comment(
+        #             team, f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)")
+        #     else:
+        #         teamid2 = random.randint(0, 3)
+        #         team, self.add_comment(f"Team {teamid}'s Ranger was slain by Team {teamid2}!")
+        pass
 
-    def add_comment(self, text: str, team: Team):
+    def handle_new_chat(self, e: EventSendChat):
+        if e.type == ChatMessageType.CHAT_COMMENT:
+            self.add_comment(e.team, e.text)
+        elif e.type == ChatMessageType.CHAT_BULLET:
+            # TODO
+            print("Bullet messages are not supported yet!")
+
+    def add_comment(self, team: Team, text: str):
         avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
         self.__comments.append(CommentBox(text, avatar, consts.CHAT_SIZE[0]))
