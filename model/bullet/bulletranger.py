@@ -6,7 +6,7 @@ import pygame as pg
 
 import const
 from event_manager import EventRangedBulletDamage
-from instances_manager import get_event_manager
+from instances_manager import get_event_manager, get_model
 from model.bullet.bullet import Bullet
 
 if TYPE_CHECKING:
@@ -29,15 +29,16 @@ class BulletRanger(Bullet[None]):
         self.direction = (self.target - self.position)
         self.direction = self.direction.normalize() if self.direction.length() != 0 else pg.Vector2(1, 0)
 
-    def judge(self, args: None = None):
+    def judge(self, _: None = None):
         """
         Decide if the bullet needs to move, cause damage or disappear.
         The direction is fixed.
         """
         original_pos = self.position
         target_pos = self.target
-        if (target_pos - original_pos).length() <= self.speed:
+        model = get_model()
+        if (target_pos - original_pos).length() <= self.speed * model.dt:
             get_event_manager().post(EventRangedBulletDamage(bullet=self))
         else:
-            self.position += self.direction*self.speed
+            self.position += self.direction * self.speed * model.dt
             self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))
