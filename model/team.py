@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import const
+import const.character
 import const.team
 from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick, EventHumanInput,
                            EventSelectCharacter, EventSpawnCharacter, EventTeamGainTower,
@@ -14,6 +15,7 @@ from model.team_vision import TeamVision
 from util import log_info
 
 if TYPE_CHECKING:
+    from model.building import Tower
     from model.entity import Entity
 
 
@@ -76,11 +78,12 @@ class Team(NeutralTeam):
         """
         Handles input by human. This method is only used by human controlled teams.
         """
+
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
             if clicked_entity and clicked_entity.team is self:
-                if self.__controlling is not None and isinstance(self.__controlling, Character):
+                if isinstance(self.__controlling, Character) and self.__controlling.team is self and self.__controlling is not None:
                     self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             else:
@@ -92,18 +95,11 @@ class Team(NeutralTeam):
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
-            if isinstance(self.__controlling, Character):
-                if self.__choosing_position is True:
-                    self.__controlling.cast_ability(event.displacement)
-                    self.__choosing_position = False
-                elif isinstance(clicked_entity, (Tower, Character)):
-                    self.__controlling.attack(clicked_entity)
+            if isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
+                self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
-                if isinstance(self.__controlling, Ranger):
-                    self.__choosing_position = True
-                else:
-                    self.__controlling.cast_ability()
+                self.__controlling.cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
         self.character_list.add(event.character)
@@ -143,7 +139,9 @@ class Team(NeutralTeam):
             self.vision.update_vision(event.character)
 
     def select_character(self, event: EventSelectCharacter):
-        if isinstance(self.__controlling, Tower):
+        if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
+            log_info(
+                f'Character type of Team {self.team_id} is modified to {event.character_type}')
             self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):

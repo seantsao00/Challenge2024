@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class EntityView(EntityObject):
     images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
         = {party: {
-            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType)
+            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType, const.BulletType)
         } for party in const.PartyType}
     """
     structure: images[party][entity][state]

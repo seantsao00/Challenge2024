@@ -10,9 +10,10 @@ import pygame as pg
 from ordered_set import OrderedSet
 
 import const
-from event_manager import (EventAttack, EventCreateTower, EventEveryTick, EventSpawnCharacter,
-                           EventTeamGainTower, EventTeamLoseTower)
+from event_manager import (EventAttack, EventBulletCreate, EventCreateTower, EventEveryTick,
+                           EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
+from model.bullet import BulletCommon
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
@@ -92,7 +93,7 @@ class Tower(LivingEntity):
         if self.team is event.attacker.team or self.is_fountain:
             log_info('same team or is fountain')
             return
-        if self.health - event.attacker.attribute.attack_damage <= 0:
+        if self.health - event.damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:
                 ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.team_id)
             else:
@@ -104,12 +105,18 @@ class Tower(LivingEntity):
             self.health = self.attribute.max_health
 
         else:
-            self.health -= event.attacker.attribute.attack_damage
+            self.health -= event.damage
 
     def attack(self):
         for character in self.__enemies:
             if character.team != self.team:
-                get_event_manager().post(EventAttack(attacker=self, victim=character), character.id)
+                bullet = BulletCommon(position=self.position,
+                                      team=self.team,
+                                      damage=self.attribute.attack_damage,
+                                      victim=character,
+                                      speed=const.BULLET_COMMON_SPEED,
+                                      attacker=self)
+                get_event_manager().post(EventBulletCreate(bullet=bullet))
                 break
 
     def enemy_in_range(self, character: Character):

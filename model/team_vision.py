@@ -62,6 +62,8 @@ class TeamVisionGrid:
     def brute_modify(self, position: pg.Vector2, real_radius: float):
         real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE,
                                    position.y * const.VISION_BLOCK_SIZE)
+        real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE,
+                                   position.y * const.VISION_BLOCK_SIZE)
         radius = real_radius / const.VISION_BLOCK_SIZE
         for x in range(max(0, int(position.x - radius)),
                        min(self.n, int(position.x + radius + 1))):
@@ -101,7 +103,11 @@ class TeamVisionGrid:
                     if i > 0 and small_vision[i - 1][0] == x:
                         up_radius = max(up_radius, count_radius(
                             small_vision[i - 1][2] / const.VISION_BLOCK_SIZE, y - small_vision[i - 1][1]))
+                        up_radius = max(up_radius, count_radius(
+                            small_vision[i - 1][2] / const.VISION_BLOCK_SIZE, y - small_vision[i - 1][1]))
                     if i < len(small_vision) and small_vision[i][0] == x:
+                        up_radius = max(up_radius, count_radius(
+                            small_vision[i][2] / const.VISION_BLOCK_SIZE, small_vision[i][1] - y))
                         up_radius = max(up_radius, count_radius(
                             small_vision[i][2] / const.VISION_BLOCK_SIZE, small_vision[i][1] - y))
                 if len(big_vision) > 0:
@@ -110,7 +116,11 @@ class TeamVisionGrid:
                     if j > 0 and big_vision[j - 1][0] == x:
                         up_radius = max(up_radius, count_radius(
                             big_vision[j - 1][2] / const.VISION_BLOCK_SIZE, y - big_vision[j - 1][1]))
+                        up_radius = max(up_radius, count_radius(
+                            big_vision[j - 1][2] / const.VISION_BLOCK_SIZE, y - big_vision[j - 1][1]))
                     if j < len(big_vision) and big_vision[j][0] == x:
+                        up_radius = max(up_radius, count_radius(
+                            big_vision[j][2] / const.VISION_BLOCK_SIZE, big_vision[j][1] - y))
                         up_radius = max(up_radius, count_radius(
                             big_vision[j][2] / const.VISION_BLOCK_SIZE, big_vision[j][1] - y))
                 if up_radius > -0.5:
@@ -125,10 +135,14 @@ class TeamVisionGrid:
                     a[3] = 0
                     self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
                                                                        const.TEAM_VISION_BLOCK] -= 1
+                    self.vision_not_open[x // const.TEAM_VISION_BLOCK][y //
+                                                                       const.TEAM_VISION_BLOCK] -= 1
                     self.bool_mask[x][y] = True
                     self.mask.set_at((x, y), a)
 
     def update_vision(self, entity: LivingEntity):
+        x, y = int(entity.position.x /
+                   const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)
         x, y = int(entity.position.x /
                    const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)
         if entity.alive is False or self.visit[x][y] is True or self.heuristic_test(entity.position) is False:
