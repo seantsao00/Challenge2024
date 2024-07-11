@@ -1,7 +1,8 @@
 import pygame as pg
 
-import const
-from const.character import CharacterType
+import const.character
+import const.team
+import const.tower
 from model.team import Team
 from view.textutil import draw_text, split_text
 
@@ -11,7 +12,12 @@ def createTeamAvatar(team: Team, size: int) -> pg.Surface:
         raise ValueError("Avatar size must be a ineteger")
 
     party = team.party
-    avatar_img = pg.image.load(const.ENTITY_IMAGE[party][CharacterType.RANGER][None])
+    if const.character.CharacterType.RANGER in const.ENTITY_IMAGE[party]:
+        avatar_img = pg.image.load(
+            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][None])
+    else:
+        avatar_img = pg.image.load(
+            const.ENTITY_IMAGE[const.team.PartyType.NEUTRAL][const.tower.TowerType.PYLON][None])
     avatar = pg.Surface((size, size), pg.SRCALPHA)
 
     # resize and crop unwanted parts
