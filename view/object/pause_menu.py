@@ -18,8 +18,8 @@ class PauseMenuView(ObjectBase):
         self.image_initialized = True
         super().__init__(canvas, [PRIORITY_PAUSEMENU])
         self.pause_menu = pause_menu
-        self.title_font = font_loader.get_font(const.REGULAR_FONT, int(20*self.resize_ratio))
-        self.font = font_loader.get_font('./font/Cubic_11_1.300_R.ttf', int(12*self.resize_ratio))
+        self.title_font = font_loader.get_font(size=12)
+        self.font = font_loader.get_font(size=12)
         self.options = self.pause_menu.options
 
     def draw(self):

@@ -159,7 +159,7 @@ class View:
         """Render game cover"""
 
         # setting up a temporary cover till we have a cover image
-        font = font_loader.get_font(None, 12)
+        font = font_loader.get_font(name=None, size=12)
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
@@ -171,7 +171,7 @@ class View:
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = font_loader.get_font(const.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = font_loader.get_font(size=12)
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
@@ -220,7 +220,7 @@ class View:
         # show time remaining
         time_remaining = int(const.GAME_TIME - model.get_time())
         (min, sec) = divmod(time_remaining, 60)
-        font = font_loader.get_font(const.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = font_loader.get_font(size=12)
         time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface,
                            (15 * self.__resize_ratio, 95 * self.__resize_ratio))
