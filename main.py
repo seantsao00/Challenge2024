@@ -5,7 +5,6 @@ Import paths should be relative to the location of this file.
 """
 
 import argparse
-import faulthandler
 
 import pygame as pg
 
@@ -17,11 +16,13 @@ from music.music import BackgroundMusic
 from util import set_verbosity
 from view import View
 
+# import faulthandler
+
 
 def main():
     # Initialization
     pg.init()
-    faulthandler.enable()
+    # faulthandler.enable()
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument(
