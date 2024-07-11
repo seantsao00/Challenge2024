@@ -76,10 +76,15 @@ class ChatView(ObjectBase):
             self.__initialized = True
         self.__chat_surface.fill(pg.Color(0, 0, 0, 0))
         cur_pos = [0, consts.CHAT_SIZE[1]]
-        for comment in reversed(self.__comments):
+        iter = len(self.__comments) - 1
+        while iter >= 0 and cur_pos[1] > 0:
+            comment = self.__comments[iter]
             cur_pos[1] -= comment.get_size()[1]
             comment.draw(self.__chat_surface, cur_pos)
             cur_pos[1] -= consts.SPACING[1]
+            iter -= 1
+        if iter >= 0:
+            del self.__comments[:(iter + 1)]
         self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
     def update(self):
