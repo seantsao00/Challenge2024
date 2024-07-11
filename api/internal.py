@@ -7,6 +7,7 @@ from __future__ import annotations
 import ctypes
 import importlib
 import os
+import random
 import signal
 import threading
 import traceback
@@ -22,6 +23,7 @@ import model
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
+from model.character.character import CharacterMovingState
 from util import log_critical, log_info, log_warning
 
 
@@ -274,6 +276,15 @@ class Internal(prototype.API):
             entity.health > 0]
         return sorted(tower_list, key=lambda x: x.id)
 
+    def get_movement(self, character: prototype.Character) -> prototype.Movement:
+        character: model.Character = self.__access_character(character)
+        if character.move_state == CharacterMovingState.STOPPED:
+            return prototype.Movement(prototype.MovementStatusClass.STOPPED)
+        elif character.move_state == CharacterMovingState.TO_DIRECTION:
+            return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, character.move_direction.normalize())
+        elif character.move_state == CharacterMovingState.TO_POSITION:
+            return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.move_destination)
+
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
         internal = self.__access_character(character)
         if internal is None or not internal.alive:
@@ -370,6 +381,27 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             inter.cast_ability()
+
+    def action_wander(self, characters: Iterable[prototype.Character]):
+        enforce_type('characters', characters, Iterable)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for inter in internals:
+            with inter.moving_lock:
+                inter.set_move_stop()
+
+                direction = inter.move_direction
+                if direction == pg.Vector2(0, 0):
+                    direction = pg.Vector2(random.random(), random.random())
+
+                direction = direction.normalize()
+                new_direction = pg.Vector2()
+                new_direction.from_polar(
+                    (direction.as_polar()[0], direction.as_polar()[1] + random.uniform(-20, 20)))
+
+                inter.set_move_direction(new_direction)
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
