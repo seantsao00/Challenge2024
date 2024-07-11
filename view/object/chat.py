@@ -20,10 +20,10 @@ from view.textutil import font_loader
 
 class _RescaledConstants:
     def __init__(self):
-        self.CHAT_POSITION = ScreenInfo.rescale(CHAT.CHAT_POSITION)
-        self.CHAT_SIZE = ScreenInfo.rescale(CHAT.CHAT_SIZE)
-        self.AVATAR_WIDTH = int(ScreenInfo.rescale(CHAT.AVATAR_WIDTH))
-        self.SPACING = ScreenInfo.rescale(CHAT.SPACING)
+        self.CHAT_POSITION = ScreenInfo.scale(CHAT.CHAT_POSITION)
+        self.CHAT_SIZE = ScreenInfo.scale(CHAT.CHAT_SIZE)
+        self.AVATAR_WIDTH = int(ScreenInfo.scale(CHAT.AVATAR_WIDTH))
+        self.SPACING = ScreenInfo.scale(CHAT.SPACING)
 
 
 consts: _RescaledConstants | None = None
