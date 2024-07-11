@@ -108,9 +108,9 @@ class Controller:
                             for entity in model.entities:
                                 if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
                                     clicked = entity
-                    if isinstance(clicked, Character):
-                        ev_manager.post(EventHumanInput(
-                            input_type=const.InputTypes.PICK, clicked_entity=clicked))
+                        if isinstance(clicked, Character):
+                            ev_manager.post(EventHumanInput(
+                                input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")

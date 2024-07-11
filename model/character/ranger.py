@@ -56,7 +56,6 @@ class Ranger(Character):
 
     def use_ability(self, event: EventUseRangerAbility):
         """This function is called after clicked Q and left button, it would generate bullet"""
-        print(self.position.distance_to(event.position))
         if self.position.distance_to(event.position) <= self.attribute.attack_range:
             get_model().ranger_ability = False
             log_info("[Ranger] Cast ablility")
