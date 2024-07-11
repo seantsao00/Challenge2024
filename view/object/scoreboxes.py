@@ -38,7 +38,7 @@ class Scorebox:
             self.__team_name_surface.get_rect(midleft=self.translate(27, 12.5))
         )
         score_surface = font_loader.get_font(size=16).render(
-            f"{self.__team_score}", False, 'black')
+            f"{self.__team_score:.2f}", False, 'black')
         self.__canvas.blit(
             score_surface,
             score_surface.get_rect(center=self.translate(35, 40))
