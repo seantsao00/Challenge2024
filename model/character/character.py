@@ -25,16 +25,6 @@ class CharacterMovingState(Enum):
     TO_DIRECTION = auto()
 
 
-class CharacterAttackResult(Enum):
-    SUCCESS = auto()
-    OUT_OF_RANGE = auto()
-    COOLDOWN = auto()
-    FRIENDLY_FIRE = auto()
-
-    def __bool__(self):
-        return self == self.SUCCESS
-
-
 class Character(LivingEntity):
     """
     Class for character in the game.
@@ -73,6 +63,9 @@ class Character(LivingEntity):
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 
         self.attribute: const.CharacterAttribute
+
+    def __str__(self):
+        return f'character {self.id} (team {self.team.team_id})'
 
     def __move_toward_direction(self):
         """
@@ -174,26 +167,35 @@ class Character(LivingEntity):
         return True
 
     def take_damage(self, event: EventAttack):
+        if not self.vulnerable(event.attacker):
+            return
+
         self.health -= event.damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
-    def is_target_assailable(self, enemy: Entity) -> CharacterAttackResult:
+    def attackable(self, enemy: LivingEntity):
+        """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
-        if self.team is enemy.team:
-            return CharacterAttackResult.FRIENDLY_FIRE
         if dist > self.attribute.attack_range:
-            return CharacterAttackResult.OUT_OF_RANGE
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} out of range")
+            return False
+        if self.team is enemy.team:
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} within the same team")
+            return False
         if (now_time - self._last_attack_time) * self.attribute.attack_speed < 1:
-            return CharacterAttackResult.COOLDOWN
-        return CharacterAttackResult.SUCCESS
+            log_info(f"[Attack] {self} is attacking too fast!")
+            return False
+        self._last_attack_time = now_time
+        return True
 
     def attack(self, enemy: Entity):
-        now_time = get_model().get_time()
-        if self.is_target_assailable(enemy):
+        if self.attackable():
             get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self._last_attack_time = now_time
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")

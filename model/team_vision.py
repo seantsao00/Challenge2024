@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -19,7 +20,10 @@ class TeamVisionGrid:
         self.m = int(const.ARENA_SIZE[1] / const.VISION_BLOCK_SIZE)
         self.mask: pg.Surface = pg.Surface((self.n, self.m), pg.SRCALPHA)
         self.mask.fill([0, 0, 0])
-        self.mask.set_alpha(192)
+        if sys.platform.startswith('darwin'):
+            self.mask.set_alpha(255)
+        else:
+            self.mask.set_alpha(192)
         self.bool_mask: list[list[bool]] = [[False for _ in range(self.m)] for _ in range(self.n)]
         self.vision_not_open: list[list[int]] = [[0 for _ in range(int(self.m // const.TEAM_VISION_BLOCK) + 1)]
                                                  for _ in range(int(self.n // const.TEAM_VISION_BLOCK) + 1)]
