@@ -15,9 +15,9 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PartySelectionView, PauseMenuView, TowerCDView,
-                         ViewRangeView)
-from view.textutil import get_font
+                         HealthView, ObjectBase, PartySelectionView, PauseMenuView, ScoreboxesView,
+                         TowerCDView, ViewRangeView)
+from view.textutil import font_loader
 
 
 class View:
@@ -67,6 +67,8 @@ class View:
             const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
 
+        self.__scoreboxes = ScoreboxesView(self.__screen)
+
         def load_image(filename: str):
             loaded_image = cv2.imread(
                 os.path.join(model.map.map_dir, filename), cv2.IMREAD_UNCHANGED
@@ -108,6 +110,8 @@ class View:
         HealthView.set_screen_info(self.__resize_ratio, *self.screen_size)
         TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
         PartySelectionView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        ScoreboxesView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        font_loader.set_resize_ratio(self.__resize_ratio)
 
     def initialize(self, _: EventInitialize):
         """
@@ -155,7 +159,7 @@ class View:
         """Render game cover"""
 
         # setting up a temporary cover till we have a cover image
-        font = get_font(None, int(12*self.__resize_ratio))
+        font = font_loader.get_font(None, 12)
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
@@ -167,7 +171,7 @@ class View:
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = get_font(const.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = font_loader.get_font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
@@ -204,6 +208,9 @@ class View:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)
 
+        self.__scoreboxes.update()
+        objects.append(self.__scoreboxes)
+
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
             obj.draw()
@@ -213,7 +220,7 @@ class View:
         # show time remaining
         time_remaining = int(const.GAME_TIME - model.get_time())
         (min, sec) = divmod(time_remaining, 60)
-        font = get_font(const.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = font_loader.get_font(const.REGULAR_FONT, int(12*self.__resize_ratio))
         time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface,
                            (15 * self.__resize_ratio, 95 * self.__resize_ratio))

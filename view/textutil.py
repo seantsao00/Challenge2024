@@ -1,21 +1,33 @@
 import pygame as pg
 
+from const import REGULAR_FONT
 
-class FontManager:
+
+class __FontLoader:
+    """
+    Class for things related to font loading/rendering
+    """
+
     def __init__(self):
         self.__fonts: dict[tuple[str, int], pg.font.Font] = {}
+        self.__resize_ratio = 1
 
-    def get_font(self, name: str | None, size: int):
+    def set_resize_ratio(self, resize_ratio: float):
+        self.__resize_ratio = resize_ratio
+
+    def get_font(self, name: str | None = REGULAR_FONT, size: int = 12, resize_ratio: float | None = None):
+        """
+        resize ratio set to default if not given
+        """
+        if resize_ratio is None:
+            resize_ratio = self.__resize_ratio
+        size = int(size * resize_ratio)
         if (name, size) not in self.__fonts:
             self.__fonts[(name, size)] = pg.font.Font(name, size)
         return self.__fonts[(name, size)]
 
 
-__manager = FontManager()
-
-
-def get_font(name: str | None, size: int):
-    return __manager.get_font(name, size)
+font_loader = __FontLoader()
 
 
 def draw_text(surf: pg.Surface, x: float, y: float, text: str, color: pg.Color, font: pg.font.Font, underline: bool = False):
