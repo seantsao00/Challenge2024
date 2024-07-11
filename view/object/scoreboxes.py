@@ -52,6 +52,7 @@ class Scorebox:
 class ScoreboxesView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
         super().__init__(canvas, [PRIORITY_SCOREBOXES])
+        self.__initialized = False
         self.__boxes: list[Scorebox] = []
 
     def initialize(self):
