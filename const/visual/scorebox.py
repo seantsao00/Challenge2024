@@ -1,0 +1,8 @@
+SCOREBOX_WIDTH = 70
+SCOREBOX_HEIGHT = 60
+SCOREBOX_ANCHORS = [
+    (15, 15),
+    (15, 175),
+    (365, 15),
+    (365, 175),
+]
