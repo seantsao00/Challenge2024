@@ -1,0 +1,23 @@
+{
+    "name": "ocean",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [20, 230], [20, 20], [230, 230], [230, 20]
+    ],
+    "neutral_towers": [
+        [130, 65]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": 
+        {
+            "mountains/mountain1.png": 162,
+            "mountains/mountain2.png": 100,
+            "bridges/bridge1_front.png": 146,
+            "bridges/bridge2_front.png": 228,
+            "bridges/bridge3_front.png": 139,
+            "bridges/bridge4_front.png": 76
+        }
+    }
+}
