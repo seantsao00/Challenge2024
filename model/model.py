@@ -75,6 +75,7 @@ class Model:
         self.dt: float
         """Real-world-passing time since last tick in second."""
 
+        self.entity_lock = threading.Lock()
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.grid: Grid = Grid(900, 900)
@@ -148,7 +149,8 @@ class Model:
                         f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __register_entity(self, event: EventCreateEntity):
-        self.entities.append(event.entity)
+        with self.entity_lock:
+            self.entities.append(event.entity)
         if isinstance(event.entity, Character):
             for tower in self.grid.get_attacker_tower(event.entity.position):
                 tower.enemy_in_range(event.entity)
@@ -173,11 +175,12 @@ class Model:
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
         event.bullet.discard()
-        for entity in self.entities:
-            if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
-                get_event_manager().post(EventAttack(victim=entity,
-                                                     attacker=event.bullet.attacker,
-                                                     damage=event.bullet.damage), channel_id=entity.id)
+        with self.entity_lock:
+            for entity in self.entities:
+                if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
+                    get_event_manager().post(EventAttack(victim=entity,
+                                                         attacker=event.bullet.attacker,
+                                                         damage=event.bullet.damage), channel_id=entity.id)
 
     def bullet_damage(self, event: EventBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)

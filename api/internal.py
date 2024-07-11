@@ -224,14 +224,16 @@ class Internal(prototype.API):
         return get_model().get_time()
 
     def get_owned_characters(self) -> list[prototype.Character]:
-        return sorted([self.__register_character(character)
-                       for character in self.__team().character_list if character.health > 0],
-                      key=lambda x: x.id)
+        with self.__team().character_lock:
+            return sorted([self.__register_character(character)
+                           for character in self.__team().character_list if character.health > 0],
+                          key=lambda x: x.id)
 
     def get_owned_towers(self) -> list[prototype.Tower]:
-        return sorted([self.__register_tower(tower)
-                       for tower in self.__team().towers],
-                      key=lambda x: x.id)
+        with self.__team().tower_lock:
+            return sorted([self.__register_tower(tower)
+                           for tower in self.__team().towers],
+                          key=lambda x: x.id)
 
     def get_team_id(self) -> int:
         return Internal.__cast_id(self.__team().team_id)
@@ -252,7 +254,9 @@ class Internal(prototype.API):
 
     def get_visible_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision
-        entities = get_model().entities
+        entities = []
+        with get_model().entity_lock:
+            entities = get_model().entities.copy()
         character_list: list[prototype.Character] = [
             self.__register_character(entity) for entity in entities
             if (isinstance(entity, model.Character) and
@@ -262,7 +266,9 @@ class Internal(prototype.API):
 
     def get_visible_towers(self) -> list[prototype.Tower]:
         vision = self.__team().vision
-        entities = get_model().entities
+        entities = []
+        with get_model().entity_lock:
+            entities = get_model().entities
         tower_list: list[prototype.Tower] = [
             self.__register_tower(entity) for entity in entities
             if (isinstance(entity, model.Tower) and
