@@ -49,7 +49,7 @@ class Tower(LivingEntity):
 
         if is_fountain:
             super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
-                             team, const.TowerType.FOUNTAIN, invulnerablility=True)
+                             team, const.TowerType.FOUNTAIN, invulnerability=True)
         else:
             super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, const.TowerType.HOTEL)
 
