@@ -51,7 +51,7 @@ class EntityView(EntityObject):
         self.canvas.blit(img, img.get_rect(center=self.resize_ratio *
                          (entity.position + const.DRAW_DISPLACEMENT)))
 
-    def update(self):
+    def move(self):
         if not self.exist:
             return False
         self.priority[1] = self.entity.position[1]

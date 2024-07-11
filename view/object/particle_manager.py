@@ -1,46 +1,53 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import math
+import random
 
 import pygame as pg
 
-import const
 from const.visual.priority import PRIORITY_PARTICLE
 from event_manager import EventEveryTick
-from instances_manager import get_event_manager, get_model
+from instances_manager import get_event_manager
 from view.object.object_base import ObjectBase
-
-if TYPE_CHECKING:
-    from model import Particle
+from view.object.particle import Particle
 
 
-class ParticleView(ObjectBase):
-    def __init__(self, canvas: pg.Surface, position, direction):
+class ParticleManager(ObjectBase):
+    def __init__(self, canvas: pg.Surface):
         self.image_initialized = True
         super().__init__(canvas, PRIORITY_PARTICLE)
         self.canvas = canvas
-        self.speed: float = 100.0
-        self.size: float = 1.0
-        self.color: tuple = (255, 0, 0)
-        self.position: pg.Vector2 = position
-        self.direction: pg.Vector2 = direction
-        self.duration: float = 5
-        self.elapsed_time: float = 0.0
+        self.particles = []
 
-        self.event_manager = get_event_manager()
-        self.model = get_model()
-        self.event_manager.register_listener(EventEveryTick, self.on_every_tick)
+        get_event_manager().register_listener(EventEveryTick, self.on_every_tick)
+
+        self.explode(pg.Vector2(200, 200), 100, 1.0, (200, 0, 0))
 
     def draw(self):
-        pg.draw.circle(self.canvas, self.color, self.position, self.size * self.resize_ratio)
+        for p in self.particles:
+            p.draw()
 
     def on_every_tick(self, _: EventEveryTick):
-        dt = self.model.dt
-        self.position += self.direction * self.speed * dt
-        self.elapsed_time += dt
+        for p in self.particles:
+            p.move()
+            if p.dead:
+                self.particles.remove(p)
 
-        if self.elapsed_time >= self.duration:
-            self.destroy()
+    def explode(self, pos, amount, duration, color):
+        for _ in range(amount):
+            _pos = pos.copy()
+            _speed = random.uniform(10, 50)
+            _duration = random.uniform(0.8, 1.2) * duration
+            _size = random.uniform(0.8, 1.2)
+            angle = random.uniform(0, 2 * math.pi)
+            _direction = pg.Vector2(math.cos(angle), math.sin(angle)).normalize()
+            _color = (clamp(color[0] + random.randint(-20, 20), 0, 255),
+                      clamp(color[1] + random.randint(-20, 20), 0, 255),
+                      clamp(color[2] + random.randint(-20, 20), 0, 255))
 
-    def destroy(self):
-        self.event_manager.unregister_listener(EventEveryTick, self.on_every_tick)
+            self.particles.append(Particle(self.canvas, _pos, _direction,
+                                  _speed, _size, _duration, _color))
+
+
+def clamp(value, min_val, max_val):
+    return max(min_val, min(max_val, value))
