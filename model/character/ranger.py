@@ -25,14 +25,15 @@ class Ranger(Character):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
         super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
-        get_event_manager().register_listener(EventUseRangerAbility, listener=self.use_ability)
+        get_event_manager().register_listener(EventUseRangerAbility,
+                                              listener=self.use_ability, channel_id=self.id)
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
             and dist <= self.attribute.attack_range
-                and (now_time - self._attack_time) * self.attribute.attack_speed >= 1):
+                and (now_time - self._last_attack_time) * self.attribute.attack_speed >= 1):
             bullet = BulletCommon(position=self.position,
                                   victim=enemy,
                                   team=self.team,
@@ -40,24 +41,25 @@ class Ranger(Character):
                                   damage=const.RANGER_ATTRIBUTE.attack_damage,
                                   speed=const.BULLET_RANGER_SPEED)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
-            self._attack_time = now_time
+            self._last_attack_time = now_time
 
     def cast_ability(self, *args, **kwargs):
         """This function is called after clicked Q, it wouldn't generate bullet"""
 
-        log_info("Ranger ability is on")
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
         self.abilities_time = now_time
         get_model().RangerAbility = True
+        get_model().RangerControlling = self
+        log_info("[Ranger] Ability is on")
 
     def use_ability(self, event: EventUseRangerAbility):
         """This function is called after clicked Q and left button, it would generate bullet"""
-
+        print(self.position.distance_to(event.position))
         if self.position.distance_to(event.position) <= self.attribute.attack_range:
             get_model().RangerAbility = False
-            log_info("Ranger cast ablility")
+            log_info("[Ranger] Cast ablility")
             bullet = BulletRanger(position=self.position,
                                   target=event.position,
                                   team=self.team,
