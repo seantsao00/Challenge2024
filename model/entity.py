@@ -72,7 +72,7 @@ class LivingEntity(Entity):
                  invulnerablility: bool = False):
         self.alive: bool = True
         self.attribute: const.LivingEntityAttribute = attribute
-        self.invulnerablility: bool = False
+        self.invulnerablility: bool = invulnerablility
         self.health: float = self.attribute.max_health
 
         super().__init__(position, team, entity_type, state)
