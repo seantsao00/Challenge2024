@@ -311,7 +311,7 @@ class Internal(prototype.API):
         W = const.ARENA_SIZE[1]
         if position.x < 0 or position.x > W or position.y < 0 or position.x > W:
             return prototype.MapTerrain.OUT_OF_BOUNDS
-        terrain = get_model().map.get_position_type(self.__transform(position, inverse=True))
+        terrain = get_model().map.get_position_type(self.__transform(position, is_vector=False, inverse=True))
         if terrain == const.map.MAP_ROAD:
             return prototype.MapTerrain.ROAD
         if terrain == const.map.MAP_PUDDLE:

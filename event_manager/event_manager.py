@@ -64,7 +64,7 @@ class EventManager:
         if self.__read_lock[(event_class, channel_id)] > 0:
             self.__wait_remove_listeners[(event_class, channel_id)].append(listener)
         else:
-            self.__listeners[(event_class, channel_id)].add(listener)
+            self.__listeners[(event_class, channel_id)].remove(listener)
 
     def post(self, event: BaseEvent, channel_id: ChannelId | None = None):
         """
@@ -90,7 +90,7 @@ class EventManager:
             self.__wait_add_listeners[(type(event), channel_id)].clear()
             for listener in self.__wait_remove_listeners[(type(event), channel_id)]:
                 try:
-                    self.__listeners[(type(event), channel_id)].add(listener)
+                    self.__listeners[(type(event), channel_id)].remove(listener)
                 except KeyError:
                     log_warning(f'{listener} is not registered to ({type(event)}, {channel_id})')
             self.__wait_remove_listeners[(type(event), channel_id)].clear()
