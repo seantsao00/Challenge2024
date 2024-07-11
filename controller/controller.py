@@ -167,9 +167,9 @@ class Controller:
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 key = pg_event.key
-                if key in const.PARTY_SELECT_BUTTONS_MAP:
+                if key in const.PARTY_SELECTOR_BUTTONS_MAP:
                     ev_manager.post(EventChangeParty(
-                        select_input=const.PARTY_SELECT_BUTTONS_MAP[key]))
+                        select_input=const.PARTY_SELECTOR_BUTTONS_MAP[key]))
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

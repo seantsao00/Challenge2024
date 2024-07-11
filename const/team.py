@@ -15,7 +15,6 @@ class InputTypes(Enum):
 
 
 class PartyType(Enum):
-    """This is for party selection"""
     NEUTRAL = auto()
     JUNIOR = auto()
     FBI = auto()
