@@ -174,11 +174,9 @@ class TeamVision(TeamVisionGrid):
     def modify_vision(self):
         if len(self.set) == 0:
             return
-        print("check vision", self.set)
         if len(self.set) >= 35:
             self.special_modify(self.set)
         else:
-            print("brute")
             for st in self.set:
                 self.brute_modify(pg.Vector2(st[0], st[1]), st[2])
         self.set.clear()
