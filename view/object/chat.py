@@ -2,35 +2,54 @@ from __future__ import annotations
 
 import pygame as pg
 
-from const.visual.priority import PRIORITY_CHAT
+from const.visual import chat as CHAT
 from instances_manager import get_model
+from model.team import Team
 from view.object import components
 from view.object.object_base import ObjectBase
 from view.textutil import font_loader
 
-CHAT_WIDTH = 100 * 900 / 250
-AVATAR_WIDTH = int(15 * 900 / 250)
-SPACING_VERTICAL = 10
-SPACING_HORIZONTAL = 10
+
+class ResizeRatioSoAnnoying:
+    def __init__(self, resize_ratio: float):
+        self.resize_ratio = resize_ratio
+        self.CHAT_POSITION = self.resize(CHAT.CHAT_POSITION)
+        self.CHAT_SIZE = self.resize(CHAT.CHAT_SIZE)
+        self.AVATAR_WIDTH = int(self.resize(CHAT.AVATAR_WIDTH))
+        self.SPACING = self.resize(CHAT.SPACING)
+
+    def resize(self, x: int | float | tuple[float, float] | list[float]):
+        if isinstance(x, float) or isinstance(x, int):
+            return x * self.resize_ratio
+        elif isinstance(x, tuple):
+            return (self.resize(x[0]), self.resize(x[1]))
+        else:
+            return [self.resize(i) for i in x]
+
+
+consts: ResizeRatioSoAnnoying = None
 
 
 class CommentBox:
-    def __init__(self, canvas: pg.Surface, text: str, user_avatar: pg.Surface, width: float):
-        self.__canvas = canvas
-
-        font = font_loader.get_font(size=8)
+    def __init__(self, text: str, user_avatar: pg.Surface, width: float):
+        font = font_loader.get_font(size=CHAT.CHAT_FONT_SIZE)
         avatar_size = user_avatar.get_size()
-        text_surf = components.createTextBox(text, 'black', font, width - SPACING_HORIZONTAL * 2)
+        text_surf = components.createTextBox(
+            text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
         text_size = text_surf.get_size()
 
-        height = avatar_size[1] + text_size[1] + SPACING_VERTICAL * 3
+        height = max(avatar_size[1], text_size[1]) + consts.SPACING[1] * 2
+        self.__size = (width, height)
         self.__surf = pg.Surface((width, height), pg.SRCALPHA)
         pg.draw.rect(self.__surf, pg.Color(255, 255, 255, 127), (0, 0, width, height))
-        self.__surf.blit(user_avatar, (SPACING_HORIZONTAL, SPACING_VERTICAL))
-        self.__surf.blit(text_surf, (SPACING_HORIZONTAL, SPACING_VERTICAL * 2 + avatar_size[1]))
+        self.__surf.blit(user_avatar, (consts.SPACING[0], consts.SPACING[1]))
+        self.__surf.blit(text_surf, (consts.SPACING[0] * 2 + avatar_size[0], consts.SPACING[1]))
 
-    def draw(self):
-        self.__canvas.blit(self.__surf, (0, 0))
+    def get_size(self) -> tuple[int, int]:
+        return self.__size
+
+    def draw(self, canvas: pg.Surface, position: tuple[int, int]):
+        canvas.blit(self.__surf, position)
 
     def update(self):
         pass
@@ -38,20 +57,44 @@ class CommentBox:
 
 class ChatView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
-        super().__init__(canvas, [PRIORITY_CHAT])
+        super().__init__(canvas, [8])
+        global consts
+        consts = ResizeRatioSoAnnoying(self.resize_ratio)
         self.__initialized = False
         self.__canvas = canvas
+        self.__chat_surface = pg.Surface(consts.CHAT_SIZE, pg.SRCALPHA)
+        self.__comments: list[CommentBox] = []
+        self.__frame_count = 0
 
     def initialize(self):
-        ava = components.createTeamAvatar(get_model().teams[0], AVATAR_WIDTH)
-        self.__box = CommentBox(
-            self.__canvas, "This is a \nSUSPICIOUS\nand loooooooooooooooooong demo text\nTeam 69's Ranger was slain by Team 8!", ava, CHAT_WIDTH)
+        for idx, team in enumerate(get_model().teams):
+            self.add_comment(f"Comment from Team {idx + 1} =^-w-^= zzzzz", team)
 
     def draw(self):
         if not self.__initialized:
             self.initialize()
             self.__initialized = True
-        self.__box.draw()
+        self.__chat_surface.fill(pg.Color(0, 0, 0, 0))
+        cur_pos = [0, consts.CHAT_SIZE[1]]
+        for comment in reversed(self.__comments):
+            cur_pos[1] -= comment.get_size()[1]
+            comment.draw(self.__chat_surface, cur_pos)
+            cur_pos[1] -= consts.SPACING[1]
+        self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
     def update(self):
-        pass
+        import random
+        self.__frame_count += 1
+        if self.__frame_count % 60 == 0:
+            teamid = random.randint(0, 3)
+            team = get_model().teams[teamid]
+            if random.randint(0, 1) > 0:
+                self.add_comment(
+                    f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)", team)
+            else:
+                teamid2 = random.randint(0, 3)
+                self.add_comment(f"Team {teamid}'s Ranger was slain by Team {teamid2}!", team)
+
+    def add_comment(self, text: str, team: Team):
+        avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
+        self.__comments.append(CommentBox(text, avatar, consts.CHAT_SIZE[0]))
