@@ -7,6 +7,7 @@ import pygame as pg
 import const
 from const.visual.priority import PRIORITY_PAUSEMENU
 from view.object.object_base import ObjectBase
+from view.textutil import draw_text, get_font
 
 if TYPE_CHECKING:
     from model import PauseMenu
@@ -17,8 +18,8 @@ class PauseMenuView(ObjectBase):
         self.image_initialized = True
         super().__init__(canvas, [PRIORITY_PAUSEMENU])
         self.pause_menu = pause_menu
-        self.title_font = pg.font.Font(const.REGULAR_FONT, int(20*self.resize_ratio))
-        self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(12*self.resize_ratio))
+        self.title_font = get_font(const.REGULAR_FONT, int(20*self.resize_ratio))
+        self.font = get_font('./font/Cubic_11_1.300_R.ttf', int(12*self.resize_ratio))
         self.options = self.pause_menu.options
 
     def draw(self):
@@ -36,19 +37,3 @@ class PauseMenuView(ObjectBase):
                       'black', self.font, index == self.pause_menu.selected)
 
         self.canvas.blit(bg_surf, (0, 0))
-
-
-def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):
-    underline_color = 'darkblue'
-    underline_thickness = 3
-    underline_offset = 3
-
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect(center=(x, y))
-
-    if underline:
-        underline_start = (text_rect.left, text_rect.bottom + underline_offset)
-        underline_end = (text_rect.right, text_rect.bottom + underline_offset)
-        pg.draw.line(surf, underline_color, underline_start, underline_end, underline_thickness)
-
-    surf.blit(text_surface, text_rect.topleft)
