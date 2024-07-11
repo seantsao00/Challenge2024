@@ -29,6 +29,28 @@ class MapTerrain(IntEnum):
     """障礙物，無法通過。"""
 
 
+class MovementStatusClass(IntEnum):
+    """角色目前停止。 """
+    STOPPED = auto()
+    """角色目前正朝某個方向前進。 """
+    TO_DIRECTION = auto()
+    """角色目前朝著某個點為目的地前進。 """
+    TO_POSITION = auto()
+
+
+class Movement:
+    def __init__(self,
+                 _status: MovementStatusClass,
+                 _vector: pg.Vector2 | None = None):
+        self.status = _status
+        """
+        當停止時，為 `None`。
+        當朝某個方向時，為朝著的方向，且為一個正規化後的向量。
+        當朝著某個點時，為該點。
+        """
+        self.vector = _vector
+
+
 class Character:
     """角色。"""
 
@@ -150,6 +172,11 @@ class API:
         """
         raise NotImplementedError
 
+    def get_movement(self, character: Character) -> Movement:
+        """
+        回傳一個角色目前的移動狀況。
+        """
+
     def refresh_character(self, character: Character) -> Character | None:
         """
         更新一個角色的數值。如果角色死亡則回傳 None。
@@ -212,6 +239,13 @@ class API:
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         raise NotImplementedError
+
+    def action_wander(self, characters: Iterable[Character]):
+        """
+        將所有列表內的角色設定為遊蕩。
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        """
+        pass
 
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
         """
