@@ -179,7 +179,8 @@ class Model:
                     get_event_manager().post(EventAttack(victim=entity,
                                                          attacker=event.bullet.attacker,
                                                          damage=event.bullet.damage), channel_id=entity.id)
-        Timer(0.1, get_event_manager().post, EventBulletExplode(bullet=event.bullet), once=True)
+        Timer(const.BULLET_RANGER_ABILITY_DURATION, get_event_manager().post,
+              EventBulletExplode(bullet=event.bullet), once=True)
 
     def bullet_damage(self, event: EventBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
