@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from threading import Lock
 from typing import TYPE_CHECKING
 
 import const
@@ -51,7 +52,8 @@ class Team(NeutralTeam):
      - total_buildings: The total buildings that this team has.
      - points: The accumulated points of the team.
      - id: The id of the team.
-     - building_list: list of the building of the team. The first one is the fountain.
+     - building_list: list of the building of the team.
+     - fountain: fountain.
      - character_list: list of the character of the team.
      - visible_entities_list: list of visible entities to the team. Note that entities owned by this team is not in this list.
     """
@@ -66,6 +68,8 @@ class Team(NeutralTeam):
             self.__team_name = 'team' + str(self.__team_id)
         self.__points: int = 0
         self.__towers: set[Tower] = set()
+        self.tower_lock = Lock()
+        self.character_lock = Lock()
         self.character_list: set[Character] = set()
         self.fountain: Tower = None
         self.__choosing_position: bool = False
@@ -102,21 +106,22 @@ class Team(NeutralTeam):
                 self.__controlling.cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
-        self.character_list.add(event.character)
+        with self.character_lock:
+            self.character_list.add(event.character)
 
     def gain_tower(self, event: EventTeamGainTower):
-        if event.tower not in self.__towers:
-            self.__towers.add(event.tower)
-        if self.fountain is None:
-            self.fountain = event.tower
+        with self.tower_lock:
+            if event.tower not in self.__towers:
+                self.__towers.add(event.tower)
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
 
     def lose_tower(self, event: EventTeamLoseTower):
         log_info(f'{self.__team_name} lost a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
-        if event.tower in self.__towers:
-            self.__towers.remove(event.tower)
+        with self.tower_lock:
+            if event.tower in self.__towers:
+                self.__towers.remove(event.tower)
 
     def gain_point_kill(self):
         self.__points += const.SCORE_KILL
@@ -127,8 +132,9 @@ class Team(NeutralTeam):
     def handle_character_died(self, event: EventCharacterDied):
         if self.__controlling is event.character:
             self.__controlling = None
-        if event.character in self.character_list:
-            self.character_list.remove(event.character)
+        with self.character_lock:
+            if event.character in self.character_list:
+                self.character_list.remove(event.character)
 
     def handle_create_tower(self, event: EventCreateTower):
         if event.tower.team is self:

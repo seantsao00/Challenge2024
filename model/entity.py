@@ -4,6 +4,7 @@ The module defines Entity class.
 
 from __future__ import annotations
 
+from threading import Lock
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -11,6 +12,7 @@ import pygame as pg
 import const
 from event_manager.events import EventCreateEntity, EventDiscardEntity
 from instances_manager import get_event_manager
+from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
@@ -44,6 +46,9 @@ class Entity:
         self.hidden: bool = False
         get_event_manager().post(EventCreateEntity(entity=self))
 
+    def __str__(self):
+        return f'living entity {self.id} (team {self.team.team_id})'
+
     def discard(self):
         ev_manager = get_event_manager()
         ev_manager.post(EventDiscardEntity(), self.id)
@@ -63,10 +68,23 @@ class LivingEntity(Entity):
                  attribute: const.LivingEntityAttribute,
                  team: Team,
                  entity_type: const.EntityType,
-                 state: const.EntityState = None):
+                 state: const.EntityState = None,
+                 invulnerablility: bool = False):
         self.alive: bool = True
         self.attribute: const.LivingEntityAttribute = attribute
-
+        self.invulnerablility: bool = False
         self.health: float = self.attribute.max_health
 
         super().__init__(position, team, entity_type, state)
+
+    def vulnerable(self, enemy: Entity):
+        """
+        Test vulerability. `Enemy` is only used for logging.
+        """
+        if self.invulnerablility:
+            log_info(f"[Attack] {self} is invulnerable, {enemy}'s attack failed")
+            return False
+        if self.alive:
+            log_info(f"[Attack] {self} is already dead, {enemy}'s attack failed")
+            return True
+        return True

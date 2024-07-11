@@ -104,9 +104,10 @@ class Controller:
                             x, y)), channel_id=model.RangerControlling.id)
                     else:
                         clicked = None
-                        for entity in model.entities:
-                            if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
-                                clicked = entity
+                        with model.entity_lock:
+                            for entity in model.entities:
+                                if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                                    clicked = entity
                         if isinstance(clicked, Character):
                             ev_manager.post(EventHumanInput(
                                 input_type=const.InputTypes.PICK, clicked_entity=clicked))
@@ -116,9 +117,10 @@ class Controller:
                     if model.RangerAbility:
                         model.RangerAbility = False
                     clicked = None
-                    for entity in reversed(model.entities):
-                        if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
-                            clicked = entity
+                    with model.entity_lock:
+                        for entity in reversed(model.entities):
+                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                                clicked = entity
                     if isinstance(clicked, Character):
                         ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                         clicked_entity=clicked, displacement=pg.Vector2(x, y)))
