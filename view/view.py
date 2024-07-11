@@ -14,7 +14,7 @@ from const.visual.priority import PRIORITY_BACKGROUD, PRIORITY_FOREGROUND, PRIOR
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
+from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, EntityView,
                          HealthView, ObjectBase, PartySelectionView, PauseMenuView, ScoreboxesView,
                          TowerCDView, ViewRangeView)
 from view.textutil import font_loader
@@ -68,6 +68,7 @@ class View:
         self.__background_images = []
 
         self.__scoreboxes = ScoreboxesView(self.__screen)
+        self.__chat = ChatView(self.__screen)
 
         def load_image(filename: str):
             loaded_image = cv2.imread(
@@ -111,6 +112,7 @@ class View:
         TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
         PartySelectionView.set_screen_info(self.__resize_ratio, *self.screen_size)
         ScoreboxesView.set_screen_info(self.__resize_ratio, *self.screen_size)
+        ChatView.set_screen_info(self.__resize_ratio, *self.screen_size)
         font_loader.set_resize_ratio(self.__resize_ratio)
 
     def initialize(self, _: EventInitialize):
@@ -210,6 +212,9 @@ class View:
 
         self.__scoreboxes.update()
         objects.append(self.__scoreboxes)
+
+        self.__chat.update()
+        objects.append(self.__chat)
 
         objects.sort(key=lambda x: x.priority)
         for obj in objects:

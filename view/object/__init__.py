@@ -1,4 +1,5 @@
 from view.object.background_object import *
+from view.object.chat import ChatView
 from view.object.cooldown import *
 from view.object.entity import *
 from view.object.health import *
