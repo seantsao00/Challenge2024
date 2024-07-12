@@ -19,3 +19,5 @@ SETTLEMENT_IMAGE: dict[PartyType, str] = {
 }
 SETTLEMENT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
     284, 100), pg.Vector2(33, 420), pg.Vector2(851, 100), pg.Vector2(600, 420)]
+SETTLEMENT_INITIAL_POSITION = pg.Vector2(-100, -100)
+SCOPE_SPEED = 3
