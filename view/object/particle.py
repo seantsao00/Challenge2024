@@ -5,6 +5,7 @@ import pygame as pg
 from const.visual.priority import PRIORITY_PARTICLE
 from instances_manager import get_model
 from view.object.object_base import ObjectBase
+from view.screen_info import ScreenInfo
 
 
 class Particle(ObjectBase):
@@ -23,7 +24,7 @@ class Particle(ObjectBase):
         self.dead = False
 
     def draw(self):
-        pg.draw.circle(self.canvas, self.color, self.position, self.size * self.resize_ratio)
+        pg.draw.circle(self.canvas, self.color, self.position, self.size * ScreenInfo.resize_ratio)
 
     def move(self):
         dt = get_model().dt

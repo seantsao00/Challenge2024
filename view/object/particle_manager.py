@@ -5,8 +5,9 @@ import random
 
 import pygame as pg
 
-from const.visual.priority import PRIORITY_PARTICLE
-from event_manager import EventEveryTick, EventTestParticle
+from const.visual import PRIORITY_PARTICLE
+from const.visual.particles import *
+from event_manager import EventBulletExplode, EventEveryTick, EventTestParticle
 from instances_manager import get_event_manager
 from view.object.object_base import ObjectBase
 from view.object.particle import Particle
@@ -19,8 +20,13 @@ class ParticleManager(ObjectBase):
         self.canvas = canvas
         self.particles = []
 
+        self.register_events()
+
+    def register_events(self):
+        ev_manager = get_event_manager()
         get_event_manager().register_listener(EventEveryTick, self.on_every_tick)
         get_event_manager().register_listener(EventTestParticle, self.test_particle)
+        ev_manager.register_listener(EventBulletExplode, self.bullet_explode)
 
     def draw(self):
         for p in self.particles:
@@ -35,7 +41,7 @@ class ParticleManager(ObjectBase):
     def explode(self, pos, amount, duration, color):
         for _ in range(amount):
             _pos = pos.copy()
-            _speed = random.uniform(10, 50)
+            _speed = random.uniform(40, 60)
             _duration = random.uniform(0.8, 1.2) * duration
             _size = random.uniform(0.8, 1.2)
             angle = random.uniform(0, 2 * math.pi)
@@ -63,7 +69,11 @@ class ParticleManager(ObjectBase):
                                   _speed, _size, _duration, _color))
 
     def test_particle(self, _: EventTestParticle):
-        self.explode(pg.Vector2(200, 200), 50, 0.5, (230, 80, 50))
+        self.explode(pg.Vector2(200, 200), 30, 0.15, (230, 80, 50))
+
+    def bullet_explode(self, event: EventBulletExplode):
+        self.explode(event.bullet.position, PARTICLES_BULLET_EXPLODE_AMOUNT,
+                     PARTICLES_BULLET_EXPLODE_DURATION, PARTICLES_BULLET_EXPLODE_COLOR)
 
 
 def clamp(value, min_val, max_val):
