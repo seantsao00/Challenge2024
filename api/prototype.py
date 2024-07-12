@@ -30,27 +30,35 @@ class MapTerrain(IntEnum):
 
 
 class MovementStatusClass(IntEnum):
-    """角色目前停止。 """
+    """角色移動的狀態。 """
     STOPPED = auto()
-    """角色目前正朝某個方向前進。 """
+    """角色目前停止。 """
     TO_DIRECTION = auto()
-    """角色目前朝著某個點為目的地前進。 """
+    """角色目前正朝某個方向前進。 """
     TO_POSITION = auto()
-    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
+    """角色目前朝著某個點為目的地前進。 """
     UNKNOWN = auto()
+    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
 
 
 class Movement:
     def __init__(self,
                  _status: MovementStatusClass,
+                 _is_wandering: bool,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
+        """角色的移動狀態。 """
+        self.is_wandering = _is_wandering
+        """
+        角色是否在遊蕩狀態。
+        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
+        """
+        self.vector = _vector
         """
         當停止時，為 `None`。
         當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
         當朝著某個點時，為該點的座標。
         """
-        self.vector = _vector
 
 
 class Character:
@@ -178,19 +186,19 @@ class API:
         """
         raise NotImplementedError
 
-    def get_movement(self, character: Character) -> Movement:
-        """
-        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。
-        """
-
     def refresh_character(self, character: Character) -> Character | None:
         """
         更新一個角色的數值。如果角色死亡則回傳 None。
         """
 
-    def refresh_tower(self, tower: Tower) -> Tower | None:
+    def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個建築物的數值。如果建築物死亡則回傳 None。
+        更新一個建築物的數值。
+        """
+
+    def get_movement(self, character: Character) -> Movement:
+        """
+        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。
         """
 
     def get_visibility(self) -> list[list[int]]:
@@ -224,6 +232,13 @@ class API:
         """
         raise NotImplementedError
 
+    def action_wander(self, characters: Iterable[Character]):
+        """
+        將所有列表內的角色設定為遊蕩。
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        """
+        pass
+
     def action_move_clear(self, characters: Iterable[Character]):
         """
         將所有列表中的角色設定為不移動。  
@@ -239,19 +254,32 @@ class API:
         """
         raise NotImplementedError
 
-    def action_cast_ability(self, characters: Iterable[Character]):
+    def action_cast_ability(self, characters: Iterable[Character], **kwargs):
         """
         將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @kwargs: 所有技能參數的聯集，以下是可用列表：
+         - `position`: `pg.Vector2`，遠程角色使用技能的位置   
+
+        ### 使用範例
+
+        使用所有角色的技能，不過遠程會在自己的位置釋放：
+
+        >>> interface: api.prototype.API
+        >>> interface.action_cast_ability(interface.get_owned_character())
+
+        使用所有遠程的技能，在自己的溫泉釋放：
+
+        >>> interface: api.prototype.API
+        >>> fountain = interface.get_owned_towers()[0]
+        >>> interface.action_cast_ability(
+        ...     [character for character in interface.get_owned_characters()
+        ...     if character.type is api.prototype.CharacterClass.RANGER],
+        ...     position=fountain.position)
+
+        如果 `kwargs` 給定的參數型別不符會收到 TypeError。
         """
         raise NotImplementedError
-
-    def action_wander(self, characters: Iterable[Character]):
-        """
-        將所有列表內的角色設定為遊蕩。
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
-        """
-        pass
 
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
         """

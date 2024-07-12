@@ -1,15 +1,10 @@
 """
-Author: CppNoPointer
+Author: Su
 AI 原理：
 目前 AI 會將戰鬥分成三個階段：
 1. 探視野階段：
-從溫泉生成近戰兵，並使每個近戰兵隨機探索未探索的點區域，直到找到一座中立塔
 2. 攻略中立塔階段：
-切換生成遠程兵，並將兵聚集於溫泉，直到屯的兵超過 20 個，便從溫泉派出軍隊將中立塔拿下
-若攻下中立塔，並進入下一階段
 3. 對戰階段：
-切換非溫泉塔生成狙擊兵，並召集所有軍隊攻擊第一個非友軍單位
-(目前這份 code 仍有 bug，但是大體來說符合上述原則)
 """
 
 
@@ -30,23 +25,24 @@ def get_fountain(visible_towers, my_team_id):
 
 def every_tick(api: API):
     scores = []
-
+    
     for team_id in range(0, 4):
         scores.append(api.get_score_of_team(team_id))
 
-    # print(scores)
-    
     print(scores)
 
     my_team_id = api.get_team_id()
 
-
     owned_characters = api.get_owned_characters()
+    visible_enemy = [character for character in api.get_visible_characters()
+    if character.team_id != my_team_id]
+    
     visible_towers = api.get_visible_towers()
     owned_characters_count = len(owned_characters)
     visible_towers_count = len(visible_towers)
+    enemy_count = len(visible_enemy)
+
     fountain = get_fountain(visible_towers, my_team_id)
-    #print(visible_towers, fountain)
 
     stopped_characters = []
     moving_characters = []
@@ -59,18 +55,21 @@ def every_tick(api: API):
     moving_characters_count = len(moving_characters)
     
 
-    if (visible_towers_count <= 1):
-        api.change_spawn_type(fountain, CharacterClass.MELEE)
+    if (visible_towers_count <= 1 and owned_characters_count > 0):
+        if (owned_characters_count <= 15):
+            api.change_spawn_type(fountain, CharacterClass.MELEE)
+
+            api.action_wander(owned_characters)
+        else:
+            api.change_spawn_type(fountain, CharacterClass.RANGER)
+            owned_ranger = [ranger for ranger in owned_characters if ranger.type == CharacterClass.RANGER]
+            random_point = pg.Vector2(random.random() * 125, random.random() * 125)
+            api.action_move_to(owned_ranger, random_point)
         
         if (stopped_characters_count >= 1):
-            random_point = None
-            while True:
-                random_point = pg.Vector2(random.random() * 250, random.random() * 250)
-                if not api.is_visible(random_point):
-                    break
-            #print(random_point)
-            #api.action_move_along(owned_characters[:], direction)
-            api.action_move_to(stopped_characters[:1], random_point)
+            random_point = pg.Vector2(random.random() * 250, random.random() * 250)
+            api.action_move_to(owned_characters, random_point)      
+        
     else: 
         target_tower = None
         for tower in visible_towers:
@@ -79,7 +78,6 @@ def every_tick(api: API):
                 break
         if target_tower != None:
             api.change_spawn_type(fountain, CharacterClass.RANGER)
-            #print(stopped_characters_count, moving_characters_count)
             if moving_characters_count <= 10 and moving_characters_count != 0: 
                 api.action_move_to(moving_characters[:],
                                         fountain.position)
@@ -91,14 +89,16 @@ def every_tick(api: API):
                     api.action_move_along(owned_characters, pg.Vector2(1, 1))
         else: 
             owned_tower = api.get_owned_towers()
-            for tower in owned_tower:
-                if not tower.is_fountain: api.change_spawn_type(tower, CharacterClass.SNIPER)
-                else: api.change_spawn_type(tower, CharacterClass.RANGER)
-            visible_enemy = [character for character in api.get_visible_characters()
-                if character.team_id != my_team_id]
             
-            if len(visible_enemy):
+            for tower in owned_tower:
+                if not tower.is_fountain: api.change_spawn_type(tower, CharacterClass.RANGER)
+                else: api.change_spawn_type(tower, CharacterClass.RANGER)
+            
+            if enemy_count:
+                enemy_sniper = [sniper for sniper in owned_characters if sniper.type == CharacterClass.SNIPER]
                 api.action_move_to(owned_characters[:], visible_enemy[0].position)
-                api.action_cast_ability(owned_characters[:])
+                api.action_cast_ability(owned_characters[:], position = visible_enemy[0].position)
+                if (len(enemy_sniper) > 0):
+                    api.action_attack(owned_characters[:], enemy_sniper[0])
                 api.action_attack(owned_characters[:], visible_enemy[0])
 

@@ -299,37 +299,61 @@ class Internal(prototype.API):
             return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
         with character.moving_lock:
             if character.move_state == CharacterMovingState.STOPPED:
-                return prototype.Movement(prototype.MovementStatusClass.STOPPED)
-            if character.move_state == CharacterMovingState.TO_DIRECTION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION,
-                                          self.__transform(character.move_direction.normalize(), is_position=False))
-            if character.move_state == CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION,
-                                          self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
+            elif character.move_state == CharacterMovingState.TO_DIRECTION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
+            elif character.move_state == CharacterMovingState.TO_POSITION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        enforce_type('character', character, prototype.Character, type(None))
+
         internal = self.__access_character(character)
         if internal is None or not internal.alive:
             return None
         return self.__register_character(internal)
 
-    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
-        internal = self.__access_tower(tower)
-        if internal is None or not internal.alive:
-            return None
-        return self.__register_tower(tower)
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower:
+        enforce_type('tower', tower, prototype.Tower)
 
-    # I don't want to deal with transform yet
-    # def get_visibility(self) -> list[list[int]]:
-    #     mask = self.__team().vision.mask
-    #     vision_grid = pg.surfarray.array_alpha(mask)
-    #     vision_grid[vision_grid == 0] = 1
-    #     vision_grid[vision_grid == 255] = 0
-    #     return vision_grid.tolist()
+        internal = self.__access_tower(tower)
+        if not internal.alive:
+            raise GameError("Tower died, what?")
+        return self.__register_tower(internal)
+
+    def get_visibility(self) -> list[list[int]]:
+        vision_grid = np.array(self.__team().vision.bool_mask)
+
+        # Upside down flip
+        vision_grid = np.flip(vision_grid, axis=0)
+        if self.transform is None:
+            self.__build_transform_matrix()
+
+        # Rotate visibility matrix base on transform
+        if self.transform[0][0] == 0 and self.transform[0][1] == 1:
+            vision_grid = np.rot90(vision_grid)
+        elif self.transform[0][0] == -1 and self.transform[0][1] == 0:
+            vision_grid = np.rot90(vision_grid, 2)
+        elif self.transform[0][0] == 0 and self.transform[0][1] == -1:
+            vision_grid = np.rot90(vision_grid, 3)
+
+        # Transform array index into coordinate
+        vision_grid = np.flip(vision_grid, axis=0)
+        vision_grid = np.rot90(vision_grid)
+
+        # Expand to 250 * 250
+        vision_coordinate = [[vision_grid[i // 2][j // 2]
+                              for i in range(const.ARENA_SIZE[0])] for j in range(const.ARENA_SIZE[1])]
+
+        return vision_coordinate
 
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(
             self.__transform(position, is_position=True, inverse=True))
+
+    def is_wandering(self, character: prototype.Character) -> bool:
+        enforce_type('character', character, prototype.Character)
+        return self.__access_character(character).is_wandering
 
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
         W = const.ARENA_SIZE[1]
@@ -368,7 +392,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
-                if len(path) > 0:
+                if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
@@ -397,14 +421,18 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character]):
+    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
         enforce_type('characters', characters, Iterable)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if 'position' in kwargs:
+            enforce_type('position', kwargs['position'], pg.Vector2)
+            kwargs['position'] = self.__transform(
+                kwargs['position'], is_position=True, inverse=True)
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
-            inter.cast_ability()
+            inter.cast_ability(**kwargs)
 
     def action_wander(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
@@ -414,18 +442,7 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
-                inter.set_move_stop()
-
-                direction = inter.move_direction
-                if direction == pg.Vector2(0, 0):
-                    direction = pg.Vector2(random.random(), random.random())
-
-                direction = direction.normalize()
-                new_direction = pg.Vector2()
-                new_direction.from_polar(
-                    (direction.as_polar()[0], direction.as_polar()[1] + random.uniform(-20, 20)))
-
-                inter.set_move_direction(new_direction)
+                inter.set_wandering()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -446,6 +463,7 @@ class Internal(prototype.API):
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
+        return characters
 
 
 class TimeoutException(BaseException):

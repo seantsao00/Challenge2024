@@ -11,12 +11,11 @@ from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick,
                            EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building import Tower
-from model.character import Character, Ranger
+from model.character import Character
 from model.team_vision import TeamVision
 from util import log_info
 
 if TYPE_CHECKING:
-    from model.building import Tower
     from model.entity import Entity
 
 
@@ -72,7 +71,6 @@ class Team(NeutralTeam):
         self.character_lock = Lock()
         self.character_list: set[Character] = set()
         self.fountain: Tower = None
-        self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
         self.vision = TeamVision(self)
@@ -105,7 +103,7 @@ class Team(NeutralTeam):
                 self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
-                self.__controlling.cast_ability()
+                self.__controlling.manual_cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
         with self.character_lock:
@@ -164,7 +162,6 @@ class Team(NeutralTeam):
         ev_manager.register_listener(EventSelectCharacter, self.select_character)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
         ev_manager.register_listener(EventEveryTick, self.gain_point_tower)
-        
 
     @property
     def team_name(self) -> str:

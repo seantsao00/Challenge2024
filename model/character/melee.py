@@ -70,6 +70,9 @@ class Melee(Character):
         self.abilities_time = now_time
         self.ability()
 
+    def manual_cast_ability(self, *args, **kwargs):
+        self.cast_ability(*args, **kwargs)
+
     def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables
         self.abilities_time = 1e9
