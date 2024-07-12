@@ -315,8 +315,9 @@ class Internal(prototype.API):
         internal = self.__access_tower(tower)
         if internal is None or not internal.alive:
             return None
-        return self.__register_tower(tower)
+        return self.__register_tower(internal)
 
+    
     def get_visibility(self) -> list[list[int]]:
         vision_grid = np.array(self.__team().vision.bool_mask)
 
