@@ -389,9 +389,13 @@ class Internal(prototype.API):
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         destination = self.__transform(destination, is_position=True, inverse=True)
+        destination_cell = get_model().map.position_to_cell(destination)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
+            old_destination = inter.move_destination
+            if old_destination is not None and get_model().map.position_to_cell(inter.move_destination) == destination_cell:
+                continue
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
