@@ -172,6 +172,7 @@ class Character(LivingEntity):
     def set_move_stop(self) -> bool:
         """Stop movement of the character. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.STOPPED
+        self.__is_wandering = False
         return True
 
     def set_move_direction(self, direction: pg.Vector2) -> bool:
