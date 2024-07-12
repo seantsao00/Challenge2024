@@ -152,9 +152,9 @@ class Controller:
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventResumeModel())
                 elif key == pg.K_DOWN:
-                    model.pause_menu.change_selected(1)
+                    model.pause_menu.move_cursor(1)
                 elif key == pg.K_UP:
-                    model.pause_menu.change_selected(-1)
+                    model.pause_menu.move_cursor(-1)
                 elif key == pg.K_RETURN:
                     model.pause_menu.execute()
 

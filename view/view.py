@@ -51,6 +51,7 @@ class View:
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
 
+        self.__cover_image: pg.Surface = load_image(const.COVER_IMAGE, screen_w, screen_h)[0]
         self.__particle_manager = ParticleManager(self.__arena)
 
         PartySelectorView.init_convert()
@@ -123,12 +124,7 @@ class View:
 
     def render_cover(self):
         """Render game cover"""
-
-        # setting up a temporary cover till we have a cover image
-        font = pg.font.Font(None, int(12*ScreenInfo.resize_ratio))
-        text_surface = font.render(
-            'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
-        self.__screen.blit(text_surface, (100, 100))
+        self.__screen.blit(self.__cover_image, (0, 0))
 
     def render_party_selector(self):
         """Render party selecting process"""
