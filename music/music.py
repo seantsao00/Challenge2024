@@ -22,7 +22,7 @@ class BackgroundMusic:
             self.sound[effect].set_volume(const.EFFECT_VOLUME[effect])
         self.__register_listeners()
 
-    def __initialize(self, _: EventInitialize):
+    def __handle_start(self, _: EventStartGame):
         """
         The variation for the in-game Background Music is determined by
         the party NOT present in game.
@@ -47,7 +47,7 @@ class BackgroundMusic:
         if pg.mixer.music.get_busy():
             pg.mixer.music.set_volume(self.default_volume)
 
-    def __handle_select_party(self, _: EventSelectParty):
+    def __handle_change_party(self, _: EventChangeParty):
         self.sound[const.EffectType.SELECT].play()
 
     def __handle_attack(self, event: EventAttack):
@@ -68,9 +68,9 @@ class BackgroundMusic:
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
-        ev_manager.register_listener(EventInitialize, self.__initialize)
+        ev_manager.register_listener(EventStartGame, self.__handle_start)
         ev_manager.register_listener(EventPauseModel, self.__handle_pause)
         ev_manager.register_listener(EventResumeModel, self.__handle_resume)
-        ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
+        ev_manager.register_listener(EventChangeParty, self.__handle_change_party)
         ev_manager.register_listener(EventCreateEntity, self.__handle_create_entity)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
