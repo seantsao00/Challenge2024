@@ -308,6 +308,10 @@ class Internal(prototype.API):
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(self.__transform(position, is_vector=False, inverse=True))
 
+    def is_wandering(self, character: prototype.Character) -> bool:
+        enforce_type('character', character, prototype.Character)
+        return self.__access_character(character).is_wandering
+
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
         W = const.ARENA_SIZE[1]
         if position.x < 0 or position.x > W or position.y < 0 or position.x > W:

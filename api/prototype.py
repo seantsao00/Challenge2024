@@ -198,6 +198,12 @@ class API:
         @position: 要檢查的位置。"""
         raise NotImplementedError
 
+    def is_wandering(self, character: Character) -> bool:
+        """
+        回傳某個角色是否處於遊蕩狀態。
+        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
+        """
+
     def get_terrain(self, position: pg.Vector2) -> MapTerrain:
         """回傳某個位置的地形，不需在視野範圍內就能呼叫。  
         如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
