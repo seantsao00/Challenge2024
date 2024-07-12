@@ -51,8 +51,8 @@ class View:
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
 
-        self.__particle_manager = ParticleManager(self.__screen)
         self.__cover_image: pg.Surface = load_image(const.COVER_IMAGE, screen_w, screen_h)[0]
+        self.__particle_manager = ParticleManager(self.__arena)
 
         PartySelectorView.init_convert()
 

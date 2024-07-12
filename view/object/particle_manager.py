@@ -7,10 +7,11 @@ import pygame as pg
 
 from const.visual import PRIORITY_PARTICLE
 from const.visual.particles import *
-from event_manager import EventBulletExplode, EventEveryTick, EventTestParticle
+from event_manager import EventBulletExplode, EventEveryTick
 from instances_manager import get_event_manager
 from view.object.object_base import ObjectBase
 from view.object.particle import Particle
+from view.screen_info import ScreenInfo
 
 
 class ParticleManager(ObjectBase):
@@ -25,7 +26,6 @@ class ParticleManager(ObjectBase):
     def register_events(self):
         ev_manager = get_event_manager()
         get_event_manager().register_listener(EventEveryTick, self.on_every_tick)
-        get_event_manager().register_listener(EventTestParticle, self.test_particle)
         ev_manager.register_listener(EventBulletExplode, self.bullet_explode)
 
     def draw(self):
@@ -40,7 +40,7 @@ class ParticleManager(ObjectBase):
 
     def explode(self, pos, amount, duration, color):
         for _ in range(amount):
-            _pos = pos.copy()
+            _pos = pos * ScreenInfo.resize_ratio
             _speed = random.uniform(40, 60)
             _duration = random.uniform(0.8, 1.2) * duration
             _size = random.uniform(0.8, 1.2)
@@ -67,9 +67,6 @@ class ParticleManager(ObjectBase):
 
             self.particles.append(Particle(self.canvas, _pos, _direction,
                                   _speed, _size, _duration, _color))
-
-    def test_particle(self, _: EventTestParticle):
-        self.explode(pg.Vector2(200, 200), 30, 0.15, (230, 80, 50))
 
     def bullet_explode(self, event: EventBulletExplode):
         self.explode(event.bullet.position, PARTICLES_BULLET_EXPLODE_AMOUNT,
