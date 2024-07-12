@@ -39,8 +39,7 @@ class View:
                        const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
         screen_h = int(min(display_info.current_h, display_info.current_w /
                        const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
-        self.__screen: pg.Surface = pg.display.set_mode(
-            size=(screen_w, screen_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
+        self.__screen: pg.Surface = pg.display.set_mode(size=(screen_w, screen_h))
 
         ScreenInfo.set_screen_info(screen_w / const.WINDOW_SIZE[0], (screen_w, screen_h))
 
@@ -181,7 +180,8 @@ class View:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            mask = pg.transform.scale(my_team.vision.get_mask(), (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
+            mask = pg.transform.scale(my_team.vision.get_mask(),
+                                      (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
             objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
