@@ -14,9 +14,9 @@ from const.visual.priority import PRIORITY_BACKGROUND, PRIORITY_FOREGROUND, PRIO
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, EntityView,
-                         HealthView, ObjectBase, PartySelectorView, PauseMenuView, ScoreboxesView,
-                         TowerCDView, ViewRangeView)
+from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
+                         EntityView, HealthView, ObjectBase, PartySelectorView, PauseMenuView,
+                         ScoreboxesView, TowerCDView, ViewRangeView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
@@ -63,6 +63,7 @@ class View:
 
         self.__scoreboxes = ScoreboxesView(self.__screen)
         self.__chat = ChatView(self.__screen)
+        self.__clock = ClockView(self.__screen)
 
         def load_image(filename: str):
             loaded_image = cv2.imread(
@@ -199,18 +200,11 @@ class View:
         self.__screen.blit(
             self.__arena, ((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
 
-        # show time remaining
-        # time_remaining = int(const.GAME_TIME - model.get_time())
-        # (min, sec) = divmod(time_remaining, 60)
-        # font = font_loader.get_font(size=12)
-        # time_remaining_surface = font.render(f'{min:02d}:{sec:02d}', True, pg.Color('white'))
-        # self.__screen.blit(time_remaining_surface,
-        #                    (15 * self.__resize_ratio, 95 * self.__resize_ratio))
-
         self.__scoreboxes.update()
         self.__scoreboxes.draw()
         self.__chat.update()
         self.__chat.draw()
+        self.__clock.draw()
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
