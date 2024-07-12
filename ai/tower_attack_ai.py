@@ -36,7 +36,7 @@ def every_tick(api: API):
         scores.append(api.get_score_of_team(team_id))
 
     # print(scores)
-
+    
     my_team_id = api.get_team_id()
 
 
