@@ -11,6 +11,9 @@ from const.entity import LivingEntityAttribute
 if TYPE_CHECKING:
     CharacterState: TypeAlias = None
 
+MAX_WANDERING = 50
+# Maximum for random in wandering
+
 
 class CharacterType(Enum):
     MELEE = auto()
