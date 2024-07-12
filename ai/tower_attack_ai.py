@@ -62,9 +62,12 @@ def every_tick(api: API):
         else: dispatched_characters.append(character)
     recruited_characters_count = len(recruited_characters)
     dispatched_characters_count = len(dispatched_characters)
-    
-
-    if (visible_towers_count <= 1):
+    contestable_tower = []
+    for tower in visible_towers:
+        if not tower.is_fountain:
+            contestable_tower.append(tower)
+    contestable_tower_count = len(contestable_tower)
+    if (contestable_tower_count == 0):
         api.change_spawn_type(fountain, CharacterClass.MELEE)
         
         if (recruited_characters_count >= 1):
@@ -75,9 +78,12 @@ def every_tick(api: API):
                     break
             #print(random_point)
             #api.action_move_along(owned_characters[:], direction)
+            """
             for index in range(len(recruited_characters)):
                 if api.get_movement(recruited_characters[index]).status == MovementStatusClass.STOPPED:
                     api.action_move_to(recruited_characters[index:(index + 1)], random_point)
+            """
+            api.action_wander(owned_characters)
     else: 
         target_tower = None
         for tower in visible_towers:
