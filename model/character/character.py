@@ -169,6 +169,7 @@ class Character(LivingEntity):
         """Set character movement toward a direction. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.TO_DIRECTION
         self.__move_direction = direction
+        self.__is_wandering = False
         return True
 
     def set_move_position(self, path: list[pg.Vector2] | None):
@@ -178,6 +179,7 @@ class Character(LivingEntity):
         self.__move_path = path
         self.__move_state = CharacterMovingState.TO_POSITION
         self.__move_direction = pg.Vector2(0, 0)
+        self.__is_wandering = False
         return True
 
     def set_wandering(self) -> bool:
