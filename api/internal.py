@@ -370,7 +370,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
-                if len(path) > 0:
+                if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
