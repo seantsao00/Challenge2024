@@ -51,20 +51,24 @@ class EventManager:
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        if self.__read_lock[(event_class, channel_id)] > 0:
+        if self.__read_lock[(event_class, channel_id)] == 0:
+            self.__listeners[(event_class, channel_id)].add(listener)
+        elif self.__read_lock[(event_class, channel_id)] > 0:
             self.__wait_add_listeners[(event_class, channel_id)].append(listener)
         else:
-            self.__listeners[(event_class, channel_id)].add(listener)
+            raise ValueError('the value of the read lock of event manager less than 0')
 
     def unregister_listener(self, event_class: type[BaseEvent],
                             listener: ListenerCallback, channel_id: ChannelId | None = None):
         """
         Unregister a listener.
         """
-        if self.__read_lock[(event_class, channel_id)] > 0:
+        if self.__read_lock[(event_class, channel_id)] == 0:
+            self.__listeners[(event_class, channel_id)].remove(listener)
+        elif self.__read_lock[(event_class, channel_id)] > 0:
             self.__wait_remove_listeners[(event_class, channel_id)].append(listener)
         else:
-            self.__listeners[(event_class, channel_id)].add(listener)
+            raise ValueError('the value of the read lock of event manager less than 0')
 
     def post(self, event: BaseEvent, channel_id: ChannelId | None = None):
         """
@@ -83,14 +87,13 @@ class EventManager:
 
         if self.__read_lock[(type(event), channel_id)] == 0:
             for listener in self.__wait_add_listeners[(type(event), channel_id)]:
-                try:
-                    self.__listeners[(type(event), channel_id)].add(listener)
-                except KeyError:
-                    log_warning(f'{listener} is not registered to ({type(event)}, {channel_id})')
+                self.__listeners[(type(event), channel_id)].add(listener)
             self.__wait_add_listeners[(type(event), channel_id)].clear()
+
             for listener in self.__wait_remove_listeners[(type(event), channel_id)]:
                 try:
-                    self.__listeners[(type(event), channel_id)].add(listener)
+                    self.__listeners[(type(event), channel_id)].remove(listener)
                 except KeyError:
-                    log_warning(f'{listener} is not registered to ({type(event)}, {channel_id})')
+                    log_warning(f'try unregister {listener} which is not registered to '
+                                f'({type(event)}, {channel_id})')
             self.__wait_remove_listeners[(type(event), channel_id)].clear()
