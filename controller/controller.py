@@ -11,8 +11,8 @@ import pygame as pg
 import const
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam)
+                           EventSelectParty, EventTestParticle, EventUnconditionalTick,
+                           EventUseRangerAbility, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import Character, LivingEntity, TimerManager
 from util import log_info
@@ -88,6 +88,8 @@ class Controller:
                     ev_manager.post(EventSelectCharacter(character_type=character_type))
                 if key == const.CHANGE_TEAM_VISION:
                     ev_manager.post(EventViewChangeTeam())
+                if key == pg.K_p:
+                    ev_manager.post(EventTestParticle())
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
@@ -109,9 +111,10 @@ class Controller:
                     else:
                         clicked = None
                         with model.entity_lock:
-                            for entity in model.towers + model.characters:
+                            for entity in model.characters + model.towers:
                                 if (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                     clicked = entity
+                                    break
                         if isinstance(clicked, Character):
                             ev_manager.post(EventHumanInput(
                                 input_type=const.InputTypes.PICK, clicked_entity=clicked))
@@ -122,9 +125,10 @@ class Controller:
                         model.ranger_ability = False
                     clicked = None
                     with model.entity_lock:
-                        for entity in model.characters + model.towers:  # Tower first
+                        for entity in model.towers + model.characters:  # Tower first
                             if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                 clicked = entity
+                                break
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked_entity=clicked, displacement=pg.Vector2(x, y)))
 

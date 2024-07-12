@@ -462,7 +462,7 @@ class Internal(prototype.API):
 
         internal_tower.update_character_type(Internal.__map_character_type(spawn_type))
 
-    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2):
+    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2) -> list[prototype.Character]:
         enforce_type('characters', characters, Iterable)
         enforce_type('target', target, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
@@ -470,7 +470,7 @@ class Internal(prototype.API):
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
-        return characters
+        return list(characters)
 
     def within_attacking_range(self, unit: prototype.Character | prototype.Tower,
                                candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
