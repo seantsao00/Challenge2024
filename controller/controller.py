@@ -97,8 +97,15 @@ class Controller:
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
                     if model.ranger_ability:
-                        ev_manager.post(EventUseRangerAbility(position=pg.Vector2(
-                            x, y)), channel_id=model.ranger_controlling.id)
+                        ability_target = pg.Vector2(x, y)
+                        if model.ranger_controlling.reachable(ability_target):
+                            ev_manager.post(EventUseRangerAbility(position=ability_target),
+                                            channel_id=model.ranger_controlling.id)
+                            model.ranger_controlling.abilities_time = model.get_time()
+                            log_info("[Ranger] manual control success")
+                        else:
+                            log_info("[Ranger] manual control failed: out of range")
+                        get_model().ranger_ability = False
                     else:
                         clicked = None
                         with model.entity_lock:

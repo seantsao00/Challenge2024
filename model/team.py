@@ -105,7 +105,7 @@ class Team(NeutralTeam):
                 self.__controlling.attack(clicked_entity)
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
-                self.__controlling.cast_ability()
+                self.__controlling.manual_cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
         with self.character_lock:
@@ -164,7 +164,6 @@ class Team(NeutralTeam):
         ev_manager.register_listener(EventSelectCharacter, self.select_character)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
         ev_manager.register_listener(EventEveryTick, self.gain_point_tower)
-        
 
     @property
     def team_name(self) -> str:
