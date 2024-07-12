@@ -6,18 +6,28 @@ import const.tower
 from model.team import Team
 from view.textutil import draw_text, split_text
 
+_cache_avatar_img: dict[const.team.PartyType, pg.Surface] = {}
+_cache_avatar: dict[tuple[int, int], pg.Surface] = {}
 
-def createTeamAvatar(team: Team, size: int) -> pg.Surface:
-    if not isinstance(size, int):
-        raise ValueError("Avatar size must be a ineteger")
 
-    party = team.party
+def _getAvatarImage(party: const.team.PartyType):
+    if party in _cache_avatar_img:
+        return _cache_avatar_img[party]
     if const.character.CharacterType.RANGER in const.ENTITY_IMAGE[party]:
         avatar_img = pg.image.load(
             const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][None])
     else:
         avatar_img = pg.image.load(
             const.ENTITY_IMAGE[const.team.PartyType.NEUTRAL][const.tower.TowerType.PYLON][None])
+    _cache_avatar_img[party] = avatar_img
+    return avatar_img
+
+
+def _getTeamAvatar(team: Team, size: int):
+    if (team, size) in _cache_avatar:
+        return _cache_avatar[(team, size)]
+
+    avatar_img = _getAvatarImage(team.party)
     avatar = pg.Surface((size, size), pg.SRCALPHA)
 
     # resize and crop unwanted parts
@@ -33,7 +43,14 @@ def createTeamAvatar(team: Team, size: int) -> pg.Surface:
     avatar = avatar.copy().convert_alpha()
     avatar.blit(rect_mask, (0, 0), None, pg.BLEND_RGBA_MIN)
 
+    _cache_avatar[(team, size)] = avatar
     return avatar
+
+
+def createTeamAvatar(team: Team, size: int) -> pg.Surface:
+    if not isinstance(size, int):
+        raise ValueError("Avatar size must be a ineteger")
+    return _getTeamAvatar(team, size)
 
 
 def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) -> pg.Surface:
