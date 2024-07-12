@@ -390,19 +390,7 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
-                inter.set_move_stop()
-
-                direction = inter.move_direction
-                if direction == pg.Vector2(0, 0):
-                    direction = pg.Vector2()
-                    direction.from_polar((1, random.uniform(0, 360)))
-
-                direction = direction.normalize()
-                new_direction = pg.Vector2()
-                new_direction.from_polar(
-                    (direction.as_polar()[0], direction.as_polar()[1] + random.uniform(-20, 20)))
-
-                inter.set_move_direction(new_direction)
+                inter.set_wandering()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""

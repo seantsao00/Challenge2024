@@ -41,6 +41,7 @@ class Character(LivingEntity):
        (useful when __move_state == TO_LOCATION).
      - __move_direction: The direction the character is facing and moving toward
        (useful when __move_state == TO_DIRECTION).
+     - __is_wandering: If the character is wandering. Wandering is only used by api methods.
     """
 
     def __init__(self,
@@ -55,6 +56,7 @@ class Character(LivingEntity):
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
+        self.__is_wandering: bool = False
 
         super().__init__(position, attribute, team, entity_type, state)
 
@@ -133,11 +135,22 @@ class Character(LivingEntity):
         if it == len(self.__move_path):
             self.__move_path = []
             self.__move_state = CharacterMovingState.STOPPED
-            log_info(f"[API] Character {self.id}: arrive at destination")
+            if self.__is_wandering:
+                self.__set_wander_destination()
+            else:
+                log_info(f"[API] Character {self.id}: arrive at destination")
         else:
             del self.__move_path[:it]
 
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
+
+    def __set_wander_destination(self):
+        destination = pg.Vector2()
+
+        # destination is not implemented yet.
+
+        self.__move_path = get_model().map.find_path(self.position, destination)
+        self.__move_state = CharacterMovingState.TO_POSITION
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
@@ -166,6 +179,15 @@ class Character(LivingEntity):
         self.__move_state = CharacterMovingState.TO_POSITION
         self.__move_direction = pg.Vector2(0, 0)
         return True
+
+    def set_wandering(self) -> bool:
+        """Set the character to be wandering. Returns True/False on success/failure. If the character is already wandering, this method will return False. """
+        if self.__is_wandering:
+            return False
+        else:
+            self.__set_wander_destination()
+            self.__is_wandering = True
+            return True
 
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
@@ -222,3 +244,7 @@ class Character(LivingEntity):
     @property
     def move_state(self) -> CharacterMovingState:
         return self.__move_state
+
+    @property
+    def is_wandering(self) -> bool:
+        return self.__is_wandering
