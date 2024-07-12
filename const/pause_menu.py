@@ -11,3 +11,6 @@ class PauseMainMenuOption(Enum):
     RESUME_GAME = auto()
     OPEN_CREDIT_BOARD = auto()
     QUIT_GAME = auto()
+
+
+CREDIT_CONTENT = 'credit.json'
