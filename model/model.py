@@ -28,6 +28,7 @@ from model.grid import Grid
 from model.map import load_map
 from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
+from model.settlement import Settlement
 from model.team import NeutralTeam, Team
 from model.timer import Timer
 from util import log_critical
@@ -89,6 +90,7 @@ class Model:
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
 
+        self.settlement: Settlement = Settlement(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
         self.ranger_ability = False
         self.ranger_controlling: Ranger = None
@@ -237,6 +239,8 @@ class Model:
                 # if running_time >= const.model.GAME_TIME:
                 #     ev_manager.post(EventGameOver())
                 ev_manager.post(EventGameOver())
+            if self.state is const.State.SETTLEMENT:
+                self.settlement.update()
             self.dt = self.global_clock.tick(const.FPS) / 1000
 
     def __handle_quit(self, _: EventQuit):
@@ -271,6 +275,7 @@ class Model:
         """
         End the game and show scoreboard on the settlement screen.
         """
+        self.settlement.ranking()
         self.state = const.State.SETTLEMENT
 
     def __handle_select_party(self, _: EventSelectParty):

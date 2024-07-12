@@ -10,26 +10,32 @@ from util import crop_image, transform_coordinate
 from view.object.object_base import ObjectBase
 from view.screen_info import ScreenInfo
 
+if TYPE_CHECKING:
+    from model import Settlement
+
 
 class SettlementView(ObjectBase):
     background_image: pg.Surface
     party_images: dict[const.PartyType, pg.Surface] = {}
     ratio: float
 
-    def __init__(self, canvas: pg.Surface):
+    def __init__(self, canvas: pg.Surface, settlement: Settlement):
         self.image_initialized = True
         super().__init__(canvas, [const.PRIORITY_SETTLEMENT])
+        self.__settlement = settlement
         self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
-        self.__scope_position = pg.Vector2(-100, -100)
 
     @classmethod
     def init_convert(cls):
-        img = pg.image.load(const.SETTLEMENT_BACKGROUND)
-
         cls.ratio = ScreenInfo.screen_size[1] / 900
 
+        img = pg.image.load(const.SETTLEMENT_BACKGROUND)
         cls.background_image = crop_image(
             img, 1260 * cls.ratio, ScreenInfo.screen_size[1], True).convert_alpha()
+
+        img = pg.image.load(const.SETTLEMENT_SCOPE)
+        cls.scope_image = crop_image(
+            img, 360 * cls.ratio, 360 * cls.ratio, True).convert_alpha()
 
         for key, path in const.SETTLEMENT_IMAGE.items():
             img = pg.image.load(path)
@@ -40,23 +46,20 @@ class SettlementView(ObjectBase):
 
     def draw(self):
         model = get_model()
-        point: list = [(284, 100), (33, 420), (600, 420), (851, 100)]
-        team_number = 0
+        point: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
             img = self.party_images[team.party]
-            self.canvas.blit(img, transform_coordinate(point[team_number], self.ratio))
-            team_number += 1
+            self.canvas.blit(img, transform_coordinate(point[team.team_id], self.ratio))
 
         img = self.background_image
         self.canvas.blit(img, (0, 0))
 
+        img = self.scope_image
+        self.canvas.blit(img, transform_coordinate(self.__settlement.scope_position, self.ratio))
+
         # if self.__party_selector.is_ready():
         #     draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
         #               40, 'Press ENTER to continue', 'white', self.__font)
-
-    def update(self) -> bool:
-
-        return True
 
 
 def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):
