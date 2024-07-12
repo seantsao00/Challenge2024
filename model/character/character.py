@@ -111,7 +111,7 @@ class Character(LivingEntity):
         """
         EPS = 1e-8
 
-        if len(self.__move_path) == 0:
+        if self.__move_path is None or len(self.__move_path) == 0:
             return
 
         it = 0
