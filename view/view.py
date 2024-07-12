@@ -17,7 +17,7 @@ from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
                          EntityView, HealthView, ObjectBase, Particle, ParticleManager,
-                         PartySelectorView, PauseMenuView, ScoreboxesView, TowerCDView,
+                         PartySelectorView, PauseMenuView, ScoreboardView, TowerCDView,
                          ViewRangeView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
@@ -65,7 +65,7 @@ class View:
             const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
 
-        self.__scoreboxes = ScoreboxesView(self.__screen)
+        self.__scoreboxes = ScoreboardView(self.__screen)
         self.__chat = ChatView(self.__screen)
         self.__clock = ClockView(self.__screen)
         bg_image_counter = 0

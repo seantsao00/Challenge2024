@@ -78,7 +78,7 @@ class Scorebox:
         return self.__team
 
 
-class ScoreboxesView(ObjectBase):
+class ScoreboardView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
         super().__init__(canvas, [8])
         self.__initialized = False
