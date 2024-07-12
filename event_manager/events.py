@@ -201,10 +201,5 @@ class EventUseRangerAbility(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventTestParticle(BaseEvent):
-    """Test haha"""
-
-
-@dataclass(kw_only=True)
 class EventBulletExplode(BaseEvent):
     bullet: Bullet

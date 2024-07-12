@@ -11,8 +11,8 @@ import pygame as pg
 import const
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventTestParticle, EventUnconditionalTick,
-                           EventUseRangerAbility, EventViewChangeTeam)
+                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
+                           EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import Character, LivingEntity, TimerManager
 from util import log_info
@@ -88,8 +88,6 @@ class Controller:
                     ev_manager.post(EventSelectCharacter(character_type=character_type))
                 if key == const.CHANGE_TEAM_VISION:
                     ev_manager.post(EventViewChangeTeam())
-                if key == pg.K_p:
-                    ev_manager.post(EventTestParticle())
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos

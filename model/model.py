@@ -176,7 +176,6 @@ class Model:
 
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
-        event.bullet.state = const.BulletState.EXPLODE
         with self.entity_lock:
             for entity in self.entities:
                 if ((entity.position - event.bullet.target).length() < event.bullet.range
@@ -184,8 +183,8 @@ class Model:
                     get_event_manager().post(EventAttack(victim=entity,
                                                          attacker=event.bullet.attacker,
                                                          damage=event.bullet.damage), channel_id=entity.id)
-        Timer(const.BULLET_RANGER_ABILITY_DURATION, get_event_manager().post,
-              EventBulletExplode(bullet=event.bullet), once=True)
+        event.bullet.discard()
+        get_event_manager().post(EventBulletExplode(bullet=event.bullet))
 
     def bullet_damage(self, event: EventBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
@@ -199,9 +198,6 @@ class Model:
 
     def bullet_disappear(self, event: EventBulletDisappear):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
-        event.bullet.discard()
-
-    def bullet_explode(self, event: EventBulletExplode):
         event.bullet.discard()
 
     def __register_listeners(self):
@@ -223,7 +219,6 @@ class Model:
         ev_manager.register_listener(EventBulletDamage, self.bullet_damage)
         ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
         ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
-        ev_manager.register_listener(EventBulletExplode, self.bullet_explode)
 
     def get_time(self):
         return self.__game_clock.get_time()
