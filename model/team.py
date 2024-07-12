@@ -122,6 +122,7 @@ class Team(NeutralTeam):
         with self.tower_lock:
             if event.tower not in self.__towers:
                 self.__towers.add(event.tower)
+                self.vision.update_vision(event.tower)
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
 
