@@ -46,12 +46,12 @@ class PauseMenuView(ObjectBase):
                           subtitle_font,
                           index == self.__pause_menu.cursor_index)
         elif pause_menu.state is const.PauseMenuState.CREDIT_BOARD:
-            position = pg.Vector2(225, 12) * ScreenInfo.resize_ratio
             title_font: pg.Font = pg.font.Font(const.REGULAR_FONT, int(10*ScreenInfo.resize_ratio))
             subtitle_font: pg.Font = pg.font.Font(
-                const.REGULAR_FONT, int(10*ScreenInfo.resize_ratio))
+                const.REGULAR_FONT, int(9*ScreenInfo.resize_ratio))
             content_font: pg.Font = pg.font.Font(
-                const.REGULAR_FONT, int(7*ScreenInfo.resize_ratio))
+                const.REGULAR_FONT, int(6.5*ScreenInfo.resize_ratio))
+            position = pg.Vector2(225, 6) * ScreenInfo.resize_ratio
             blit_normal_text(bg_surf, *position,
                              self.__pause_menu.credit_content.game_title, title_font)
             interval = pg.Vector2(0, 14) * ScreenInfo.resize_ratio
