@@ -15,8 +15,9 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PartySelectionView, PauseMenuView, TowerCDView,
+                         HealthView, ObjectBase, PartySelectorView, PauseMenuView, TowerCDView,
                          ViewRangeView)
+from view.screen_info import ScreenInfo
 
 
 class View:
@@ -33,31 +34,24 @@ class View:
         """
         model = get_model()
 
-        screen_info = pg.display.Info()
-        window_w = int(min(screen_info.current_w, screen_info.current_h /
+        display_info = pg.display.Info()
+        screen_w = int(min(display_info.current_w, display_info.current_h /
                        const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
-        window_h = int(min(screen_info.current_h, screen_info.current_w /
+        screen_h = int(min(display_info.current_h, display_info.current_w /
                        const.WINDOW_SIZE[0] * const.WINDOW_SIZE[1]) * const.SCREEN_FIT_RATIO)
-
-        self.window_w = window_w
-        self.window_h = window_h
-
         self.__screen: pg.Surface = pg.display.set_mode(
-            size=(window_w, window_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
-        self.screen_size: tuple[int, int] = (window_w, window_h)
+            size=(screen_w, screen_h), flags=pg.RESIZABLE | pg.DOUBLEBUF)
+
+        ScreenInfo.set_screen_info(screen_w / const.WINDOW_SIZE[0], (screen_w, screen_h))
 
         pg.display.set_icon(pg.image.load(const.ICON_IMAGE))
-        pg.display.set_caption(const.WINDOW_CAPTION)
 
-        self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
-        self.set_screen_info()
-        # self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
-        self.__arena: pg.Surface = pg.Surface(size=(window_h, window_h))
+        self.__arena: pg.Surface = pg.Surface(size=(screen_h, screen_h))
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
-        self.__party_selecyion_view = PartySelectionView(self.__screen, model.party_selector)
+        self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
 
-        PartySelectionView.init_convert()
+        PartySelectorView.init_convert()
 
         self.__entities: list[EntityView] = []
 
@@ -71,7 +65,7 @@ class View:
                 os.path.join(model.map.map_dir, filename), cv2.IMREAD_UNCHANGED
             )
             loaded_image = cv2.resize(
-                loaded_image, (window_h, window_h), interpolation=cv2.INTER_AREA
+                loaded_image, (screen_h, screen_h), interpolation=cv2.INTER_AREA
             )
             # if loaded_image.shape[2] == 3:
             #     alpha_channel = np.ones(
@@ -79,7 +73,7 @@ class View:
             #     loaded_image = np.dstack((loaded_image, alpha_channel))
             x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
             picture = pg.image.load(os.path.join(model.map.map_dir, filename)).convert_alpha()
-            picture = pg.transform.scale(picture, (window_h, window_h))
+            picture = pg.transform.scale(picture, (screen_h, screen_h))
             picture = picture.subsurface(pg.Rect(x, y, w, h))
             return x, y, picture
 
@@ -97,16 +91,6 @@ class View:
         EntityView.init_convert()
 
         self.register_listeners()
-
-    def set_screen_info(self):
-        PauseMenuView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        EntityView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        ViewRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        AttackRangeView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        AbilitiesCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        HealthView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        TowerCDView.set_screen_info(self.__resize_ratio, *self.screen_size)
-        PartySelectionView.set_screen_info(self.__resize_ratio, *self.screen_size)
 
     def initialize(self, _: EventInitialize):
         """
@@ -145,7 +129,7 @@ class View:
         elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
             self.render_play()
         elif model.state is const.State.SELECT_PARTY:
-            self.render_party_selection()
+            self.render_party_selector()
         elif model.state is const.State.SETTLEMENT:
             self.render_settlement()
         pg.display.flip()
@@ -154,19 +138,19 @@ class View:
         """Render game cover"""
 
         # setting up a temporary cover till we have a cover image
-        font = pg.font.Font(None, int(12*self.__resize_ratio))
+        font = pg.font.Font(None, int(12*ScreenInfo.resize_ratio))
         text_surface = font.render(
             'THIS IS COVER. Press Space to Start the game', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
-    def render_party_selection(self):
-        """Render party selection process"""
-        self.__party_selecyion_view.draw()
+    def render_party_selector(self):
+        """Render party selecting process"""
+        self.__party_selector_view.draw()
 
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
@@ -174,7 +158,7 @@ class View:
         """Render scenes when the game is being played"""
         model = get_model()
 
-        self.scoreboard_image = pg.transform.scale(self.scoreboard_image, self.screen_size)
+        self.scoreboard_image = pg.transform.scale(self.scoreboard_image, ScreenInfo.screen_size)
         self.__screen.blit(self.scoreboard_image, (0, 0))
 
         discarded_entities: set[type[EntityView]] = set()
@@ -197,7 +181,7 @@ class View:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            mask = pg.transform.scale(my_team.vision.get_mask(), (self.window_h, self.window_h))
+            mask = pg.transform.scale(my_team.vision.get_mask(), (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
             objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
@@ -207,12 +191,13 @@ class View:
         for obj in objects:
             obj.draw()
 
-        self.__screen.blit(self.__arena, ((self.screen_size[0]-self.screen_size[1]) / 2, 0))
+        self.__screen.blit(
+            self.__arena, ((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
 
         # show time remaining
         time_remaining = int(const.GAME_TIME - model.get_time())
         (minute, sec) = divmod(time_remaining, 60)
-        font = pg.font.Font(const.REGULAR_FONT, int(12*self.__resize_ratio))
+        font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
         time_remaining_surface = font.render(f'{minute:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
 

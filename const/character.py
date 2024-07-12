@@ -81,3 +81,5 @@ use ability     1.39       2
 need walk       3.39       2
 need walk use   3.39       2
 """
+
+PUDDLE_SPEED_RATIO = 0.5

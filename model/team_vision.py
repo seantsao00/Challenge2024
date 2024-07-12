@@ -66,8 +66,6 @@ class TeamVisionGrid:
     def brute_modify(self, position: pg.Vector2, real_radius: float):
         real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE,
                                    position.y * const.VISION_BLOCK_SIZE)
-        real_position = pg.Vector2(position.x * const.VISION_BLOCK_SIZE,
-                                   position.y * const.VISION_BLOCK_SIZE)
         radius = real_radius / const.VISION_BLOCK_SIZE
         for x in range(max(0, int(position.x - radius)),
                        min(self.n, int(position.x + radius + 1))):

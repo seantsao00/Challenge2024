@@ -24,11 +24,11 @@ class PartySelector:
         """
         ev_manager = get_event_manager()
         operation, change = event.select_input
-        if operation is const.PartySelectInput.CONFIRM:
+        if operation is const.PartySelectorInputType.CONFIRM:
             if None in self.__selected_party_indices:
                 return
             ev_manager.post(EventStartGame())
-        elif operation is const.PartySelectInput.CHANGE:
+        elif operation is const.PartySelectorInputType.CHANGE:
             team_index, change_direction = change
             if team_index >= self.__number_of_teams:
                 return

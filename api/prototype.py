@@ -36,6 +36,8 @@ class MovementStatusClass(IntEnum):
     TO_DIRECTION = auto()
     """角色目前朝著某個點為目的地前進。 """
     TO_POSITION = auto()
+    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
+    UNKNOWN = auto()
 
 
 class Movement:
@@ -45,8 +47,8 @@ class Movement:
         self.status = _status
         """
         當停止時，為 `None`。
-        當朝某個方向時，為朝著的方向，且為一個正規化後的向量。
-        當朝著某個點時，為該點。
+        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
+        當朝著某個點時，為該點的座標。
         """
         self.vector = _vector
 
@@ -84,7 +86,7 @@ class Character:
         self.max_health = _max_health
         """角色的最大血量。"""
         self.team_id = _team_id
-        """角色所屬的隊伍編號。"""
+        """角色所屬的隊伍編號，編號為 1 至 4 的正整數。"""
 
 
 class Tower:
@@ -123,7 +125,7 @@ class Tower:
         self.max_health = _max_health
         """建築物的最大血量。"""
         self.team_id = _team_id
-        """建築物所屬的隊伍編號。"""
+        """建築物所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
 
 
 class API:
@@ -174,7 +176,7 @@ class API:
 
     def get_movement(self, character: Character) -> Movement:
         """
-        回傳一個角色目前的移動狀況。
+        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。
         """
 
     def refresh_character(self, character: Character) -> Character | None:
@@ -211,8 +213,8 @@ class API:
 
     def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2):
         """
-        將所有列表中的角色設定為朝著某個目的地移動。如果目標不在視野範圍內或者不是可以行走的位置則不會生效。
-        這個函數會使用內建的巡路，可能會耗費大量時間，使用時請注意耗用時間。  
+        將所有列表中的角色設定為朝著某個目的地移動。如果目標不是可以行走的位置則不會生效。
+        這個函數會使用內建的尋路，可能會耗費大量時間，使用時請注意。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @destination: 移動的目的地。
         """
@@ -233,7 +235,7 @@ class API:
         """
         raise NotImplementedError
 
-    def action_cast_spell(self, characters: Iterable[Character]):
+    def action_cast_ability(self, characters: Iterable[Character]):
         """
         將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。

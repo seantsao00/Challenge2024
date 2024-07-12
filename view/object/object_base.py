@@ -18,15 +18,7 @@ class ObjectBase:
         A Lower value indicates the image is rendered earlier, and thus placed on a rearer layer.
     """
     image_initialized = False
-    images: tuple | dict = tuple()
-    resize_ratio: float = 1
     """the ratio between model's coordinate and the canvas size."""
-
-    @classmethod
-    def set_screen_info(cls, resize_ratio: float, screen_width: int, screen_height: int):
-        cls.resize_ratio = resize_ratio
-        cls.screen_width = screen_width
-        cls.screen_height = screen_height
 
     @classmethod
     def init_convert(cls):

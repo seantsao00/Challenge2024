@@ -76,7 +76,7 @@ class Character(LivingEntity):
 
         model = get_model()
         if direction.length() > 0:
-            direction = self.attribute.speed * model.dt * direction.normalize()
+            direction = self.get_speed() * model.dt * direction.normalize()
 
         component_dirs = [pg.Vector2(direction.x, 0), pg.Vector2(0, direction.y)]
 
@@ -116,11 +116,11 @@ class Character(LivingEntity):
         movement = 0
         model = get_model()
         while (it < len(self.__move_path)
-               and movement + EPS <= self.attribute.speed * model.dt):
+               and movement + EPS <= self.get_speed() * model.dt):
             if (self.__move_path[it] - self.position).length() < EPS:
                 it += 1
                 continue
-            ratio = ((self.attribute.speed * model.dt - movement)
+            ratio = ((self.get_speed() * model.dt - movement)
                      / (self.__move_path[it] - self.position).length())
             if ratio >= 1:
                 movement += (self.__move_path[it] - self.position).length()
@@ -206,6 +206,9 @@ class Character(LivingEntity):
         get_event_manager().post(EventCharacterDied(character=self))
         get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
+
+    def get_speed(self):
+        return self.attribute.speed * (const.PUDDLE_SPEED_RATIO if get_model().map.is_position_puddle(self.position) else 1)
 
     @abstractmethod
     def cast_ability(self, *args, **kwargs):
