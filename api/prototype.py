@@ -42,9 +42,15 @@ class MovementStatusClass(IntEnum):
 class Movement:
     def __init__(self,
                  _status: MovementStatusClass,
+                 _is_wandering: bool,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
         """角色的移動狀態。 """
+        self.is_wandering = _is_wandering
+        """
+        角色是否在遊蕩狀態。
+        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
+        """
         self.vector = _vector
         """
         當停止時，為 `None`。
@@ -197,12 +203,6 @@ class API:
         """回傳某個位置是否在視野範圍內。如果位置在地圖之外，永遠回傳 `False`。  
         @position: 要檢查的位置。"""
         raise NotImplementedError
-
-    def is_wandering(self, character: Character) -> bool:
-        """
-        回傳某個角色是否處於遊蕩狀態。
-        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
-        """
 
     def get_terrain(self, position: pg.Vector2) -> MapTerrain:
         """回傳某個位置的地形，不需在視野範圍內就能呼叫。  

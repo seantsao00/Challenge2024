@@ -279,11 +279,11 @@ class Internal(prototype.API):
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
         if character.move_state == CharacterMovingState.STOPPED:
-            return prototype.Movement(prototype.MovementStatusClass.STOPPED)
+            return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
         elif character.move_state == CharacterMovingState.TO_DIRECTION:
-            return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, character.move_direction.normalize())
+            return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, character.move_direction.normalize())
         elif character.move_state == CharacterMovingState.TO_POSITION:
-            return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.move_destination)
+            return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, character.move_destination)
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
         internal = self.__access_character(character)
