@@ -30,27 +30,35 @@ class MapTerrain(IntEnum):
 
 
 class MovementStatusClass(IntEnum):
-    """角色目前停止。 """
+    """角色移動的狀態。 """
     STOPPED = auto()
-    """角色目前正朝某個方向前進。 """
+    """角色目前停止。 """
     TO_DIRECTION = auto()
-    """角色目前朝著某個點為目的地前進。 """
+    """角色目前正朝某個方向前進。 """
     TO_POSITION = auto()
-    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
+    """角色目前朝著某個點為目的地前進。 """
     UNKNOWN = auto()
+    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
 
 
 class Movement:
     def __init__(self,
                  _status: MovementStatusClass,
+                 _is_wandering: bool,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
+        """角色的移動狀態。 """
+        self.is_wandering = _is_wandering
+        """
+        角色是否在遊蕩狀態。
+        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
+        """
+        self.vector = _vector
         """
         當停止時，為 `None`。
         當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
         當朝著某個點時，為該點的座標。
         """
-        self.vector = _vector
 
 
 class Character:
