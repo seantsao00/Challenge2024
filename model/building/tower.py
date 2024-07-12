@@ -95,7 +95,7 @@ class Tower(LivingEntity):
     def take_damage(self, event: EventAttack):
         ev_manager = get_event_manager()
 
-        if not self.vulnerable(event.attacker):
+        if not self.vulnerable(event.attacker) or self.team == event.attacker.team:
             return
 
         if self.health - event.damage <= 0:
