@@ -131,8 +131,12 @@ class Tower:
 class API:
     """與遊戲互動的方法。傳入 AI 的方法是作為 `every_tick` 的第一個引數。"""
 
-    def get_current_time(self):
+    def get_current_time(self) -> float:
         """回傳當下的遊戲進行時間，單位為秒。"""
+        raise NotImplementedError
+
+    def get_grid_size(self) -> float:
+        """回傳遊戲網格的長寬，由於遊戲網格是正方形的，長寬都使用這個函數。"""
         raise NotImplementedError
 
     def get_team_id(self) -> int:
