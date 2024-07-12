@@ -20,7 +20,7 @@ class BarCDView(EntityObject):
 
     def __init__(self, canvas: pg.Surface, entity: Character):
         super().__init__(canvas, entity)
-        self.priority = [PRIORITY_CD, entity.position[1]]
+        self.priority = [PRIORITY_CD, entity.position[1], entity.position[0]]
         self.entity: Character
         self.register_listeners()
 
