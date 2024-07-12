@@ -55,15 +55,16 @@ def every_tick(api: API):
     moving_characters_count = len(moving_characters)
     
 
-    if (visible_towers_count <= 1):
+    if (visible_towers_count <= 1 and owned_characters_count > 0):
         if (owned_characters_count <= 15):
             api.change_spawn_type(fountain, CharacterClass.MELEE)
-            random_point = pg.Vector2(random.random() * 250, random.random() * 250)
-            api.action_move_to(owned_characters, random_point)
+
+            api.action_wander(owned_characters)
         else:
             api.change_spawn_type(fountain, CharacterClass.RANGER)
             owned_ranger = [ranger for ranger in owned_characters if ranger.type == CharacterClass.RANGER]
-            api.action_move_clear(owned_ranger)
+            random_point = pg.Vector2(random.random() * 125, random.random() * 125)
+            api.action_move_to(owned_ranger, random_point)
         
         if (stopped_characters_count >= 1):
             random_point = pg.Vector2(random.random() * 250, random.random() * 250)
@@ -96,7 +97,7 @@ def every_tick(api: API):
             if enemy_count:
                 enemy_sniper = [sniper for sniper in owned_characters if sniper.type == CharacterClass.SNIPER]
                 api.action_move_to(owned_characters[:], visible_enemy[0].position)
-                api.action_cast_ability(owned_characters[:])
+                api.action_cast_ability(owned_characters[:], position = visible_enemy[0].position)
                 if (len(enemy_sniper) > 0):
                     api.action_attack(owned_characters[:], enemy_sniper[0])
                 api.action_attack(owned_characters[:], visible_enemy[0])
