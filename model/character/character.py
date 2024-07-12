@@ -156,6 +156,8 @@ class Character(LivingEntity):
         if cnt >= const.MAX_WANDERING:
             return False
         self.__move_path = get_model().map.find_path(self.position, destination)
+        if self.__move_path is None:
+            return False
         self.__move_state = CharacterMovingState.TO_POSITION
         return True
 
