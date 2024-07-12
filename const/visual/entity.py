@@ -125,5 +125,14 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
 structure: ENTITY_SIZE[entity][state]
 """
 
+CLICK_SIZE: dict[EntityType, dict[EntityState, int]] = {
+    **{character: {
+        None: 6.25
+    } for character in CharacterType},
+    **{tower: {
+        None: 20
+    } for tower in TowerType},
+}
+
 DRAW_DISPLACEMENT = pg.Vector2(0, -3.125)
 DRAW_DISPLACEMENT_Y = -3.125
