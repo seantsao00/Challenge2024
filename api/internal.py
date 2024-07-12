@@ -294,14 +294,15 @@ class Internal(prototype.API):
         character: model.Character = self.__access_character(character)
         if self.__is_controllable(character):
             return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
-        if character.move_state == CharacterMovingState.STOPPED:
-            return prototype.Movement(prototype.MovementStatusClass.STOPPED)
-        if character.move_state == CharacterMovingState.TO_DIRECTION:
-            return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION,
-                                      self.__transform(character.move_direction.normalize(), is_position=False))
-        if character.move_state == CharacterMovingState.TO_POSITION:
-            return prototype.Movement(prototype.MovementStatusClass.TO_POSITION,
-                                      self.__transform(character.move_destination, is_position=True))
+        with character.moving_lock:
+            if character.move_state == CharacterMovingState.STOPPED:
+                return prototype.Movement(prototype.MovementStatusClass.STOPPED)
+            if character.move_state == CharacterMovingState.TO_DIRECTION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION,
+                                          self.__transform(character.move_direction.normalize(), is_position=False))
+            if character.move_state == CharacterMovingState.TO_POSITION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION,
+                                          self.__transform(character.move_destination, is_position=True))
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
         internal = self.__access_character(character)
