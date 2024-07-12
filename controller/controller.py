@@ -155,7 +155,7 @@ class Controller:
                     model.pause_menu.move_cursor(1)
                 elif key == pg.K_UP:
                     model.pause_menu.move_cursor(-1)
-                elif key == pg.K_RETURN:
+                elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
 
     def ctrl_cover(self, pg_events: list[pg.Event]):
@@ -167,7 +167,7 @@ class Controller:
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 # For pausing the game
-                if pg_event.key == const.LEAVE_COVER_BUTTON:
+                if pg_event.key in const.CONFIRM_BUTTONS:
                     ev_manager.post(EventSelectParty())
 
     def ctrl_select_party(self, pg_events: list[pg.Event]):
