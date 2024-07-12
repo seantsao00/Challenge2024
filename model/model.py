@@ -234,8 +234,9 @@ class Model:
             if self.state == const.State.PLAY:
                 ev_manager.post(EventEveryTick())
                 running_time = self.get_time()
-                if running_time >= const.model.GAME_TIME:
-                    ev_manager.post(EventGameOver())
+                # if running_time >= const.model.GAME_TIME:
+                #     ev_manager.post(EventGameOver())
+                ev_manager.post(EventGameOver())
             self.dt = self.global_clock.tick(const.FPS) / 1000
 
     def __handle_quit(self, _: EventQuit):

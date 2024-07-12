@@ -15,8 +15,8 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PartySelectorView, PauseMenuView, TowerCDView,
-                         ViewRangeView)
+                         HealthView, ObjectBase, PartySelectorView, PauseMenuView, SettlementView,
+                         TowerCDView, ViewRangeView)
 from view.screen_info import ScreenInfo
 
 
@@ -50,8 +50,10 @@ class View:
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
+        self.__settlement_view = SettlementView(self.__screen)
 
         PartySelectorView.init_convert()
+        SettlementView.init_convert()
 
         self.__entities: list[EntityView] = []
 
@@ -150,9 +152,7 @@ class View:
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
-        text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
-        self.__screen.blit(text_surface, (100, 100))
+        self.__settlement_view.draw()
 
     def render_play(self):
         """Render scenes when the game is being played"""
@@ -181,7 +181,8 @@ class View:
                 objects.append(entity)
         else:
             my_team = model.teams[self.vision_of - 1]
-            mask = pg.transform.scale(my_team.vision.get_mask(), (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
+            mask = pg.transform.scale(my_team.vision.get_mask(
+            ), (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
             objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
