@@ -41,7 +41,6 @@ class CommentBox:
         height = max(avatar_size[1], text_size[1]) + consts.SPACING[1] * 2
         self.__size = (width, height)
         self.__surf = pg.Surface((width, height), pg.SRCALPHA)
-        # pg.draw.rect(self.__surf, pg.Color(255, 255, 255, 127), (0, 0, width, height))
         self.__surf.blit(user_avatar, (consts.SPACING[0], consts.SPACING[1]))
         self.__surf.blit(text_surf, (consts.SPACING[0] * 2 + avatar_size[0], consts.SPACING[1]))
 
@@ -60,7 +59,6 @@ class ChatView(ObjectBase):
         super().__init__(canvas, [8])
         global consts
         consts = _RescaledConstants()
-        self.__initialized = False
         self.__canvas = canvas
         self.__chat_surface = pg.Surface(consts.CHAT_SIZE, pg.SRCALPHA)
         self.__comments: list[CommentBox] = []
@@ -68,14 +66,7 @@ class ChatView(ObjectBase):
         self.__total_scroll = 0
         get_event_manager().register_listener(EventSendChat, self.handle_new_chat)
 
-    def initialize(self):
-        for idx, team in enumerate(get_model().teams):
-            self.add_comment(team, f"Comment from Team {idx + 1} =^-w-^= zzzzz")
-
     def draw(self):
-        if not self.__initialized:
-            self.initialize()
-            self.__initialized = True
         self.__chat_surface.fill(pg.Color(0, 0, 0, 0))
         cur_pos = [0, consts.CHAT_SIZE[1] + self.__total_scroll - self.__scroll.value]
         iter = len(self.__comments) - 1
@@ -90,19 +81,7 @@ class ChatView(ObjectBase):
         self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
     def update(self):
-        # do fake updates
-        import random
-        if random.randint(1, 50) == 1:
-            teamid = random.randint(0, 3)
-            team = get_model().teams[teamid]
-            if random.randint(1, 20) == 1:
-                self.add_comment(team, f":monocle_face:\nabcdefghijklmnopqrs")
-            elif random.randint(0, 1) > 0:
-                self.add_comment(
-                    team, f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)")
-            else:
-                teamid2 = random.randint(0, 3)
-                self.add_comment(team, f"Team {teamid}'s Ranger was slain by Team {teamid2}!")
+        pass
 
     def handle_new_chat(self, e: EventSendChat):
         if e.type == ChatMessageType.CHAT_COMMENT:
