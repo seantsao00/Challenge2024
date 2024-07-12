@@ -48,7 +48,8 @@ class Tower(LivingEntity):
         self.last_generate: float = -1e9
 
         if is_fountain:
-            super().__init__(position, const.FOUNTAIN_ATTRIBUTE, team, const.TowerType.FOUNTAIN)
+            super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
+                             team, const.TowerType.FOUNTAIN, invulnerability=True)
         else:
             super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, const.TowerType.HOTEL)
 
@@ -61,6 +62,9 @@ class Tower(LivingEntity):
             self.last_generate = get_model().get_time()
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.team_id)
         get_event_manager().post(EventCreateTower(tower=self))
+
+    def __str__(self):
+        return f'tower {self.id} (team {self.team.team_id})'
 
     def update_period(self):
         self.period = const.count_period_ms(len(self.team.character_list))
@@ -90,9 +94,10 @@ class Tower(LivingEntity):
 
     def take_damage(self, event: EventAttack):
         ev_manager = get_event_manager()
-        if self.team is event.attacker.team or self.is_fountain:
-            log_info('same team or is fountain')
+
+        if not self.vulnerable(event.attacker) or self.team == event.attacker.team:
             return
+
         if self.health - event.damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:
                 ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.team_id)

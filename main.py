@@ -4,8 +4,13 @@ The program's entry point is the main function in this module.
 Import paths should be relative to the location of this file.
 """
 
+import os
+
+# pylint: disable=wrong-import-position
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # nopep8
+
 import argparse
-import faulthandler
+import sys
 
 import pygame as pg
 
@@ -17,11 +22,14 @@ from music.music import BackgroundMusic
 from util import set_verbosity
 from view import View
 
+# import faulthandler
+
 
 def main():
     # Initialization
     pg.init()
-    faulthandler.enable()
+
+    # faulthandler.enable()
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument(
@@ -40,10 +48,12 @@ def main():
     parser.add_argument('-v', '--verbose', action='count', default=0,
                         help='Increase verbosity (can be used multiple times).')
     parser.add_argument('-m', '--music', action='store_true', help='play the BGM')
-    parser.add_argument('-q', '--skip-character-selection', action='store_true',
-                        help='skip the character selection and quick start')
+    parser.add_argument('-q', '--skip-character-selecting', action='store_true',
+                        help='automatically randomly select parties for each team')
 
     args = parser.parse_args()
+    if not check_input_validity(args):
+        sys.exit()
     set_verbosity(args.verbose)
 
     ev_manager = EventManager()
@@ -54,18 +64,39 @@ def main():
         team_controls=args.team_controls,
         show_view_range=args.show_view_range or args.range,
         show_attack_range=args.show_attack_range or args.range,
-        skip_character_selection=args.skip_character_selection
+        skip_character_selecting=args.skip_character_selecting
     ))
     instances_manager.register_model(model)
 
-    Controller()
     View()
+    Controller()
 
     if args.music:
         BackgroundMusic()
 
     # Main loop
     model.run()
+
+
+def check_input_validity(args) -> bool:
+    team_controls = args.team_controls
+    game_map = args.map
+
+    if len(team_controls) > 4:
+        print('Too many teams')
+        return False
+    if team_controls.count('human') > 1:
+        print('At most one human')
+        return False
+    for team in team_controls:
+        if team != 'human' and not os.path.isfile(f'./ai/{team}.py'):
+            print(f'{team}.py does not exist')
+            return False
+    if not os.path.isdir(f'./topography/{game_map}'):
+        print(f'{game_map} map does not exist')
+        return False
+
+    return True
 
 
 if __name__ == "__main__":

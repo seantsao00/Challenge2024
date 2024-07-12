@@ -25,16 +25,6 @@ class CharacterMovingState(Enum):
     TO_DIRECTION = auto()
 
 
-class CharacterAttackResult(Enum):
-    SUCCESS = auto()
-    OUT_OF_RANGE = auto()
-    COOLDOWN = auto()
-    FRIENDLY_FIRE = auto()
-
-    def __bool__(self):
-        return self == self.SUCCESS
-
-
 class Character(LivingEntity):
     """
     Class for character in the game.
@@ -74,6 +64,9 @@ class Character(LivingEntity):
 
         self.attribute: const.CharacterAttribute
 
+    def __str__(self):
+        return f'character {self.id} (team {self.team.team_id})'
+
     def __move_toward_direction(self):
         """
         Move the character in the given direction.
@@ -83,7 +76,7 @@ class Character(LivingEntity):
 
         model = get_model()
         if direction.length() > 0:
-            direction = self.attribute.speed * model.dt * direction.normalize()
+            direction = self.get_speed() * model.dt * direction.normalize()
 
         component_dirs = [pg.Vector2(direction.x, 0), pg.Vector2(0, direction.y)]
 
@@ -123,11 +116,11 @@ class Character(LivingEntity):
         movement = 0
         model = get_model()
         while (it < len(self.__move_path)
-               and movement + EPS <= self.attribute.speed * model.dt):
+               and movement + EPS <= self.get_speed() * model.dt):
             if (self.__move_path[it] - self.position).length() < EPS:
                 it += 1
                 continue
-            ratio = ((self.attribute.speed * model.dt - movement)
+            ratio = ((self.get_speed() * model.dt - movement)
                      / (self.__move_path[it] - self.position).length())
             if ratio >= 1:
                 movement += (self.__move_path[it] - self.position).length()
@@ -171,29 +164,40 @@ class Character(LivingEntity):
             return False
         self.__move_path = path
         self.__move_state = CharacterMovingState.TO_POSITION
+        self.__move_direction = pg.Vector2(0, 0)
         return True
 
     def take_damage(self, event: EventAttack):
+        if not self.vulnerable(event.attacker):
+            return
+
         self.health -= event.damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(
+                    f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
-    def is_target_assailable(self, enemy: Entity) -> CharacterAttackResult:
+    def attackable(self, enemy: LivingEntity):
+        """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
-        if self.team is enemy.team:
-            return CharacterAttackResult.FRIENDLY_FIRE
         if dist > self.attribute.attack_range:
-            return CharacterAttackResult.OUT_OF_RANGE
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} out of range")
+            return False
+        if self.team is enemy.team:
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} within the same team")
+            return False
         if (now_time - self._last_attack_time) * self.attribute.attack_speed < 1:
-            return CharacterAttackResult.COOLDOWN
-        return CharacterAttackResult.SUCCESS
+            log_info(f"[Attack] {self} is attacking too fast!")
+            return False
+        self._last_attack_time = now_time
+        return True
 
+    @abstractmethod
     def attack(self, enemy: Entity):
-        now_time = get_model().get_time()
-        if self.is_target_assailable(enemy):
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self._last_attack_time = now_time
+        pass
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")
@@ -203,6 +207,21 @@ class Character(LivingEntity):
         get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
 
+    def get_speed(self):
+        return self.attribute.speed * (const.PUDDLE_SPEED_RATIO if get_model().map.is_position_puddle(self.position) else 1)
+
     @abstractmethod
     def cast_ability(self, *args, **kwargs):
         pass
+
+    @property
+    def move_direction(self) -> pg.Vector2:
+        return self.__move_direction
+
+    @property
+    def move_destination(self) -> pg.Vector2:
+        return self.__move_path[-1]
+
+    @property
+    def move_state(self) -> CharacterMovingState:
+        return self.__move_state

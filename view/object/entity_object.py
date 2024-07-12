@@ -21,7 +21,7 @@ class EntityObject(ObjectBase):
     def __init__(self, canvas: pg.Surface, entity: Entity, priority: float = const.WINDOW_SIZE[1] + 10):
         self.entity: Entity = entity
         self.position: pg.Vector2 = self.entity.position.copy()
-        super().__init__(canvas, [PRIORITY_ENTITIES, self.position[1]])
+        super().__init__(canvas, [PRIORITY_ENTITIES, self.position[1], entity.position[0]])
         self.register_listeners()
 
     def handle_discard_entity(self, _: EventDiscardEntity):
