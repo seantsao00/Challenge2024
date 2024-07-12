@@ -49,7 +49,7 @@ class Tower(LivingEntity):
 
         if is_fountain:
             super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
-                             team, const.TowerType.FOUNTAIN, invulnerablility=True)
+                             team, const.TowerType.FOUNTAIN, invulnerability=True)
         else:
             super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, const.TowerType.HOTEL)
 
@@ -95,7 +95,7 @@ class Tower(LivingEntity):
     def take_damage(self, event: EventAttack):
         ev_manager = get_event_manager()
 
-        if not self.vulnerable(event.attacker):
+        if not self.vulnerable(event.attacker) or self.team == event.attacker.team:
             return
 
         if self.health - event.damage <= 0:

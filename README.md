@@ -50,6 +50,10 @@ isort .
 - 選取想要使用的 interpreter。一般來說，選取 `/bin/python3` 就好了。
 - 在詢問要安裝的 dependencies 時，選擇 `requirements.txt`。
 
+## 提醒事項
+
+- 在 Windows 使用 `python`，在 MacOS/Linux 使用 `python3`。
+
 ## Challenge 2023
 
 [Challenge 2023 repo](https://github.com/Ccucumber12/Challenge2023)

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pygame as pg
 
-from const.bullet import BulletType
+from const.bullet import BulletState, BulletType
 from const.character import CharacterType
 from const.team import PartyType
 from const.tower import TowerType
@@ -21,7 +21,7 @@ CD_BAR_COLOR = 'blue'
 HEALTH_BAR_COLOR = ['yellow', 'green', 'orange', 'violet', 'red']
 
 HEALTH_BAR_UPPER = 5
-CD_BAR_UPPER = 3
+CD_BAR_UPPER = 6
 TEAM_VISION_BLOCK = 8
 VISION_BLOCK_SIZE = 2
 
@@ -65,7 +65,6 @@ BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.COMMON: 'common.png',
     BulletType.SNIPER: 'sniper.png',
     BulletType.RANGER: 'ranger.png',
-    BulletType.EXPLODE: 'explode.png'
 }
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
@@ -77,9 +76,10 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 } for tower in TowerType if tower is not TowerType.FOUNTAIN
             },
             **{
-                bullet: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
-                } for bullet in BulletType
+                BulletType.COMMON: {
+                    BulletState.FLYING: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[BulletType.COMMON])
+                }
             }
         } if party is PartyType.NEUTRAL else {
             **{
@@ -94,7 +94,9 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
             },
             **{
                 bullet: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet])
+                    BulletState.FLYING: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet]),
+                    BulletState.EXPLODE: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, 'explode.png')
                 } for bullet in BulletType
             }
         }
@@ -112,7 +114,8 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
         None: 10
     } for tower in TowerType},
     **{bullet: {
-        None: 2
+        BulletState.FLYING: 2,
+        BulletState.EXPLODE: 15
     } for bullet in BulletType}
 }
 """

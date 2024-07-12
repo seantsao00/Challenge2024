@@ -16,13 +16,13 @@ from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, Eve
 from instances_manager import get_event_manager, get_model
 from model import Character, LivingEntity, TimerManager
 from util import log_info
+from view import ScreenInfo
 
 
 class Controller:
     """
     The object handles the control input, either from keyboard or from AI.
     """
-    __resize_ratio: float
 
     def __init__(self):
         """
@@ -32,10 +32,7 @@ class Controller:
         For more specific objects related to a game instance,
         they should be initialized in Controller.initialize()
         """
-        screen_info = pg.display.Info()
-        window_w = int(min(screen_info.current_w, screen_info.current_h /
-                       const.WINDOW_SIZE[1] * const.WINDOW_SIZE[0]) * const.SCREEN_FIT_RATIO)
-        self.__resize_ratio: float = window_w / const.WINDOW_SIZE[0]
+        self.__resize_ratio: float = ScreenInfo.resize_ratio
         self.register_listeners()
 
     def initialize(self, _: EventInitialize):
@@ -99,23 +96,23 @@ class Controller:
 
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
-                    if model.RangerAbility:
+                    if model.ranger_ability:
                         ev_manager.post(EventUseRangerAbility(position=pg.Vector2(
-                            x, y)), channel_id=model.RangerControlling.id)
+                            x, y)), channel_id=model.ranger_controlling.id)
                     else:
                         clicked = None
                         with model.entity_lock:
                             for entity in model.entities:
                                 if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
                                     clicked = entity
-                    if isinstance(clicked, Character):
-                        ev_manager.post(EventHumanInput(
-                            input_type=const.InputTypes.PICK, clicked_entity=clicked))
+                        if isinstance(clicked, Character):
+                            ev_manager.post(EventHumanInput(
+                                input_type=const.InputTypes.PICK, clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
-                    if model.RangerAbility:
-                        model.RangerAbility = False
+                    if model.ranger_ability:
+                        model.ranger_ability = False
                     clicked = None
                     with model.entity_lock:
                         for entity in reversed(model.entities):  # Tower first
@@ -170,9 +167,9 @@ class Controller:
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 key = pg_event.key
-                if key in const.PARTY_SELECT_BUTTONS_MAP:
+                if key in const.PARTY_SELECTOR_BUTTONS_MAP:
                     ev_manager.post(EventChangeParty(
-                        select_input=const.PARTY_SELECT_BUTTONS_MAP[key]))
+                        select_input=const.PARTY_SELECTOR_BUTTONS_MAP[key]))
 
     def register_listeners(self):
         """Register every listeners of this object into the event manager."""

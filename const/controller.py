@@ -29,22 +29,22 @@ PAUSE_BUTTON = pg.K_ESCAPE
 LEAVE_COVER_BUTTON = pg.K_SPACE
 
 
-class PartySelectInput(Enum):
+class PartySelectorInputType(Enum):
     CONFIRM = auto()
     CHANGE = auto()
 
 
-PARTY_SELECT_BUTTONS_MAP: dict[int, tuple[PartySelectInput, tuple[int, int] | None]] = {
-    pg.K_a: (PartySelectInput.CHANGE, (0, -1)),
-    pg.K_d: (PartySelectInput.CHANGE, (0, 1)),
-    pg.K_f: (PartySelectInput.CHANGE, (1, -1)),
-    pg.K_h: (PartySelectInput.CHANGE, (1, 1)),
-    pg.K_j: (PartySelectInput.CHANGE, (2, -1)),
-    pg.K_l: (PartySelectInput.CHANGE, (2, 1)),
-    pg.K_LEFT: (PartySelectInput.CHANGE, (3, -1)),
-    pg.K_RIGHT: (PartySelectInput.CHANGE, (3, 1)),
-    pg.K_SPACE: (PartySelectInput.CONFIRM, None),
-    pg.K_RETURN: (PartySelectInput.CONFIRM, None)
+PARTY_SELECTOR_BUTTONS_MAP: dict[int, tuple[PartySelectorInputType, tuple[int, int] | None]] = {
+    pg.K_a: (PartySelectorInputType.CHANGE, (0, -1)),
+    pg.K_d: (PartySelectorInputType.CHANGE, (0, 1)),
+    pg.K_f: (PartySelectorInputType.CHANGE, (1, -1)),
+    pg.K_h: (PartySelectorInputType.CHANGE, (1, 1)),
+    pg.K_j: (PartySelectorInputType.CHANGE, (2, -1)),
+    pg.K_l: (PartySelectorInputType.CHANGE, (2, 1)),
+    pg.K_LEFT: (PartySelectorInputType.CHANGE, (3, -1)),
+    pg.K_RIGHT: (PartySelectorInputType.CHANGE, (3, 1)),
+    pg.K_SPACE: (PartySelectorInputType.CONFIRM, None),
+    pg.K_RETURN: (PartySelectorInputType.CONFIRM, None)
 }
 """
 Input buttons defined for party-selection process

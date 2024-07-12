@@ -6,7 +6,7 @@ import pygame as pg
 
 import const
 from event_manager import EventBulletDamage, EventBulletDisappear
-from instances_manager import get_event_manager
+from instances_manager import get_event_manager, get_model
 from model.bullet.bullet import Bullet
 
 if TYPE_CHECKING:
@@ -27,18 +27,20 @@ class BulletCommon(Bullet[None]):
                          team=team, speed=speed, attacker=attacker, damage=damage)
         self.victim = victim
 
-    def judge(self, args: None = None):
+    def judge(self, _: None = None):
         """
         Decide if the bullet needs to move, cause damage or disappear.
         The direction is decided by the current position of bullet and victim.
         """
         original_pos = self.position
         victim_pos = self.victim.position
-        if not self.victim.alive:  # The bullet needs to disappear because the victim has been dead
-            get_event_manager().post(EventBulletDisappear(bullet=self))
-        if (victim_pos - original_pos).length() <= self.speed:  # In the next step, the bullet would hit the victim
-            get_event_manager().post(EventBulletDamage(bullet=self))
-        else:  # The bullet simply moves
+        model = get_model()
+        ev_manager = get_event_manager()
+        if not self.victim.alive:
+            ev_manager.post(EventBulletDisappear(bullet=self))
+        elif (victim_pos - original_pos).length() <= self.speed * model.dt:
+            ev_manager.post(EventBulletDamage(bullet=self))
+        else:
             self.direction = (victim_pos - original_pos).normalize()
-            self.position += self.direction*self.speed
+            self.position += self.direction * self.speed * model.dt
             self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))

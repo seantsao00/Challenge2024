@@ -48,7 +48,7 @@ class EventSelectParty(BaseEvent):
 @dataclass(kw_only=True)
 class EventChangeParty(BaseEvent):
     """Event posted when player is selecting parties"""
-    select_input: tuple[const.PartySelectInput, tuple[int, int] | None]
+    select_input: tuple[const.PartySelectorInputType, tuple[int, int] | None]
 
 
 @dataclass(kw_only=True)
@@ -198,3 +198,8 @@ class EventViewChangeTeam(BaseEvent):
 @dataclass(kw_only=True)
 class EventUseRangerAbility(BaseEvent):
     position: pg.Vector2 | tuple[float, float]
+
+
+@dataclass(kw_only=True)
+class EventBulletExplode(BaseEvent):
+    bullet: Bullet

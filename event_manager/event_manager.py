@@ -6,7 +6,7 @@ from collections import defaultdict
 from typing import Callable, TypeAlias
 
 from event_manager.events import BaseEvent
-from util import log_warning
+from util import log_critical, log_warning
 
 ListenerCallback: TypeAlias = Callable[[BaseEvent], None]
 """
@@ -36,12 +36,11 @@ class EventManager:
         self.__listeners: defaultdict[tuple[type[BaseEvent], ChannelId | None],
                                       set[ListenerCallback]] = defaultdict(set)
 
-        self.__wait_remove_listeners: list[tuple[tuple[type[BaseEvent], ChannelId | None],
-                                                 ListenerCallback]] = []
+        self.__wait_remove_listeners: dict[tuple[type[BaseEvent], ChannelId | None],
+                                           list[ListenerCallback]] = defaultdict(list)
         self.__wait_add_listeners: dict[tuple[type[BaseEvent], ChannelId | None],
-                                                 list[ListenerCallback]] = defaultdict(list)
-        self.__write_lock: dict[tuple[type[BaseEvent], ChannelId | None], int] = defaultdict(int)
-        self.__read_lock: int = 0
+                                        list[ListenerCallback]] = defaultdict(list)
+        self.__read_lock: dict[tuple[type[BaseEvent], ChannelId | None], int] = defaultdict(int)
         """The lock to ensure one can modify self.listeners only when no one is iterating it."""
 
     def register_listener(self, event_class: type[BaseEvent],
@@ -52,43 +51,49 @@ class EventManager:
         When the event is posted, 
         all registered listeners associated with that event will be invoked.
         """
-        if self.__write_lock[(event_class, channel_id)] > 0:
+        if self.__read_lock[(event_class, channel_id)] == 0:
+            self.__listeners[(event_class, channel_id)].add(listener)
+        elif self.__read_lock[(event_class, channel_id)] > 0:
             self.__wait_add_listeners[(event_class, channel_id)].append(listener)
         else:
-            self.__listeners[(event_class, channel_id)].add(listener)
+            raise ValueError('the value of the read lock of event manager less than 0')
 
     def unregister_listener(self, event_class: type[BaseEvent],
                             listener: ListenerCallback, channel_id: ChannelId | None = None):
         """
         Unregister a listener.
         """
-        self.__wait_remove_listeners.append(((event_class, channel_id), listener))
+        if self.__read_lock[(event_class, channel_id)] == 0:
+            self.__listeners[(event_class, channel_id)].remove(listener)
+        elif self.__read_lock[(event_class, channel_id)] > 0:
+            self.__wait_remove_listeners[(event_class, channel_id)].append(listener)
+        else:
+            raise ValueError('the value of the read lock of event manager less than 0')
 
     def post(self, event: BaseEvent, channel_id: ChannelId | None = None):
         """
         Invoke all registered listeners associated with the event.
         """
+        if not isinstance(event, BaseEvent):
+            log_critical(f'pass event = {event}, which is not an instance of BaseEvent')
+
         if (type(event), channel_id) not in self.__listeners:
             return
 
-        self.__read_lock += 1
-        self.__write_lock[(type(event), channel_id)] += 1
+        self.__read_lock[(type(event), channel_id)] += 1
         for listener in self.__listeners[(type(event), channel_id)]:
             listener(event)
-        self.__read_lock -= 1
-        self.__write_lock[(type(event), channel_id)] -= 1
+        self.__read_lock[(type(event), channel_id)] -= 1
 
-        if self.__read_lock == 0:
-            for (e, c), listener in self.__wait_remove_listeners:
-                try:
-                    self.__listeners[(e, c)].remove(listener)
-                except KeyError:
-                    log_warning(f'{listener} is not listening to ({e}, {c})')
-            self.__wait_remove_listeners.clear()
-        if self.__write_lock[(type(event), channel_id)] == 0:
+        if self.__read_lock[(type(event), channel_id)] == 0:
             for listener in self.__wait_add_listeners[(type(event), channel_id)]:
-                try:
-                    self.__listeners[(type(event), channel_id)].add(listener)
-                except KeyError:
-                    log_warning(f'{listener} is not registered to ({type(event)}, {channel_id})')
+                self.__listeners[(type(event), channel_id)].add(listener)
             self.__wait_add_listeners[(type(event), channel_id)].clear()
+
+            for listener in self.__wait_remove_listeners[(type(event), channel_id)]:
+                try:
+                    self.__listeners[(type(event), channel_id)].remove(listener)
+                except KeyError:
+                    log_warning(f'try unregister {listener} which is not registered to '
+                                f'({type(event)}, {channel_id})')
+            self.__wait_remove_listeners[(type(event), channel_id)].clear()
