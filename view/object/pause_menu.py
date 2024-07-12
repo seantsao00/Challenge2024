@@ -15,34 +15,43 @@ if TYPE_CHECKING:
 
 class PauseMenuView(ObjectBase):
     def __init__(self, canvas: pg.Surface, pause_menu: PauseMenu):
-        self.image_initialized = True
         super().__init__(canvas, [PRIORITY_PAUSEMENU])
-        self.pause_menu = pause_menu
-        self.title_font = pg.font.Font(const.REGULAR_FONT, int(20*ScreenInfo.resize_ratio))
-        self.font = pg.font.Font('./font/Cubic_11_1.300_R.ttf', int(12*ScreenInfo.resize_ratio))
-        self.options = self.pause_menu.options
+        self.__pause_menu: PauseMenu = pause_menu
+        self.title_font: pg.Font = pg.font.Font(
+            const.REGULAR_FONT, int(20*ScreenInfo.resize_ratio))
+        self.font: pg.Font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
 
     def draw(self):
-        if not self.pause_menu.enabled:
+        pause_menu: PauseMenu = self.__pause_menu
+        if pause_menu.state is const.PauseMenuState.CLOSED:
             return
-
         bg_surf = pg.Surface((self.canvas.get_size()), pg.SRCALPHA)
-        bg_surf.fill((200, 200, 200, 230))
+        bg_surf.fill(const.PAUSE_MENU_BACKGROUND_COLOR)
+        position = pg.Vector2(const.PAUSE_MENU_TITLE_POSITION) * ScreenInfo.resize_ratio
+        interval = const.PAUSE_MENU_OPTION_INTERVAL * ScreenInfo.resize_ratio
 
-        center = (bg_surf.get_width() // 2, bg_surf.get_height() // 2)
-
-        draw_text(bg_surf, center[0], center[1]-150, 'Paused', 'black', self.title_font)
-        for index, opt_text in enumerate(self.options):
-            draw_text(bg_surf, center[0], center[1]+80*index, opt_text,
-                      'black', self.font, index == self.pause_menu.selected)
+        if pause_menu.state is const.PauseMenuState.MAIN_MENU:
+            draw_text(bg_surf,
+                      *position,
+                      const.PAUSE_MENU_TITLE_TEXT,
+                      const.PAUSE_MENU_TEXT_COLOR,
+                      self.title_font)
+            for index, option in enumerate(self.__pause_menu.main_menu_options):
+                draw_text(bg_surf,
+                          position[0],
+                          position[1] + (1+index) * interval,
+                          const.PAUSE_MAIN_MENU_TEXT[option],
+                          const.PAUSE_MENU_TEXT_COLOR,
+                          self.font,
+                          index == self.__pause_menu.cursor_index)
 
         self.canvas.blit(bg_surf, (0, 0))
 
 
 def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):
-    underline_color = 'darkblue'
-    underline_thickness = 3
-    underline_offset = 3
+    underline_color = const.PAUSE_MENU_UNDERLINE_COLOR
+    underline_thickness = const.PAUSE_MENU_UNDERLINE_THICKNESS
+    underline_offset = const.PAUSE_MENU_UNDERLINE_OFFSET
 
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect(center=(x, y))
