@@ -1,23 +1,24 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from itertools import chain
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
+from model import Bullet
 from util import crop_image
 from view.object.entity_object import EntityObject
+from view.screen_info import ScreenInfo
 
 if TYPE_CHECKING:
     from model import Entity
 
 
 class EntityView(EntityObject):
-    images: dict[const.PartyType, dict[const.EntityType, dict[const.EntityState, pg.Surface]]] \
-        = {party: {
-            entity_type: {} for entity_type in chain(const.CharacterType, const.TowerType, const.BulletType)
-        } for party in const.PartyType}
+    __images: dict[tuple[const.PartyType, const.EntityType, const.EntityState],
+                   pg.Surface] = {}
     """
     structure: images[party][entity][state]
 
@@ -38,21 +39,22 @@ class EntityView(EntityObject):
             for entity, state_dict in entity_dict.items():
                 for state, path in state_dict.items():
                     img = pg.image.load(path)
-                    width = const.ENTITY_SIZE[entity][state] * 2 * cls.resize_ratio
-                    height = const.ENTITY_SIZE[entity][state] * 2 * cls.resize_ratio
-                    cls.images[party][entity][state] = crop_image(
-                        img, width, height
-                    ).convert_alpha()
+                    w = const.ENTITY_SIZE[entity][state] * 2 * ScreenInfo.resize_ratio
+                    h = const.ENTITY_SIZE[entity][state] * 2 * ScreenInfo.resize_ratio
+                    cls.__images[(party, entity, state)] = crop_image(img, w, h).convert_alpha()
         cls.image_initialized = True
 
     def draw(self):
         entity = self.entity
-        img = self.images[entity.team.party][entity.entity_type][entity.state]
-        self.canvas.blit(img, img.get_rect(center=self.resize_ratio *
+        img = self.__images[(entity.team.party, entity.entity_type, entity.state)]
+        # if isinstance(self.entity, Bullet):
+        #     img = pg.transform.rotate(img, self.entity.view_rotate)
+        self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
                          (entity.position + const.DRAW_DISPLACEMENT)))
 
     def move(self):
         if not self.exist:
             return False
-        self.priority[1] = self.entity.position[1]
+        self.priority[1] = int(self.entity.position[1])
+        self.priority[2] = int(self.entity.position[0])
         return True

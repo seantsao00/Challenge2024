@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import Enum, auto
+from random import uniform
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -25,16 +26,6 @@ class CharacterMovingState(Enum):
     TO_DIRECTION = auto()
 
 
-class CharacterAttackResult(Enum):
-    SUCCESS = auto()
-    OUT_OF_RANGE = auto()
-    COOLDOWN = auto()
-    FRIENDLY_FIRE = auto()
-
-    def __bool__(self):
-        return self == self.SUCCESS
-
-
 class Character(LivingEntity):
     """
     Class for character in the game.
@@ -51,6 +42,7 @@ class Character(LivingEntity):
        (useful when __move_state == TO_LOCATION).
      - __move_direction: The direction the character is facing and moving toward
        (useful when __move_state == TO_DIRECTION).
+     - __is_wandering: If the character is wandering. Wandering is only used by api methods.
     """
 
     def __init__(self,
@@ -65,6 +57,7 @@ class Character(LivingEntity):
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
+        self.__is_wandering: bool = False
 
         super().__init__(position, attribute, team, entity_type, state)
 
@@ -73,6 +66,9 @@ class Character(LivingEntity):
         ev_manager.register_listener(EventEveryTick, self.tick_move)
 
         self.attribute: const.CharacterAttribute
+
+    def __str__(self):
+        return f'character {self.id} (team {self.team.team_id})'
 
     def __move_toward_direction(self):
         """
@@ -83,7 +79,7 @@ class Character(LivingEntity):
 
         model = get_model()
         if direction.length() > 0:
-            direction = self.attribute.speed * model.dt * direction.normalize()
+            direction = self.get_speed() * model.dt * direction.normalize()
 
         component_dirs = [pg.Vector2(direction.x, 0), pg.Vector2(0, direction.y)]
 
@@ -115,7 +111,7 @@ class Character(LivingEntity):
         """
         EPS = 1e-8
 
-        if len(self.__move_path) == 0:
+        if self.__move_path is None or len(self.__move_path) == 0:
             return
 
         it = 0
@@ -123,11 +119,11 @@ class Character(LivingEntity):
         movement = 0
         model = get_model()
         while (it < len(self.__move_path)
-               and movement + EPS <= self.attribute.speed * model.dt):
+               and movement + EPS <= self.get_speed() * model.dt):
             if (self.__move_path[it] - self.position).length() < EPS:
                 it += 1
                 continue
-            ratio = ((self.attribute.speed * model.dt - movement)
+            ratio = ((self.get_speed() * model.dt - movement)
                      / (self.__move_path[it] - self.position).length())
             if ratio >= 1:
                 movement += (self.__move_path[it] - self.position).length()
@@ -140,11 +136,30 @@ class Character(LivingEntity):
         if it == len(self.__move_path):
             self.__move_path = []
             self.__move_state = CharacterMovingState.STOPPED
-            log_info(f"[API] Character {self.id}: arrive at destination")
+            if self.__is_wandering:
+                self.__set_wander_destination()
+            else:
+                log_info(f"[API] Character {self.id}: arrive at destination")
         else:
             del self.__move_path[:it]
 
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
+
+    def __set_wander_destination(self) -> bool:
+        destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
+                                 uniform(0, const.ARENA_SIZE[1])])
+        cnt = 0
+        while (self.team.vision.position_inside_vision(destination) or get_model().map.get_position_type(destination) is const.MAP_OBSTACLE) and cnt < const.MAX_WANDERING:
+            destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
+                                     uniform(0, const.ARENA_SIZE[1])])
+            cnt += 1
+        if cnt >= const.MAX_WANDERING:
+            return False
+        self.__move_path = get_model().map.find_path(self.position, destination)
+        if self.__move_path is None:
+            return False
+        self.__move_state = CharacterMovingState.TO_POSITION
+        return True
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
@@ -157,12 +172,14 @@ class Character(LivingEntity):
     def set_move_stop(self) -> bool:
         """Stop movement of the character. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.STOPPED
+        self.__is_wandering = False
         return True
 
     def set_move_direction(self, direction: pg.Vector2) -> bool:
         """Set character movement toward a direction. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.TO_DIRECTION
         self.__move_direction = direction
+        self.__is_wandering = False
         return True
 
     def set_move_position(self, path: list[pg.Vector2] | None):
@@ -171,29 +188,59 @@ class Character(LivingEntity):
             return False
         self.__move_path = path
         self.__move_state = CharacterMovingState.TO_POSITION
+        self.__move_direction = pg.Vector2(0, 0)
+        self.__is_wandering = False
         return True
 
+    def set_wandering(self) -> bool:
+        """Set the character to be wandering. Returns True/False on success/failure. If the character is already wandering, this method will return False. """
+        if self.__is_wandering:
+            return False
+        else:
+            if not self.__set_wander_destination():
+                self.__is_wandering = False
+                return False
+            self.__is_wandering = True
+            return True
+
     def take_damage(self, event: EventAttack):
+        if not self.vulnerable(event.attacker):
+            return
+
         self.health -= event.damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(
+                    f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
-    def is_target_assailable(self, enemy: Entity) -> CharacterAttackResult:
+    def reachable(self, position: pg.Vector2):
+        """
+        Test whether some position is within my reach range.
+        This method is used by attack and ranger ability cast.
+        """
+        dist = self.position.distance_to(position)
+        return dist <= self.attribute.attack_range
+
+    def attackable(self, enemy: LivingEntity):
+        """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
         now_time = get_model().get_time()
-        dist = self.position.distance_to(enemy.position)
+        if not self.reachable(enemy.position):
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} out of range")
+            return False
         if self.team is enemy.team:
-            return CharacterAttackResult.FRIENDLY_FIRE
-        if dist > self.attribute.attack_range:
-            return CharacterAttackResult.OUT_OF_RANGE
+            log_info(f"[Attack] {self} is attacking an enemy {enemy} within the same team")
+            return False
         if (now_time - self._last_attack_time) * self.attribute.attack_speed < 1:
-            return CharacterAttackResult.COOLDOWN
-        return CharacterAttackResult.SUCCESS
+            log_info(f"[Attack] {self} is attacking too fast!")
+            return False
+        self._last_attack_time = now_time
+        return True
 
+    @abstractmethod
     def attack(self, enemy: Entity):
-        now_time = get_model().get_time()
-        if self.is_target_assailable(enemy):
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
-            self._last_attack_time = now_time
+        pass
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")
@@ -203,6 +250,34 @@ class Character(LivingEntity):
         get_event_manager().unregister_listener(EventEveryTick, self.tick_move)
         super().discard()
 
+    def get_speed(self):
+        return self.attribute.speed * (const.PUDDLE_SPEED_RATIO if get_model().map.is_position_puddle(self.position) else 1)
+
     @abstractmethod
     def cast_ability(self, *args, **kwargs):
         pass
+
+    @abstractmethod
+    def manual_cast_ability(self, *args, **kwargs):
+        """
+        This is a (somewhat bad) workaround for manual ability casting, 
+        because I did not come up a nice solution to integrate with API.
+        Refactor will be great.
+        """
+        pass
+
+    @property
+    def move_direction(self) -> pg.Vector2:
+        return self.__move_direction
+
+    @property
+    def move_destination(self) -> pg.Vector2:
+        return self.__move_path[-1]
+
+    @property
+    def move_state(self) -> CharacterMovingState:
+        return self.__move_state
+
+    @property
+    def is_wandering(self) -> bool:
+        return self.__is_wandering

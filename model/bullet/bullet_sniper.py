@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import const
-from model.bullet.bulletcommon import BulletCommon
+from model.bullet.bullet_common import BulletCommon
 
 if TYPE_CHECKING:
     from model.entity import LivingEntity

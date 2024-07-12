@@ -7,31 +7,32 @@ import pygame as pg
 import const
 from util import crop_image, transform_coordinate
 from view.object.object_base import ObjectBase
+from view.screen_info import ScreenInfo
 
 if TYPE_CHECKING:
     from model import PartySelector
 
 
-class PartySelectionView(ObjectBase):
+class PartySelectorView(ObjectBase):
     background_image: pg.Surface
     party_images: dict[None | const.PartyType, pg.Surface] = {}
     ratio: float
 
     def __init__(self, canvas: pg.Surface, party_selector: PartySelector):
         self.image_initialized = True
-        super().__init__(canvas, [const.PRIORITY_PARTYSELECTION])
+        super().__init__(canvas, [const.PRIORITY_PARTY_SELECTOR])
         self.__party_selector = party_selector
-        self.__font = pg.font.Font(const.REGULAR_FONT, int(12*self.resize_ratio))
+        self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
 
     @classmethod
     def init_convert(cls):
-        img = pg.image.load(const.PARTY_SELECTION_BACKGROUND)
+        img = pg.image.load(const.PARTY_SELECTOR_BACKGROUND)
 
         cls.background_image = crop_image(
-            img, cls.screen_width, cls.screen_height, True).convert_alpha()
+            img, *ScreenInfo.screen_size, True).convert_alpha()
 
-        cls.ratio = cls.screen_width / 1600
-        for key, path in const.PARTY_SELECTION_IMAGE.items():
+        cls.ratio = ScreenInfo.screen_size[0] / 1600
+        for key, path in const.PARTY_SELECTOR_IMAGE.items():
             img = pg.image.load(path)
             cls.party_images[key] = crop_image(
                 img, 638 * cls.ratio, 260 * cls.ratio).convert_alpha()
@@ -52,8 +53,8 @@ class PartySelectionView(ObjectBase):
         img = self.background_image
         self.canvas.blit(img, (0, 0))
 
-        if check == 4:
-            draw_text(self.canvas, self.screen_width / 2, self.screen_height -
+        if self.__party_selector.is_ready():
+            draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
                       40, 'Press ENTER to continue', 'white', self.__font)
 
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 import ctypes
 import importlib
 import os
+import random
 import signal
 import threading
 import traceback
@@ -17,10 +18,12 @@ import numpy as np
 import pygame as pg
 
 import const
+import const.map
 import model
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
+from model.character.character import CharacterMovingState
 from util import log_critical, log_info, log_warning
 
 
@@ -38,6 +41,12 @@ def enforce_type(name, obj, *args):
 
 
 class Internal(prototype.API):
+    """
+    Internal implementation of API.  
+    Please do note everything from internal to API is named `cast` (because we usually just take the fields)
+    and everything from API to internal is named `map` (because we need extra map to convert back to original ref)
+    """
+
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.transform: np.ndarray = None
@@ -52,15 +61,18 @@ class Internal(prototype.API):
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
 
+    def __team(self):
+        return get_model().teams[self.team_id]
+
     @classmethod
-    def __cast_id(cls, index: int):
+    def __cast_team_id(cls, index: int):
         """
         AI interprets the team as 1, 2, 3, 4 whereas internal naming uses 0, 1, 2, 3.
         """
         return index + 1
 
     @classmethod
-    def __recast_id(cls, index: int):
+    def __map_team_id(cls, index: int):
         return index - 1
 
     def __build_transform_matrix(self):
@@ -90,7 +102,7 @@ class Internal(prototype.API):
             if abs(np.linalg.norm(transformed) - best) < EPS:
                 break
 
-    def __transform(self, position: pg.Vector2, is_vector: int, inverse: bool = False):
+    def __transform(self, position: pg.Vector2, is_position: bool, inverse: bool = False):
         """
         Transform internal positions into real math positions.
         """
@@ -99,13 +111,16 @@ class Internal(prototype.API):
 
         vector = np.array([[position.x],
                            [position.y],
-                           [0 if is_vector else 1]])
+                           [1 if is_position else 0]])
         vector = np.dot(np.linalg.inv(self.transform) if inverse else self.transform,
                         vector)
         return pg.Vector2(vector[0][0], vector[1][0])
 
     @classmethod
-    def __cast_character_type(cls, class_type: int):
+    def __map_character_type(cls, class_type: prototype.CharacterClass):
+        """
+        Map API character type to internal type.
+        """
         if class_type == prototype.CharacterClass.MELEE:
             return const.CharacterType.MELEE
         if class_type == prototype.CharacterClass.RANGER:
@@ -130,14 +145,43 @@ class Internal(prototype.API):
         extern = prototype.Character(
             _id=internal.id,
             _type=character_class,
-            _position=self.__transform(internal.position, is_vector=False),
+            _position=self.__transform(internal.position, is_position=True),
             _speed=internal.attribute.attack_speed,
             _attack_range=internal.attribute.attack_range,
             _damage=internal.attribute.attack_damage,
             _vision=internal.attribute.vision,
             _health=internal.health,
             _max_health=internal.attribute.max_health,
-            _team_id=Internal.__cast_id(internal.team.team_id)
+            _team_id=Internal.__cast_team_id(internal.team.team_id)
+        )
+        return extern
+
+    def __convert_tower(self, internal: model.Tower) -> prototype.Tower:
+        """
+        Convert a `model.Tower` to `api.Tower`
+        """
+        character_class = prototype.CharacterClass.UNKNOWN
+        if internal.character_type == const.CharacterType.MELEE:
+            character_class = prototype.CharacterClass.MELEE
+        elif internal.character_type == const.CharacterType.RANGER:
+            character_class = prototype.CharacterClass.RANGER
+        elif internal.character_type == const.CharacterType.SNIPER:
+            character_class = prototype.CharacterClass.SNIPER
+        else:
+            raise GameError("Unknown spawn character type")
+        extern = prototype.Tower(
+            _id=internal.id,
+            _position=self.__transform(internal.position, is_position=True),
+            _period=internal.period,
+            _is_fountain=internal.is_fountain,
+            _attack_range=internal.attribute.attack_range,
+            _damage=internal.attribute.attack_damage,
+            _vision=internal.attribute.vision,
+            _health=internal.health,
+            _max_health=internal.attribute.max_health,
+            _team_id=0 if internal.team is None else Internal.__cast_team_id(
+                internal.team.team_id),
+            _spwan_character_type=character_class
         )
         return extern
 
@@ -145,52 +189,22 @@ class Internal(prototype.API):
         """
         Register a `model.Character` to `api.Character`.
         Therefore, API can only manipulate a character using the given interface
-        while we still know the original `model.Character`.
+        while we still know the original `model.Character`.  
+        If multiple instance are registered during the same AI decision call, 
+        they will be all valid for operations.
         """
-
-        if internal.id not in self.__character_map:
-            extern = self.__convert_character(internal)
-            self.__character_map[internal.id] = extern
-            self.__reverse_character_map[id(extern)] = internal
+        extern = self.__convert_character(internal)
+        self.__character_map[internal.id] = extern
+        self.__reverse_character_map[id(extern)] = internal
         return self.__character_map[internal.id]
-
-    def __convert_tower(self, internal: model.Tower) -> prototype.Tower:
-        """
-        Convert a `model.Tower` to `api.Tower`
-        """
-        if internal.id not in self.__tower_map:
-            character_class = prototype.CharacterClass.UNKNOWN
-            if internal.character_type == const.CharacterType.MELEE:
-                character_class = prototype.CharacterClass.MELEE
-            elif internal.character_type == const.CharacterType.RANGER:
-                character_class = prototype.CharacterClass.RANGER
-            elif internal.character_type == const.CharacterType.SNIPER:
-                character_class = prototype.CharacterClass.SNIPER
-            else:
-                raise GameError("Unknown spawn character type")
-            extern = prototype.Tower(
-                _id=internal.id,
-                _position=self.__transform(internal.position, is_vector=False),
-                _period=internal.period,
-                _is_fountain=internal.is_fountain,
-                _attack_range=internal.attribute.attack_range,
-                _damage=internal.attribute.attack_damage,
-                _vision=internal.attribute.vision,
-                _health=internal.health,
-                _max_health=internal.attribute.max_health,
-                _team_id=0 if internal.team is None else Internal.__cast_id(internal.team.team_id),
-                _spwan_character_type=character_class
-            )
-        return extern
 
     def __register_tower(self, internal: model.Tower) -> prototype.Tower:
         """
         Register a `model.Tower` to `api.Tower` like above.
         """
-        if internal.id not in self.__tower_map:
-            extern = self.__convert_tower(internal)
-            self.__tower_map[internal.id] = extern
-            self.__reverse_tower_map[id(extern)] = internal
+        extern = self.__convert_tower(internal)
+        self.__tower_map[internal.id] = extern
+        self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
     def __access_character(self, extern: prototype.Character) -> model.Character:
@@ -198,7 +212,8 @@ class Internal(prototype.API):
         Return registered character. None if it does not exist.
         """
         if id(extern) not in self.__reverse_character_map:
-            warnings.warn("Invalid prototype.Character. Maybe it is already expired.")
+            log_warning(
+                f"[AI] AI of team {self.team_id} used invalid prototype.Character. Maybe it is already expired.")
             return None
         return self.__reverse_character_map[id(extern)]
 
@@ -207,33 +222,41 @@ class Internal(prototype.API):
         Return registered tower. None if it does not exist.
         """
         if id(extern) not in self.__reverse_tower_map:
-            warnings.warn("Invalid prototype.Tower. Maybe it is already expired.")
+            log_warning(
+                f"[AI] AI of team {self.team_id} used invalid prototype.Tower. Maybe it is already expired.")
             return None
         return self.__reverse_tower_map[id(extern)]
-
-    def __team(self):
-        return get_model().teams[self.team_id]
 
     def __is_controllable(self, obj: None | model.Character | model.Tower):
         return (obj is not None and
                 obj.team == self.__team() and
                 obj.health > 0)
 
+    """Methods defined below are all callable from AI."""
+
     def get_current_time(self):
         return get_model().get_time()
 
+    def get_grid_size(self):
+        return const.ARENA_SIZE[0]
+
+    def get_vision_block_size(self) -> float:
+        return const.VISION_BLOCK_SIZE
+
     def get_owned_characters(self) -> list[prototype.Character]:
-        return sorted([self.__register_character(character)
-                       for character in self.__team().character_list if character.health > 0],
-                      key=lambda x: x.id)
+        with self.__team().character_lock:
+            return sorted([self.__register_character(character)
+                           for character in self.__team().character_list if character.health > 0],
+                          key=lambda x: x.id)
 
     def get_owned_towers(self) -> list[prototype.Tower]:
-        return sorted([self.__register_tower(tower)
-                       for tower in self.__team().towers],
-                      key=lambda x: x.id)
+        with self.__team().tower_lock:
+            return sorted([self.__register_tower(tower)
+                           for tower in self.__team().towers],
+                          key=lambda x: x.id)
 
     def get_team_id(self) -> int:
-        return Internal.__cast_id(self.__team().team_id)
+        return Internal.__cast_team_id(self.__team().team_id)
 
     def get_score_of_team(self, index=None) -> int:
         enforce_type('index', index, int, type(None))
@@ -251,7 +274,9 @@ class Internal(prototype.API):
 
     def get_visible_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision
-        entities = get_model().entities
+        entities = []
+        with get_model().entity_lock:
+            entities = get_model().entities.copy()
         character_list: list[prototype.Character] = [
             self.__register_character(entity) for entity in entities
             if (isinstance(entity, model.Character) and
@@ -261,7 +286,9 @@ class Internal(prototype.API):
 
     def get_visible_towers(self) -> list[prototype.Tower]:
         vision = self.__team().vision
-        entities = get_model().entities
+        entities = []
+        with get_model().entity_lock:
+            entities = get_model().entities.copy()
         tower_list: list[prototype.Tower] = [
             self.__register_tower(entity) for entity in entities
             if (isinstance(entity, model.Tower) and
@@ -269,23 +296,87 @@ class Internal(prototype.API):
             entity.health > 0]
         return sorted(tower_list, key=lambda x: x.id)
 
-    # I don't want to deal with transform yet
-    # def get_visibility(self) -> list[list[int]]:
-    #     mask = self.__team().vision.mask
-    #     vision_grid = pg.surfarray.array_alpha(mask)
-    #     vision_grid[vision_grid == 0] = 1
-    #     vision_grid[vision_grid == 255] = 0
-    #     return vision_grid.tolist()
+    def get_movement(self, character: prototype.Character) -> prototype.Movement:
+        character: model.Character = self.__access_character(character)
+        if not self.__is_controllable(character):
+            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
+        with character.moving_lock:
+            if character.move_state == CharacterMovingState.STOPPED:
+                return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
+            elif character.move_state == CharacterMovingState.TO_DIRECTION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
+            elif character.move_state == CharacterMovingState.TO_POSITION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
+
+    def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        enforce_type('character', character, prototype.Character, type(None))
+
+        internal = self.__access_character(character)
+        if internal is None or not internal.alive:
+            return None
+        return self.__register_character(internal)
+
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower:
+        enforce_type('tower', tower, prototype.Tower)
+
+        internal = self.__access_tower(tower)
+        if not internal.alive:
+            raise GameError("Tower died, what?")
+        return self.__register_tower(internal)
+
+    def get_visibility(self) -> list[list[int]]:
+        vision_grid = np.array(self.__team().vision.bool_mask)
+
+        # Upside down flip
+        vision_grid = np.flip(vision_grid, axis=0)
+        if self.transform is None:
+            self.__build_transform_matrix()
+
+        # Rotate visibility matrix base on transform
+        if self.transform[0][0] == 0 and self.transform[0][1] == 1:
+            vision_grid = np.rot90(vision_grid)
+        elif self.transform[0][0] == -1 and self.transform[0][1] == 0:
+            vision_grid = np.rot90(vision_grid, 2)
+        elif self.transform[0][0] == 0 and self.transform[0][1] == -1:
+            vision_grid = np.rot90(vision_grid, 3)
+
+        # Transform array index into coordinate
+        vision_grid = np.flip(vision_grid, axis=0)
+        vision_grid = np.rot90(vision_grid)
+
+        # Expand to 250 * 250
+        vision_coordinate = [[vision_grid[i // 2][j // 2]
+                              for i in range(const.ARENA_SIZE[0])] for j in range(const.ARENA_SIZE[1])]
+
+        return vision_coordinate
 
     def is_visible(self, position: pg.Vector2) -> bool:
-        return self.__team().vision.position_inside_vision(self.__transform(position, is_vector=False, inverse=True))
+        return self.__team().vision.position_inside_vision(
+            self.__transform(position, is_position=True, inverse=True))
+
+    def is_wandering(self, character: prototype.Character) -> bool:
+        enforce_type('character', character, prototype.Character)
+        return self.__access_character(character).is_wandering
+
+    def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
+        W = const.ARENA_SIZE[1]
+        if position.x < 0 or position.x > W or position.y < 0 or position.x > W:
+            return prototype.MapTerrain.OUT_OF_BOUNDS
+        terrain = get_model().map.get_position_type(self.__transform(position, is_position=True, inverse=True))
+        if terrain == const.map.MAP_ROAD:
+            return prototype.MapTerrain.ROAD
+        if terrain == const.map.MAP_PUDDLE:
+            return prototype.MapTerrain.OFFROAD
+        if terrain == const.map.MAP_OBSTACLE:
+            return prototype.MapTerrain.OBSTACLE
+        raise GameError("Unkown terrain type.")
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
         enforce_type('characters', characters, Iterable)
         enforce_type('direction', direction, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        direction = self.__transform(direction, is_vector=True, inverse=True)
+        direction = self.__transform(direction, is_position=False, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
@@ -297,18 +388,15 @@ class Internal(prototype.API):
         enforce_type('destination', destination, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
-        if not self.is_visible(destination):
-            log_info(f"[API] team {self.team_id} tried to move to a point outside of vision!")
-            return
-
-        destination = self.__transform(destination, is_vector=False, inverse=True)
+        destination = self.__transform(destination, is_position=True, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
-                inter.set_move_position(path)
+                if path is not None and len(path) > 0:
+                    inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
@@ -334,24 +422,30 @@ class Internal(prototype.API):
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for internal in internals:
-            attackable = internal.is_target_assailable(target_internal)
-            if attackable == model.CharacterAttackResult.FRIENDLY_FIRE:
-                log_info(f"[API] team {self.team_id} tried to attack themselves.")
-            elif attackable == model.CharacterAttackResult.COOLDOWN:
-                log_info(f"[API] team {self.team_id} is attacking too fast!")
-            elif attackable == model.CharacterAttackResult.OUT_OF_RANGE:
-                log_info(f"[API] team {self.team_id} is attacking too far!")
-            else:
-                internal.attack(target_internal)
+            internal.attack(target_internal)
 
-    def action_cast_spell(self, characters: Iterable[prototype.Character]):
+    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
+        enforce_type('characters', characters, Iterable)
+        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if 'position' in kwargs:
+            enforce_type('position', kwargs['position'], pg.Vector2)
+            kwargs['position'] = self.__transform(
+                kwargs['position'], is_position=True, inverse=True)
+
+        internals = [self.__access_character(ch) for ch in characters]
+        internals = [inter for inter in internals if self.__is_controllable(inter)]
+        for inter in internals:
+            inter.cast_ability(**kwargs)
+
+    def action_wander(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
-            inter.cast_ability()
+            with inter.moving_lock:
+                inter.set_wandering()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -362,14 +456,47 @@ class Internal(prototype.API):
         if not self.__is_controllable(internal_tower):
             return
 
-        internal_tower.update_character_type(Internal.__cast_character_type(spawn_type))
+        internal_tower.update_character_type(Internal.__map_character_type(spawn_type))
 
     def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2):
         enforce_type('characters', characters, Iterable)
         enforce_type('target', target, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
-        target = self.__transform(target, is_vector=False, inverse=True)
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
+        return characters
+
+    def within_attacking_range(self, unit: prototype.Character | prototype.Tower,
+                               candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= unit.attack_range and enemy.team_id != unit.team_id]
+
+    def within_vulnerable_range(self, unit: prototype.Character | prototype.Tower,
+                                candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= enemy.attack_range and enemy.team_id != unit.team_id]
 
 
 class TimeoutException(BaseException):
@@ -451,8 +578,7 @@ def threading_ai(team_id: int, helper: Internal, timer: Timer):
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
     except Exception:
-        log_warning(f"Caught exception in AI of team {team_id}:")
-        log_info(traceback.format_exc())
+        log_critical(f"Caught exception in AI of team {team_id}:\n{traceback.format_exc()}")
     except TimeoutException:
         log_critical(f"[API] AI of team {team_id} timed out!")
     finally:

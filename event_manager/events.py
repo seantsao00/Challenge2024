@@ -26,6 +26,14 @@ class EventInitialize(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventPostInitialize(BaseEvent):
+    """
+    Event posted after a new round of game starts.
+    This event is a workaround of AI, because everything should be started before AI.
+    """
+
+
+@dataclass(kw_only=True)
 class EventQuit(BaseEvent):
     """Event posted upon quitting the game (closing the program)."""
 
@@ -40,7 +48,7 @@ class EventSelectParty(BaseEvent):
 @dataclass(kw_only=True)
 class EventChangeParty(BaseEvent):
     """Event posted when player is selecting parties"""
-    select_input: tuple[const.PartySelectInput, tuple[int, int] | None]
+    select_input: tuple[const.PartySelectorInputType, tuple[int, int] | None]
 
 
 @dataclass(kw_only=True)
@@ -195,3 +203,8 @@ class EventUseRangerAbility(BaseEvent):
 @dataclass(kw_only=True)
 class EventTestParticle(BaseEvent):
     """Test haha"""
+
+
+@dataclass(kw_only=True)
+class EventBulletExplode(BaseEvent):
+    bullet: Bullet

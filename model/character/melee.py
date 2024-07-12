@@ -33,7 +33,7 @@ class Melee(Character):
 
     """
 
-    def __init__(self, team, position):
+    def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
         super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
         self.__defense: float = 0
 
@@ -48,6 +48,9 @@ class Melee(Character):
             self._last_attack_time = now_time
 
     def take_damage(self, event: EventAttack):
+        if not self.vulnerable(event.attacker):
+            return
+
         if self.__defense > 0:
             new_damage = 0.5 * event.attacker.attribute.attack_damage
             self.__defense -= 1
@@ -66,6 +69,9 @@ class Melee(Character):
         log_info("[Melee] Cast ability")
         self.abilities_time = now_time
         self.ability()
+
+    def manual_cast_ability(self, *args, **kwargs):
+        self.cast_ability(*args, **kwargs)
 
     def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables

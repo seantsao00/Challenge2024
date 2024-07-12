@@ -3,7 +3,7 @@ The module defines the main game engine.
 """
 from __future__ import annotations
 
-import os
+import os.path
 import threading
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -15,14 +15,14 @@ import const.map
 import const.model
 from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
-                           EventCharacterDied, EventCharacterMove, EventCreateEntity,
-                           EventEveryTick, EventGameOver, EventInitialize, EventPauseModel,
-                           EventQuit, EventRangedBulletDamage, EventResumeModel, EventSelectParty,
+                           EventBulletExplode, EventCharacterDied, EventCharacterMove,
+                           EventCreateEntity, EventEveryTick, EventGameOver, EventInitialize,
+                           EventPauseModel, EventPostInitialize, EventQuit,
+                           EventRangedBulletDamage, EventResumeModel, EventSelectParty,
                            EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
 from instances_manager import get_event_manager
 from model.building import Tower
-from model.bullet import Bullet
-from model.character import Character
+from model.character import Character, Ranger, Sniper
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
@@ -43,7 +43,7 @@ class ModelArguments:
     team_controls: list[str]
     show_view_range: bool
     show_attack_range: bool
-    skip_character_selection: bool
+    skip_character_selecting: bool
 
 
 class Model:
@@ -68,17 +68,18 @@ class Model:
 
         self.global_clock: pg.time.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock = Clock()
+        self.__game_clock: Clock
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
         self.dt: float
         """Real-world-passing time since last tick in second."""
 
+        self.entity_lock = threading.Lock()
         self.entities: list[Entity] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
-        self.grid: Grid = Grid(900, 900)
+        self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
-        if model_arguments.skip_character_selection:
+        if model_arguments.skip_character_selecting:
             self.party_selector.select_random_party()
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
@@ -89,7 +90,8 @@ class Model:
         self.show_attack_range: bool = model_arguments.show_attack_range
 
         self.pause_menu: PauseMenu = PauseMenu()
-        self.RangerAbility = False
+        self.ranger_ability = False
+        self.ranger_controlling: Ranger = None
 
         self.__register_listeners()
 
@@ -100,10 +102,9 @@ class Model:
         This method should be called when a new game is about to start,
         even for the second or more rounds of the game.
         """
-        load_ai(self.__team_files_names)
 
+        self.__game_clock = Clock()
         self.teams: list[Team] = []
-        self.bullet_pool: list[Bullet] = []
 
         selected_parties = self.party_selector.selected_parties()
 
@@ -112,8 +113,10 @@ class Model:
             team = Team(team_master == 'human',
                         selected_parties[i],
                         team_master)
+            fountain = Tower(new_position, team, True)
             self.teams.append(team)
-            self.__tower.append(Tower(new_position, team, True))
+            self.__tower.append(fountain)
+            team.fountain = fountain
         for team in self.teams:
             for i in (team.team_id for team in self.teams):
                 if i != team.team_id:
@@ -125,7 +128,8 @@ class Model:
             self.__tower.append(Tower(position, self.__neutral_team))
         self.state = const.State.PLAY
 
-        # self.__game_clock
+    def __post_initialize(self, _: EventPostInitialize):
+        load_ai(self.__team_files_names)
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -145,7 +149,8 @@ class Model:
                         f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __register_entity(self, event: EventCreateEntity):
-        self.entities.append(event.entity)
+        with self.entity_lock:
+            self.entities.append(event.entity)
         if isinstance(event.entity, Character):
             for tower in self.grid.get_attacker_tower(event.entity.position):
                 tower.enemy_in_range(event.entity)
@@ -163,34 +168,42 @@ class Model:
 
     def create_bullet(self, event: EventBulletCreate):
         get_event_manager().register_listener(EventEveryTick, event.bullet.judge)
-        # event.bullet.timer = Timer(interval=const.BULLET_INTERVAL,
-        #                            function=event.bullet.judge, once=False)
-        self.bullet_pool.append(event.bullet)
 
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
-        event.bullet.discard()
-        for entity in self.entities:
-            if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
-                get_event_manager().post(EventAttack(victim=entity,
-                                                     attacker=event.bullet.attacker,
-                                                     damage=event.bullet.damage), channel_id=entity.id)
+        event.bullet.state = const.BulletState.EXPLODE
+        with self.entity_lock:
+            for entity in self.entities:
+                if ((entity.position - event.bullet.target).length() < event.bullet.range
+                        and entity.team is not event.bullet.team):
+                    get_event_manager().post(EventAttack(victim=entity,
+                                                         attacker=event.bullet.attacker,
+                                                         damage=event.bullet.damage), channel_id=entity.id)
+        Timer(const.BULLET_RANGER_ABILITY_DURATION, get_event_manager().post,
+              EventBulletExplode(bullet=event.bullet), once=True)
 
     def bullet_damage(self, event: EventBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
         event.bullet.discard()
+        damage = event.bullet.damage
+        if isinstance(event.bullet.attacker, Sniper) and isinstance(event.bullet.victim, Tower):
+            damage /= const.BULLET_SNIPER_ATTACK_TOWER_DEBUFF
         get_event_manager().post(EventAttack(victim=event.bullet.victim,
                                              attacker=event.bullet.attacker,
-                                             damage=event.bullet.damage), channel_id=event.bullet.victim.id)
+                                             damage=damage), channel_id=event.bullet.victim.id)
 
     def bullet_disappear(self, event: EventBulletDisappear):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
+        event.bullet.discard()
+
+    def bullet_explode(self, event: EventBulletExplode):
         event.bullet.discard()
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.__initialize)
+        ev_manager.register_listener(EventInitialize, self.__post_initialize)
         ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
         ev_manager.register_listener(EventQuit, self.__handle_quit)
         ev_manager.register_listener(EventPauseModel, self.__handle_pause)
@@ -205,6 +218,7 @@ class Model:
         ev_manager.register_listener(EventBulletDamage, self.bullet_damage)
         ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
         ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
+        ev_manager.register_listener(EventBulletExplode, self.bullet_explode)
 
     def get_time(self):
         return self.__game_clock.get_time()
@@ -250,6 +264,7 @@ class Model:
         """
         ev_manager = get_event_manager()
         ev_manager.post(EventInitialize())
+        ev_manager.post(EventPostInitialize())
 
     def handle_game_over(self, _: EventGameOver):
         """

@@ -25,7 +25,8 @@ class Ranger(Character):
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
         super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
-        get_event_manager().register_listener(EventUseRangerAbility, listener=self.use_ability)
+        get_event_manager().register_listener(EventUseRangerAbility,
+                                              listener=self.use_ability, channel_id=self.id)
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
@@ -43,23 +44,43 @@ class Ranger(Character):
             self._last_attack_time = now_time
 
     def cast_ability(self, *args, **kwargs):
-        """This function is called after clicked Q, it wouldn't generate bullet"""
+        """`kwargs` should contain position (default to my position)"""
+        target = kwargs.get('position', self.position)
+        now_time = get_model().get_time()
+        if now_time - self.abilities_time < self.attribute.ability_cd:
+            print(f"[Ranger] {self} is casting ability too fast")
+            return
+        if not self.reachable(target):
+            print(f"[Ranger] {self} is casting ability too far")
+            return
+        print(f"[Ranger] {self} casted ability")
+        self.abilities_time = now_time
+        get_event_manager().post(EventUseRangerAbility(position=target), channel_id=self.id)
 
-        log_info("[Ranger] Ability is on")
+    def manual_cast_ability(self, *args, **kwargs):
+        """
+        This function is called after clicked Q, it wouldn't generate bullet.
+        Actual call is handled inside model.
+        """
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        self.abilities_time = now_time
-        get_model().RangerAbility = True
+        # This is moved to model preventing ability double spam
+        # self.abilities_time = now_time
+        get_model().ranger_ability = True
+        get_model().ranger_controlling = self
+        log_info("[Ranger] Ability is on")
 
     def use_ability(self, event: EventUseRangerAbility):
         """This function is called after clicked Q and left button, it would generate bullet"""
+        # Range determine is moved outside this function, as there might be lag
+        # between of API and event manager (which casing the event fail is quite weird)
 
-        if self.position.distance_to(event.position) <= self.attribute.attack_range:
-            get_model().RangerAbility = False
-            log_info("[Ranger] Cast ablility")
-            bullet = BulletRanger(position=self.position,
-                                  target=event.position,
-                                  team=self.team,
-                                  attacker=self)
-            get_event_manager().post(EventBulletCreate(bullet=bullet))
+        # In case of API cast ability, this controlling will not be overritten,
+        # to ensure API does not interrupt human control.
+        log_info("[Ranger] Cast ablility")
+        bullet = BulletRanger(position=self.position,
+                              target=event.position,
+                              team=self.team,
+                              attacker=self)
+        get_event_manager().post(EventBulletCreate(bullet=bullet))
