@@ -15,8 +15,8 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, PartySelectorView, PauseMenuView, TowerCDView,
-                         ViewRangeView)
+                         HealthView, ObjectBase, Particle, ParticleManager, PartySelectorView,
+                         PauseMenuView, TowerCDView, ViewRangeView)
 from view.screen_info import ScreenInfo
 
 
@@ -49,6 +49,8 @@ class View:
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
+
+        self.__particle_manager = ParticleManager(self.__screen)
 
         PartySelectorView.init_convert()
 
@@ -163,7 +165,7 @@ class View:
         discarded_entities: set[type[EntityView]] = set()
 
         for entity in self.__entities:
-            if not entity.update():
+            if not entity.move():
                 discarded_entities.add(entity)
         self.__entities = [
             entity for entity in self.__entities if entity not in discarded_entities]
@@ -200,6 +202,8 @@ class View:
         font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
         time_remaining_surface = font.render(f'{minute:02d}:{sec:02d}', True, pg.Color('white'))
         self.__screen.blit(time_remaining_surface, (100, 100))
+
+        self.__particle_manager.draw()
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
