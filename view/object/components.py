@@ -1,3 +1,8 @@
+"""
+Different components on scoreboard and chat.
+Moved here for reusability & keep scorebox/chat modules clean.
+"""
+
 import pygame as pg
 
 import const.character
@@ -63,3 +68,12 @@ def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) 
         draw_text(textbox, 0, cur_y, ln, color, font, align_text='midleft')
         cur_y += line_height
     return textbox
+
+
+def createIcon(file_path: str, icon_size: float) -> pg.Surface:
+    """
+    Load and scale a square icon to desired size.
+    """
+    icon = pg.image.load(file_path)
+    icon = pg.transform.scale(icon, (icon_size, icon_size))
+    return icon

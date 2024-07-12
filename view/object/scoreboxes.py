@@ -11,7 +11,6 @@ from view.textutil import font_loader
 
 
 class Scorebox:
-
     def __init__(self, team: Team, initial_position: tuple[int, int]):
         self.__canvas = pg.Surface(SI.translate((SCOREBOX_WIDTH, SCOREBOX_HEIGHT)), pg.SRCALPHA)
         self.font_primary = font_loader.get_font(size=SCOREBOX_FONT_SIZE_PRIMARY)
@@ -28,52 +27,40 @@ class Scorebox:
         self.has_tower = False
 
     def draw(self, canvas: pg.Surface):
-        # pg.draw.rect(self.__canvas, pg.color.Color(255, 255, 255, 127),
-        #              (*SI.translate((0, 0), position), SI.scale(SCOREBOX_WIDTH), SI.scale(SCOREBOX_HEIGHT)))
         self.__canvas.fill(pg.Color(0, 0, 0, 0))
         # avatar
         self.__canvas.blit(self.__team_avatar, self.__team_avatar.get_rect(
-            topright=SI.scale((SCOREBOX_WIDTH, 0))))
+            midleft=SI.scale((3, 12))))
         # team name
         self.__canvas.blit(
             self.__team_name_surface,
-            self.__team_name_surface.get_rect(
-                midleft=SI.scale((0, SCOREBOX_AVATAR_SIZE / 2))
-            )
+            self.__team_name_surface.get_rect(bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
         )
         # score
-        score_text = self.font_primary.render(f"10{self.__team_score:.2f}", False, 'black')
+        score_text = self.font_primary.render(f"{self.__team_score + 1000:.2f}", False, 'black')
         self.__canvas.blit(
             score_text,
-            score_text.get_rect(bottomleft=SI.scale((0, SCOREBOX_HEIGHT)))
+            score_text.get_rect(topright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
         )
-        # kill count
-        kill_icon = pg.image.load(SCOREBOX_ICON_KILL)
-        kill_icon = pg.transform.scale(kill_icon, SI.scale((7, 7)))
-        self.__canvas.blit(kill_icon, kill_icon.get_rect(
-            midright=SI.scale((SCOREBOX_WIDTH, SCOREBOX_HEIGHT - 13.5))))
-        kill_text = self.font_secondary.render(f"114", False, 'black')
-        self.__canvas.blit(kill_text, kill_text.get_rect(
-            bottomright=SI.scale((SCOREBOX_WIDTH - 8, SCOREBOX_HEIGHT - 9))))
-        # unit count
-        unit_icon = pg.image.load(SCOREBOX_ICON_UNIT)
-        unit_icon = pg.transform.scale(unit_icon, SI.scale((7, 7)))
-        self.__canvas.blit(unit_icon, unit_icon.get_rect(
-            midright=SI.scale((SCOREBOX_WIDTH, SCOREBOX_HEIGHT - 4.5))))
-        unit_text = self.font_secondary.render(f"514", False, 'black')
-        self.__canvas.blit(unit_text, unit_text.get_rect(
-            bottomright=SI.scale((SCOREBOX_WIDTH - 8, SCOREBOX_HEIGHT))))
-        # tower icon
-        if self.has_tower:
-            tower_icon = pg.image.load(SCOREBOX_ICON_NEUTRALTOWER)
-            tower_icon = pg.transform.scale(tower_icon, SI.scale((7, 7)))
-            self.__canvas.blit(tower_icon, tower_icon.get_rect(
-                midleft=SI.scale((0, SCOREBOX_HEIGHT / 2))))
 
-        # text = self.font_secondary.render(f"1234", False, 'black')
-        # rect = text.get_rect(bottomright = SI.scale((SCOREBOX_WIDTH, SCOREBOX_HEIGHT)))
-        # self.__canvas.blit(text, rect)
-        # pg.draw.rect(self.__canvas, 'white', rect, width=1)
+        def blitIconAndText(icon_name: str, text_string: str, bottomleft: list[float, float]):
+            icon = components.createIcon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))
+            text = self.font_secondary.render(text_string, True, 'black')
+            height = max(icon.get_size()[1], text.get_size()[1])
+            midleft = [bottomleft[0], bottomleft[1] - height / 2]
+            self.__canvas.blit(icon, icon.get_rect(midleft=midleft))
+            midleft[0] += icon.get_size()[0] + SI.scale(1)
+            self.__canvas.blit(text, text.get_rect(midleft=midleft))
+
+        # unit count
+        bottomleft = SI.scale([0, SCOREBOX_HEIGHT])
+        blitIconAndText(SCOREBOX_ICON_UNIT, "114", bottomleft)
+        # kill count
+        bottomleft[0] += SI.scale(SCOREBOX_WIDTH / 3)
+        blitIconAndText(SCOREBOX_ICON_KILL, "514", bottomleft)
+        # dead count
+        bottomleft[0] += SI.scale(SCOREBOX_WIDTH / 3)
+        blitIconAndText(SCOREBOX_ICON_DEAD, "888", bottomleft)
 
         position = (self.__position_x, self.__position_y.value)
         canvas.blit(self.__canvas, SI.scale(position))
@@ -85,6 +72,9 @@ class Scorebox:
     def cur_score(self):
         return self.__team_score
 
+    def get_team(self):
+        return self.__team
+
 
 class ScoreboxesView(ObjectBase):
     def __init__(self, canvas: pg.Surface):
@@ -94,27 +84,40 @@ class ScoreboxesView(ObjectBase):
         self.__boxes: list[Scorebox] = []
 
     def initialize(self):
+        if self.__initialized:
+            return
         cur_y = SCOREBOX_POSITION[1]
         for team in get_model().teams:
             self.__boxes.append(
                 Scorebox(team, (SCOREBOX_POSITION[0], cur_y)))
             cur_y += SCOREBOX_HEIGHT + SCOREBOX_SPACING
         self.__boxes[0].has_tower = True
+        self.__initialized = True
 
     def draw(self):
-        if not self.__initialized:
-            self.initialize()
-            self.__initialized = True
+        self.initialize()
+
+        # fake update: another team gets the tower
         import random
         if random.randint(1, 50) == 1:
             for box in self.__boxes:
                 box.has_tower = False
             teamid = random.randint(0, len(self.__boxes) - 1)
             self.__boxes[teamid].has_tower = True
+
         for box in self.__boxes:
             box.draw(self.__canvas)
 
     def update(self):
+        self.initialize()
+
+        # fake update: random team gets 10 points
+        import random
+        if random.randint(1, 50) == 1:
+            teamid = random.randint(0, len(self.__boxes) - 1)
+            for _ in range(10):
+                self.__boxes[teamid].get_team().gain_point_kill()
+
         self.__boxes.sort(key=lambda box: box.cur_score(), reverse=True)
         cur_y = SCOREBOX_POSITION[1]
         for box in self.__boxes:
