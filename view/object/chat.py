@@ -13,6 +13,7 @@ from event_manager import EventSendChat
 from instances_manager import get_event_manager, get_model
 from model.team import Team
 from view.object import components
+from view.object.animation import LinearAnimation, LinearAnimationEasings
 from view.object.object_base import ObjectBase
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
@@ -63,7 +64,8 @@ class ChatView(ObjectBase):
         self.__canvas = canvas
         self.__chat_surface = pg.Surface(consts.CHAT_SIZE, pg.SRCALPHA)
         self.__comments: list[CommentBox] = []
-        self.__frame_count = 0
+        self.__scroll = LinearAnimation(0, 1, LinearAnimationEasings.easeOutCubic)
+        self.__total_scroll = 0
         get_event_manager().register_listener(EventSendChat, self.handle_new_chat)
 
     def initialize(self):
@@ -75,7 +77,7 @@ class ChatView(ObjectBase):
             self.initialize()
             self.__initialized = True
         self.__chat_surface.fill(pg.Color(0, 0, 0, 0))
-        cur_pos = [0, consts.CHAT_SIZE[1]]
+        cur_pos = [0, consts.CHAT_SIZE[1] + self.__total_scroll - self.__scroll.value]
         iter = len(self.__comments) - 1
         while iter >= 0 and cur_pos[1] > 0:
             comment = self.__comments[iter]
@@ -88,18 +90,17 @@ class ChatView(ObjectBase):
         self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
     def update(self):
-        # import random
-        # self.__frame_count += 1
-        # if self.__frame_count % 60 == 0:
-        #     teamid = random.randint(0, 3)
-        #     team = get_model().teams[teamid]
-        #     if random.randint(0, 1) > 0:
-        #         self.add_comment(
-        #             team, f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)")
-        #     else:
-        #         teamid2 = random.randint(0, 3)
-        #         team, self.add_comment(f"Team {teamid}'s Ranger was slain by Team {teamid2}!")
-        pass
+        # do fake updates
+        import random
+        if random.randint(1, 20) == 1:
+            teamid = random.randint(0, 3)
+            team = get_model().teams[teamid]
+            if random.randint(0, 1) > 0:
+                self.add_comment(
+                    team, f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)")
+            else:
+                teamid2 = random.randint(0, 3)
+                self.add_comment(team, f"Team {teamid}'s Ranger was slain by Team {teamid2}!")
 
     def handle_new_chat(self, e: EventSendChat):
         if e.type == ChatMessageType.CHAT_COMMENT:
@@ -110,4 +111,7 @@ class ChatView(ObjectBase):
 
     def add_comment(self, team: Team, text: str):
         avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
-        self.__comments.append(CommentBox(text, avatar, consts.CHAT_SIZE[0]))
+        comment_box = CommentBox(text, avatar, consts.CHAT_SIZE[0])
+        self.__comments.append(comment_box)
+        self.__total_scroll += comment_box.get_size()[1] + consts.SPACING[1]
+        self.__scroll.value = self.__total_scroll

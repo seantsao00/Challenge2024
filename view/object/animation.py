@@ -4,16 +4,21 @@ from instances_manager import get_model
 
 
 class LinearAnimationEasings:
+    """easing functions from https://easings.net/"""
+
     @staticmethod
     def linear(t: float):
         return t
 
     @staticmethod
     def easeInOutCubic(t: float):
-        """took from https://easings.net/#easeInOutCubic"""
         if t < 0.5:
             return 4 * (t ** 3)
         return 1 - ((-2 * t + 2) ** 3) / 2
+
+    @staticmethod
+    def easeOutCubic(t: float):
+        return 1 - (1 - t) ** 3
 
 
 class LinearAnimation:
