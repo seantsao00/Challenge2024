@@ -186,19 +186,19 @@ class API:
         """
         raise NotImplementedError
 
-    def get_movement(self, character: Character) -> Movement:
-        """
-        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。
-        """
-
     def refresh_character(self, character: Character) -> Character | None:
         """
         更新一個角色的數值。如果角色死亡則回傳 None。
         """
 
-    def refresh_tower(self, tower: Tower) -> Tower | None:
+    def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個建築物的數值。如果建築物死亡則回傳 None。
+        更新一個建築物的數值。
+        """
+
+    def get_movement(self, character: Character) -> Movement:
+        """
+        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。
         """
 
     def get_visibility(self) -> list[list[int]]:
@@ -231,6 +231,13 @@ class API:
         @destination: 移動的目的地。
         """
         raise NotImplementedError
+
+    def action_wander(self, characters: Iterable[Character]):
+        """
+        將所有列表內的角色設定為遊蕩。
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        """
+        pass
 
     def action_move_clear(self, characters: Iterable[Character]):
         """
@@ -274,13 +281,6 @@ class API:
         """
         raise NotImplementedError
 
-    def action_wander(self, characters: Iterable[Character]):
-        """
-        將所有列表內的角色設定為遊蕩。
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
-        """
-        pass
-
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
         """
         改變指定塔所生成的兵種。  
@@ -289,6 +289,6 @@ class API:
         """
         raise NotImplementedError
 
-    def _distance(self, characters: Iterable[Character], target: pg.Vector2):
+    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
         """將各角色依據其與目標的距離排序，若距離一樣則隨意排序。"""
         raise NotImplementedError

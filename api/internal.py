@@ -306,18 +306,21 @@ class Internal(prototype.API):
                 return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        enforce_type('character', character, prototype.Character, type(None))
+
         internal = self.__access_character(character)
         if internal is None or not internal.alive:
             return None
         return self.__register_character(internal)
 
-    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower:
+        enforce_type('tower', tower, prototype.Tower)
+
         internal = self.__access_tower(tower)
-        if internal is None or not internal.alive:
-            return None
+        if not internal.alive:
+            raise GameError("Tower died, what?")
         return self.__register_tower(internal)
 
-    
     def get_visibility(self) -> list[list[int]]:
         vision_grid = np.array(self.__team().vision.bool_mask)
 
