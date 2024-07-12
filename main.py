@@ -47,7 +47,7 @@ def main():
                         help='Showing the attack range of all entities')
     parser.add_argument('-v', '--verbose', action='count', default=0,
                         help='Increase verbosity (can be used multiple times).')
-    parser.add_argument('-m', '--music', action='store_true', help='play the BGM')
+    parser.add_argument('-m', '--mute', action='store_true', help='mute the BGM and sound effects')
     parser.add_argument('-q', '--skip-character-selecting', action='store_true',
                         help='automatically randomly select parties for each team')
 
@@ -71,7 +71,7 @@ def main():
     View()
     Controller()
 
-    if args.music:
+    if not args.mute:
         BackgroundMusic()
 
     # Main loop
