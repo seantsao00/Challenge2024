@@ -174,7 +174,8 @@ class Model:
         event.bullet.state = const.BulletState.EXPLODE
         with self.entity_lock:
             for entity in self.entities:
-                if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
+                if ((entity.position - event.bullet.target).length() < event.bullet.range
+                        and entity.team is not event.bullet.team):
                     get_event_manager().post(EventAttack(victim=entity,
                                                          attacker=event.bullet.attacker,
                                                          damage=event.bullet.damage), channel_id=entity.id)

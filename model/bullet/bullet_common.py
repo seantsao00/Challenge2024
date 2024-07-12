@@ -38,7 +38,7 @@ class BulletCommon(Bullet[None]):
         ev_manager = get_event_manager()
         if not self.victim.alive:
             ev_manager.post(EventBulletDisappear(bullet=self))
-        if (victim_pos - original_pos).length() <= self.speed * model.dt:
+        elif (victim_pos - original_pos).length() <= self.speed * model.dt:
             ev_manager.post(EventBulletDamage(bullet=self))
         else:
             self.direction = (victim_pos - original_pos).normalize()

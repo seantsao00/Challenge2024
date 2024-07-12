@@ -195,9 +195,9 @@ class Character(LivingEntity):
         self._last_attack_time = now_time
         return True
 
+    @abstractmethod
     def attack(self, enemy: Entity):
-        if self.attackable():
-            get_event_manager().post(EventAttack(attacker=self, victim=enemy), enemy.id)
+        pass
 
     def die(self):
         log_info(f"Character {self.id} in Team {self.team.team_id} died")
