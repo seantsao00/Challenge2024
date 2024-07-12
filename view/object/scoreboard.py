@@ -19,9 +19,10 @@ class Scorebox:
         self.__team = team
         self.__team_stats = self.__team.stats
         self.__team_name_surface = self.font_primary.render(
-            f"Team {self.__team.team_id}", False, 'black')
+            f"{self.__team.team_name}", False, 'black')
         self.__team_avatar = components.createTeamAvatar(
             self.__team, int(SI.scale(SCOREBOX_AVATAR_SIZE)))
+        self.__team_towers_count: int = 0
         self.__position_x = initial_position[0]
         self.__position_y = LinearAnimation(
             initial_position[1], SCOREBOX_ANIMATION_DURATION)
@@ -41,34 +42,48 @@ class Scorebox:
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
         # score
         score_text = self.font_primary.render(f"{self.__team_stats.score:.1f}", False, 'black')
-        self.__canvas.blit(
-            score_text,
-            score_text.get_rect(topright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
-        )
+        score_rect = score_text.get_rect(topright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
+        self.__canvas.blit(score_text, score_rect)
+        # show towers owned
+        tower_icon = components.createIcon(
+            SCOREBOX_ICON_NEUTRALTOWER, SI.scale(SCOREBOX_ICON_SIZE))
+        midright = score_rect.midleft
+        midright = (midright[0] - SI.scale(2), midright[1])
+        for _ in range(self.__team_towers_count):
+            self.__canvas.blit(tower_icon, tower_icon.get_rect(midright=midright))
+            midright = (midright[0] - SI.scale(4), midright[1])
 
-        def blitIconAndText(icon_name: str, text_string: str, bottomleft: list[float, float]):
+        def blitIconAndText(icon_name: str, text_string: str, bottomleft: list[float, float], width: float):
             icon = components.createIcon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))
             text = self.font_secondary.render(text_string, True, 'black')
             height = max(icon.get_size()[1], text.get_size()[1])
-            midleft = [bottomleft[0], bottomleft[1] - height / 2]
-            self.__canvas.blit(icon, icon.get_rect(midleft=midleft))
-            midleft[0] += icon.get_size()[0] + SI.scale(1)
-            self.__canvas.blit(text, text.get_rect(midleft=midleft))
+            self.__canvas.blit(icon, icon.get_rect(
+                midleft=(bottomleft[0], bottomleft[1] - height / 2)))
+            self.__canvas.blit(text, text.get_rect(
+                center=(bottomleft[0] + icon.get_size()[0] / 2 + width / 2, bottomleft[1] - height / 2)))
+        field_width = SI.scale(SCOREBOX_WIDTH / 3)
         # unit count
         bottomleft = SI.scale([0, SCOREBOX_HEIGHT])
-        blitIconAndText(SCOREBOX_ICON_UNIT, str(self.__team_stats.units_alive), bottomleft)
+        blitIconAndText(SCOREBOX_ICON_UNIT, str(
+            self.__team_stats.units_alive), bottomleft, field_width)
         # kill count
-        bottomleft[0] += SI.scale(SCOREBOX_WIDTH / 3)
-        blitIconAndText(SCOREBOX_ICON_KILL, str(self.__team_stats.units_killed), bottomleft)
+        bottomleft[0] += field_width
+        blitIconAndText(SCOREBOX_ICON_KILL, str(
+            self.__team_stats.units_killed), bottomleft, field_width)
         # dead count
-        bottomleft[0] += SI.scale(SCOREBOX_WIDTH / 3)
-        blitIconAndText(SCOREBOX_ICON_DEAD, str(self.__team_stats.units_dead), bottomleft)
+        bottomleft[0] += field_width
+        blitIconAndText(SCOREBOX_ICON_DEAD, str(
+            self.__team_stats.units_dead), bottomleft, field_width)
 
+        # actually draw the box onto the screen
         position = (self.__position_x, self.__position_y.value)
         canvas.blit(self.__canvas, SI.scale(position))
 
     def update(self, position: tuple[float, float]):
         self.__team_stats = self.__team.stats
+        self.__team_towers_count = len(self.__team.towers)
+        if self.__team.fountain is not None:
+            self.__team_towers_count -= 1
         self.__position_y.value = position[1]
 
     def cur_score(self):

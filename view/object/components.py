@@ -70,10 +70,12 @@ def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) 
     return textbox
 
 
-def createIcon(file_path: str, icon_size: float) -> pg.Surface:
+def createIcon(file_path: str, icon_height: float) -> pg.Surface:
     """
-    Load and scale a square icon to desired size.
+    Load and scale an icon to specified height
     """
     icon = pg.image.load(file_path)
-    icon = pg.transform.scale(icon, (icon_size, icon_size))
+    w, h = icon.get_size()
+    ratio = icon_height / h
+    icon = pg.transform.scale(icon, (w * ratio, h * ratio))
     return icon
