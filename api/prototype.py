@@ -147,6 +147,10 @@ class API:
         """回傳遊戲網格的長寬，由於遊戲網格是正方形的，長寬都使用這個函數。"""
         raise NotImplementedError
 
+    def get_vision_block_size(self) -> float:
+        """回傳視野的精確程度，也就是說假設回傳值為 B，每長 B 寬 B 的位置會有同樣的視野狀態。"""
+        raise NotImplementedError
+
     def get_team_id(self) -> int:
         """回傳自己隊伍的編號（`id`）。"""
         raise NotImplementedError
@@ -155,6 +159,13 @@ class API:
         """
         回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。  
         @index: 隊伍的編號或者是 `None`（代表自己的小隊）
+        """
+        raise NotImplementedError
+
+    def get_sample_character(self, type_class: CharacterClass) -> Character:
+        """
+        回傳自己隊伍所擁有的角色。
+        預設回傳按照角色的 `id` 排序。
         """
         raise NotImplementedError
 
@@ -188,21 +199,30 @@ class API:
 
     def refresh_character(self, character: Character) -> Character | None:
         """
-        更新一個角色的數值。如果角色死亡則回傳 None。
+        更新一個角色的數值。如果角色死亡則回傳 None。  
+        @character: 目標的角色。
         """
 
     def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個建築物的數值。
+        更新一個建築物的數值。  
+        @tower: 目標的建築。
         """
 
     def get_movement(self, character: Character) -> Movement:
         """
-        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。
+        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。  
+        @character: 目標的角色。
         """
 
     def get_visibility(self) -> list[list[int]]:
-        """Deprecated. use `is_visible` instead."""
+        """
+        回傳目前的所有視野狀態。回傳值是一個二維的表格，
+        長寬皆為 `get_grid_size` 的回傳值除以 `get_vision_block_size` 的回傳值。
+        也就是說，假設 `get_vision_block_size` 的回傳值是 B，
+        那回傳值的第 i 行第 j 列代表的是 x 座標為 [i * B, i * (B + 1)] 
+        而 y 座標為 [j * B, j * (B + 1)] 的這個格子的狀態。
+        """
         raise NotImplementedError
 
     def is_visible(self, position: pg.Vector2) -> bool:
@@ -290,5 +310,29 @@ class API:
         raise NotImplementedError
 
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
-        """將各角色依據其與目標的距離排序，若距離一樣則隨意排序。"""
+        """
+        將各角色依據其與目標的距離排序，若距離一樣則隨意排序。  
+        @characters: 指定的角色列表。  
+        @target: 指定的目標座標。
+        """
+        raise NotImplementedError
+
+    def within_attacking_range(self, unit: Character | Tower,
+                               candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
+        """
+        給定一個實體以及潛在目標，回傳可以攻擊的到的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵對實體。
+        這個函數只是普通暴力的包裝。  
+        @unit: 指定的攻擊者。  
+        @candidates: 要考慮的所有實體。
+        """
+        raise NotImplementedError
+
+    def within_vulnerable_range(self, unit: Character | Tower,
+                                candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
+        """
+        給定一個實體以及潛在目標，回傳可能被攻擊的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵對實體。
+        這個函數只是普通暴力的包裝。
+        @unit: 指定的被攻擊者。  
+        @candidates: 要考慮的所有實體。
+        """
         raise NotImplementedError

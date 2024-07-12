@@ -240,6 +240,9 @@ class Internal(prototype.API):
     def get_grid_size(self):
         return const.ARENA_SIZE[0]
 
+    def get_vision_block_size(self) -> float:
+        return const.VISION_BLOCK_SIZE
+
     def get_owned_characters(self) -> list[prototype.Character]:
         with self.__team().character_lock:
             return sorted([self.__register_character(character)
@@ -464,6 +467,36 @@ class Internal(prototype.API):
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
         return characters
+
+    def within_attacking_range(self, unit: prototype.Character | prototype.Tower,
+                               candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= unit.attack_range and enemy.team_id != unit.team_id]
+
+    def within_vulnerable_range(self, unit: prototype.Character | prototype.Tower,
+                                candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= enemy.attack_range and enemy.team_id != unit.team_id]
 
 
 class TimeoutException(BaseException):
