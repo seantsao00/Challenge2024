@@ -43,7 +43,7 @@ class Map:
         y = util.clamp(
             cell[1] * const.ARENA_SIZE[1] / self.size[1], 0, const.ARENA_SIZE[1] - 1
         )
-        return pg.Vector2(x, y)
+        return pg.Vector2(x + 0.5, y + 0.5)
 
     def get_cell_type(self, cell: tuple[int, int]) -> int:
         """
