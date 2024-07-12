@@ -318,22 +318,25 @@ class Internal(prototype.API):
         return self.__register_tower(tower)
 
     def get_visibility(self) -> list[list[int]]:
-        mask = self.__team().vision.mask
-        vision_grid = pg.surfarray.array_alpha(mask)
-        vision_grid[vision_grid == 0] = 1
-        vision_grid[vision_grid == 255] = 0
+        vision_grid = np.array(self.__team().vision.bool_mask)
+
         # Upside down flip
         vision_grid = np.flip(vision_grid, axis=0)
         if self.transform is None:
             self.__build_transform_matrix()
+
         # Rotate visibility matrix base on transform
-        vision_grid = np.rot90(vision_grid, 3)
         if self.transform[0][0] == 0 and self.transform[0][1] == 1:
             vision_grid = np.rot90(vision_grid)
         elif self.transform[0][0] == -1 and self.transform[0][1] == 0:
             vision_grid = np.rot90(vision_grid, 2)
         elif self.transform[0][0] == 0 and self.transform[0][1] == -1:
             vision_grid = np.rot90(vision_grid, 3)
+
+        # Transform array index into coordinate
+        vision_grid = np.flip(vision_grid, axis=0)
+        vision_grid = np.rot90(vision_grid)
+
         return vision_grid.tolist()
 
     def is_visible(self, position: pg.Vector2) -> bool:
