@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -57,6 +58,13 @@ class Team(NeutralTeam):
      - visible_entities_list: list of visible entities to the team. Note that entities owned by this team is not in this list.
     """
 
+    @dataclass
+    class TeamStats:
+        score: int
+        units_alive: int
+        units_dead: int
+        units_killed: int
+
     def __init__(self, manual_control: bool, party: const.PartyType, team_name: str | None = None):
         super().__init__(party)
 
@@ -65,7 +73,7 @@ class Team(NeutralTeam):
             self.__team_name = team_name
         else:
             self.__team_name = 'team' + str(self.__team_id)
-        self.__points: int = 0
+        self.__stats = Team.TeamStats(0, 0, 0, 0)
         self.__towers: set[Tower] = set()
         self.tower_lock = Lock()
         self.character_lock = Lock()
@@ -108,6 +116,7 @@ class Team(NeutralTeam):
     def gain_character(self, event: EventSpawnCharacter):
         with self.character_lock:
             self.character_list.add(event.character)
+        self.__stats.units_alive += 1
 
     def gain_tower(self, event: EventTeamGainTower):
         with self.tower_lock:
@@ -124,10 +133,11 @@ class Team(NeutralTeam):
                 self.__towers.remove(event.tower)
 
     def gain_point_kill(self):
-        self.__points += const.SCORE_KILL
+        self.__stats.score += const.SCORE_KILL
+        self.__stats.units_killed += 1
 
     def gain_point_tower(self, _: EventEveryTick):
-        self.__points += const.SCORE_OWN_TOWER * len(self.__towers) * get_model().dt
+        self.__stats.score += const.SCORE_OWN_TOWER * len(self.__towers) * get_model().dt
 
     def handle_character_died(self, event: EventCharacterDied):
         if self.__controlling is event.character:
@@ -135,6 +145,8 @@ class Team(NeutralTeam):
         with self.character_lock:
             if event.character in self.character_list:
                 self.character_list.remove(event.character)
+                self.__stats.units_alive -= 1
+                self.__stats.units_dead += 1
 
     def handle_create_tower(self, event: EventCreateTower):
         if event.tower.team is self:
@@ -169,7 +181,11 @@ class Team(NeutralTeam):
 
     @property
     def points(self) -> int:
-        return self.__points
+        return self.__stats.score
+
+    @property
+    def stats(self) -> Team.TeamStats:
+        return self.__stats
 
     @property
     def towers(self) -> const.PartyType:

@@ -9,6 +9,7 @@ import const
 from const.visual.priority import PRIORITY_PAUSEMENU
 from view.object.object_base import ObjectBase
 from view.screen_info import ScreenInfo
+from view.textutil import draw_text
 
 if TYPE_CHECKING:
     from model import PauseMenu

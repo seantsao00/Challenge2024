@@ -15,10 +15,12 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from util import load_image
-from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
-                         HealthView, ObjectBase, Particle, ParticleManager, PartySelectorView,
-                         PauseMenuView, TowerCDView, ViewRangeView)
+from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
+                         EntityView, HealthView, ObjectBase, Particle, ParticleManager,
+                         PartySelectorView, PauseMenuView, ScoreboxesView, TowerCDView,
+                         ViewRangeView)
 from view.screen_info import ScreenInfo
+from view.textutil import font_loader
 
 
 class View:
@@ -63,6 +65,9 @@ class View:
             const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
 
+        self.__scoreboxes = ScoreboxesView(self.__screen)
+        self.__chat = ChatView(self.__screen)
+        self.__clock = ClockView(self.__screen)
         bg_image_counter = 0
         for filename in model.map.backgrounds:
             picture, position = load_image(os.path.join(
@@ -133,7 +138,7 @@ class View:
     def render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
+        font = font_loader.get_font(size=12)
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
@@ -178,12 +183,11 @@ class View:
         self.__screen.blit(
             self.__arena, ((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
 
-        # show time remaining
-        time_remaining = int(const.GAME_TIME - model.get_time())
-        (minute, sec) = divmod(time_remaining, 60)
-        font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
-        time_remaining_surface = font.render(f'{minute:02d}:{sec:02d}', True, pg.Color('white'))
-        self.__screen.blit(time_remaining_surface, (100, 100))
+        self.__scoreboxes.update()
+        self.__scoreboxes.draw()
+        self.__chat.update()
+        self.__chat.draw()
+        self.__clock.draw()
 
         self.__particle_manager.draw()
 

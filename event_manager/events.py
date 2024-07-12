@@ -12,7 +12,8 @@ import pygame as pg
 import const
 
 if TYPE_CHECKING:
-    from model import Bullet, BulletCommon, BulletRanger, Character, Entity, LivingEntity, Tower
+    from model import (Bullet, BulletCommon, BulletRanger, Character, Entity, LivingEntity, Team,
+                       Tower)
 
 
 @dataclass(kw_only=True)
@@ -203,3 +204,10 @@ class EventUseRangerAbility(BaseEvent):
 @dataclass(kw_only=True)
 class EventBulletExplode(BaseEvent):
     bullet: Bullet
+
+
+@dataclass(kw_only=True)
+class EventSendChat(BaseEvent):
+    type: const.ChatMessageType
+    team: Team
+    text: str
