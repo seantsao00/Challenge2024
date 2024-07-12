@@ -20,7 +20,7 @@ class Settlement:
         self.__rank_of_teams = sorted(model.teams, key=lambda team: team.points)
 
     def update(self) -> bool:
-        team_position: list[pg.Vector2] = [pg.Vector2(284, 100), (33, 420), (851, 100), (600, 420)]
+        team_position = const.SETTLEMENT_TEAM_POSITION
         if self.__scope_position == team_position[self.__rank_of_teams[self.__scope_target_index].team_id]:
             self.__scope_target_index += 1
         if self.__scope_target_index >= 3:

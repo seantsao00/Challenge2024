@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 
+import pygame as pg
+
 from const.team import PartyType
 from const.visual import IMAGE_DIR
 
@@ -15,3 +17,5 @@ SETTLEMENT_IMAGE: dict[PartyType, str] = {
     PartyType.BLACK: os.path.join(IMAGE_DIR, SETTLEMENT_DIR, 'black.png'),
     PartyType.MOURI: os.path.join(IMAGE_DIR, SETTLEMENT_DIR, 'mouri.png')
 }
+SETTLEMENT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
+    284, 100), pg.Vector2(33, 420), pg.Vector2(851, 100), pg.Vector2(600, 420)]
