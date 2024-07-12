@@ -399,14 +399,18 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character]):
+    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
         enforce_type('characters', characters, Iterable)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if 'position' in kwargs:
+            enforce_type('position', kwargs['position'], pg.Vector2)
+            kwargs['position'] = self.__transform(
+                kwargs['position'], is_position=True, inverse=True)
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
-            inter.cast_ability()
+            inter.cast_ability(**kwargs)
 
     def action_wander(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
@@ -437,6 +441,7 @@ class Internal(prototype.API):
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
+        return characters
 
 
 class TimeoutException(BaseException):

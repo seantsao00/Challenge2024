@@ -50,20 +50,25 @@ if __name__ == "__main__":
 
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
-    parser.add_argument('map', help='The name of maps. It can be test_map')
+    parser.add_argument('map',
+                        help='Specify the map name from the topography/ directory, e.g., "ruins".')
     parser.add_argument('team_controls', nargs='+',
-                        help='assign ai to teams or "human" if the team is controlled by human.')
-    parser.add_argument('-r', '--range', action='store_true',
-                        help='Shorthand of --show-view-range --show-attack-range')
+                        help='List who controls the teams: AI names from the ai/ directory or '
+                             '"human" for player-controlled teams. Accepts 1 to 4 entries.')
     parser.add_argument('--show-view-range', action='store_true',
-                        help='Showing the view range of all entities')
+                        help='Displays the viewing range of all characters and towers.')
     parser.add_argument('--show-attack-range', action='store_true',
-                        help='Showing the attack range of all entities')
+                        help='Displays the attack range of all characters and towers.')
+    parser.add_argument('-r', '--show-attack-view-range', action='store_true',
+                        help='Shorthand of combination of --show-view-range and --show-attack-range.')
     parser.add_argument('-v', '--verbose', action='count', default=0,
-                        help='Increase verbosity (can be used multiple times).')
-    parser.add_argument('-m', '--mute', action='store_true', help='mute the BGM and sound effects')
+                        help='Controls verbosity: 0 for critical messages, 1 for warnings, '
+                             '2 for informational messages.')
+    parser.add_argument('-m', '--mute', action='store_true',
+                        help='Mute all background music and sound effects.')
     parser.add_argument('-q', '--skip-character-selecting', action='store_true',
-                        help='automatically randomly select parties for each team')
+                        help='Skip character selection and randomly assign characters to teams '
+                             'for quick test.')
 
     args = parser.parse_args()
 

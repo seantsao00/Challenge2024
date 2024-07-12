@@ -247,10 +247,30 @@ class API:
         """
         raise NotImplementedError
 
-    def action_cast_ability(self, characters: Iterable[Character]):
+    def action_cast_ability(self, characters: Iterable[Character], **kwargs):
         """
         將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @kwargs: 所有技能參數的聯集，以下是可用列表：
+         - `position`: `pg.Vector2`，遠程角色使用技能的位置   
+
+        ### 使用範例
+
+        使用所有角色的技能，不過遠程會在自己的位置釋放：
+
+        >>> interface: api.prototype.API
+        >>> interface.action_cast_ability(interface.get_owned_character())
+
+        使用所有遠程的技能，在自己的溫泉釋放：
+
+        >>> interface: api.prototype.API
+        >>> fountain = interface.get_owned_towers()[0]
+        >>> interface.action_cast_ability(
+        ...     [character for character in interface.get_owned_characters()
+        ...     if character.type is api.prototype.CharacterClass.RANGER],
+        ...     position=fountain.position)
+
+        如果 `kwargs` 給定的參數型別不符會收到 TypeError。
         """
         raise NotImplementedError
 
@@ -269,6 +289,6 @@ class API:
         """
         raise NotImplementedError
 
-    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
+    def _distance(self, characters: Iterable[Character], target: pg.Vector2):
         """將各角色依據其與目標的距離排序，若距離一樣則隨意排序。"""
         raise NotImplementedError
