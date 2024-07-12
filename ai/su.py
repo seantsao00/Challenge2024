@@ -58,7 +58,17 @@ def every_tick(api: API):
 
     fountain = get_fountain(visible_towers, my_team_id)
     
-
+    stopped_characters = []
+    moving_characters = []
+    for character in owned_characters:
+        if api.get_movement(character).status == MovementStatusClass.STOPPED:
+            stopped_characters.append(character)
+        else:
+            moving_characters.append(character)
+    stopped_characters_count = len(stopped_characters)
+    moving_characters_count = len(moving_characters)    
+    
+    print(stopped_characters_count)
     if (visible_towers_count <= 1 and owned_characters_count > 0):
         if (owned_characters_count <= 15):
             api.change_spawn_type(fountain, CharacterClass.RANGER)
@@ -67,14 +77,19 @@ def every_tick(api: API):
         else:
             api.change_spawn_type(fountain, CharacterClass.RANGER)
             owned_ranger = [ranger for ranger in owned_characters if ranger.type == CharacterClass.RANGER]
-            random_point = pg.Vector2(random.random() * 125, random.random() * 125)
+            random_point = pg.Vector2(random.random() * 250, random.random() * 250)
             api.action_move_to(owned_ranger, random_point)
-           
+            
             
         if enemy_count:
             target_enemy = attack_nearest_enemy(api, owned_characters, visible_enemy)
             api.action_move_to(owned_characters[:], visible_enemy[target_enemy].position)
             api.action_cast_ability(owned_characters[:], position = visible_enemy[target_enemy].position)
+        else:
+            owned_ranger = [ranger for ranger in owned_characters if ranger.type == CharacterClass.RANGER]
+            random_point = pg.Vector2(random.random() * 250, random.random() * 250)
+            api.action_move_to(owned_ranger, random_point)  
+            
     else: 
         target_tower = None
         for tower in visible_towers:
@@ -83,10 +98,6 @@ def every_tick(api: API):
                 break
         if target_tower != None:
             api.change_spawn_type(fountain, CharacterClass.RANGER)
-            # if moving_characters_count <= 10 and moving_characters_count != 0: 
-            #     api.action_move_to(moving_characters[:],
-            #                             fountain.position)
-            # elif owned_characters_count >= 20:
                     
             if enemy_count:
                 target_enemy = attack_nearest_enemy(api, owned_characters, visible_enemy)
