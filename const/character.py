@@ -4,12 +4,9 @@ This module defines constants associated with characters.
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import Any
 
 from const.entity import LivingEntityAttribute
-
-if TYPE_CHECKING:
-    CharacterState: TypeAlias = None
 
 MAX_WANDERING = 50
 # Maximum for random in wandering
@@ -26,6 +23,10 @@ class CharacterAttribute(LivingEntityAttribute):
     speed: float
     ability_cd: float | None
     ability_variables: Any | None
+
+
+class CharacterState(Enum):
+    pass
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(
@@ -57,7 +58,7 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     attack_range=45,
     attack_damage=300,
     max_health=100,
-    vision=1,
+    vision=0,
     ability_cd=4,
     attack_speed=0.5,
     ability_variables=300  # damage of ability
