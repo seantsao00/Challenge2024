@@ -29,6 +29,9 @@ VIEW_EVERYTHING = 0
 
 REGULAR_FONT = './font/Cubic_11_1.300_R.ttf'
 
+TOWER_CD_RADIUS = (6, 3.5)
+TOWER_CD_COLOR = ('black', CD_BAR_COLOR, 'white')
+
 PARTY_PATH: dict[PartyType, str] = {
     PartyType.NEUTRAL: 'entity/neutral/',
     PartyType.JUNIOR: 'entity/junior/',
@@ -76,9 +79,10 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 } for tower in TowerType if tower is not TowerType.FOUNTAIN
             },
             **{
-                bullet: {
-                    BulletState.FLYING: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet]),
-                } for bullet in BulletType
+                BulletType.COMMON: {
+                    BulletState.FLYING: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[BulletType.COMMON])
+                }
             }
         } if party is PartyType.NEUTRAL else {
             **{
@@ -104,7 +108,7 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
 """
 structure: ENTITY_IMAGE[party][entity][state]
 """
-
+# Size for showing
 ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
         None: 6.25
@@ -120,6 +124,19 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
 """
 structure: ENTITY_SIZE[entity][state]
 """
+# Size for clicking
+CLICK_SIZE: dict[EntityType, dict[EntityState, int]] = {
+    **{character: {
+        None: 6.25
+    } for character in CharacterType},
+    **{tower: {
+        None: 20
+    } for tower in TowerType},
+}
+"""
+structure: CLICK_SIZE[entity][state]
+"""
+
 
 DRAW_DISPLACEMENT = pg.Vector2(0, -3.125)
 DRAW_DISPLACEMENT_Y = -3.125

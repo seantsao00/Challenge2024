@@ -11,8 +11,8 @@ import pygame as pg
 import const
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam)
+                           EventSelectParty, EventTestParticle, EventUnconditionalTick,
+                           EventUseRangerAbility, EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
 from model import Character, LivingEntity, TimerManager
 from util import log_info
@@ -88,6 +88,8 @@ class Controller:
                     ev_manager.post(EventSelectCharacter(character_type=character_type))
                 if key == const.CHANGE_TEAM_VISION:
                     ev_manager.post(EventViewChangeTeam())
+                if key == pg.K_p:
+                    ev_manager.post(EventTestParticle())
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
@@ -97,14 +99,22 @@ class Controller:
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
                     if model.ranger_ability:
-                        ev_manager.post(EventUseRangerAbility(position=pg.Vector2(
-                            x, y)), channel_id=model.ranger_controlling.id)
+                        ability_target = pg.Vector2(x, y)
+                        if model.ranger_controlling.reachable(ability_target):
+                            ev_manager.post(EventUseRangerAbility(position=ability_target),
+                                            channel_id=model.ranger_controlling.id)
+                            model.ranger_controlling.abilities_time = model.get_time()
+                            log_info("[Ranger] manual control success")
+                        else:
+                            log_info("[Ranger] manual control failed: out of range")
+                        get_model().ranger_ability = False
                     else:
                         clicked = None
                         with model.entity_lock:
-                            for entity in model.entities:
-                                if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                            for entity in model.characters + model.towers:
+                                if (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                     clicked = entity
+                                    break
                         if isinstance(clicked, Character):
                             ev_manager.post(EventHumanInput(
                                 input_type=const.InputTypes.PICK, clicked_entity=clicked))
@@ -115,9 +125,10 @@ class Controller:
                         model.ranger_ability = False
                     clicked = None
                     with model.entity_lock:
-                        for entity in reversed(model.entities):  # Tower first
-                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                        for entity in model.towers + model.characters:  # Tower first
+                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                 clicked = entity
+                                break
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked_entity=clicked, displacement=pg.Vector2(x, y)))
 

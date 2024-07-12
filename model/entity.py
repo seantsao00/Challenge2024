@@ -29,15 +29,15 @@ class Entity:
      - team: the owner team of this entity.
     """
 
-    entity_id: int = 0
+    __entity_id: int = 0
 
     def __init__(self,
                  position: pg.Vector2 | tuple[float, float],
                  team: Team,
                  entity_type: const.EntityType,
                  state: const.EntityState = None):
-        Entity.entity_id += 1
-        self.__id: int = Entity.entity_id
+        Entity.__entity_id += 1
+        self.__id: int = Entity.__entity_id
         self.position: pg.Vector2 = pg.Vector2(position)
         self.team: Team = team
         self.__entity_type: const.EntityType = entity_type
@@ -78,7 +78,7 @@ class LivingEntity(Entity):
 
     def vulnerable(self, enemy: Entity):
         """
-        Test vulerability. `Enemy` is only used for logging.
+        Test vulnerability. `Enemy` is only used for logging.
         """
         if self.__invulnerability:
             log_info(f"[Attack] {self} is invulnerable, {enemy}'s attack failed")

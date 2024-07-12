@@ -8,6 +8,7 @@ import pygame as pg
 import const
 from const.visual.priority import PRIORITY_CD
 from instances_manager import get_model
+from util import crop_image
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
 
@@ -20,7 +21,7 @@ class BarCDView(EntityObject):
 
     def __init__(self, canvas: pg.Surface, entity: Character):
         super().__init__(canvas, entity)
-        self.priority = [PRIORITY_CD, entity.position[1]]
+        self.priority = [PRIORITY_CD, entity.position[1], entity.position[0]]
         self.entity: Character
         self.register_listeners()
 
@@ -46,23 +47,19 @@ class AbilitiesCDView(BarCDView):
 
 
 class TowerCDView(BarCDView):
-    images = {}
-    image_initialized = False
+    images: dict[const.CharacterType, pg.Surface] = {}
+    """(Surface, position)"""
 
     def __init__(self, canvas: pg.Vector2, entity: Tower):
         super().__init__(canvas, entity)
         self.entity: Tower
-        if not self.image_initialized:
-            self.init_convert()
-        self.melee_weapon = self.images[const.CharacterType.MELEE]
-        self.ranger_weapon = self.images[const.CharacterType.RANGER]
-        self.sniper_weapon = self.images[const.CharacterType.SNIPER]
 
     @classmethod
     def init_convert(cls):
+        length = int(const.TOWER_CD_RADIUS[1] * ScreenInfo.resize_ratio * 2 * 0.7)
         for character_type, path in const.WEAPON_IMAGE.items():
             img = pg.image.load(path)
-            cls.images[character_type] = img.convert_alpha()
+            cls.images[character_type] = crop_image(img, length, length)
         cls.image_initialized = True
 
     def draw(self):
@@ -71,26 +68,15 @@ class TowerCDView(BarCDView):
             return
 
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
-        radius = entity_size / 1.5 * ScreenInfo.resize_ratio
+        radius, inner_radius = pg.Vector2(const.TOWER_CD_RADIUS) * ScreenInfo.resize_ratio
+        width = const.TOWER_CD_RADIUS[0] - const.TOWER_CD_RADIUS[1]
         position = ScreenInfo.resize_ratio * \
             (entity.position + pg.Vector2(entity_size, entity_size) + const.DRAW_DISPLACEMENT)
-        pg.draw.circle(self.canvas, 'black', position, radius,
-                       width=int(3 * ScreenInfo.resize_ratio))
-        inner_radius = radius - int(3 * ScreenInfo.resize_ratio)
-        pg.draw.circle(self.canvas, 'white', position, inner_radius, 0)
-        if entity.character_type == const.CharacterType.MELEE:
-            weapon_image = self.melee_weapon
-        elif entity.character_type == const.CharacterType.RANGER:
-            weapon_image = self.ranger_weapon
-        elif entity.character_type == const.CharacterType.SNIPER:
-            weapon_image = self.sniper_weapon
-        else:
-            weapon_image = None
-        if weapon_image:
-            weapon_image = pg.transform.scale(
-                weapon_image, (int(inner_radius * 2 / 2 ** 0.5), int(inner_radius * 2 / 2 ** 0.5)))
-            self.canvas.blit(
-                weapon_image, (position[0] - inner_radius / 2 ** 0.5, position[1] - inner_radius / 2 ** 0.5))
+        pg.draw.circle(self.canvas, const.TOWER_CD_COLOR[0], position, radius, int(
+            width * ScreenInfo.resize_ratio))
+        pg.draw.circle(self.canvas, const.TOWER_CD_COLOR[2], position, inner_radius, 0)
+        img = self.images[entity.character_type]
+        self.canvas.blit(img, img.get_rect(center=position))
         cd_remaining = (get_model().get_time() - entity.last_generate) / entity.period
         pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((ScreenInfo.resize_ratio*(entity.position+const.DRAW_DISPLACEMENT) + pg.Vector2(ScreenInfo.resize_ratio*entity_size - radius,
-                    ScreenInfo.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2 - pi * 2 * cd_remaining, pi / 2, width=int(3*ScreenInfo.resize_ratio))
+                    ScreenInfo.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2 - pi * 2 * cd_remaining, pi / 2, int(width*ScreenInfo.resize_ratio))

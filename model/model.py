@@ -76,6 +76,8 @@ class Model:
 
         self.entity_lock = threading.Lock()
         self.entities: list[Entity] = []
+        self.characters: list[Character] = []
+        self.towers: list[Tower] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
@@ -151,7 +153,10 @@ class Model:
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
             self.entities.append(event.entity)
-        if isinstance(event.entity, Character):
+        if isinstance(event.entity, Tower):
+            self.towers.append(event.entity)
+        elif isinstance(event.entity, Character):
+            self.characters.append(event.entity)
             for tower in self.grid.get_attacker_tower(event.entity.position):
                 tower.enemy_in_range(event.entity)
 
@@ -174,7 +179,8 @@ class Model:
         event.bullet.state = const.BulletState.EXPLODE
         with self.entity_lock:
             for entity in self.entities:
-                if (entity.position - event.bullet.target).length() < event.bullet.range and entity.team is not event.bullet.team:
+                if ((entity.position - event.bullet.target).length() < event.bullet.range
+                        and entity.team is not event.bullet.team):
                     get_event_manager().post(EventAttack(victim=entity,
                                                          attacker=event.bullet.attacker,
                                                          damage=event.bullet.damage), channel_id=entity.id)
