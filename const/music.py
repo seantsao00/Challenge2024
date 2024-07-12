@@ -3,10 +3,9 @@ This module defines constants associated with music.
 """
 
 import os.path
+from enum import Enum, auto
 
 from const.team import PartyType
-
-from enum import Enum, auto
 
 MUSIC_DIR = 'music/'
 
@@ -27,11 +26,13 @@ BGM_VOLUME = 0.5
 
 EFFECT_DIR = os.path.join(MUSIC_DIR, 'effect')
 
+
 class EffectType(Enum):
     """This is for party selection"""
     SELECT = auto()
     ATTACK_MELEE = auto()
     ATTACK_RANGE = auto()
+
 
 EFFECT_PATH: dict[EffectType, str] = {
     EffectType.SELECT: os.path.join(EFFECT_DIR, 'select.mp3'),

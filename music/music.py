@@ -63,7 +63,7 @@ class BackgroundMusic:
     def __handle_character_died(self, event: EventCharacterDied):
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventAttack, self.__handle_attack, event.character.id)
-    
+
     def __handle_game_over(self, event: EventGameOver):
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
@@ -86,7 +86,7 @@ class BackgroundMusic:
     def __handle_character_died(self, event: EventCharacterDied):
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventAttack, self.__handle_attack, event.character.id)
-    
+
     def __handle_game_over(self, event: EventGameOver):
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
