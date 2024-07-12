@@ -41,7 +41,7 @@ class CommentBox:
         height = max(avatar_size[1], text_size[1]) + consts.SPACING[1] * 2
         self.__size = (width, height)
         self.__surf = pg.Surface((width, height), pg.SRCALPHA)
-        pg.draw.rect(self.__surf, pg.Color(255, 255, 255, 127), (0, 0, width, height))
+        # pg.draw.rect(self.__surf, pg.Color(255, 255, 255, 127), (0, 0, width, height))
         self.__surf.blit(user_avatar, (consts.SPACING[0], consts.SPACING[1]))
         self.__surf.blit(text_surf, (consts.SPACING[0] * 2 + avatar_size[0], consts.SPACING[1]))
 
@@ -95,7 +95,9 @@ class ChatView(ObjectBase):
         if random.randint(1, 50) == 1:
             teamid = random.randint(0, 3)
             team = get_model().teams[teamid]
-            if random.randint(0, 1) > 0:
+            if random.randint(1, 20) == 1:
+                self.add_comment(team, f":monocle_face:\nabcdefghijklmnopqrs")
+            elif random.randint(0, 1) > 0:
                 self.add_comment(
                     team, f"random comment #{random.randint(1, 10 ** 8)} (intentionally made taller for demo)")
             else:
