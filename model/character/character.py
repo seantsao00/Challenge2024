@@ -149,7 +149,7 @@ class Character(LivingEntity):
         destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
                                  uniform(0, const.ARENA_SIZE[1])])
         cnt = 0
-        while (self.team.vision.position_inside_vision(destination) or get_model().map.get_position_type(destination) == const.MAP_OBSTACLE) and cnt < const.MAX_WANDERING:
+        while (self.team.vision.position_inside_vision(destination) or get_model().map.get_position_type(destination) is const.MAP_OBSTACLE) and cnt < const.MAX_WANDERING:
             destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
                                      uniform(0, const.ARENA_SIZE[1])])
             cnt += 1
