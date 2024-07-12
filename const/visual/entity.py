@@ -29,6 +29,9 @@ VIEW_EVERYTHING = 0
 
 REGULAR_FONT = './font/Cubic_11_1.300_R.ttf'
 
+TOWER_CD_RADIUS = (6, 3.5)
+TOWER_CD_COLOR = ('black', CD_BAR_COLOR, 'white')
+
 PARTY_PATH: dict[PartyType, str] = {
     PartyType.NEUTRAL: 'entity/neutral/',
     PartyType.JUNIOR: 'entity/junior/',
