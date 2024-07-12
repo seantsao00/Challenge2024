@@ -83,8 +83,8 @@ if __name__ == "__main__":
     model = Model(ModelArguments(
         topography=args.map,
         team_controls=args.team_controls,
-        show_view_range=args.show_view_range or args.range,
-        show_attack_range=args.show_attack_range or args.range,
+        show_view_range=args.show_view_range or args.show_attack_view_range,
+        show_attack_range=args.show_attack_range or args.show_attack_view_range,
         skip_character_selecting=args.skip_character_selecting
     ))
     instances_manager.register_model(model)
