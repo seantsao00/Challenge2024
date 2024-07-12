@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from math import cos, pi, sin
 
 import pygame as pg
 
@@ -21,5 +22,6 @@ SETTLEMENT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
     284, 100), pg.Vector2(33, 420), pg.Vector2(851, 100), pg.Vector2(600, 420)]
 SETTLEMENT_INITIAL_POSITION = pg.Vector2(-100, -100)
 SCOPE_SPEED = 3
-INVERVAL_WAITING = 5
+INVERVAL_WAITING = 7
 INVERVAL_WANDERING = 5
+WANDERING_PERIOD = 3

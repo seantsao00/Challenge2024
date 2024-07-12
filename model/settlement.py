@@ -1,4 +1,5 @@
 import random
+from math import cos, pi, sin
 
 import pygame as pg
 
@@ -21,6 +22,7 @@ class Settlement:
         self.__scope_speed: int = const.SCOPE_SPEED
         self.__scope_wandering: bool = False  # if the scope is wandering
         self.__scope_waiting: bool = False  # if the scope is waiting for timer to make it wandering
+        self.__parameter_wandering: float = 0
 
     def ranking(self):
         model = get_model()
@@ -29,17 +31,19 @@ class Settlement:
     def update(self) -> bool:
 
         if self.__scope_position == self.__scope_target_position and self.__scope_target_index >= self.__number_of_teams:
-            return True
+            pass
         elif self.__scope_position == self.__scope_target_position and not self.__scope_waiting:
             self.__scope_target_index += 1
             self.__scope_waiting = True
             Timer(interval=const.INVERVAL_WAITING, function=self.set_wandering, once=True)
-
-        self.set_target()
-        displacement = (self.__scope_target_position - self.__scope_position).normalize()*self.__scope_speed if (self.__scope_target_position -
-                                                                                                                 self.__scope_position).length() > self.__scope_speed else (self.__scope_target_position - self.__scope_position)
-        self.__scope_position += displacement
-        return True
+        elif self.__scope_position == self.__scope_target_position:
+            pass
+        else:
+            self.set_target()
+            displacement = (self.__scope_target_position - self.__scope_position).normalize()*self.__scope_speed if (self.__scope_target_position -
+                                                                                                                     self.__scope_position).length() > self.__scope_speed else (self.__scope_target_position - self.__scope_position)
+            self.__scope_position += displacement
+        return
 
     def set_target(self):
 
@@ -48,20 +52,18 @@ class Settlement:
 
         elif not self.__scope_wandering:
             target_team: Team = self.__rank_of_teams[self.__scope_target_index]
-
-            if self.__scope_position == self.__team_position[target_team.team_id]:
-                self.__scope_target_index += 1
-                self.set_wandering()
-
-            target_team = self.__rank_of_teams[self.__scope_target_index]
             self.__scope_target_position = self.__team_position[target_team.team_id]
 
         else:
-            pass
+            self.__scope_target_position = pg.Vector2(
+                100*sin(self.__parameter_wandering)+100, 100*cos(2*self.__parameter_wandering)+100)
+            self.__parameter_wandering += 2*pi*get_model().dt/const.WANDERING_PERIOD
 
     def set_wandering(self):
         self.__scope_wandering = True
         self.__scope_waiting = False
+        self.__parameter_wandering = 0
+        self.set_target()
         Timer(interval=const.INVERVAL_WANDERING, function=self.set_not_wandering, once=True)
 
     def set_not_wandering(self):
