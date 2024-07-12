@@ -1,0 +1,17 @@
+{
+    "name": "field",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [24, 20], [30, 94], [33, 167], [65, 226]
+    ],
+    "neutral_towers": [
+        [222, 82]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": 
+        {
+        }
+    }
+}

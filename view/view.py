@@ -14,6 +14,7 @@ from const.visual.priority import PRIORITY_BACKGROUND, PRIORITY_FOREGROUND, PRIO
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
+from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, EntityView,
                          HealthView, ObjectBase, Particle, ParticleManager, PartySelectorView,
                          PauseMenuView, TowerCDView, ViewRangeView)
@@ -61,33 +62,18 @@ class View:
             const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
         self.__background_images = []
 
-        def load_image(filename: str):
-            loaded_image = cv2.imread(
-                os.path.join(model.map.map_dir, filename), cv2.IMREAD_UNCHANGED
-            )
-            loaded_image = cv2.resize(
-                loaded_image, (screen_h, screen_h), interpolation=cv2.INTER_AREA
-            )
-            # if loaded_image.shape[2] == 3:
-            #     alpha_channel = np.ones(
-            #         (loaded_image.shape[0], loaded_image.shape[1]), dtype=loaded_image.dtype) * 255
-            #     loaded_image = np.dstack((loaded_image, alpha_channel))
-            x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
-            picture = pg.image.load(os.path.join(model.map.map_dir, filename)).convert_alpha()
-            picture = pg.transform.scale(picture, (screen_h, screen_h))
-            picture = picture.subsurface(pg.Rect(x, y, w, h))
-            return x, y, picture
-
         bg_image_counter = 0
-        for i in model.map.backgrounds:
-            x, y, picture = load_image(i)
+        for filename in model.map.backgrounds:
+            picture, position = load_image(os.path.join(
+                model.map.map_dir, filename), screen_h, screen_h)
             self.__background_images.append(BackgroundObject(
-                self.__arena, [PRIORITY_BACKGROUND, bg_image_counter], (x, y), picture))
+                self.__arena, [PRIORITY_BACKGROUND, bg_image_counter], position, picture))
             bg_image_counter += 1
-        for i in model.map.objects:
-            x, y, picture = load_image(i)
+        for filename in model.map.objects:
+            picture, position = load_image(os.path.join(
+                model.map.map_dir, filename), screen_h, screen_h)
             self.__background_images.append(BackgroundObject(
-                self.__arena, [PRIORITY_FOREGROUND, model.map.objects[i]], (x, y), picture))
+                self.__arena, [PRIORITY_FOREGROUND, model.map.objects[filename]], position, picture))
 
         EntityView.init_convert()
 
