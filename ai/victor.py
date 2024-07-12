@@ -1,6 +1,6 @@
 import math, itertools
 import random
-from ordered_set import OrderedSet
+
 import pygame as pg
 
 from api.prototype import *
@@ -48,7 +48,7 @@ def attack_enemy(api: API, enemy):
         del idle_melee[:3]
 
 def handle_attack(api: API):
-    global gathering_point, my_team_id, attacker_team, alive
+    global gathering_point, my_team_id, attacker_melee, attacker_ranger, destination, alive
     need_delete = set()
     for i in range(len(attacker_team)):
         total_size = 0

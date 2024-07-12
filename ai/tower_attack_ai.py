@@ -29,6 +29,7 @@ def get_fountain(visible_towers, my_team_id):
 
 
 def every_tick(api: API):
+    print(f"hao's team is {api.get_team_id()}")
     scores = []
 
     for team_id in range(0, 4):

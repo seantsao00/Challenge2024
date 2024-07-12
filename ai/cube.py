@@ -174,4 +174,5 @@ strategy = Strategy()
 
 
 def every_tick(interface: api.prototype.API):
+    print(f"cube's team is {interface.get_team_id()}")
     strategy.run(interface)
