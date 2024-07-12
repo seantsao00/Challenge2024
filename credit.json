@@ -1,0 +1,55 @@
+{
+    "Game Title": "CSIE Camp Challenge 2024 幻影的競技場",
+    "title": "Credit",
+    "content": {
+        "Game Develop": [
+            "王淇 littlecube8152",
+            "鄭又齊 Dandan489",
+            "邱翊均 PixelCat31415",
+            "鄭詠堯 yungyaoc",
+            "官毓韋 Achi-kyw",
+            "常洧丞 WeberChange-dev",
+            "張閔堯 Yao1004",
+            "高嘉泓 victor0206",
+            "蘇翊軒 brizxz",
+            "楊翔宇 racercode",
+            "陳愷欣 kxcathy",
+            "笪瑜庭 iazzenma",
+            "黃睿加 rueijiahuang",
+            "林映辰 MiriamLin",
+            "李瑞恩 LEbullient",
+            "周昀蓉 miachou1225",
+            "胡祐誠 HyperSoWeak",
+            "曹紹洵 seantsao00",
+            "洪銘德 shimeming"
+        ],
+        "Art": [
+            "陳愷欣 kxcathy",
+            "周昀蓉 miachou1225",
+            "笪瑜庭 iazzenma",
+            "胡祐誠 HyperSoWeak"
+        ],
+        "Music and Sound": [
+            "黃睿加 rueijiahuang"
+        ],
+        "AI Design and Game Testing": [
+            "王淇 littlecube8152",
+            "鄭詠堯 yungyaoc",
+            "高嘉泓 victor0206",
+            "劉承浩",
+            "蘇翊軒 brizxz",
+            "蔡朝暐"
+        ],
+        "Project Management": [
+            "曹紹洵 seantsao00",
+            "洪銘德 shimeming"
+        ],
+        "Special Thanks": [
+            {
+                "學術負責人": "段蓉杉 tuanrongshan",
+                "主辦": "資工系系學會"
+            },
+            "一起籌備資訊營的人們與參加資訊營的所有人"
+        ]
+    }
+}
