@@ -441,6 +441,7 @@ class Internal(prototype.API):
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
+        return characters
 
 
 class TimeoutException(BaseException):
