@@ -237,6 +237,9 @@ class Internal(prototype.API):
     def get_current_time(self):
         return get_model().get_time()
 
+    def get_grid_size(self):
+        return const.ARENA_SIZE[0]
+
     def get_owned_characters(self) -> list[prototype.Character]:
         with self.__team().character_lock:
             return sorted([self.__register_character(character)
