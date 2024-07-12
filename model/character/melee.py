@@ -70,6 +70,14 @@ class Melee(Character):
         self.abilities_time = now_time
         self.ability()
 
+    def manual_cast_ability(self, *args, **kwargs):
+        """
+        This is a (somewhat bad) workaround for manual ability casting, 
+        because I did not come up a nice solution to integrate with API.
+        Refactor will be great.
+        """
+        self.cast_ability(*args, **kwargs)
+
     def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables
         self.abilities_time = 1e9

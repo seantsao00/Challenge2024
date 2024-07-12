@@ -179,11 +179,18 @@ class Character(LivingEntity):
                 log_info(
                     f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
+    def reachable(self, position: pg.Vector2):
+        """
+        Test whether some position is within my reach range.
+        This method is used by attack and ranger ability cast.
+        """
+        dist = self.position.distance_to(position)
+        return dist <= self.attribute.attack_range
+
     def attackable(self, enemy: LivingEntity):
         """Test whether cooldown is ready and enemy is within range. If ready then reset it."""
         now_time = get_model().get_time()
-        dist = self.position.distance_to(enemy.position)
-        if dist > self.attribute.attack_range:
+        if not self.reachable(enemy.position):
             log_info(f"[Attack] {self} is attacking an enemy {enemy} out of range")
             return False
         if self.team is enemy.team:
@@ -212,6 +219,15 @@ class Character(LivingEntity):
 
     @abstractmethod
     def cast_ability(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def manual_cast_ability(self, *args, **kwargs):
+        """
+        This is a (somewhat bad) workaround for manual ability casting, 
+        because I did not come up a nice solution to integrate with API.
+        Refactor will be great.
+        """
         pass
 
     @property
