@@ -1,5 +1,6 @@
 import pygame as pg
 
+import const
 from const.visual.scorebox import *
 from instances_manager import get_model
 from model.team import Team
@@ -31,10 +32,13 @@ class Scorebox:
         self.__canvas.blit(self.__team_avatar, self.__team_avatar.get_rect(
             midleft=SI.scale((3, 12))))
         # team name
-        self.__canvas.blit(
-            self.__team_name_surface,
-            self.__team_name_surface.get_rect(bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
-        )
+        team_name_rect = self.__team_name_surface.get_rect(
+            bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
+
+        def offset(p): return (p[0], p[1] + self.font_primary.get_descent())
+        pg.draw.line(self.__canvas, const.HEALTH_BAR_COLOR[self.__team.team_id], offset(
+            team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
+        self.__canvas.blit(self.__team_name_surface, team_name_rect)
         # score
         score_text = self.font_primary.render(f"{self.__team_stats.score:.1f}", False, 'black')
         self.__canvas.blit(
