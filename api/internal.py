@@ -337,7 +337,11 @@ class Internal(prototype.API):
         vision_grid = np.flip(vision_grid, axis=0)
         vision_grid = np.rot90(vision_grid)
 
-        return vision_grid.tolist()
+        # Expand to 250 * 250
+        vision_coordinate = [[vision_grid[i // 2][j // 2]
+                              for i in range(const.ARENA_SIZE[0])] for j in range(const.ARENA_SIZE[1])]
+
+        return vision_coordinate
 
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(
