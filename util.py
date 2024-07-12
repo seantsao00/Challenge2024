@@ -83,6 +83,6 @@ def load_image(filepath: str, width: int, height: int) -> tuple[pg.Surface, pg.V
     )
     x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
     picture = pg.image.load(filepath).convert_alpha()
-    picture = pg.transform.scale(picture, (w, h))
+    picture = pg.transform.scale(picture, (width, height))
     picture = picture.subsurface(pg.Rect(x, y, w, h))
     return (picture, pg.Vector2(x, y))
