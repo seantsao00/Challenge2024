@@ -289,6 +289,6 @@ class API:
         """
         raise NotImplementedError
 
-    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
+    def _distance(self, characters: Iterable[Character], target: pg.Vector2):
         """將各角色依據其與目標的距離排序，若距離一樣則隨意排序。"""
         raise NotImplementedError

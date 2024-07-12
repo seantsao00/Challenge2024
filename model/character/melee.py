@@ -71,11 +71,6 @@ class Melee(Character):
         self.ability()
 
     def manual_cast_ability(self, *args, **kwargs):
-        """
-        This is a (somewhat bad) workaround for manual ability casting, 
-        because I did not come up a nice solution to integrate with API.
-        Refactor will be great.
-        """
         self.cast_ability(*args, **kwargs)
 
     def ability(self):
