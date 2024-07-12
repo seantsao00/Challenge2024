@@ -235,7 +235,7 @@ class API:
         如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
         @position: 要檢查的位置。"""
 
-    def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2):
+    def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
         """
         將所有列表中的角色設定為沿著某個向量移動。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
@@ -243,7 +243,7 @@ class API:
         """
         raise NotImplementedError
 
-    def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2):
+    def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2) -> None:
         """
         將所有列表中的角色設定為朝著某個目的地移動。如果目標不是可以行走的位置則不會生效。
         這個函數會使用內建的尋路，可能會耗費大量時間，使用時請注意。  
@@ -252,21 +252,21 @@ class API:
         """
         raise NotImplementedError
 
-    def action_wander(self, characters: Iterable[Character]):
+    def action_wander(self, characters: Iterable[Character]) -> None:
         """
         將所有列表內的角色設定為遊蕩。
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         pass
 
-    def action_move_clear(self, characters: Iterable[Character]):
+    def action_move_clear(self, characters: Iterable[Character]) -> None:
         """
         將所有列表中的角色設定為不移動。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         raise NotImplementedError
 
-    def action_attack(self, characters: Iterable[Character], target: Character | Tower):
+    def action_attack(self, characters: Iterable[Character], target: Character | Tower) -> None:
         """
         將所有列表中的角色設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
@@ -274,7 +274,7 @@ class API:
         """
         raise NotImplementedError
 
-    def action_cast_ability(self, characters: Iterable[Character], **kwargs):
+    def action_cast_ability(self, characters: Iterable[Character], **kwargs) -> None:
         """
         將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
@@ -301,7 +301,7 @@ class API:
         """
         raise NotImplementedError
 
-    def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass):
+    def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass) -> None:
         """
         改變指定塔所生成的兵種。  
         @tower: 指定的建築。  
@@ -309,7 +309,7 @@ class API:
         """
         raise NotImplementedError
 
-    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2):
+    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
         """
         將各角色依據其與目標的距離排序，若距離一樣則隨意排序。  
         @characters: 指定的角色列表。  
