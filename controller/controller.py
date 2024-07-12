@@ -110,7 +110,7 @@ class Controller:
                         clicked = None
                         with model.entity_lock:
                             for entity in model.entities:
-                                if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                                if (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                     clicked = entity
                         if isinstance(clicked, Character):
                             ev_manager.post(EventHumanInput(
@@ -123,7 +123,7 @@ class Controller:
                     clicked = None
                     with model.entity_lock:
                         for entity in reversed(model.entities):  # Tower first
-                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                 clicked = entity
                     ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
                                     clicked_entity=clicked, displacement=pg.Vector2(x, y)))

@@ -240,6 +240,9 @@ class Internal(prototype.API):
     def get_grid_size(self):
         return const.ARENA_SIZE[0]
 
+    def get_vision_block_size(self) -> float:
+        return const.VISION_BLOCK_SIZE
+
     def get_owned_characters(self) -> list[prototype.Character]:
         with self.__team().character_lock:
             return sorted([self.__register_character(character)
@@ -306,24 +309,46 @@ class Internal(prototype.API):
                 return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        enforce_type('character', character, prototype.Character, type(None))
+
         internal = self.__access_character(character)
         if internal is None or not internal.alive:
             return None
         return self.__register_character(internal)
 
-    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
-        internal = self.__access_tower(tower)
-        if internal is None or not internal.alive:
-            return None
-        return self.__register_tower(tower)
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower:
+        enforce_type('tower', tower, prototype.Tower)
 
-    # I don't want to deal with transform yet
-    # def get_visibility(self) -> list[list[int]]:
-    #     mask = self.__team().vision.mask
-    #     vision_grid = pg.surfarray.array_alpha(mask)
-    #     vision_grid[vision_grid == 0] = 1
-    #     vision_grid[vision_grid == 255] = 0
-    #     return vision_grid.tolist()
+        internal = self.__access_tower(tower)
+        if not internal.alive:
+            raise GameError("Tower died, what?")
+        return self.__register_tower(internal)
+
+    def get_visibility(self) -> list[list[int]]:
+        vision_grid = np.array(self.__team().vision.bool_mask)
+
+        # Upside down flip
+        vision_grid = np.flip(vision_grid, axis=0)
+        if self.transform is None:
+            self.__build_transform_matrix()
+
+        # Rotate visibility matrix base on transform
+        if self.transform[0][0] == 0 and self.transform[0][1] == 1:
+            vision_grid = np.rot90(vision_grid)
+        elif self.transform[0][0] == -1 and self.transform[0][1] == 0:
+            vision_grid = np.rot90(vision_grid, 2)
+        elif self.transform[0][0] == 0 and self.transform[0][1] == -1:
+            vision_grid = np.rot90(vision_grid, 3)
+
+        # Transform array index into coordinate
+        vision_grid = np.flip(vision_grid, axis=0)
+        vision_grid = np.rot90(vision_grid)
+
+        # Expand to 250 * 250
+        vision_coordinate = [[vision_grid[i // 2][j // 2]
+                              for i in range(const.ARENA_SIZE[0])] for j in range(const.ARENA_SIZE[1])]
+
+        return vision_coordinate
 
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(
@@ -370,7 +395,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
-                if len(path) > 0:
+                if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
@@ -442,6 +467,36 @@ class Internal(prototype.API):
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
         return characters
+
+    def within_attacking_range(self, unit: prototype.Character | prototype.Tower,
+                               candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= unit.attack_range and enemy.team_id != unit.team_id]
+
+    def within_vulnerable_range(self, unit: prototype.Character | prototype.Tower,
+                                candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= enemy.attack_range and enemy.team_id != unit.team_id]
 
 
 class TimeoutException(BaseException):
