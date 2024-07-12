@@ -21,6 +21,8 @@ BGM_PATH: dict[PartyType, str] = {
     PartyType.MOURI: os.path.join(BGM_DIR, 'mouri.mp3')
 }
 
+BGM_END_PATH = os.path.join(BGM_DIR, 'end.mp3')
+
 BGM_VOLUME = 0.5
 
 EFFECT_DIR = os.path.join(MUSIC_DIR, 'effect')

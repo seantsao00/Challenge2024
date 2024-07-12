@@ -63,7 +63,12 @@ class BackgroundMusic:
     def __handle_character_died(self, event: EventCharacterDied):
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventAttack, self.__handle_attack, event.character.id)
-
+    
+    def __handle_game_over(self, event: EventGameOver):
+        pg.mixer.music.fadeout(500)
+        pg.mixer.music.unload()
+        pg.mixer.music.load(const.BGM_END_PATH)
+        pg.mixer.music.play(loops=1)
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
@@ -74,3 +79,4 @@ class BackgroundMusic:
         ev_manager.register_listener(EventChangeParty, self.__handle_change_party)
         ev_manager.register_listener(EventCreateEntity, self.__handle_create_entity)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
+        ev_manager.register_listener(EventGameOver, self.__handle_game_over)
