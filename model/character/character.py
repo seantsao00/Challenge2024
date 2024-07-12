@@ -271,8 +271,13 @@ class Character(LivingEntity):
         return self.__move_direction
 
     @property
-    def move_destination(self) -> pg.Vector2:
-        return self.__move_path[-1]
+    def move_destination(self) -> pg.Vector2 | None:
+        if self.__move_state == CharacterMovingState.TO_POSITION:
+            if len(self.__move_path) > 0:
+                return self.__move_path[-1]
+            else:
+                return self.position
+        return None
 
     @property
     def move_state(self) -> CharacterMovingState:

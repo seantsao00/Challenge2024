@@ -49,21 +49,25 @@ def every_tick(api: API):
     fountain = get_fountain(visible_towers, my_team_id)
     #print(visible_towers, fountain)
 
-    stopped_characters = []
-    moving_characters = []
+    recruited_characters = []
+    dispatched_characters = []
+    owned_tower = api.get_owned_towers()
     for character in owned_characters:
-        if api.get_movement(character).status == MovementStatusClass.STOPPED:
-            stopped_characters.append(character)
-        else:
-            moving_characters.append(character)
-    stopped_characters_count = len(stopped_characters)
-    moving_characters_count = len(moving_characters)
+        recruited = False
+        for tower in owned_tower:
+            if character.position.distance_to(tower.position) <= 50:
+                recruited = True
+                break
+        if recruited: recruited_characters.append(character)
+        else: dispatched_characters.append(character)
+    recruited_characters_count = len(recruited_characters)
+    dispatched_characters_count = len(dispatched_characters)
     
 
     if (visible_towers_count <= 1):
         api.change_spawn_type(fountain, CharacterClass.MELEE)
         
-        if (stopped_characters_count >= 1):
+        if (recruited_characters_count >= 1):
             random_point = None
             while True:
                 random_point = pg.Vector2(random.random() * 250, random.random() * 250)
@@ -71,7 +75,9 @@ def every_tick(api: API):
                     break
             #print(random_point)
             #api.action_move_along(owned_characters[:], direction)
-            api.action_move_to(stopped_characters[:1], random_point)
+            for index in range(len(recruited_characters)):
+                if api.get_movement(recruited_characters[index]).status == MovementStatusClass.STOPPED:
+                    api.action_move_to(recruited_characters[index:(index + 1)], random_point)
     else: 
         target_tower = None
         for tower in visible_towers:
@@ -80,21 +86,20 @@ def every_tick(api: API):
                 break
         if target_tower != None:
             api.change_spawn_type(fountain, CharacterClass.RANGER)
-            #print(stopped_characters_count, moving_characters_count)
-            if moving_characters_count <= 10 and moving_characters_count != 0: 
-                api.action_move_to(moving_characters[:],
+            #print(recruited_characters_count, dispatched_characters_count)
+            if dispatched_characters_count <= 5 and dispatched_characters_count != 0: 
+                api.action_move_to(dispatched_characters[:],
                                         fountain.position)
-            elif owned_characters_count >= 20:
-                if moving_characters_count != 0:
-                    api.action_move_to(moving_characters, target_tower.position)
-                    api.action_attack(moving_characters, target_tower)
+            elif owned_characters_count >= 10:
+                if dispatched_characters_count != 0:
+                    api.action_move_to(dispatched_characters, target_tower.position)
+                    api.action_attack(dispatched_characters, target_tower)
                 else:
                     api.action_move_along(owned_characters, pg.Vector2(1, 1))
         else: 
-            owned_tower = api.get_owned_towers()
+            
             for tower in owned_tower:
-                if not tower.is_fountain: api.change_spawn_type(tower, CharacterClass.SNIPER)
-                else: api.change_spawn_type(tower, CharacterClass.RANGER)
+                api.change_spawn_type(tower, CharacterClass.RANGER)
             visible_enemy = [character for character in api.get_visible_characters()
                 if character.team_id != my_team_id]
             
