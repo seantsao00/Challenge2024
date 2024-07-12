@@ -76,9 +76,10 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                 } for tower in TowerType if tower is not TowerType.FOUNTAIN
             },
             **{
-                bullet: {
-                    BulletState.FLYING: os.path.join(IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[bullet]),
-                } for bullet in BulletType
+                BulletType.COMMON: {
+                    BulletState.FLYING: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[BulletType.COMMON])
+                }
             }
         } if party is PartyType.NEUTRAL else {
             **{

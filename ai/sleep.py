@@ -1,7 +1,6 @@
 import time
 
-from api.prototype import *
-from util import log_info
+import api.prototype as api
 
 
 def every_tick(interface: API):
