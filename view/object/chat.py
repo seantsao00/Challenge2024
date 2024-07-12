@@ -92,7 +92,7 @@ class ChatView(ObjectBase):
     def update(self):
         # do fake updates
         import random
-        if random.randint(1, 20) == 1:
+        if random.randint(1, 50) == 1:
             teamid = random.randint(0, 3)
             team = get_model().teams[teamid]
             if random.randint(0, 1) > 0:
