@@ -292,7 +292,7 @@ class Internal(prototype.API):
 
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
-        if self.__is_controllable(character):
+        if not self.__is_controllable(character):
             return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
         with character.moving_lock:
             if character.move_state == CharacterMovingState.STOPPED:
@@ -365,7 +365,8 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
-                inter.set_move_position(path)
+                if len(path) > 0:
+                    inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
