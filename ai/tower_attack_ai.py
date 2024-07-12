@@ -8,8 +8,9 @@ AI 原理：
 切換生成遠程兵，並將兵聚集於溫泉，直到屯的兵超過 20 個，便從溫泉派出軍隊將中立塔拿下
 若攻下中立塔，並進入下一階段
 3. 對戰階段：
-切換非溫泉塔生成狙擊兵，並召集所有軍隊攻擊第一個非友軍單位
+召集所有軍隊攻擊第一個非友軍單位
 (目前這份 code 仍有 bug，但是大體來說符合上述原則)
+(在四人對戰中，AI 表現明顯優於 sample)
 """
 
 
@@ -34,7 +35,7 @@ def every_tick(api: API):
     for team_id in range(0, 4):
         scores.append(api.get_score_of_team(team_id))
 
-    print(scores)
+    # print(scores)
 
     my_team_id = api.get_team_id()
 
@@ -90,8 +91,7 @@ def every_tick(api: API):
         else: 
             owned_tower = api.get_owned_towers()
             for tower in owned_tower:
-                if not tower.is_fountain: api.change_spawn_type(tower, CharacterClass.SNIPER)
-                else: api.change_spawn_type(tower, CharacterClass.RANGER)
+                api.change_spawn_type(tower, CharacterClass.RANGER)
             visible_enemy = [character for character in api.get_visible_characters()
                 if character.team_id != my_team_id]
             
