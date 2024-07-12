@@ -164,7 +164,6 @@ class Team(NeutralTeam):
         ev_manager.register_listener(EventSelectCharacter, self.select_character)
         ev_manager.register_listener(EventCharacterDied, self.handle_character_died)
         ev_manager.register_listener(EventEveryTick, self.gain_point_tower)
-        
 
     @property
     def team_name(self) -> str:
