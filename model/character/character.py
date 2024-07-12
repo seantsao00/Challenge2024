@@ -196,7 +196,9 @@ class Character(LivingEntity):
         if self.__is_wandering:
             return False
         else:
-            self.__set_wander_destination()
+            if not self.__set_wander_destination():
+                self.__is_wandering = False
+                return False
             self.__is_wandering = True
             return True
 
