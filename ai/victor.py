@@ -93,11 +93,11 @@ def every_tick(api: API):
     global my_team_id, map, alive, walker, stop_at, need_change_position
     global my_character, my_tower, idle_melee, idle_ranger, idle_sniper, enemys, enemys_tower, enemys_melee, enemys_ranger, enemys_sniper
     init(api)
-    if len(map) > 140:
+    if len(map) > 145:
         for tower in my_tower:
             api.change_spawn_type(tower, CharacterClass.MELEE)
     else:
-        if len(walker) < 2 and len(map) > 0: 
+        if len(walker) < 2 and api.get_current_time() < 80: 
             for tower in my_tower:
                 api.change_spawn_type(tower, CharacterClass.MELEE)
         else:
@@ -105,6 +105,11 @@ def every_tick(api: API):
                 api.change_spawn_type(tower, CharacterClass.SNIPER)
     handle_walker(api)
     change_position(api)
+    all_character = api.get_visible_characters()
+    enemys_ranger = [character for character in all_character if character.team_id != my_team_id and character.type is CharacterClass.RANGER]
+    enemys_sniper = [character for character in all_character if character.team_id != my_team_id and character.type is CharacterClass.SNIPER]
+    enemys_melee = [character for character in all_character if character.team_id != my_team_id and character.type is CharacterClass.MELEE]
+    sniper_order = set(enemys_ranger + enemys_sniper + enemys_melee)
     for x in api.get_owned_characters():
         if x.type is CharacterClass.SNIPER:
             now_time = api.get_current_time()    
@@ -124,7 +129,7 @@ def every_tick(api: API):
                             break
                 victim = None
                 now_time = api.get_current_time()
-                for y in [character for character in api.get_visible_characters() if character.team_id != my_team_id]:
+                for y in sniper_order:
                     if y.position.distance_to(x.position) < x.attack_range and y.id not in enemys_died:
                         victim = y
                         break
@@ -135,5 +140,6 @@ def every_tick(api: API):
                 last_time_attack[x.id] = now_time
                 if victim.type is CharacterClass.RANGER or victim.type is CharacterClass.SNIPER or victim.health < 150:
                     enemys_died.add(y.id)
+                    sniper_order.remove(victim)
                 else:
                     victim.health -= 150
