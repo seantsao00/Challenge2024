@@ -71,6 +71,7 @@ class Character:
                  _position: pg.Vector2,
                  _speed: float,
                  _attack_range: float,
+                 _attack_speed: float,
                  _damage: float,
                  _vision: float,
                  _health: float,
@@ -86,6 +87,8 @@ class Character:
         """角色的最大移動速度。"""
         self.attack_range = _attack_range
         """角色的最大攻擊範圍。"""
+        self.attack_speed = _attack_speed
+        """角色的攻擊時間間隔。"""
         self.damage = _damage
         """角色的傷害。"""
         self.vision = _vision
@@ -166,8 +169,18 @@ class API:
     @abstractmethod
     def get_sample_character(self, type_class: CharacterClass) -> Character:
         """
-        回傳自己隊伍所擁有的角色。
-        預設回傳按照角色的 `id` 排序。
+        給定角色種類，回傳一個「無法控制」的角色，這個角色會擁有給定角色種類的數值，
+        可以用來獲取特定的角色數據。`id` 為 -1、座標為原點、而隊伍 `team_id` 為 0。
+
+        @type_class: 角色種類，不能是 `UNKNOWN`。
+
+        ## 使用範例：
+
+        輸出進戰角色的血量。
+
+        >>> interface: api.prototype.API
+        >>> sample_melee = interface.get_sample_character(api.prototype.CharacterClass.MELEE)
+        >>> print(sample_melee.health)
         """
         raise NotImplementedError
 
