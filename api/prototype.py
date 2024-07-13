@@ -3,6 +3,7 @@ This file ONLY defines prototype. No actual thing is done in this file.
 The document of the API is at https://hackmd.io/@seantsao00/challenge_2024_api/edit.
 """
 
+from abc import abstractmethod
 from enum import IntEnum, auto
 from typing import Iterable
 
@@ -139,18 +140,22 @@ class Tower:
 class API:
     """與遊戲互動的方法。傳入 AI 的方法是作為 `every_tick` 的第一個引數。"""
 
+    @abstractmethod
     def get_current_time(self) -> float:
         """回傳當下的遊戲進行時間，單位為秒。"""
         raise NotImplementedError
 
+    @abstractmethod
     def get_grid_size(self) -> float:
         """回傳遊戲網格的長寬，由於遊戲網格是正方形的，長寬都使用這個函數。"""
         raise NotImplementedError
 
+    @abstractmethod
     def get_team_id(self) -> int:
         """回傳自己隊伍的編號（`id`）。"""
         raise NotImplementedError
 
+    @abstractmethod
     def get_score_of_team(self, index=None) -> int:
         """
         回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。  
@@ -158,6 +163,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_sample_character(self, type_class: CharacterClass) -> Character:
         """
         回傳自己隊伍所擁有的角色。
@@ -165,6 +171,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_owned_characters(self) -> list[Character]:
         """
         回傳自己隊伍所擁有的角色。
@@ -172,6 +179,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_owned_towers(self) -> list[Tower]:
         """
         回傳自己隊伍所擁有的建築。
@@ -179,6 +187,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_visible_characters(self) -> list[Character]:
         """
         回傳在自己視野範圍當中的角色，請注意這個函數也會回傳自己的角色。
@@ -186,6 +195,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_visible_towers(self) -> list[Tower]:
         """
         回傳在自己視野範圍當中的建築，請注意這個函數也會回傳自己的建築。
@@ -193,40 +203,47 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def refresh_character(self, character: Character) -> Character | None:
         """
         更新一個角色的數值。如果角色死亡則回傳 None。  
         @character: 目標的角色。
         """
 
+    @abstractmethod
     def refresh_tower(self, tower: Tower) -> Tower:
         """
         更新一個建築物的數值。  
         @tower: 目標的建築。
         """
 
+    @abstractmethod
     def get_movement(self, character: Character) -> Movement:
         """
         回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。  
         @character: 目標的角色。
         """
 
+    @abstractmethod
     def get_visibility(self) -> list[list[int]]:
         """
         回傳目前的所有視野狀態。回傳值是一個二維的表格，長寬皆為 `get_grid_size()` 的回傳值。
         """
         raise NotImplementedError
 
+    @abstractmethod
     def is_visible(self, position: pg.Vector2) -> bool:
         """回傳某個位置是否在視野範圍內。如果位置在地圖之外，永遠回傳 `False`。  
         @position: 要檢查的位置。"""
         raise NotImplementedError
 
+    @abstractmethod
     def get_terrain(self, position: pg.Vector2) -> MapTerrain:
         """回傳某個位置的地形，不需在視野範圍內就能呼叫。  
         如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
         @position: 要檢查的位置。"""
 
+    @abstractmethod
     def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
         """
         將所有列表中的角色設定為沿著某個向量移動。  
@@ -235,6 +252,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2) -> None:
         """
         將所有列表中的角色設定為朝著某個目的地移動。如果目標不是可以行走的位置則不會生效。
@@ -244,13 +262,15 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def action_wander(self, characters: Iterable[Character]) -> None:
         """
         將所有列表內的角色設定為遊蕩。
         @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
-        pass
+        raise NotImplementedError
 
+    @abstractmethod
     def action_move_clear(self, characters: Iterable[Character]) -> None:
         """
         將所有列表中的角色設定為不移動。  
@@ -258,6 +278,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def action_attack(self, characters: Iterable[Character], target: Character | Tower) -> None:
         """
         將所有列表中的角色設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
@@ -266,6 +287,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def action_cast_ability(self, characters: Iterable[Character], **kwargs) -> None:
         """
         將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
@@ -293,6 +315,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass) -> None:
         """
         改變指定塔所生成的兵種。  
@@ -301,6 +324,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
         """
         將各角色依據其與目標的距離排序，若距離一樣則隨意排序。  
@@ -309,6 +333,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def within_attacking_range(self, unit: Character | Tower,
                                candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
         """
@@ -319,6 +344,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def within_vulnerable_range(self, unit: Character | Tower,
                                 candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
         """
@@ -329,6 +355,7 @@ class API:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def send_chat(self, msg: str) -> bool:
         """
         傳送聊天室訊息，每個 `every_tick` 的呼叫當中只能傳送一次。回傳值為傳送成功或失敗。  
