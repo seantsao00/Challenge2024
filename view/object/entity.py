@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from collections import defaultdict
-from itertools import chain
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 import const
-from model import Bullet, Team
+from model import Bullet
 from util import crop_image
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
@@ -47,8 +45,7 @@ class EntityView(EntityObject):
     def draw(self):
         entity = self.entity
         img = self.__images[(entity.team.party, entity.entity_type, entity.state)]
-        # Rotate bullet but don't rotate bomb from neutral tower
-        if isinstance(self.entity, Bullet) and isinstance(entity.team, Team):
+        if isinstance(self.entity, Bullet):
             img = pg.transform.rotate(img, self.entity.view_rotate)
         self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
                          (entity.position + const.DRAW_DISPLACEMENT)))

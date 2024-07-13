@@ -7,9 +7,6 @@ import os
 import pygame as pg
 
 import const
-import const.model
-import const.visual
-from const.visual.priority import PRIORITY_BACKGROUND, PRIORITY_FOREGROUND, PRIORITY_VISION_MASK
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
@@ -74,13 +71,13 @@ class View:
             picture, position = load_image(os.path.join(
                 model.map.map_dir, filename), screen_h, screen_h)
             self.__background_images.append(BackgroundObject(
-                self.__arena, [PRIORITY_BACKGROUND, bg_image_counter], position, picture))
+                self.__arena, [const.PRIORITY_BACKGROUND, bg_image_counter], position, picture))
             bg_image_counter += 1
         for filename in model.map.objects:
             picture, position = load_image(os.path.join(
                 model.map.map_dir, filename), screen_h, screen_h)
             self.__background_images.append(BackgroundObject(
-                self.__arena, [PRIORITY_FOREGROUND, model.map.objects[filename]], position, picture))
+                self.__arena, [const.PRIORITY_FOREGROUND, model.map.objects[filename]], position, picture))
 
         EntityView.init_convert()
 
@@ -168,7 +165,8 @@ class View:
             my_team = model.teams[self.vision_of - 1]
             mask = pg.transform.scale(my_team.vision.get_mask(),
                                       (ScreenInfo.screen_size[1], ScreenInfo.screen_size[1]))
-            objects.append(BackgroundObject(self.__arena, [PRIORITY_VISION_MASK], (0, 0), mask))
+            objects.append(BackgroundObject(
+                self.__arena, [const.PRIORITY_VISION_MASK], (0, 0), mask))
             for obj in self.__entities:
                 if my_team.vision.entity_inside_vision(obj.entity) is True:
                     objects.append(obj)
