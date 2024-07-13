@@ -158,7 +158,7 @@ class API:
     @abstractmethod
     def get_score_of_team(self, index=None) -> int:
         """
-        回傳指定隊伍的編號，回傳該隊伍的分數。如果隊伍沒有指定則回傳自己隊伍的分數。  
+        回傳指定隊伍的分數。如果沒有指定隊伍，則回傳自己隊伍的分數。  
         @index: 隊伍的編號或者是 `None`（代表自己的小隊）
         """
         raise NotImplementedError
