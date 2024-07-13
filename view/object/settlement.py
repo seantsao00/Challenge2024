@@ -23,7 +23,9 @@ class SettlementView(ObjectBase):
         self.image_initialized = True
         super().__init__(canvas, [const.PRIORITY_SETTLEMENT])
         self.__settlement = settlement
+        self.__scope_destination = const.SETTLEMENT_TEAM_POSITION
         self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
+        self.__team_show_points: list[bool] = [False, False, False, False]
 
     @classmethod
     def init_convert(cls):
@@ -46,13 +48,28 @@ class SettlementView(ObjectBase):
 
     def draw(self):
         model = get_model()
-        point: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
+        team_icon_position: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
             img = self.party_images[team.party]
-            self.canvas.blit(img, transform_coordinate(point[team.team_id], self.ratio))
+            self.canvas.blit(img, transform_coordinate(
+                team_icon_position[team.team_id], self.ratio))
 
         img = self.background_image
         self.canvas.blit(img, (0, 0))
+
+        for team in model.teams:
+            if team.team_id < 2:
+                draw_text(self.canvas, (team_icon_position[team.team_id][0] + 362 / 2) * self.ratio,
+                          (team_icon_position[team.team_id][1]) * self.ratio, "第  小隊", 'white', self.__font)
+            else:
+                draw_text(self.canvas, (team_icon_position[team.team_id][0] + 380 / 2) * self.ratio,
+                          (team_icon_position[team.team_id][1]) * self.ratio, "第  小隊", 'white', self.__font)
+
+            if self.__settlement.scope_position == self.__scope_destination[team.team_id] and self.__team_show_points[team.team_id] == False:
+                self.__team_show_points[team.team_id] = True
+            if self.__team_show_points[team.team_id] == True:
+                draw_text(self.canvas, (team_icon_position[team.team_id][0] + 370 / 2) * self.ratio, (
+                    team_icon_position[team.team_id][1] + 305) * self.ratio, str(team.points), 'white', self.__font)
 
         img = self.scope_image
         self.canvas.blit(img, transform_coordinate(self.__settlement.scope_position, self.ratio))
