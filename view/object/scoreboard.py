@@ -41,7 +41,7 @@ class Scorebox:
             team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
         # score
-        score_text = self.font_primary.render(f"{self.__team_stats.score:.1f}", False, 'black')
+        score_text = self.font_primary.render(f"{int(self.__team_stats.score)}", False, 'black')
         score_rect = score_text.get_rect(topright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
         self.__canvas.blit(score_text, score_rect)
         # show towers owned
