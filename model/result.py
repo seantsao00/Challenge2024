@@ -20,7 +20,7 @@ class Result:
         self.__scope_target_position: pg.Vector2 = const.RESULT_INITIAL_POSITION
         self.__team_position: pg.Vector2 = const.RESULT_TEAM_POSITION
         self.__scope_speed: int = const.SCOPE_SPEED
-        self.__scope_status: const.ScopeStatus = const.ScopeStatus.TOWARD_WANDERING
+        self.__scope_status: const.ScopeStatus = const.ScopeStatus.WAITING_INPUT
         self.__parameter_wandering: float = 0
 
     def ranking(self):
@@ -69,6 +69,10 @@ class Result:
         else:
             target_team: Team = self.__rank_of_teams[self.__scope_target_index]
             self.__scope_target_position = self.__team_position[target_team.team_id]
+
+    def handle_scopemoving_start(self):
+        if self.__scope_status is const.ScopeStatus.WAITING_INPUT:
+            self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
 
     @property
     def scope_position(self) -> pg.Vector2:

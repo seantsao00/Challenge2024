@@ -166,13 +166,12 @@ class Controller:
         """
         Control depending on key input when the model.state is RESULT.
         """
-        ev_manager = get_event_manager()
         model = get_model()
 
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 if pg_event.key in const.CONFIRM_BUTTONS:
-                    model.result.handel_scopemoving_start()
+                    model.result.handle_scopemoving_start()
 
     def ctrl_cover(self, pg_events: list[pg.Event]):
         """
