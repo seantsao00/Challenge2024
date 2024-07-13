@@ -2,6 +2,7 @@
 Utility functions that can be utilized across multiple modules.
 """
 
+import cv2
 import pygame as pg
 
 
@@ -65,3 +66,23 @@ def log_info(msg: str):
 def transform_coordinate(point: tuple[float, float], ratio: float) -> tuple[float, float]:
     x, y = point
     return (x * ratio, y * ratio)
+
+
+def load_image(filepath: str, width: int, height: int) -> tuple[pg.Surface, pg.Vector2]:
+    """
+    Load_image and resize it to the desired size.
+    Return the image and the left top position of the result surface.
+    This function WON'T ignore transparent part of the image.
+    """
+    assert isinstance(width, int) and isinstance(height, int)
+    loaded_image = cv2.imread(
+        filepath, cv2.IMREAD_UNCHANGED
+    )
+    loaded_image = cv2.resize(
+        loaded_image, (width, height), interpolation=cv2.INTER_AREA
+    )
+    x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
+    picture = pg.image.load(filepath).convert_alpha()
+    picture = pg.transform.scale(picture, (width, height))
+    picture = picture.subsurface(pg.Rect(x, y, w, h))
+    return (picture, pg.Vector2(x, y))

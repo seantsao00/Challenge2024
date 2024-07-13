@@ -43,4 +43,4 @@ class BulletCommon(Bullet[None]):
         else:
             self.direction = (victim_pos - original_pos).normalize()
             self.position += self.direction * self.speed * model.dt
-            self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))
+            self.view_rotate = self.direction.angle_to(pg.Vector2(-1, 0))

@@ -23,7 +23,7 @@ class Bullet(Entity, Generic[T]):
                  speed: float = 0.0,
                  damage: float = 0.0,
                  attacker: LivingEntity = None):
-        super().__init__(position=position, entity_type=entity_type, team=team, state=const.BulletState.FLYING)
+        super().__init__(position=position, entity_type=entity_type, team=team)
         self.direction: pg.Vector2 | tuple[float, float] | None = None
         self.speed: float = speed
         self.damage: float = damage

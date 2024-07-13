@@ -7,11 +7,9 @@ from __future__ import annotations
 import ctypes
 import importlib
 import os
-import random
 import signal
 import threading
 import traceback
-import warnings
 from typing import Iterable
 
 import numpy as np
@@ -20,6 +18,7 @@ import pygame as pg
 import const
 import const.map
 import model
+import model.chat
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
@@ -50,12 +49,14 @@ class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.transform: np.ndarray = None
+        self.__chat_sent = False
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
 
     def clear(self):
+        self.__chat_sent = False
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
@@ -161,11 +162,11 @@ class Internal(prototype.API):
         Convert a `model.Tower` to `api.Tower`
         """
         character_class = prototype.CharacterClass.UNKNOWN
-        if internal.character_type == const.CharacterType.MELEE:
+        if internal.character_type is const.CharacterType.MELEE:
             character_class = prototype.CharacterClass.MELEE
-        elif internal.character_type == const.CharacterType.RANGER:
+        elif internal.character_type is const.CharacterType.RANGER:
             character_class = prototype.CharacterClass.RANGER
-        elif internal.character_type == const.CharacterType.SNIPER:
+        elif internal.character_type is const.CharacterType.SNIPER:
             character_class = prototype.CharacterClass.SNIPER
         else:
             raise GameError("Unknown spawn character type")
@@ -240,6 +241,9 @@ class Internal(prototype.API):
     def get_grid_size(self):
         return const.ARENA_SIZE[0]
 
+    def get_vision_block_size(self) -> float:
+        return const.VISION_BLOCK_SIZE
+
     def get_owned_characters(self) -> list[prototype.Character]:
         with self.__team().character_lock:
             return sorted([self.__register_character(character)
@@ -260,7 +264,7 @@ class Internal(prototype.API):
 
         if index is None:
             index = self.team_id
-        if index < 0 or index >= MAX_TEAMS:
+        if index < 0 or index >= len(get_model().teams):
             raise IndexError
         team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
@@ -296,40 +300,64 @@ class Internal(prototype.API):
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
         if not self.__is_controllable(character):
-            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
+            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN, False)
         with character.moving_lock:
-            if character.move_state == CharacterMovingState.STOPPED:
-                return prototype.Movement(prototype.MovementStatusClass.STOPPED)
-            if character.move_state == CharacterMovingState.TO_DIRECTION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION,
-                                          self.__transform(character.move_direction.normalize(), is_position=False))
-            if character.move_state == CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION,
-                                          self.__transform(character.move_destination, is_position=True))
+            if character.move_state is CharacterMovingState.STOPPED:
+                return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
+            elif character.move_state is CharacterMovingState.TO_DIRECTION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
+            elif character.move_state is CharacterMovingState.TO_POSITION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
+        enforce_type('character', character, prototype.Character, type(None))
+
         internal = self.__access_character(character)
         if internal is None or not internal.alive:
             return None
         return self.__register_character(internal)
 
-    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
-        internal = self.__access_tower(tower)
-        if internal is None or not internal.alive:
-            return None
-        return self.__register_tower(tower)
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower:
+        enforce_type('tower', tower, prototype.Tower)
 
-    # I don't want to deal with transform yet
-    # def get_visibility(self) -> list[list[int]]:
-    #     mask = self.__team().vision.mask
-    #     vision_grid = pg.surfarray.array_alpha(mask)
-    #     vision_grid[vision_grid == 0] = 1
-    #     vision_grid[vision_grid == 255] = 0
-    #     return vision_grid.tolist()
+        internal = self.__access_tower(tower)
+        if not internal.alive:
+            raise GameError("Tower died, what?")
+        return self.__register_tower(internal)
+
+    def get_visibility(self) -> list[list[int]]:
+        vision_grid = np.array(self.__team().vision.bool_mask)
+
+        # Upside down flip
+        vision_grid = np.flip(vision_grid, axis=0)
+        if self.transform is None:
+            self.__build_transform_matrix()
+
+        # Rotate visibility matrix base on transform
+        if self.transform[0][0] == 0 and self.transform[0][1] == 1:
+            vision_grid = np.rot90(vision_grid)
+        elif self.transform[0][0] == -1 and self.transform[0][1] == 0:
+            vision_grid = np.rot90(vision_grid, 2)
+        elif self.transform[0][0] == 0 and self.transform[0][1] == -1:
+            vision_grid = np.rot90(vision_grid, 3)
+
+        # Transform array index into coordinate
+        vision_grid = np.flip(vision_grid, axis=0)
+        vision_grid = np.rot90(vision_grid)
+
+        # Expand to 250 * 250
+        vision_coordinate = [[vision_grid[i // 2][j // 2]
+                              for i in range(const.ARENA_SIZE[0])] for j in range(const.ARENA_SIZE[1])]
+
+        return vision_coordinate
 
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(
             self.__transform(position, is_position=True, inverse=True))
+
+    def is_wandering(self, character: prototype.Character) -> bool:
+        enforce_type('character', character, prototype.Character)
+        return self.__access_character(character).is_wandering
 
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
         W = const.ARENA_SIZE[1]
@@ -362,13 +390,17 @@ class Internal(prototype.API):
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
 
         destination = self.__transform(destination, is_position=True, inverse=True)
+        destination_cell = get_model().map.position_to_cell(destination)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
+            old_destination = inter.move_destination
+            if old_destination is not None and get_model().map.position_to_cell(inter.move_destination) == destination_cell:
+                continue
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = get_model().map.find_path(inter.position, destination)
-                if len(path) > 0:
+                if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
@@ -397,14 +429,18 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character]):
+    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
         enforce_type('characters', characters, Iterable)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if 'position' in kwargs:
+            enforce_type('position', kwargs['position'], pg.Vector2)
+            kwargs['position'] = self.__transform(
+                kwargs['position'], is_position=True, inverse=True)
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
-            inter.cast_ability()
+            inter.cast_ability(**kwargs)
 
     def action_wander(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
@@ -414,18 +450,7 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
-                inter.set_move_stop()
-
-                direction = inter.move_direction
-                if direction == pg.Vector2(0, 0):
-                    direction = pg.Vector2(random.random(), random.random())
-
-                direction = direction.normalize()
-                new_direction = pg.Vector2()
-                new_direction.from_polar(
-                    (direction.as_polar()[0], direction.as_polar()[1] + random.uniform(-20, 20)))
-
-                inter.set_move_direction(new_direction)
+                inter.set_wandering()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -438,7 +463,7 @@ class Internal(prototype.API):
 
         internal_tower.update_character_type(Internal.__map_character_type(spawn_type))
 
-    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2):
+    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2) -> list[prototype.Character]:
         enforce_type('characters', characters, Iterable)
         enforce_type('target', target, pg.Vector2)
         [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
@@ -446,6 +471,50 @@ class Internal(prototype.API):
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
         characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
+        return list(characters)
+
+    def within_attacking_range(self, unit: prototype.Character | prototype.Tower,
+                               candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= unit.attack_range and enemy.team_id != unit.team_id]
+
+    def within_vulnerable_range(self, unit: prototype.Character | prototype.Tower,
+                                candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('unit', unit, prototype.Character, prototype.Tower)
+        enforce_type('candidates', candidates, list, type(None))
+        if candidates is not None:
+            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
+             for unit in candidates]
+        else:
+            candidates = self.get_visible_characters() + self.get_owned_towers()
+
+        # We preform no transform at all, as all transform are just translate and rotate.
+        # Length is preserved under these operations.
+        return [enemy for enemy in candidates
+                if (enemy.position - unit.position).length() <= enemy.attack_range and enemy.team_id != unit.team_id]
+
+    def send_chat(self, msg: str) -> bool:
+        enforce_type('msg', msg, str)
+        if self.__chat_sent:
+            return False
+        if len(msg) > 30:
+            return False
+        # Bad special case, I know. However, that is ensured in the pygame documentation.
+        if '\x00' in msg:
+            return False
+        self.__chat_sent = True
+        model.chat.chat.send_comment(team=self.__team(), text=msg)
+        return True
 
 
 class TimeoutException(BaseException):

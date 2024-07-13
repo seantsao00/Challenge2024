@@ -8,6 +8,7 @@ import const
 from util import crop_image, transform_coordinate
 from view.object.object_base import ObjectBase
 from view.screen_info import ScreenInfo
+from view.textutil import draw_text, font_loader
 
 if TYPE_CHECKING:
     from model import PartySelector
@@ -22,7 +23,7 @@ class PartySelectorView(ObjectBase):
         self.image_initialized = True
         super().__init__(canvas, [const.PRIORITY_PARTY_SELECTOR])
         self.__party_selector = party_selector
-        self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
+        self.__font = font_loader.get_font(size=12)
 
     @classmethod
     def init_convert(cls):
@@ -52,23 +53,6 @@ class PartySelectorView(ObjectBase):
 
         img = self.background_image
         self.canvas.blit(img, (0, 0))
-
         if self.__party_selector.is_ready():
             draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
                       40, 'Press ENTER to continue', 'white', self.__font)
-
-
-def draw_text(surf: pg.Surface, x: float, y: float, text: str, color, font: pg.Font, underline: bool = False):
-    underline_color = 'darkblue'
-    underline_thickness = 3
-    underline_offset = 3
-
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect(center=(x, y))
-
-    if underline:
-        underline_start = (text_rect.left, text_rect.bottom + underline_offset)
-        underline_end = (text_rect.right, text_rect.bottom + underline_offset)
-        pg.draw.line(surf, underline_color, underline_start, underline_end, underline_thickness)
-
-    surf.blit(text_surface, text_rect.topleft)
