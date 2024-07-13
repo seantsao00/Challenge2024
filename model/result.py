@@ -23,16 +23,14 @@ class Result:
         self.__scope_wandering: bool = False  # if the scope is wandering
         self.__scope_waiting: bool = False  # if the scope is waiting for timer to make it wandering
         self.__parameter_wandering: float = 0
-        self.scope_state: const.Result_Scope_State = const.Result_Scope_State.WAITING_INPUT
 
     def ranking(self):
         model = get_model()
         self.__rank_of_teams = sorted(model.teams, key=lambda team: team.points)
 
     def update(self) -> bool:
-        if self.scope_state is const.Result_Scope_State.WAITING_INPUT:
-            pass
-        elif self.__scope_position == self.__scope_target_position and self.__scope_target_index >= self.__number_of_teams:
+
+        if self.__scope_position == self.__scope_target_position and self.__scope_target_index >= self.__number_of_teams:
             pass
         elif self.__scope_position == self.__scope_target_position and not self.__scope_waiting:
             self.__scope_target_index += 1
@@ -70,9 +68,6 @@ class Result:
 
     def set_not_wandering(self):
         self.__scope_wandering = False
-
-    def handel_scopemoving_start(self):
-        self.scope_state = const.Result_Scope_State.MOVING
 
     @property
     def scope_position(self) -> pg.Vector2:
