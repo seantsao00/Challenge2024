@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import pygame as pg
 
-from const import ChatMessageType
-from const.visual import chat as CHAT
+import const
 from event_manager import EventSendChat
-from instances_manager import get_event_manager, get_model
+from instances_manager import get_event_manager
 from model.team import Team
 from view.object import components
 from view.object.animation import LinearAnimation, LinearAnimationEasings
@@ -21,10 +20,10 @@ from view.textutil import font_loader
 
 class _RescaledConstants:
     def __init__(self):
-        self.CHAT_POSITION = ScreenInfo.scale(CHAT.CHAT_POSITION)
-        self.CHAT_SIZE = ScreenInfo.scale(CHAT.CHAT_SIZE)
-        self.AVATAR_WIDTH = int(ScreenInfo.scale(CHAT.AVATAR_WIDTH))
-        self.SPACING = ScreenInfo.scale(CHAT.SPACING)
+        self.CHAT_POSITION = ScreenInfo.scale(const.CHAT_POSITION)
+        self.CHAT_SIZE = ScreenInfo.scale(const.CHAT_SIZE)
+        self.AVATAR_WIDTH = int(ScreenInfo.scale(const.AVATAR_WIDTH))
+        self.SPACING = ScreenInfo.scale(const.SPACING)
 
 
 consts: _RescaledConstants | None = None
@@ -32,7 +31,7 @@ consts: _RescaledConstants | None = None
 
 class CommentBox:
     def __init__(self, text: str, user_avatar: pg.Surface, width: float):
-        font = font_loader.get_font(size=CHAT.CHAT_FONT_SIZE)
+        font = font_loader.get_font(size=const.CHAT_FONT_SIZE)
         avatar_size = user_avatar.get_size()
         text_surf = components.createTextBox(
             text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
@@ -84,9 +83,9 @@ class ChatView(ObjectBase):
         pass
 
     def handle_new_chat(self, e: EventSendChat):
-        if e.type == ChatMessageType.CHAT_COMMENT:
+        if e.type == const.ChatMessageType.CHAT_COMMENT:
             self.add_comment(e.team, e.text)
-        elif e.type == ChatMessageType.CHAT_BULLET:
+        elif e.type == const.ChatMessageType.CHAT_BULLET:
             # TODO
             print("Bullet messages are not supported yet!")
 

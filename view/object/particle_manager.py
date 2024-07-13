@@ -5,8 +5,7 @@ import random
 
 import pygame as pg
 
-from const.visual import PRIORITY_PARTICLE
-from const.visual.particles import *
+import const
 from event_manager import EventBulletExplode, EventEveryTick
 from instances_manager import get_event_manager
 from view.object.object_base import ObjectBase
@@ -17,7 +16,7 @@ from view.screen_info import ScreenInfo
 class ParticleManager(ObjectBase):
     def __init__(self, canvas: pg.Surface):
         self.image_initialized = True
-        super().__init__(canvas, PRIORITY_PARTICLE)
+        super().__init__(canvas, const.PRIORITY_PARTICLE)
         self.canvas = canvas
         self.particles = []
 
@@ -69,8 +68,8 @@ class ParticleManager(ObjectBase):
                                   _speed, _size, _duration, _color))
 
     def bullet_explode(self, event: EventBulletExplode):
-        self.explode(event.bullet.position, PARTICLES_BULLET_EXPLODE_AMOUNT,
-                     PARTICLES_BULLET_EXPLODE_DURATION, PARTICLES_BULLET_EXPLODE_COLOR)
+        self.explode(event.bullet.position, const.PARTICLES_BULLET_EXPLODE_AMOUNT,
+                     const.PARTICLES_BULLET_EXPLODE_DURATION, const.PARTICLES_BULLET_EXPLODE_COLOR)
 
 
 def clamp(value, min_val, max_val):
