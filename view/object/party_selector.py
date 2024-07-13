@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 class PartySelectorView(ObjectBase):
     background_image: pg.Surface
+    bottom_image: pg.Surface
     party_images: dict[None | const.PartyType, pg.Surface] = {}
     ratio: float
 
@@ -32,6 +33,10 @@ class PartySelectorView(ObjectBase):
         cls.background_image = crop_image(
             img, *ScreenInfo.screen_size, True).convert_alpha()
 
+        img = pg.image.load(const.PARTY_SELECTOR_BOTTOM)
+        cls.bottom_image = crop_image(
+            img, *ScreenInfo.screen_size, True).convert_alpha()
+
         cls.ratio = ScreenInfo.screen_size[0] / 1600
         for key, path in const.PARTY_SELECTOR_IMAGE.items():
             img = pg.image.load(path)
@@ -41,6 +46,9 @@ class PartySelectorView(ObjectBase):
         cls.image_initialized = True
 
     def draw(self):
+        img = self.bottom_image
+        self.canvas.blit(img, (0, 0))
+
         point: list = [(107, 124), (107, 527), (868, 124), (868, 527)]
         team_number = 0
         check = 0
