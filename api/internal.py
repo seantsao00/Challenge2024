@@ -264,7 +264,7 @@ class Internal(prototype.API):
 
         if index is None:
             index = self.team_id
-        if index < 0 or index >= MAX_TEAMS:
+        if index < 0 or index >= len(get_model().teams):
             raise IndexError
         team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
