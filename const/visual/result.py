@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import os
 from enum import Enum, auto
-from math import cos, pi, sin
+from math import cos, sin
+from random import uniform
 
 import pygame as pg
 
@@ -45,6 +46,10 @@ class ScopeStatus(Enum):
 
 SCOPE_SPEED = 7
 INVERVAL_WAITING = 1
-INVERVAL_WANDERING = 5
+INVERVAL_WANDERING = uniform(4.0, 6.5)
 WANDERING_PERIOD = 3
 POSITION_EPSILON = 0.01
+
+
+def wandering_formula(t: float) -> pg.Vector2:
+    return pg.Vector2(200*cos(t)+450, 100*sin(2*t)+280)

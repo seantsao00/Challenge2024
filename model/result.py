@@ -4,6 +4,7 @@ from math import cos, pi, sin
 import pygame as pg
 
 import const
+import const.result
 from event_manager import EventChangeParty, EventStartGame
 from instances_manager import get_event_manager, get_model
 from model.team import Team
@@ -36,13 +37,12 @@ class Result:
             if self.arrived():
                 return
         elif self.__scope_status is const.ScopeStatus.WANDERING:
-            self.__scope_target_position = pg.Vector2(
-                100*sin(self.__parameter_wandering)+100, 100*cos(2*self.__parameter_wandering)+100)
+            self.__scope_target_position = const.wandering_formula(self.__parameter_wandering)
             self.__parameter_wandering += 2*pi*get_model().dt/const.WANDERING_PERIOD
         elif self.__scope_status is const.ScopeStatus.TOWARD_WANDERING:
             if self.arrived():
                 self.__scope_status = const.ScopeStatus.WANDERING
-                Timer(interval=const.INVERVAL_WANDERING, function=self.set_not_wandering, once=True)
+                Timer(interval=const.INVERVAL_WANDERING, function=self.set_toward_target, once=True)
         elif self.__scope_status is const.ScopeStatus.WAITING:
             pass
         elif self.__scope_status is const.ScopeStatus.TOWARD_TARGET:
@@ -62,9 +62,9 @@ class Result:
             return
         self.__scope_status = const.ScopeStatus.WANDERING
         self.__parameter_wandering = 0
-        Timer(interval=const.INVERVAL_WANDERING, function=self.set_not_wandering, once=True)
+        Timer(interval=const.INVERVAL_WANDERING, function=self.set_toward_target, once=True)
 
-    def set_not_wandering(self):
+    def set_toward_target(self):
         self.__scope_status = const.ScopeStatus.TOWARD_TARGET
         target_team: Team = self.__rank_of_teams[self.__scope_target_index]
         self.__scope_target_position = self.__team_position[target_team.team_id]
