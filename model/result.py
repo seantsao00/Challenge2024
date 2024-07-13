@@ -33,7 +33,8 @@ class Result:
     def update(self):
 
         if self.__scope_status is const.ScopeStatus.FINISH:
-            return
+            if self.arrived():
+                return
         elif self.__scope_status is const.ScopeStatus.WANDERING:
             self.__scope_target_position = pg.Vector2(
                 100*sin(self.__parameter_wandering)+100, 100*cos(2*self.__parameter_wandering)+100)
@@ -55,8 +56,9 @@ class Result:
         self.__scope_position += displacement
 
     def set_wandering(self):
-        if self.__scope_target_index > self.__number_of_teams:
+        if self.__scope_target_index >= self.__number_of_teams:
             self.__scope_status = const.ScopeStatus.FINISH
+            self.__scope_target_position = const.RESULT_FINAL_POSITION
             return
         self.__scope_status = const.ScopeStatus.WANDERING
         self.__parameter_wandering = 0
@@ -64,11 +66,8 @@ class Result:
 
     def set_not_wandering(self):
         self.__scope_status = const.ScopeStatus.TOWARD_TARGET
-        if self.__scope_target_index == self.__number_of_teams:
-            self.__scope_target_position = const.RESULT_FINAL_POSITION
-        else:
-            target_team: Team = self.__rank_of_teams[self.__scope_target_index]
-            self.__scope_target_position = self.__team_position[target_team.team_id]
+        target_team: Team = self.__rank_of_teams[self.__scope_target_index]
+        self.__scope_target_position = self.__team_position[target_team.team_id]
 
     def handle_scopemoving_start(self):
         if self.__scope_status is const.ScopeStatus.WAITING_INPUT:
