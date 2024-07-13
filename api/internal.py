@@ -300,7 +300,7 @@ class Internal(prototype.API):
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
         if not self.__is_controllable(character):
-            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
+            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN, False)
         with character.moving_lock:
             if character.move_state is CharacterMovingState.STOPPED:
                 return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
