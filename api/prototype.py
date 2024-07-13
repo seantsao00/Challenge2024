@@ -336,3 +336,9 @@ class API:
         @candidates: 要考慮的所有實體。
         """
         raise NotImplementedError
+
+    def send_chat(self, msg: str) -> bool:
+        """
+        傳送聊天室訊息，每個 `every_tick` 的呼叫當中只能傳送一次。回傳值為傳送成功或失敗。  
+        @msg: 要傳送的訊息，長度不得超過 30、不得包含 NULL 字元。部分字元可能會因為字體無法顯示。
+        """

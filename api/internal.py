@@ -7,11 +7,9 @@ from __future__ import annotations
 import ctypes
 import importlib
 import os
-import random
 import signal
 import threading
 import traceback
-import warnings
 from typing import Iterable
 
 import numpy as np
@@ -20,6 +18,7 @@ import pygame as pg
 import const
 import const.map
 import model
+import model.chat
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
@@ -50,12 +49,14 @@ class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.transform: np.ndarray = None
+        self.__chat_sent = False
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
 
     def clear(self):
+        self.__chat_sent = False
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
@@ -501,6 +502,18 @@ class Internal(prototype.API):
         # Length is preserved under these operations.
         return [enemy for enemy in candidates
                 if (enemy.position - unit.position).length() <= enemy.attack_range and enemy.team_id != unit.team_id]
+
+    def send_chat(self, msg: str) -> bool:
+        enforce_type('msg', msg, str)
+        if self.__chat_sent:
+            return False
+        if len(msg) > 30:
+            return False
+        # Bad special case, I know. However, that is ensured in the pygame documentation.
+        if '\x00' in msg:
+            return False
+        model.chat.chat.send_comment(team=self.__team(), text=msg)
+        return True
 
 
 class TimeoutException(BaseException):
