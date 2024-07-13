@@ -49,4 +49,4 @@ TOWER_SPAWN_INITIAL_PERIOD = 1
 
 
 def count_period_ms(entity_number: int) -> float:
-    return TOWER_SPAWN_INITIAL_PERIOD * (1 + (entity_number / 20) ** (2))
+    return TOWER_SPAWN_INITIAL_PERIOD * (1 + (entity_number / 10) ** (2))
