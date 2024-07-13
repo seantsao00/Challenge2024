@@ -147,7 +147,7 @@ class View:
         discarded_entities: set[EntityView] = set()
 
         for entity in self.__entities:
-            if not entity.move():
+            if not entity.update():
                 discarded_entities.add(entity)
         self.__entities.difference_update(discarded_entities)
 
