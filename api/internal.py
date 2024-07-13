@@ -5,7 +5,7 @@ Defines internal API interaction and AI threading.
 from __future__ import annotations
 
 import ctypes
-import importlib
+import importlib.util
 import os
 import signal
 import threading
@@ -615,7 +615,9 @@ def load_ai(files: list[str]):
     for i, file in enumerate(files):
         if file == 'human':
             continue
-        ai[i] = importlib.import_module('ai.' + file)
+        spec = importlib.util.find_spec('ai.' + file)
+        ai[i] = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ai[i])
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
