@@ -47,6 +47,7 @@ class Result:
         elif self.__scope_status is const.ScopeStatus.TOWARD_TARGET:
             if self.arrived():
                 self.__scope_status = const.ScopeStatus.WAITING
+                self.__scope_target_index += 1
                 Timer(interval=const.INVERVAL_WAITING, function=self.set_wandering, once=True)
 
         displacement = (self.__scope_target_position - self.__scope_position).normalize()*self.__scope_speed if (self.__scope_target_position -
@@ -65,7 +66,6 @@ class Result:
         self.__scope_status = const.ScopeStatus.TOWARD_TARGET
         target_team: Team = self.__rank_of_teams[self.__scope_target_index]
         self.__scope_target_position = self.__team_position[target_team.team_id]
-        self.__scope_target_index += 1
 
     @property
     def scope_position(self) -> pg.Vector2:
