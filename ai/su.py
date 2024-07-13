@@ -36,8 +36,7 @@ def attack_nearest_enemy(api: API,owned_characters: list[Character], visible_ene
     return res
 
 def send_spam_message(api: API):
-    api.send_chat(random.choice(["鄭詠堯說你是2486",
-                                "哥們，這條刪了唄，我是無所謂的，沒那麼容易破防的，真的，我不輕易破防，但是我一個朋友可能有點汗流浹背了，他不太舒服想睡了，當然不是我哈，我一直都是行的，以一個旁觀者的心態看吧，也不至於破防吧，就是想照顧下我朋友的感受，他有點破防了，還是建議刪了吧，當然刪不刪隨你，我是沒感覺的，就是為朋友感到不平罷了，也不是那麼輕易破防的，求你了，刪了唄"]))
+    api.send_chat(random.choice(["鄭詠堯說你是2486"]))
 
 
 def every_tick(api: API):
@@ -47,7 +46,7 @@ def every_tick(api: API):
     for team_id in range(0, 4):
         scores.append(api.get_score_of_team(team_id))
 
-    print(f"su's team is {api.get_team_id()}")
+    # print(f"su's team is {api.get_team_id()}")
     print(scores)
 
     my_team_id = api.get_team_id()
@@ -73,7 +72,6 @@ def every_tick(api: API):
     stopped_characters_count = len(stopped_characters)
     moving_characters_count = len(moving_characters)    
     
-    print(stopped_characters_count)
     if (visible_towers_count <= 1 and owned_characters_count > 0):
         if (owned_characters_count <= 15):
             api.change_spawn_type(fountain, CharacterClass.RANGER)
