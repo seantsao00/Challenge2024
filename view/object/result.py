@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 class ResultView(ObjectBase):
     background_image: pg.Surface
+    bottom_image: pg.Surface
     party_images: dict[const.PartyType, pg.Surface] = {}
     ratio: float
 
@@ -30,6 +31,10 @@ class ResultView(ObjectBase):
     @classmethod
     def init_convert(cls):
         cls.ratio = ScreenInfo.screen_size[1] / 900
+
+        img = pg.image.load(const.RESULT_BOTTOM)
+        cls.bottom_image = crop_image(
+            img, 348, ScreenInfo.screen_size[1], True).convert_alpha()
 
         img = pg.image.load(const.RESULT_BACKGROUND)
         cls.background_image = crop_image(
@@ -48,6 +53,9 @@ class ResultView(ObjectBase):
 
     def draw(self):
         model = get_model()
+        img = self.bottom_image
+        self.canvas.blit(img, (0, 0))
+
         team_icon_position: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
             img = self.party_images[team.party]
