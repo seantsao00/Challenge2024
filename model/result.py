@@ -10,27 +10,27 @@ from model.team import Team
 from model.timer import Timer
 
 
-class Settlement:
+class Result:
 
     def __init__(self, number_of_teams: int):
         self.__number_of_teams: int = number_of_teams
         self.__rank_of_teams: list = [Team]
-        self.__scope_position = const.SETTLEMENT_INITIAL_POSITION
+        self.__scope_position = const.RESULT_INITIAL_POSITION
         self.__scope_target_index: int = 0  # The index of target team
         self.__scope_target_position = pg.Vector2 | tuple[float, float]
-        self.__team_position = const.SETTLEMENT_TEAM_POSITION
+        self.__team_position = const.RESULT_TEAM_POSITION
         self.__scope_speed: int = const.SCOPE_SPEED
         self.__scope_wandering: bool = False  # if the scope is wandering
         self.__scope_waiting: bool = False  # if the scope is waiting for timer to make it wandering
         self.__parameter_wandering: float = 0
-        self.scope_state: const.Settlement_Scope_State = const.Settlement_Scope_State.WAITING_INPUT
+        self.scope_state: const.Result_Scope_State = const.Result_Scope_State.WAITING_INPUT
 
     def ranking(self):
         model = get_model()
         self.__rank_of_teams = sorted(model.teams, key=lambda team: team.points)
 
     def update(self) -> bool:
-        if self.scope_state is const.Settlement_Scope_State.WAITING_INPUT:
+        if self.scope_state is const.Result_Scope_State.WAITING_INPUT:
             pass
         elif self.__scope_position == self.__scope_target_position and self.__scope_target_index >= self.__number_of_teams:
             pass
@@ -72,7 +72,7 @@ class Settlement:
         self.__scope_wandering = False
 
     def handel_scopemoving_start(self):
-        self.scope_state = const.Settlement_Scope_State.MOVING
+        self.scope_state = const.Result_Scope_State.MOVING
 
     @property
     def scope_position(self) -> pg.Vector2:

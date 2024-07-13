@@ -17,8 +17,8 @@ from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
                          EntityView, HealthView, ObjectBase, Particle, ParticleManager,
-                         PartySelectorView, PauseMenuView, ScoreboardView, SettlementView,
-                         TowerCDView, ViewRangeView)
+                         PartySelectorView, PauseMenuView, ResultView, ScoreboardView, TowerCDView,
+                         ViewRangeView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
@@ -52,13 +52,13 @@ class View:
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
-        self.__settlement_view = SettlementView(self.__screen, model.settlement)
+        self.__result_view = ResultView(self.__screen, model.result)
 
         self.__cover_image: pg.Surface = load_image(const.COVER_IMAGE, screen_w, screen_h)[0]
         self.__particle_manager = ParticleManager(self.__arena)
 
         PartySelectorView.init_convert()
-        SettlementView.init_convert()
+        ResultView.init_convert()
 
         self.__entities: list[EntityView] = []
 
@@ -125,8 +125,8 @@ class View:
             self.render_play()
         elif model.state is const.State.SELECT_PARTY:
             self.render_party_selector()
-        elif model.state is const.State.SETTLEMENT:
-            self.render_settlement()
+        elif model.state is const.State.RESULT:
+            self.render_result()
         pg.display.flip()
 
     def render_cover(self):
@@ -137,12 +137,12 @@ class View:
         """Render party selecting process"""
         self.__party_selector_view.draw()
 
-    def render_settlement(self):
-        """Render the game settlement screen"""
+    def render_result(self):
+        """Render the game result screen"""
         self.__screen.blit(self.scoreboard_image, (0, 0))
         self.__chat.update()
         self.__chat.draw()
-        self.__settlement_view.draw()
+        self.__result_view.draw()
 
     def render_play(self):
         """Render scenes when the game is being played"""
