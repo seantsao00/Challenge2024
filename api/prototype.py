@@ -147,10 +147,6 @@ class API:
         """回傳遊戲網格的長寬，由於遊戲網格是正方形的，長寬都使用這個函數。"""
         raise NotImplementedError
 
-    def get_vision_block_size(self) -> float:
-        """回傳視野的精確程度，也就是說假設回傳值為 B，每長 B 寬 B 的位置會有同樣的視野狀態。"""
-        raise NotImplementedError
-
     def get_team_id(self) -> int:
         """回傳自己隊伍的編號（`id`）。"""
         raise NotImplementedError
@@ -217,11 +213,7 @@ class API:
 
     def get_visibility(self) -> list[list[int]]:
         """
-        回傳目前的所有視野狀態。回傳值是一個二維的表格，
-        長寬皆為 `get_grid_size` 的回傳值除以 `get_vision_block_size` 的回傳值。
-        也就是說，假設 `get_vision_block_size` 的回傳值是 B，
-        那回傳值的第 i 行第 j 列代表的是 x 座標為 [i * B, i * (B + 1)] 
-        而 y 座標為 [j * B, j * (B + 1)] 的這個格子的狀態。
+        回傳目前的所有視野狀態。回傳值是一個二維的表格，長寬皆為 `get_grid_size()` 的回傳值。
         """
         raise NotImplementedError
 

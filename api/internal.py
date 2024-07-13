@@ -162,11 +162,11 @@ class Internal(prototype.API):
         Convert a `model.Tower` to `api.Tower`
         """
         character_class = prototype.CharacterClass.UNKNOWN
-        if internal.character_type == const.CharacterType.MELEE:
+        if internal.character_type is const.CharacterType.MELEE:
             character_class = prototype.CharacterClass.MELEE
-        elif internal.character_type == const.CharacterType.RANGER:
+        elif internal.character_type is const.CharacterType.RANGER:
             character_class = prototype.CharacterClass.RANGER
-        elif internal.character_type == const.CharacterType.SNIPER:
+        elif internal.character_type is const.CharacterType.SNIPER:
             character_class = prototype.CharacterClass.SNIPER
         else:
             raise GameError("Unknown spawn character type")
@@ -302,11 +302,11 @@ class Internal(prototype.API):
         if not self.__is_controllable(character):
             return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
         with character.moving_lock:
-            if character.move_state == CharacterMovingState.STOPPED:
+            if character.move_state is CharacterMovingState.STOPPED:
                 return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
-            elif character.move_state == CharacterMovingState.TO_DIRECTION:
+            elif character.move_state is CharacterMovingState.TO_DIRECTION:
                 return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
-            elif character.move_state == CharacterMovingState.TO_POSITION:
+            elif character.move_state is CharacterMovingState.TO_POSITION:
                 return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
