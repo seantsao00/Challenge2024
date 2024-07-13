@@ -61,6 +61,10 @@ class Melee(Character):
         self.health -= new_damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(
+                    f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
     def cast_ability(self, *args, **kwargs):
         now_time = get_model().get_time()
