@@ -28,7 +28,6 @@ class ObjectBase:
         To avoid loading the same image multiple times,
         once first instance is created and init_convert is called,
         image_initialized within the class will be set to True.
-
         """
         cls.image_initialized = True
 

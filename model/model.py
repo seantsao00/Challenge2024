@@ -29,7 +29,6 @@ from model.map import load_map
 from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.team import NeutralTeam, Team
-from model.timer import Timer
 from util import log_critical
 
 if TYPE_CHECKING:

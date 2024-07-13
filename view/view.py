@@ -4,7 +4,6 @@ The module defines View class.
 
 import os
 
-import cv2
 import pygame as pg
 
 import const
@@ -16,9 +15,8 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
 from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
-                         EntityView, HealthView, ObjectBase, Particle, ParticleManager,
-                         PartySelectorView, PauseMenuView, ScoreboardView, TowerCDView,
-                         ViewRangeView)
+                         EntityView, HealthView, ObjectBase, ParticleManager, PartySelectorView,
+                         PauseMenuView, ScoreboardView, TowerCDView, ViewRangeView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
@@ -54,18 +52,21 @@ class View:
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
 
         self.__cover_image: pg.Surface = load_image(const.COVER_IMAGE, screen_w, screen_h)[0]
-        self.__particle_manager = ParticleManager(self.__arena)
+        self.__particle_manager = ParticleManager(self.__screen)
 
         PartySelectorView.init_convert()
 
-        self.__entities: list[EntityView] = []
+        self.__entities: set[EntityView] = set()
 
         self.vision_of = 0
-        self.scoreboard_image = pg.image.load(os.path.join(
-            const.IMAGE_DIR, 'scoreboard.png')).convert_alpha()
+        self.__scoreboard_image = pg.transform.scale(
+            pg.image.load(os.path.join(const.IMAGE_DIR, 'scoreboard.png')).convert_alpha(),
+            ScreenInfo.screen_size
+        )
+
         self.__background_images = []
 
-        self.__scoreboxes = ScoreboardView(self.__screen)
+        self.__score_boxes = ScoreboardView(self.__screen)
         self.__chat = ChatView(self.__screen)
         self.__clock = ClockView(self.__screen)
         bg_image_counter = 0
@@ -94,68 +95,64 @@ class View:
         from model import Character, Tower
         model = get_model()
         entity = event.entity
-        self.__entities.append(EntityView(self.__arena, entity))
+        self.__entities.add(EntityView(self.__arena, entity))
         if isinstance(entity, Character):
             if model.show_view_range:
-                self.__entities.append(ViewRangeView(self.__arena, entity))
+                self.__entities.add(ViewRangeView(self.__arena, entity))
             if model.show_attack_range:
-                self.__entities.append(AttackRangeView(self.__arena, entity))
-            self.__entities.append(AbilitiesCDView(self.__arena, entity))
+                self.__entities.add(AttackRangeView(self.__arena, entity))
+            self.__entities.add(AbilitiesCDView(self.__arena, entity))
             if entity.health is not None:
-                self.__entities.append(HealthView(self.__arena, entity))
+                self.__entities.add(HealthView(self.__arena, entity))
         if isinstance(entity, Tower):
             if model.show_view_range:
-                self.__entities.append(ViewRangeView(self.__arena, entity))
+                self.__entities.add(ViewRangeView(self.__arena, entity))
             if model.show_attack_range:
-                self.__entities.append(AttackRangeView(self.__arena, entity))
-            self.__entities.append(TowerCDView(self.__arena, entity))
+                self.__entities.add(AttackRangeView(self.__arena, entity))
+            self.__entities.add(TowerCDView(self.__arena, entity))
             if not entity.is_fountain:
-                self.__entities.append(HealthView(self.__arena, entity))
+                self.__entities.add(HealthView(self.__arena, entity))
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
-        self.display_fps()
-        self.__screen.fill(const.BACKGROUND_COLOR)
-        self.__arena.fill(const.BACKGROUND_COLOR)
+        self.__display_fps()
         model = get_model()
         if model.state is const.State.COVER:
-            self.render_cover()
-        elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
-            self.render_play()
+            self.__render_cover()
         elif model.state is const.State.SELECT_PARTY:
-            self.render_party_selector()
+            self.__render_party_selector()
+        elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
+            self.__render_play()
         elif model.state is const.State.SETTLEMENT:
-            self.render_settlement()
+            self.__render_settlement()
         pg.display.flip()
 
-    def render_cover(self):
+    def __render_cover(self):
         """Render game cover"""
         self.__screen.blit(self.__cover_image, (0, 0))
 
-    def render_party_selector(self):
+    def __render_party_selector(self):
         """Render party selecting process"""
         self.__party_selector_view.draw()
 
-    def render_settlement(self):
+    def __render_settlement(self):
         """Render the game settlement screen"""
         # setting up a temporary screen till we have a scoreboard image and settlement screen
         font = font_loader.get_font(size=12)
         text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
         self.__screen.blit(text_surface, (100, 100))
 
-    def render_play(self):
+    def __render_play(self):
         """Render scenes when the game is being played"""
         model = get_model()
 
-        self.scoreboard_image = pg.transform.scale(self.scoreboard_image, ScreenInfo.screen_size)
-        self.__screen.blit(self.scoreboard_image, (0, 0))
+        self.__screen.blit(self.__scoreboard_image, (0, 0))
 
-        discarded_entities: set[type[EntityView]] = set()
+        discarded_entities: set[EntityView] = set()
 
         for entity in self.__entities:
             if not entity.move():
                 discarded_entities.add(entity)
-        self.__entities = [
-            entity for entity in self.__entities if entity not in discarded_entities]
+        self.__entities.difference_update(discarded_entities)
 
         for entity in discarded_entities:
             entity.unregister_listeners()
@@ -180,11 +177,11 @@ class View:
         for obj in objects:
             obj.draw()
 
-        self.__screen.blit(
-            self.__arena, ((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
+        self.__screen.blit(self.__arena,
+                           ((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
 
-        self.__scoreboxes.update()
-        self.__scoreboxes.draw()
+        self.__score_boxes.update()
+        self.__score_boxes.draw()
         self.__chat.update()
         self.__chat.draw()
         self.__clock.draw()
@@ -205,7 +202,7 @@ class View:
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
         ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
 
-    def display_fps(self):
+    def __display_fps(self):
         """Display the current fps on the window caption."""
         model = get_model()
         pg.display.set_caption(
