@@ -1,4 +1,4 @@
-import math
+# import math
 import random
 import pygame as pg
 
@@ -12,7 +12,7 @@ class StageClass(IntEnum):
     ATTACK_ENEMY = auto()
 
 class JerryAI:
-    
+
     GRID_NUM: int = 20
     MAP_SIZE: int = 250
     PER_GRID: float =  MAP_SIZE / GRID_NUM
@@ -30,11 +30,11 @@ class JerryAI:
         self.explored_grids: set[tuple[int, int]] = set()
         self.explorers: set[int] = set()
 
-        self.own_character_dict: dict[int: Character] = dict()
-        self.owned_characters: set[int] = set()
+        self.my_chid_to_ch: dict[int: Character] = dict()
+        self.my_chs: set[int] = set()
 
-        self.target_tower_id: int = -1
-        self.tower_id_to_entity: dict[int, Tower] = dict()
+        self.target_towerid: int = -1
+        self.towerid_to_tower: dict[int, Tower] = dict()
 
     def grid_to_coordiante(self, grid: tuple[int, int]) -> pg.Vector2:
         return pg.Vector2(JerryAI.PER_GRID * grid[0], JerryAI.PER_GRID * grid[1])
@@ -44,17 +44,19 @@ class JerryAI:
             if not tower.is_fountain and tower.team_id != self.team_id:
                 return True
 
-    def explor(self, api:API, characters: set[int]):
-        for _, chid in enumerate(characters):
+    def explor(self, api:API, chids: set[int]):
+        # explorer the map
+        for chid in chids:
             des: tuple[int, int]
             if len(self.explor_map) == len(self.exploring_grids):
                 des = random.sample(list(self.explor_map), 1)
             else:
                 des = random.sample(list(self.explor_map - self.exploring_grids), 1)
                 self.exploring_grids.add(des[0])
-            api.action_move_to([self.own_character_dict[chid]], self.grid_to_coordiante(des[0]))
+            api.action_move_to([self.my_chid_to_ch[chid]], self.grid_to_coordiante(des[0]))
 
     def attack_tower(self, api: API, tower: Tower):
+        # attack the target tower
         api.action_move_to(api.get_owned_characters(), tower.position)
         for ch in api.get_owned_characters():
             if (tower.position - ch.position).length() <= ch.attack_range:
@@ -63,14 +65,22 @@ class JerryAI:
                 enemies = api.within_attacking_range(ch, None)
                 if  enemies is not None and len(enemies) != 0:
                     api.action_attack([ch], enemies[0])
-
+                    
+    def defen_tower(self, api: API, tower: Tower):
+        for ch in api.get_owned_characters():
+            api.action_move_to([ch], tower.position)
+            enemies = api.within_attacking_range(ch, None)
+            if enemies is not None and len(enemies) != 0:
+                api.action_attack([ch], enemies[0])
+            if self.find_enemy_neutral_tower(api):
+                self.stage = StageClass.ATTACK_TOWER
 
     def stage_explor(self, api: API):
-        self.explorers = self.owned_characters & self.explorers
-        unused: set[int] = self.owned_characters - self.explorers
+        self.explorers = self.my_chs & self.explorers
+        unused: set[int] = self.my_chs - self.explorers
         # update exploers and unused character
         for chid in set(self.explorers):
-            if api.get_movement(self.own_character_dict[chid]).vector is None:
+            if api.get_movement(self.my_chid_to_ch[chid]).vector is None:
                 self.explorers.remove(chid)
                 unused.add(chid)
 
@@ -80,20 +90,36 @@ class JerryAI:
             self.explor(api, tmp)
             self.explorers |= tmp
         elif len(unused) > 0:
-            tmp = [self.own_character_dict[chid] for chid in unused]
+            tmp = [self.my_chid_to_ch[chid] for chid in unused]
             api.action_move_to(tmp, pg.Vector2(self.EXPLOR_WAITING_POINT[0], self.EXPLOR_WAITING_POINT[1]))
-            api.change_spawn_type(api.get_owned_towers()[0], CharacterClass.RANGER)
+            api.change_spawn_type(api.get_owned_towers()[0], CharacterClass.MELEE)
 
     def stage_attack_tower(self, api: API):
-        if self.target_tower_id == -1 or self.tower_id_to_entity[self.target_tower_id].team_id == self.team_id:
+        if self.target_towerid == -1 or self.towerid_to_tower[self.target_towerid].team_id == self.team_id:
             for t in api.get_visible_towers():
                 if t.is_fountain or t.team_id == self.team_id:
                     continue
-                target_tower_id = t.id
+                self.target_towerid = t.id
                 break
-        self.attack_tower(api, self.tower_id_to_entity[target_tower_id])
+        
+        self.attack_tower(api, self.towerid_to_tower[self.target_towerid])
 
-    # def stage_defence(api: API):
+    def stage_defence_tower(self, api: API):
+        target_tower = None
+        for t in api.get_owned_towers():
+            if t.id == self.target_towerid:
+                target_tower = self.towerid_to_tower[self.target_towerid]
+                api.change_spawn_type(target_tower, CharacterClass.SNIPER)
+                print(f"change tower {target_tower} to sniper")
+                break
+
+        if target_tower is None:
+            self.stage = StageClass.ATTACK_ENEMY
+        else:
+            self.defen_tower(api, target_tower)
+            
+
+
     def chat(self, api: API):
         # chs = api.get_owned_characters()
         emoji_list = [
@@ -113,21 +139,21 @@ class JerryAI:
         api.send_chat(ch)
 
     def run(self, api: API):
-        self.own_character_dict = dict()
-        self.owned_characters = set()
+        self.my_chid_to_ch = dict()
+        self.my_chs = set()
 
         for character in api.get_owned_characters():
-            self.own_character_dict[character.id] = character
-            self.owned_characters.add(character.id)
+            self.my_chid_to_ch[character.id] = character
+            self.my_chs.add(character.id)
 
         for tower in api.get_visible_towers():
-            self.tower_id_to_entity[tower.id] = tower
+            self.towerid_to_tower[tower.id] = tower
 
         if self.stage is StageClass.START:
             # Setting at the beginning
             api.change_spawn_type(api.get_owned_towers()[0], CharacterClass.MELEE)
             self.stage = StageClass.EXPLOR
-            team_id = api.get_team_id()
+            self.team_id = api.get_team_id()
 
         if self.stage is StageClass.EXPLOR:
             # Explore New Regions
@@ -141,25 +167,21 @@ class JerryAI:
 
         elif self.stage is StageClass.ATTACK_TOWER:
             # Attack towers
-            print(f"Jerry's team {team_id} | Stage: ATTACK_TOWER")
+            print(f"Jerry's team {self.team_id} | Stage: ATTACK_TOWER")
             if not self.find_enemy_neutral_tower(api):
                 api.send_chat("打下塔了哈哈。")
                 self.stage = StageClass.DEFEN_TOWER
+
             self.stage_attack_tower(api)
 
         elif self.stage is StageClass.DEFEN_TOWER:
-            print(f"Jerry's team {team_id} | Stage: DEFEN_TOWER")
-            for ch in api.get_owned_characters():
-                enemies = api.within_attacking_range(ch, None)
-                if  enemies is not None and len(enemies) != 0:
-                    api.action_attack([ch], enemies[0])
-            if self.find_enemy_neutral_tower(api):
+            print(f"Jerry's team {self.team_id} | Stage: DEFEN_TOWER")
+            self.stage_defence_tower(api)
+            if self.towerid_to_tower[self.team_id] not in api.get_owned_towers():
                 self.stage = StageClass.ATTACK_TOWER
 
         elif self.stage == StageClass.ATTACK_ENEMY:
-            print("error")
-            exit()
-
+            print(f"Jerry's team {self.team_id} | Stage: ATTACK_ENEMY")
         else:
             print("missing stage")
             exit()
