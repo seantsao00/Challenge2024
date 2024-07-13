@@ -60,10 +60,10 @@ class SettlementView(ObjectBase):
         for team in model.teams:
             if team.team_id < 2:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 362 / 2) * self.ratio,
-                          (team_icon_position[team.team_id][1]) * self.ratio, "第  小隊", 'white', self.__font)
+                          (team_icon_position[team.team_id][1]) * self.ratio, f"{team.team_name}", 'white', self.__font)
             else:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 380 / 2) * self.ratio,
-                          (team_icon_position[team.team_id][1]) * self.ratio, "第  小隊", 'white', self.__font)
+                          (team_icon_position[team.team_id][1]) * self.ratio, f"{team.team_name}", 'white', self.__font)
 
             if self.__settlement.scope_position == self.__scope_destination[team.team_id] and self.__team_show_points[team.team_id] == False:
                 self.__team_show_points[team.team_id] = True
