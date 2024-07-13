@@ -55,7 +55,7 @@ class Result:
         self.__scope_position += displacement
 
     def set_wandering(self):
-        if self.__scope_target_index >= self.__number_of_teams:
+        if self.__scope_target_index > self.__number_of_teams:
             self.__scope_status = const.ScopeStatus.FINISH
             return
         self.__scope_status = const.ScopeStatus.WANDERING
@@ -64,8 +64,11 @@ class Result:
 
     def set_not_wandering(self):
         self.__scope_status = const.ScopeStatus.TOWARD_TARGET
-        target_team: Team = self.__rank_of_teams[self.__scope_target_index]
-        self.__scope_target_position = self.__team_position[target_team.team_id]
+        if self.__scope_target_index == self.__number_of_teams:
+            self.__scope_target_position = const.RESULT_FINAL_POSITION
+        else:
+            target_team: Team = self.__rank_of_teams[self.__scope_target_index]
+            self.__scope_target_position = self.__team_position[target_team.team_id]
 
     @property
     def scope_position(self) -> pg.Vector2:
