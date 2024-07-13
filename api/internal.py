@@ -512,6 +512,7 @@ class Internal(prototype.API):
         # Bad special case, I know. However, that is ensured in the pygame documentation.
         if '\x00' in msg:
             return False
+        self.__chat_sent = True
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
