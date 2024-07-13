@@ -52,17 +52,26 @@ class Strategy:
         self.my_team_id: int = None
         
         self.owned_characters: list[Character] = []
+        self.detective_team: list[Character] = []
+        
         self.visible_enemy: list[Character] = []
+        self.visible_enemy_towers: list[Tower] = []
+        
         self.cnt: int = 0
         
     def initialize(self):
         self.my_team_id = self.api.get_team_id()
         self.fountain = self.get_fountain(self.api.get_visible_towers(), self.my_team_id)
         self.owned_characters = self.api.get_owned_characters()
+        
         self.visible_enemy = [character for character in self.api.get_visible_characters()
         if character.team_id != self.my_team_id]
+        self.visible_enemy_towers = [tower for tower in self.api.get_visible_towers() if 
+                                     tower.team_id != self.my_team_id]
+        
+        
+        self.cnt += 1
 
-        raise NotImplementedError
         
     def send_spam_message(self):
         self.api.send_chat(random.choice(["鄭詠堯說你是2486"]))
@@ -72,16 +81,51 @@ class Strategy:
             scores.append(self.api.get_score_of_team(team_id))
         print(scores)
         
-        
     def get_fountain(self, visible_towers: list[Tower], my_team_id: int):
         for tower in visible_towers:
             if tower.is_fountain and my_team_id == tower.team_id:
                 return tower
         
     def handle_spawn(self):
-        raise NotImplementedError
+        if (len(self.owned_characters) <= 5 and len(self.api.get_visible_towers()) <= 1):
+            self.api.change_spawn_type(self.fountain, CharacterClass.MELEE)
+        else:
+            self.api.change_spawn_type(self.fountain, CharacterClass.RANGER)
+        
+        # raise NotImplementedError
+        
+    def attack_target(self, target: Character | Tower):
+        self.api.action_move_to(self.owned_characters, target.position)
+        self.api.action_attack(self.owned_characters, target)
+        self.api.action_cast_ability(self.owned_characters, position = target.position)
+    
+        
     def handle_attack(self):
-        raise NotImplementedError
+        
+        if (len(self.api.get_owned_towers()) <= 1):
+            self.api.action_wander(self.owned_characters)
+            
+            if (len(self.visible_enemy) > 0):
+                self.attack_target(self.visible_enemy[0])
+
+        else:
+            if (len(self.owned_characters) < 15 and len(self.owned_towers) <= 1):
+                if (len(self.owned_characters) > len(self.visible_enemy) and len(self.visible_enemy) > 0):
+                    self.attack_target(self.visible_enemy[0])
+                else:
+                    self.api.action_move_to(self.owned_characters[:], pg.Vector2(20, 20))
+                
+            elif (len(self.visible_enemy) > 0 and len(self.owned_characters) - len(self.visible_enemy) > 15):
+                self.attack_target(self.visible_enemy[0])
+            else:                
+                if (len(self.visible_enemy_towers) > 0):
+                    self.attack_target(self.visible_enemy_towers[0])
+                else:
+                    self.api.action_wander(self.owned_characters)
+                
+                
+        
+        # raise NotImplementedError
         
     def run(self, api: API):
         self.api = api
@@ -89,8 +133,9 @@ class Strategy:
         self.print_scores()
         
         self.initialize()
-        self.cnt += 1
-        print(self.cnt)
+        
+        self.handle_spawn()
+        self.handle_attack()
         
         
 
