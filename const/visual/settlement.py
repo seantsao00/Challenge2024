@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from enum import Enum, auto
 from math import cos, pi, sin
 
 import pygame as pg
@@ -21,7 +22,18 @@ SETTLEMENT_IMAGE: dict[PartyType, str] = {
 SETTLEMENT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
     287, 110), pg.Vector2(36, 430), pg.Vector2(859, 110), pg.Vector2(610, 430)]  # only for scope
 SETTLEMENT_INITIAL_POSITION = pg.Vector2(-100, -100)
+
+
+class ScopeStatus(Enum):
+    WANDERING = auto()
+    WAITING = auto()
+    TOWARD_TARGET = auto()
+    TOWARD_WANDERING = auto()
+    FINISH = auto()
+
+
 SCOPE_SPEED = 3
 INVERVAL_WAITING = 7
 INVERVAL_WANDERING = 5
 WANDERING_PERIOD = 3
+POSITION_EPSILON = 0.01
