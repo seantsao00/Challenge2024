@@ -139,7 +139,9 @@ class View:
 
     def render_settlement(self):
         """Render the game settlement screen"""
-        # setting up a temporary screen till we have a scoreboard image and settlement screen
+        self.__screen.blit(self.scoreboard_image, (0, 0))
+        self.__chat.update()
+        self.__chat.draw()
         self.__settlement_view.draw()
 
     def render_play(self):
