@@ -1,0 +1,21 @@
+{
+    "name": "ntu",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [20, 230], [20, 20], [230, 230], [230, 20]
+    ],
+    "neutral_towers": [
+        [130, 65]
+    ],
+    "images": {
+        "backgrounds": ["background.png", "lake.png"],
+        "objects": 
+        {
+            "bicycle.png": 223,
+            "building2.png": 89,
+            "building3.png": 153,
+            "building4.png": 141
+        }
+    }
+}
