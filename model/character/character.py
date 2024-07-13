@@ -269,6 +269,10 @@ class Character(LivingEntity):
     @property
     def move_direction(self) -> pg.Vector2:
         return self.__move_direction
+    
+    @property
+    def move_path(self) -> list[pg.Vector2] | None:
+        return self.__move_path
 
     @property
     def move_destination(self) -> pg.Vector2 | None:

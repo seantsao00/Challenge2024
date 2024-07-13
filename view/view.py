@@ -18,7 +18,7 @@ from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
                          EntityView, HealthView, ObjectBase, Particle, ParticleManager,
                          PartySelectorView, PauseMenuView, ScoreboardView, TowerCDView,
-                         ViewRangeView)
+                         ViewRangeView, TrajectoryView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
@@ -103,6 +103,8 @@ class View:
             self.__entities.append(AbilitiesCDView(self.__arena, entity))
             if entity.health is not None:
                 self.__entities.append(HealthView(self.__arena, entity))
+            if entity.alive:
+                self.__entities.append(TrajectoryView(self.__arena, entity))
         if isinstance(entity, Tower):
             if model.show_view_range:
                 self.__entities.append(ViewRangeView(self.__arena, entity))

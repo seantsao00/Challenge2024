@@ -11,3 +11,4 @@ from view.object.party_selector import *
 from view.object.pause_menu import *
 from view.object.range import *
 from view.object.scoreboard import ScoreboardView
+from view.object.trajectory import *
