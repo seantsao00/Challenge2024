@@ -21,7 +21,7 @@ RESULT_IMAGE: dict[PartyType, str] = {
 }
 RESULT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
     287, 110), pg.Vector2(36, 430), pg.Vector2(859, 110), pg.Vector2(610, 430)]  # only for scope
-RESULT_INITIAL_POSITION = pg.Vector2(-100, -100)
+RESULT_INITIAL_POSITION: pg.Vector2 = pg.Vector2(-100, -100)
 
 
 class ScopeStatus(Enum):
