@@ -41,4 +41,4 @@ class BulletRanger(Bullet[None]):
             get_event_manager().post(EventRangedBulletDamage(bullet=self))
         else:
             self.position += self.direction * self.speed * model.dt
-            self.view_rotate = self.direction.angle_to(pg.Vector2(1, 0))
+            self.view_rotate = self.direction.angle_to(pg.Vector2(-1, 0))

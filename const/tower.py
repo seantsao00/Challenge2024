@@ -3,13 +3,9 @@ This module defines constants associated with towers.
 """
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TYPE_CHECKING, TypeAlias
 
 from const.character import CharacterType
 from const.entity import LivingEntityAttribute
-
-if TYPE_CHECKING:
-    TowerState: TypeAlias = None
 
 
 class TowerType(Enum):
@@ -21,6 +17,10 @@ class TowerType(Enum):
 
 @dataclass(kw_only=True)
 class TowerAttribute(LivingEntityAttribute):
+    pass
+
+
+class TowerState(Enum):
     pass
 
 

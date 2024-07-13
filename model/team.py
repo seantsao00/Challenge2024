@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -11,12 +12,11 @@ from event_manager import (EventCharacterDied, EventCreateTower, EventEveryTick,
                            EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.building import Tower
-from model.character import Character, Ranger
+from model.character import Character
 from model.team_vision import TeamVision
-from util import log_info
+from util import log_critical, log_info
 
 if TYPE_CHECKING:
-    from model.building import Tower
     from model.entity import Entity
 
 
@@ -58,6 +58,13 @@ class Team(NeutralTeam):
      - visible_entities_list: list of visible entities to the team. Note that entities owned by this team is not in this list.
     """
 
+    @dataclass
+    class TeamStats:
+        score: int
+        units_alive: int
+        units_dead: int
+        units_killed: int
+
     def __init__(self, manual_control: bool, party: const.PartyType, team_name: str | None = None):
         super().__init__(party)
 
@@ -66,13 +73,12 @@ class Team(NeutralTeam):
             self.__team_name = team_name
         else:
             self.__team_name = 'team' + str(self.__team_id)
-        self.__points: int = 0
+        self.__stats = Team.TeamStats(0, 0, 0, 0)
         self.__towers: set[Tower] = set()
         self.tower_lock = Lock()
         self.character_lock = Lock()
         self.character_list: set[Character] = set()
         self.fountain: Tower = None
-        self.__choosing_position: bool = False
         """For abilities that have to click mouse to cast."""
         self.__controlling: Entity | None = None
         self.vision = TeamVision(self)
@@ -86,12 +92,15 @@ class Team(NeutralTeam):
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
-            if clicked_entity and clicked_entity.team is self:
-                if isinstance(self.__controlling, Character) and self.__controlling.team is self and self.__controlling is not None:
+            if clicked_entity is None:
+                log_critical('post EventHumanInput PICK without clicked entity')
+                return
+            if clicked_entity.team is self:
+                if isinstance(self.__controlling, Character) and self.__controlling.team is self:
                     self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             else:
-                log_info('picked a non interactable entity')
+                log_info('selected an entity that is not for your team')
 
         if self.__controlling is None:
             return
@@ -99,22 +108,25 @@ class Team(NeutralTeam):
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
-            if isinstance(clicked_entity, Tower) and clicked_entity.team is self:  # Utilize ATTACK to pick tower
-                self.__controlling = clicked_entity
-            elif isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
+            if isinstance(self.__controlling, Character):
                 self.__controlling.attack(clicked_entity)
+            else:
+                log_info(
+                    f'try to attack when controlling {self.__controlling}, which can not attack')
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
-                self.__controlling.cast_ability()
+                self.__controlling.manual_cast_ability()
 
     def gain_character(self, event: EventSpawnCharacter):
         with self.character_lock:
             self.character_list.add(event.character)
+        self.__stats.units_alive += 1
 
     def gain_tower(self, event: EventTeamGainTower):
         with self.tower_lock:
             if event.tower not in self.__towers:
                 self.__towers.add(event.tower)
+                self.vision.update_vision(event.tower)
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
 
@@ -126,10 +138,11 @@ class Team(NeutralTeam):
                 self.__towers.remove(event.tower)
 
     def gain_point_kill(self):
-        self.__points += const.SCORE_KILL
+        self.__stats.score += const.SCORE_KILL
+        self.__stats.units_killed += 1
 
     def gain_point_tower(self, _: EventEveryTick):
-        self.__points += const.SCORE_OWN_TOWER * len(self.__towers) * get_model().dt
+        self.__stats.score += const.SCORE_OWN_TOWER * len(self.__towers) * get_model().dt
 
     def handle_character_died(self, event: EventCharacterDied):
         if self.__controlling is event.character:
@@ -137,6 +150,8 @@ class Team(NeutralTeam):
         with self.character_lock:
             if event.character in self.character_list:
                 self.character_list.remove(event.character)
+                self.__stats.units_alive -= 1
+                self.__stats.units_dead += 1
 
     def handle_create_tower(self, event: EventCreateTower):
         if event.tower.team is self:
@@ -171,7 +186,11 @@ class Team(NeutralTeam):
 
     @property
     def points(self) -> int:
-        return self.__points
+        return self.__stats.score
+
+    @property
+    def stats(self) -> Team.TeamStats:
+        return self.__stats
 
     @property
     def towers(self) -> const.PartyType:

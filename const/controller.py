@@ -26,7 +26,7 @@ CHANGE_TEAM_VISION = pg.K_TAB
 
 PAUSE_BUTTON = pg.K_ESCAPE
 
-LEAVE_COVER_BUTTON = pg.K_SPACE
+CONFIRM_BUTTONS = [pg.K_SPACE, pg.K_RETURN]
 
 
 class PartySelectorInputType(Enum):

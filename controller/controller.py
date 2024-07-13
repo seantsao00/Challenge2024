@@ -2,10 +2,6 @@
 The module defines Controller class.
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 import pygame as pg
 
 import const
@@ -14,7 +10,7 @@ from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, Eve
                            EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from model import Character, LivingEntity, TimerManager
+from model import Character, TimerManager, Tower
 from util import log_info
 from view import ScreenInfo
 
@@ -65,6 +61,8 @@ class Controller:
             self.ctrl_cover(pg_events)
         elif model.state is const.State.SELECT_PARTY:
             self.ctrl_select_party(pg_events)
+        elif model.state is const.State.RESULT:
+            self.ctrl_result(pg_events)
 
     def ctrl_play(self, pg_events: list[pg.Event]):
         """
@@ -97,29 +95,44 @@ class Controller:
                 if pg_event.button == 1:  # Left mouse button
                     log_info(f"[Controller] Mouse click position: ({x}, {y})")
                     if model.ranger_ability:
-                        ev_manager.post(EventUseRangerAbility(position=pg.Vector2(
-                            x, y)), channel_id=model.ranger_controlling.id)
+                        ability_target = pg.Vector2(x, y)
+                        if model.ranger_controlling.reachable(ability_target):
+                            ev_manager.post(EventUseRangerAbility(position=ability_target),
+                                            channel_id=model.ranger_controlling.id)
+                            model.ranger_controlling.abilities_time = model.get_time()
+                            log_info("[Ranger] manual control success")
+                        else:
+                            log_info("[Ranger] manual control failed: out of range")
+                        get_model().ranger_ability = False
                     else:
                         clicked = None
                         with model.entity_lock:
-                            for entity in model.entities:
-                                if (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
+                            for entity in model.characters + model.towers:
+                                if (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
                                     clicked = entity
+                                    break
                         if isinstance(clicked, Character):
-                            ev_manager.post(EventHumanInput(
-                                input_type=const.InputTypes.PICK, clicked_entity=clicked))
+                            ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
+                                                            clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
-                    if model.ranger_ability:
-                        model.ranger_ability = False
+                    model.ranger_ability = False
                     clicked = None
-                    with model.entity_lock:
-                        for entity in reversed(model.entities):  # Tower first
-                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.ENTITY_SIZE[entity.entity_type][entity.state]:
-                                clicked = entity
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
-                                    clicked_entity=clicked, displacement=pg.Vector2(x, y)))
+                    for entity in model.towers + model.characters:  # Tower first
+                        if (entity.alive and (pg.Vector2(x, y) - entity.position).length()
+                                < const.CLICK_SIZE[entity.entity_type][entity.state]):
+                            clicked = entity
+                            log_info(f"[Controller] Right click on: {clicked}")
+                            break
+                    if isinstance(clicked, Character):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
+                                                        clicked_entity=clicked))
+                    elif isinstance(clicked, Tower):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
+                                        clicked_entity=clicked))
+                    else:
+                        log_info('[Controller] Right click non interactable object')
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)
@@ -143,11 +156,23 @@ class Controller:
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventResumeModel())
                 elif key == pg.K_DOWN:
-                    model.pause_menu.change_selected(1)
+                    model.pause_menu.move_cursor(1)
                 elif key == pg.K_UP:
-                    model.pause_menu.change_selected(-1)
-                elif key == pg.K_RETURN:
+                    model.pause_menu.move_cursor(-1)
+                elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
+
+    def ctrl_result(self, pg_events: list[pg.Event]):
+        """
+        Control depending on key input when the model.state is RESULT.
+        """
+        ev_manager = get_event_manager()
+        model = get_model()
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                if pg_event.key in const.CONFIRM_BUTTONS:
+                    model.result.handel_scopemoving_start()
 
     def ctrl_cover(self, pg_events: list[pg.Event]):
         """
@@ -158,7 +183,7 @@ class Controller:
         for pg_event in pg_events:
             if pg_event.type == pg.KEYDOWN:
                 # For pausing the game
-                if pg_event.key == const.LEAVE_COVER_BUTTON:
+                if pg_event.key in const.CONFIRM_BUTTONS:
                     ev_manager.post(EventSelectParty())
 
     def ctrl_select_party(self, pg_events: list[pg.Event]):

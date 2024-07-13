@@ -35,6 +35,9 @@ class Sniper(Character):
         self.abilities_time = now_time
         self.ability()
 
+    def manual_cast_ability(self, *args, **kwargs):
+        self.cast_ability(*args, **kwargs)
+
     def ability(self):
         """Make the bullet become BulletSniper"""
         self.ability_active = True
