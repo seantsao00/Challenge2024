@@ -69,7 +69,7 @@ class SettlementView(ObjectBase):
                 self.__team_show_points[team.team_id] = True
             if self.__team_show_points[team.team_id] == True:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 370 / 2) * self.ratio, (
-                    team_icon_position[team.team_id][1] + 305) * self.ratio, str(team.points), 'white', self.__font)
+                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.1f}", 'white', self.__font)
 
         img = self.scope_image
         self.canvas.blit(img, transform_coordinate(self.__settlement.scope_position, self.ratio))
