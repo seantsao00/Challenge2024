@@ -62,7 +62,7 @@ class Controller:
         elif model.state is const.State.SELECT_PARTY:
             self.ctrl_select_party(pg_events)
 
-    def ctrl_play(self, pg_events: list[pg.Event]):
+    def ctrl_play(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is PLAY.
 
@@ -141,7 +141,7 @@ class Controller:
         ev_manager.post(EventHumanInput(
             input_type=const.InputTypes.MOVE, displacement=direction))
 
-    def ctrl_pause(self, pg_events: list[pg.Event]):
+    def ctrl_pause(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is PAUSE.
         """
@@ -160,7 +160,7 @@ class Controller:
                 elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
 
-    def ctrl_cover(self, pg_events: list[pg.Event]):
+    def ctrl_cover(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is COVER.
         """
@@ -172,7 +172,7 @@ class Controller:
                 if pg_event.key in const.CONFIRM_BUTTONS:
                     ev_manager.post(EventSelectParty())
 
-    def ctrl_select_party(self, pg_events: list[pg.Event]):
+    def ctrl_select_party(self, pg_events: list[pg.event.Event]):
         """Select party for each team."""
         ev_manager = get_event_manager()
         for pg_event in pg_events:

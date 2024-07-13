@@ -51,13 +51,27 @@ class Strategy:
         self.owned_towers: list[Tower] = []
         self.my_team_id: int = None
         
+        self.owned_characters: list[Character] = []
+        self.visible_enemy: list[Character] = []
+        self.cnt: int = 0
+        
     def initialize(self):
         self.my_team_id = self.api.get_team_id()
         self.fountain = self.get_fountain(self.api.get_visible_towers(), self.my_team_id)
+        self.owned_characters = self.api.get_owned_characters()
+        self.visible_enemy = [character for character in self.api.get_visible_characters()
+        if character.team_id != self.my_team_id]
+
         raise NotImplementedError
         
     def send_spam_message(self):
         self.api.send_chat(random.choice(["鄭詠堯說你是2486"]))
+    def print_scores(self):
+        scores = []
+        for team_id in range(0, 4):
+            scores.append(self.api.get_score_of_team(team_id))
+        print(scores)
+        
         
     def get_fountain(self, visible_towers: list[Tower], my_team_id: int):
         for tower in visible_towers:
@@ -72,14 +86,13 @@ class Strategy:
     def run(self, api: API):
         self.api = api
         self.send_spam_message()
+        self.print_scores()
         
-
+        self.initialize()
+        self.cnt += 1
+        print(self.cnt)
         
-        scores = []
-        for team_id in range(0, 4):
-            scores.append(api.get_score_of_team(team_id))
-
-        print(scores)
+        
 
 strategy = Strategy()
 
