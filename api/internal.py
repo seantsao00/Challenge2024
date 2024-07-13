@@ -149,6 +149,7 @@ class Internal(prototype.API):
             _position=self.__transform(internal.position, is_position=True),
             _speed=internal.attribute.attack_speed,
             _attack_range=internal.attribute.attack_range,
+            _attack_speed=1 / internal.attribute.attack_speed,
             _damage=internal.attribute.attack_damage,
             _vision=internal.attribute.vision,
             _health=internal.health,
@@ -272,6 +273,36 @@ class Internal(prototype.API):
             log_critical("[API] Team ID mismatch: team.team_id, index")
             raise GameError("Team ID implement has changed.")
         return team.points
+
+    def get_sample_character(self, type_class: prototype.CharacterClass) -> prototype.Character:
+        enforce_type('type_class', type_class, prototype.CharacterClass)
+
+        if type_class is prototype.CharacterClass.UNKNOWN:
+            raise ValueError
+        stats: const.CharacterAttribute
+        if type_class is prototype.CharacterClass.MELEE:
+            stats = const.MELEE_ATTRIBUTE
+        elif type_class is prototype.CharacterClass.SNIPER:
+            stats = const.SNIPER_ATTRIBUTE
+        elif type_class is prototype.CharacterClass.RANGER:
+            stats = const.RANGER_ATTRIBUTE
+        else:
+            raise ValueError
+
+        extern = prototype.Character(
+            _id=-1,
+            _type=type_class,
+            _position=pg.Vector2(0, 0),
+            _speed=stats.speed,
+            _attack_range=stats.attack_range,
+            _attack_speed=1 / stats.attack_speed,
+            _damage=stats.attack_damage,
+            _vision=stats.vision,
+            _health=stats.max_health,
+            _max_health=stats.max_health,
+            _team_id=0
+        )
+        return extern
 
     def get_visible_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision

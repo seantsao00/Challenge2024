@@ -30,6 +30,7 @@ class Strategy:
         self.ready = False
 
     def initialize(self):
+        print(f"cube's team is {self.api.get_team_id()}")
         self.W = self.api.get_grid_size()
         self.initialized = True
 
@@ -160,6 +161,7 @@ class Strategy:
         if self.target_tower is None:
             if len(self.attackable_towers) > 0:
                 self.target_tower = self.attackable_towers[0]
+                print(f"{self.api.get_team_id()} detected neutral tower!")
 
         if self.target_tower is not None:
             if not self.ready:
@@ -174,5 +176,4 @@ strategy = Strategy()
 
 
 def every_tick(interface: api.prototype.API):
-    print(f"cube's team is {interface.get_team_id()}")
     strategy.run(interface)
