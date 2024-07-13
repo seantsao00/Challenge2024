@@ -109,7 +109,7 @@ class Tower:
                  _position: pg.Vector2,
                  _period: float,
                  _is_fountain: bool,
-                 _spwan_character_type: CharacterClass,
+                 _spawn_character_type: CharacterClass,
                  _attack_range: float,
                  _damage: float,
                  _vision: float,
@@ -124,7 +124,7 @@ class Tower:
         """建築物所在的位置。"""
         self.is_fountain = _is_fountain
         """建築物是否是溫泉（每個隊伍一開始的建築）。"""
-        self.spwan_character_type = _spwan_character_type
+        self.spawn_character_type = _spawn_character_type
         """建築物即將生成的角色種類。"""
         self.attack_range = _attack_range
         """建築物的攻擊範圍。"""

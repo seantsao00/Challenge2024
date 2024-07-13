@@ -183,7 +183,7 @@ class Internal(prototype.API):
             _max_health=internal.attribute.max_health,
             _team_id=0 if internal.team is None else Internal.__cast_team_id(
                 internal.team.team_id),
-            _spwan_character_type=character_class
+            _spawn_character_type=character_class
         )
         return extern
 
