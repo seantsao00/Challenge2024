@@ -130,7 +130,7 @@ class Controller:
                         ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
                                         clicked_entity=clicked))
                     else:
-                        raise ValueError
+                        log_info('[Controller] Right click non interactable object')
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)
