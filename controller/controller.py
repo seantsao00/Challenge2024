@@ -61,6 +61,8 @@ class Controller:
             self.ctrl_cover(pg_events)
         elif model.state is const.State.SELECT_PARTY:
             self.ctrl_select_party(pg_events)
+        elif model.state is const.State.SETTLEMENT:
+            self.ctrl_settlement(pg_events)
 
     def ctrl_play(self, pg_events: list[pg.Event]):
         """
@@ -159,6 +161,18 @@ class Controller:
                     model.pause_menu.move_cursor(-1)
                 elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
+
+    def ctrl_settlement(self, pg_events: list[pg.Event]):
+        """
+        Control depending on key input when the model.state is SETTLEMENT.
+        """
+        ev_manager = get_event_manager()
+        model = get_model()
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                if pg_event.key in const.CONFIRM_BUTTONS:
+                    model.settlement.handel_scopemoving_start()
 
     def ctrl_cover(self, pg_events: list[pg.Event]):
         """
