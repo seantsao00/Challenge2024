@@ -1,8 +1,7 @@
 import time
 
-from api.prototype import *
+import api.prototype as api
 
-
-def every_tick(api: API):
+def every_tick(api: api.API):
     print("lets sleep...")
     time.sleep(1)

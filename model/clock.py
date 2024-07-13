@@ -25,4 +25,6 @@ class Clock:
         ev_manager.register_listener(EventResumeModel, self.__handle_resume)
 
     def get_time(self):
+        if self.__pause_start_time is not None:
+            return self.__pause_start_time - self.__start_time - self.__total_paused_time
         return time.time() - self.__start_time - self.__total_paused_time

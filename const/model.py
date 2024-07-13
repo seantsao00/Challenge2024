@@ -7,7 +7,7 @@ from enum import Enum, auto
 FPS = 60
 
 # the total game time is 3 minutes
-GAME_TIME = 180
+GAME_TIME = 181
 
 
 class State(Enum):

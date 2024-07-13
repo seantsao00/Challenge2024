@@ -5,10 +5,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypeAlias
 
 if TYPE_CHECKING:
-    from character import CharacterState, CharacterType
-    from tower import TowerState, TowerType
-    EntityType: TypeAlias = CharacterType | TowerType
-    EntityState: TypeAlias = CharacterState | TowerState
+    from const.bullet import BulletState, BulletType
+    from const.character import CharacterState, CharacterType
+    from const.tower import TowerState, TowerType
+
+    EntityType: TypeAlias = CharacterType | TowerType | BulletType
+    EntityState: TypeAlias = CharacterState | TowerState | BulletState
 
 
 @dataclass(kw_only=True)

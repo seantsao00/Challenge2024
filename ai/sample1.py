@@ -5,41 +5,12 @@ import pygame as pg
 
 from api.prototype import *
 
-destination = []
-
 
 def every_tick(api: API):
-    character = api.get_characters()
-    # if len(character) < 250:
-    #     return
-    while len(character) > len(destination):
-        destination.append(pg.Vector2(10 + random.random() * 200, 10 + random.random() * 200))
-    mx, my = 0, 0
-    for i, ch in enumerate(character):
-        while ch._Character__position.distance_to(destination[i]) < 30:
-            destination[i] = pg.Vector2(random.random() * 250, random.random() * 250)
-        # print(ch._Character__position)
-        mx = max(mx, ch._Character__position.x)
-        my = max(mx, ch._Character__position.y)
-        api.action_move_along([ch], pg.Vector2(
-            destination[i].x - ch._Character__position.x, destination[i].y - ch._Character__position.y))
 
-
-destination = []
-
-
-def every_tick(api: API):
-    character = api.get_characters()
-    # if len(character) < 100:
-    #     return
-    while len(character) > len(destination):
-        destination.append(pg.Vector2(10 + random.random() * 200, 10 + random.random() * 200))
-    mx, my = 0, 0
-    for i, ch in enumerate(character):
-        while ch._Character__position.distance_to(destination[i]) < 30:
-            destination[i] = pg.Vector2(random.random() * 250, random.random() * 250)
-        # print(ch._Character__position)
-        mx = max(mx, ch._Character__position.x)
-        my = max(mx, ch._Character__position.y)
-        api.action_move_along([ch], pg.Vector2(
-            destination[i].x - ch._Character__position.x, destination[i].y - ch._Character__position.y))
+    visible = [character for character in api.get_visible_characters() if character.team_id !=
+               api.get_team_id()]
+    api.action_move_to(api.get_owned_characters(), pg.Vector2(random.random() * 250, random.random() * 250))
+    if len(visible):
+        api.action_move_to(api.get_owned_characters()[1:], visible[0].position)
+        api.action_attack(api.get_owned_characters()[1:], visible[0])

@@ -1,6 +1,8 @@
-import pygame as pg
+from __future__ import annotations
 
-import const
+from typing import Iterable
+
+import pygame as pg
 
 
 class ObjectBase:
@@ -16,13 +18,7 @@ class ObjectBase:
         A Lower value indicates the image is rendered earlier, and thus placed on a rearer layer.
     """
     image_initialized = False
-    images: tuple | dict = tuple()
-    resize_ratio: float = 1
     """the ratio between model's coordinate and the canvas size."""
-
-    @classmethod
-    def set_resize_ratio(cls, resize_ratio: float):
-        cls.resize_ratio = resize_ratio
 
     @classmethod
     def init_convert(cls):
@@ -36,9 +32,9 @@ class ObjectBase:
         """
         cls.image_initialized = True
 
-    def __init__(self, canvas: pg.Surface, priority: float = const.WINDOW_SIZE[1]+10):
+    def __init__(self, canvas: pg.Surface, priority: Iterable[float]):
         self.canvas: pg.Surface = canvas
-        self.priority: float = priority
+        self.priority: Iterable[float] = priority
         self.exist: bool = True
         """If the object is still exist."""
         if not self.image_initialized:
@@ -49,7 +45,7 @@ class ObjectBase:
         Draw the object to the screen.
         """
 
-    def update(self) -> bool:
+    def move(self) -> bool:
         """
         update the position and the height of the object and return if the object is still exist.
         """

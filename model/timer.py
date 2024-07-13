@@ -25,7 +25,6 @@ class TimerManager:
         """Handle events for all timers. Returns True if handled."""
         timer = cls.__timers.get(event.type)
         if timer:
-            # pylint: disable=protected-access
             timer.handle_event(event)
             return True
         return False
@@ -47,28 +46,31 @@ class TimerManager:
 
 
 class Timer:
-    __next_event_type = pg.USEREVENT + 30
+    __next_event_type = pg.USEREVENT + 50
 
-    def __init__(self, interval: int, function: Callable, *args, once: bool = False, **kwargs):
+    def __init__(self, interval: float, function: Callable, *args, once: bool = False, **kwargs):
         """
         Initialize a Timer object.
 
         Parameters:
-        - `interval`: The interval(ms) at which the function should be called.
+        - `interval`: The interval(second) at which the function should be called.
         - `function`: The function to call at each interval.
         - `once`: If True, the timer will execute only once and then stop.
         - `*args`: Variable length argument list for the function.
         - `**kwargs`: Arbitrary keyword arguments for the function.
         """
-        self.interval: int = interval
         self.__function: Callable = function
         self.__args = args
         self.__kwargs = kwargs
+
         self.event_type = Timer.__next_event_type
+
+        self.__interval: float = interval
         self.__count: int = 0
         self.__running: bool = False
         self.__once: bool = once
-        self.remaining_time: int | None = None
+        self.__remaining_time: float | None = None
+        self.__last_start_time: float | None = None
 
         Timer.__next_event_type += 1
 
@@ -79,9 +81,9 @@ class Timer:
     def __start(self):
         """Restart the timer."""
         if not self.__running:
-            pg.time.set_timer(self.event_type, self.interval)
-            self.remaining_time = self.interval
-            self.last_time = time.time()
+            pg.time.set_timer(self.event_type, int(self.__interval * 1000))
+            self.__remaining_time = self.__interval
+            self.__last_start_time = time.time()
             self.__running = True
 
     def __stop(self):
@@ -92,32 +94,30 @@ class Timer:
     def pause(self):
         """Pause the timer."""
         if self.__running:
-            self.remaining_time = self.get_remaining_time()
+            self.__remaining_time = self.get_remaining_time()
             self.__running = False
             pg.time.set_timer(self.event_type, 0)
 
     def resume(self):
         """Resume the timer."""
         if not self.__running:
-            pg.time.set_timer(self.event_type, self.remaining_time)
-            self.last_time = time.time()
+            pg.time.set_timer(self.event_type, int(self.__remaining_time * 1000))
+            self.__last_start_time = time.time()
             self.__running = True
 
-    def set_interval(self, interval: int):
+    def set_interval(self, interval: float):
         """Set a new interval for the timer."""
-        self.interval = interval
+        self.__interval = interval
         if self.__running:
             self.__stop()
             self.__start()
 
-    def get_remaining_time(self) -> int:
-        if self.__running:
-            return int(max(0, self.remaining_time - (time.time() - self.last_time) * 1000))
-        return self.remaining_time
-
     def get_interval(self):
         """Get the current interval of the timer."""
-        return self.interval
+        return self.__interval
+
+    def get_remaining_time(self) -> float:
+        return self.__remaining_time - (time.time() - self.__last_start_time)
 
     def get_count(self):
         """Get the count of how many times the timer has triggered."""

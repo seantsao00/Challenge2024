@@ -16,7 +16,8 @@ class Map:
     name: str
     size: tuple[int, int]
     map_list: list[list[int]]
-    images: dict[str, int]
+    backgrounds: list[str]
+    objects: dict[str, int]
     fountains: list[tuple[int, int]]
     neutral_towers: list[tuple[int, int]]
     map_dir: str
@@ -42,7 +43,7 @@ class Map:
         y = util.clamp(
             cell[1] * const.ARENA_SIZE[1] / self.size[1], 0, const.ARENA_SIZE[1] - 1
         )
-        return pg.Vector2(x, y)
+        return pg.Vector2(x + 0.5, y + 0.5)
 
     def get_cell_type(self, cell: tuple[int, int]) -> int:
         """
@@ -76,6 +77,21 @@ class Map:
         """
         return self.is_cell_passable(self.position_to_cell(position))
 
+    def is_cell_puddle(self, cell: tuple[int, int]) -> bool:
+        """
+        Checks if a cell is a puddle and will cause the character to slow down
+        Cell takes in *integer* coordinates in range [0, Map.size)
+        """
+        return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
+                and self.get_cell_type(cell) == const.MAP_PUDDLE)
+
+    def is_position_puddle(self, position: pg.Vector2) -> bool:
+        """
+        Checks if a cell is a puddle and will cause the character to slow down
+        Position takes in *real-valued* coordinates in range [0, const.ARENA_SIZE)
+        """
+        return self.is_cell_puddle(self.position_to_cell(position))
+
     def get_random_pos(self, r: int) -> pg.Vector2:
         """
         Return a random position in map that is not of type "obstacle"
@@ -98,8 +114,8 @@ class Map:
         Returns a list of positions describing the path, or None if the algorithm
         did not find a path.
         """
-        if (not self.is_position_passable(position_begin) or
-                not self.is_position_passable(position_end)):
+        if (not self.is_position_passable(position_begin)
+                or not self.is_position_passable(position_end)):
             return None
 
         max_x, max_y = self.size
@@ -174,7 +190,8 @@ def load_map(map_dir):
     map_file = os.path.abspath(map_file)
     with open(json_file, encoding='utf-8') as f:
         data = json.load(f)
-    images = data['images']
+    backgrounds = data['images']['backgrounds']
+    objects = data['images']['objects']
 
     name = os.path.basename(os.path.dirname(json_file))
     size = (data['width'], data['height'])
@@ -188,5 +205,5 @@ def load_map(map_dir):
             for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
     return Map(
-        name, size, map_list, images, fountains, neutral_towers, map_dir
+        name, size, map_list, backgrounds, objects, fountains, neutral_towers, map_dir
     )
