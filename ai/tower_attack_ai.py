@@ -55,7 +55,7 @@ def every_tick(api: API):
     for character in owned_characters:
         recruited = False
         for tower in owned_tower:
-            if character.position.distance_to(tower.position) <= 50:
+            if character.position.distance_to(tower.position) <= 20 and api.get_movement(character).status == MovementStatusClass.STOPPED:
                 recruited = True
                 break
         if recruited: recruited_characters.append(character)
@@ -91,6 +91,7 @@ def every_tick(api: API):
                 target_tower = tower
                 break
         if target_tower != None:
+            print("Attacking neutral tower")
             api.change_spawn_type(fountain, CharacterClass.RANGER)
             #print(recruited_characters_count, dispatched_characters_count)
             if dispatched_characters_count <= 5 and dispatched_characters_count != 0: 
