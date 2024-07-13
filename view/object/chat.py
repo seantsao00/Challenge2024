@@ -79,9 +79,6 @@ class ChatView(ObjectBase):
             del self.__comments[:(iter + 1)]
         self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
-    def update(self):
-        pass
-
     def handle_new_chat(self, e: EventSendChat):
         if e.type == const.ChatMessageType.CHAT_COMMENT:
             self.add_comment(e.team, e.text)

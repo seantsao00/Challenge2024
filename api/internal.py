@@ -5,7 +5,7 @@ Defines internal API interaction and AI threading.
 from __future__ import annotations
 
 import ctypes
-import importlib
+import importlib.util
 import os
 import signal
 import threading
@@ -183,7 +183,7 @@ class Internal(prototype.API):
             _max_health=internal.attribute.max_health,
             _team_id=0 if internal.team is None else Internal.__cast_team_id(
                 internal.team.team_id),
-            _spwan_character_type=character_class
+            _spawn_character_type=character_class
         )
         return extern
 
@@ -615,7 +615,9 @@ def load_ai(files: list[str]):
     for i, file in enumerate(files):
         if file == 'human':
             continue
-        ai[i] = importlib.import_module('ai.' + file)
+        spec = importlib.util.find_spec('ai.' + file)
+        ai[i] = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ai[i])
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):

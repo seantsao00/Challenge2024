@@ -44,7 +44,7 @@ class ObjectBase:
         Draw the object to the screen.
         """
 
-    def move(self) -> bool:
+    def update(self) -> bool:
         """
         update the position and the height of the object and return if the object is still exist.
         """

@@ -23,6 +23,3 @@ class ClockView(ObjectBase):
             f'{min:02d}:{sec:02d}', False, pg.Color(201, 158, 131))
         self.__canvas.blit(time_remaining_surface, time_remaining_surface.get_rect(
             center=ScreenInfo.translate((50, 30))))
-
-    def update(self):
-        pass
