@@ -14,7 +14,7 @@ from instances_manager import get_event_manager, get_model
 from model.building import Tower
 from model.character import Character
 from model.team_vision import TeamVision
-from util import log_info
+from util import log_critical, log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -92,12 +92,15 @@ class Team(NeutralTeam):
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
-            if clicked_entity and clicked_entity.team is self:
-                if isinstance(self.__controlling, Character) and self.__controlling.team is self and self.__controlling is not None:
+            if clicked_entity is None:
+                log_critical('post EventHumanInput PICK without clicked entity')
+                return
+            if clicked_entity.team is self:
+                if isinstance(self.__controlling, Character) and self.__controlling.team is self:
                     self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             else:
-                log_info('picked a non interactable entity')
+                log_info('selected an entity that is not for your team')
 
         if self.__controlling is None:
             return
@@ -105,10 +108,11 @@ class Team(NeutralTeam):
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
-            if isinstance(clicked_entity, Tower) and clicked_entity.team is self:  # Utilize ATTACK to pick tower
-                self.__controlling = clicked_entity
-            elif isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
+            if isinstance(self.__controlling, Character):
                 self.__controlling.attack(clicked_entity)
+            else:
+                log_info(
+                    f'try to attack when controlling {self.__controlling}, which can not attack')
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
                 self.__controlling.manual_cast_ability()

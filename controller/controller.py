@@ -2,10 +2,6 @@
 The module defines Controller class.
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 import pygame as pg
 
 import const
@@ -14,7 +10,7 @@ from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, Eve
                            EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
                            EventViewChangeTeam)
 from instances_manager import get_event_manager, get_model
-from model import Character, LivingEntity, TimerManager
+from model import Character, TimerManager, Tower
 from util import log_info
 from view import ScreenInfo
 
@@ -114,21 +110,27 @@ class Controller:
                                     clicked = entity
                                     break
                         if isinstance(clicked, Character):
-                            ev_manager.post(EventHumanInput(
-                                input_type=const.InputTypes.PICK, clicked_entity=clicked))
+                            ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
+                                                            clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
-                    if model.ranger_ability:
-                        model.ranger_ability = False
+                    model.ranger_ability = False
                     clicked = None
-                    with model.entity_lock:
-                        for entity in model.towers + model.characters:  # Tower first
-                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
-                                clicked = entity
-                                break
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
-                                    clicked_entity=clicked, displacement=pg.Vector2(x, y)))
+                    for entity in model.towers + model.characters:  # Tower first
+                        if (entity.alive and (pg.Vector2(x, y) - entity.position).length()
+                                < const.CLICK_SIZE[entity.entity_type][entity.state]):
+                            clicked = entity
+                            log_info(f"[Controller] Right click on: {clicked}")
+                            break
+                    if isinstance(clicked, Character):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
+                                                        clicked_entity=clicked))
+                    elif isinstance(clicked, Tower):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
+                                        clicked_entity=clicked))
+                    else:
+                        raise ValueError
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)
