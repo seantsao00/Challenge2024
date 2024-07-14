@@ -6,7 +6,7 @@
         [20, 230], [20, 20], [230, 230], [230, 20]
     ],
     "neutral_towers": [
-        [130, 65]
+        [130, 65, "hotel"]
     ],
     "images": {
         "backgrounds": ["background.png"],

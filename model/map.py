@@ -19,7 +19,7 @@ class Map:
     backgrounds: list[str]
     objects: dict[str, int]
     fountains: list[tuple[int, int]]
-    neutral_towers: list[tuple[int, int]]
+    neutral_towers: list[tuple[tuple[int, int], const.TowerType]]
     map_dir: str
 
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
@@ -200,7 +200,18 @@ def load_map(map_dir):
     size = (data['width'], data['height'])
 
     fountains = [tuple(i) for i in data['fountains']]
-    neutral_towers = [tuple(i) for i in data['neutral_towers']]
+    neutral_towers: list[tuple[tuple[int, int], const.TowerType]] = []
+    for i in data['neutral_towers']:
+        if i[-1] == "ferris_wheel":
+            tower_type = const.TowerType.FERRIS_WHEEL
+        elif i[-1] == "hotel":
+            tower_type = const.TowerType.HOTEL
+        elif i[-1] == "pylon":
+            tower_type = const.TowerType.PYLON
+        else:
+            raise TypeError(f"neutral tower type '{i[-1]}' is unknown")
+        neutral_towers.append((tuple(i[:2]), tower_type))
+
     with open(map_file, encoding='utf-8') as f:
         rows = list(csv.reader(f))
         map_list = [[0] * size[1] for _ in range(0, size[0])]

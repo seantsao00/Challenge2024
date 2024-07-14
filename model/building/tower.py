@@ -40,8 +40,8 @@ class Tower(LivingEntity):
      - attack_timer: The timer to periodcally attack characters.
     """
 
-    def __init__(self, position: pg.Vector2, team: Team, is_fountain: bool = False):
-        self.__is_fountain = is_fountain
+    def __init__(self, position: pg.Vector2, team: Team, tower_type: const.TowerType):
+        self.__is_fountain = tower_type is const.TowerType.FOUNTAIN
         self.__character_type: const.CharacterType = const.CharacterType.RANGER
         self.__enemies: OrderedSet[Character] = OrderedSet()
         self.period: float = const.TOWER_SPAWN_INITIAL_PERIOD
@@ -55,11 +55,11 @@ class Tower(LivingEntity):
         ]
         """Grids that can spawn characters for this tower."""
 
-        if is_fountain:
+        if  self.__is_fountain:
             super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
-                             team, const.TowerType.FOUNTAIN, invulnerability=True)
+                             team, tower_type, invulnerability=True)
         else:
-            super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, const.TowerType.HOTEL)
+            super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, tower_type)
 
         self.register_listeners()
 
