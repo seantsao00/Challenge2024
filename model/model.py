@@ -237,7 +237,7 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-                # if running_time >= 5:
+                # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
             if self.state is const.State.RESULT:
                 self.result.update()
