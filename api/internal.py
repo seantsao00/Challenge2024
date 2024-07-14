@@ -552,6 +552,9 @@ class Internal(prototype.API):
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
+    def get_map_name(self) -> str:
+        return get_model().map.name
+
 
 class TimeoutException(BaseException):
     """

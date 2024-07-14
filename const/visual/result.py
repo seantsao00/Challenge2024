@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from enum import Enum, auto
 from math import cos, sin
-from random import randint, uniform
+from random import getrandbits, uniform
 
 import pygame as pg
 
@@ -15,6 +15,8 @@ RESULT_BACKGROUND: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'background.png')
 RESULT_BOTTOM: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'bottom.png')
 RESULT_SCOPE: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'scope.png')
 RESULT_OUT: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'out_icon.png')
+RESULT_GOLDCIRCLE: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'gold_circle.png')
+RESULT_CROWN: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'crown.png')
 RESULT_IMAGE_NOMAL: dict[PartyType, str] = {
     PartyType.JUNIOR: os.path.join(IMAGE_DIR, RESULT_DIR, 'junior.png'),
     PartyType.FBI: os.path.join(IMAGE_DIR, RESULT_DIR, 'fbi.png'),
@@ -47,13 +49,19 @@ class ScopeStatus(Enum):
 
 SCOPE_SPEED = 7
 INVERVAL_WAITING = 1
-INVERVAL_WANDERING = uniform(4.0, 6.5)
 WANDERING_PERIOD = 3
 POSITION_EPSILON = 0.01
+WANDERING_SHIFT: pg.Vector2 = (2, 2)
 
 
-def final_wanderring_parameter() -> int:
-    return randint(0, 2)
+def interval_wandering() -> float:
+    return uniform(3.0, 5.0)
+
+
+def is_final_wandering(num_teams: int) -> bool:
+    if num_teams == 1:
+        return False
+    return bool(getrandbits(1))
 
 
 def wandering_formula(t: float) -> pg.Vector2:
