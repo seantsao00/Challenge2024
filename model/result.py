@@ -5,7 +5,8 @@ import pygame as pg
 
 import const
 import const.result
-from instances_manager import get_model
+from event_manager.events import EventResultChamp, EventResultChoseCharacter, EventResultWandering
+from instances_manager import get_event_manager, get_model
 from model.team import Team
 from model.timer import Timer
 
@@ -57,18 +58,23 @@ class Result:
             pass
         elif self.__scope_status is const.ScopeStatus.TOWARD_TARGET:
             if self.arrived():
+                if self.__scope_target_index + 1 == self.__number_of_teams:
+                    get_event_manager().post(EventResultChamp())
+                else:
+                    get_event_manager().post(EventResultChoseCharacter())
                 self.__scope_status = const.ScopeStatus.WAITING
                 self.__scope_target_index += 1
-                Timer(interval=const.INVERVAL_WAITING, function=self.set_toward_wandering, once=True)
+                Timer(interval=const.INVERVAL_WAITING,
+                      function=self.set_toward_wandering, music=True, once=True)
         elif self.__scope_status is const.ScopeStatus.FINAL_WANDERING:
             if self.arrived():
-                self.set_toward_wandering()
+                self.set_toward_wandering(False)
 
         displacement = (self.__scope_target_position - self.__scope_position).normalize()*self.__scope_speed if (self.__scope_target_position -
                                                                                                                  self.__scope_position).length() > self.__scope_speed else (self.__scope_target_position - self.__scope_position)
         self.__scope_position += displacement
 
-    def set_toward_wandering(self):
+    def set_toward_wandering(self, music: bool):
         if self.__scope_target_index >= self.__number_of_teams:
             self.__scope_status = const.ScopeStatus.FINISH
             self.__scope_target_position = const.RESULT_FINAL_POSITION
@@ -78,8 +84,9 @@ class Result:
             target_team: Team = self.__rank_of_teams[self.__scope_target_index]
             self.__scope_target_position = self.__team_position[target_team.team_id]
             return
-        else:
-            self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
+        if music:
+            get_event_manager().post(EventResultWandering())
+        self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
         self.__parameter_wandering = 0
         self.__scope_target_position = const.wandering_formula(self.__parameter_wandering)
 
@@ -95,7 +102,7 @@ class Result:
 
     def handle_scopemoving_start(self):
         if self.__scope_status is const.ScopeStatus.WAITING_INPUT:
-            self.set_toward_wandering()
+            self.set_toward_wandering(True)
 
     @property
     def scope_position(self) -> pg.Vector2:
