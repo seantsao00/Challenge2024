@@ -140,11 +140,11 @@ def every_tick(api: API):
             """
             api.action_wander(owned_characters)
             for character in owned_characters:
-                    attackable = api.within_attacking_range(character)
-                    if len(attackable) > 0: 
-                        random_target = random.choice(attackable)
-                        api.action_cast_ability([character])
-                        api.action_attack([character], random_target)
+                attackable = api.within_attacking_range(character)
+                if len(attackable) > 0: 
+                    random_target = random.choice(attackable)
+                    api.action_cast_ability([character])
+                    api.action_attack([character], random_target)
     else: 
         target_tower = None
         no_sniper_characters = []
