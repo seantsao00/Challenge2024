@@ -37,34 +37,39 @@ def assign_random_destination(character: Character, interface: API):
 
 def move_and_attack(characters, visible_enemy, owned_tower, api):
     index = -1
+    
+    defend = False
+    defend_tower = None
+    for tower in owned_tower:
+        if tower.is_fountain: continue
+        if len(enemies_near_tower(visible_enemy, tower, api)) > 0:
+            defend = True
+            defend_tower = tower
+            break
+    no_sniper_characters = []
+    for character in characters:
+        if character.type != CharacterClass.SNIPER:
+            no_sniper_characters.append(character)
+    attackable = api.within_attacking_range(character)
+    if defend:
+        api.action_move_to(no_sniper_characters, defend_tower.position)
+    elif len(attackable) == 0:
+        api.action_move_to(no_sniper_characters, visible_enemy[0].position)
+
     for character in characters:
         index += 1
-        attackable = api.within_attacking_range(character)
+        
         #print(index, attackable)
         #print(visible_enemy)
-        defend = False
-        defend_tower = None
-        for tower in owned_tower:
-            if tower.is_fountain: continue
-            if len(enemies_near_tower(visible_enemy, tower, api)) > 0:
-                defend = True
-                defend_tower = tower
-                break
         if (len(attackable) == 0): 
             if (character.type != CharacterClass.SNIPER):
                 if (len(visible_enemy) == 0):
                     print("no enemies seen")
                     api.action_wander(characters[index:index + 1])
-                else:
-                    if defend: api.action_move_to(characters[index:index + 1], defend_tower)
-                    else: api.action_move_to(characters[index:index + 1], visible_enemy[0].position)
             if (len(visible_enemy) != 0): api.action_attack(characters[index:index + 1], visible_enemy[0])
             continue
         else:
             random_target = random.choice(attackable)
-            if (character.type != CharacterClass.SNIPER): 
-                if defend: api.action_move_to(characters[index:index + 1], defend_tower)
-                else: api.action_move_to(characters[index:index + 1], random_target.position)
             api.action_attack(characters[index:index + 1], random_target)
         
 def enemies_near_tower(visible_enemies, tower, api):
