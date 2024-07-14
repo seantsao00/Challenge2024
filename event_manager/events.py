@@ -197,6 +197,11 @@ class EventViewChangeTeam(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventViewTrajectorySwitch(BaseEvent):
+    """Event to turn on and off trajectory"""
+
+
+@dataclass(kw_only=True)
 class EventUseRangerAbility(BaseEvent):
     position: pg.Vector2 | tuple[float, float]
 

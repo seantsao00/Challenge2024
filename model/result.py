@@ -94,3 +94,6 @@ class Result:
     @property
     def scope_position(self) -> pg.Vector2:
         return self.__scope_position
+
+    def number_of_teams(self) -> int:
+        return self.__number_of_teams

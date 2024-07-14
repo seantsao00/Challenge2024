@@ -31,6 +31,7 @@ class ResultView(ObjectBase):
         self.__team_out: list[bool] = [False, False, False, False]
         self.__team_rank: list[int] = [4, 4, 4, 4]
         self.__team_index: int = 0
+        self.__number_of_teams: int = self.__result.number_of_teams()
 
     @classmethod
     def init_convert(cls):
@@ -76,7 +77,7 @@ class ResultView(ObjectBase):
                 self.__team_index += 1
                 self.__team_rank[team.team_id] = self.__team_index
 
-            if self.__team_out[team.team_id] == True and self.__team_rank[team.team_id] < 4:
+            if self.__team_out[team.team_id] == True and self.__team_rank[team.team_id] < self.__number_of_teams:
                 img = self.party_images_gray[team.party]
             else:
                 img = self.party_images_nomal[team.party]
@@ -99,7 +100,7 @@ class ResultView(ObjectBase):
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 370 / 2) * self.ratio, (
                     team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.1f}", 'white', self.__font)
 
-                if self.__team_rank[team.team_id] < 4:
+                if self.__team_rank[team.team_id] < self.__number_of_teams:
                     self.canvas.blit(img, transform_coordinate(
                         (team_icon_position[team.team_id][0], team_icon_position[team.team_id][1] + 120), self.ratio))
 

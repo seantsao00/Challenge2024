@@ -6,7 +6,9 @@
         [41, 35], [17, 240], [230, 230], [230, 20]
     ],
     "neutral_towers": [
-        [120, 40], [103, 138], [148, 242]
+        [120, 40, "ferris_wheel"],
+        [103, 138, "pylon"],
+        [148, 242, "hotel"]
     ],
     "images": {
         "backgrounds": ["background.png", "lake.png"],

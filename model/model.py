@@ -14,6 +14,7 @@ import const
 import const.map
 import const.model
 from api.internal import load_ai, start_ai
+import const.team
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventBulletExplode, EventCharacterDied, EventCharacterMove,
                            EventCreateEntity, EventEveryTick, EventGameOver, EventInitialize,
@@ -44,6 +45,7 @@ class ModelArguments:
     show_view_range: bool
     show_attack_range: bool
     skip_character_selecting: bool
+    show_trajectory: bool
 
 
 class Model:
@@ -53,7 +55,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool):
+    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool, show_trajectory: bool):
     def __init__(self, model_arguments: ModelArguments):
         """
         Initialize the Model object.
@@ -90,6 +92,7 @@ class Model:
         self.__team_files_names: list[str] = model_arguments.team_controls
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
+        self.show_trajectory: bool = model_arguments.show_trajectory
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
@@ -116,7 +119,7 @@ class Model:
             team = Team(team_master == 'human',
                         selected_parties[i],
                         team_master)
-            fountain = Tower(new_position, team, True)
+            fountain = Tower(new_position, team, const.TowerType.FOUNTAIN)
             self.teams.append(team)
             self.__tower.append(fountain)
             team.fountain = fountain
@@ -127,8 +130,8 @@ class Model:
                                                           team.handle_others_character_spawn, i)
 
         self.__neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
-        for position in self.map.neutral_towers:
-            self.__tower.append(Tower(position, self.__neutral_team))
+        for position, tower_type in self.map.neutral_towers:
+            self.__tower.append(Tower(position, self.__neutral_team, tower_type))
         self.state = const.State.PLAY
 
     def __post_initialize(self, _: EventPostInitialize):
