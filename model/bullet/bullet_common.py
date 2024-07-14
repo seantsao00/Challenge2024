@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventBulletDamage, EventBulletDisappear
+from event_manager import EventBulletDamage, EventBulletDisappear, EventEveryTick
 from instances_manager import get_event_manager, get_model
 from model.bullet.bullet import Bullet
 
@@ -27,7 +27,7 @@ class BulletCommon(Bullet):
                          team=team, speed=speed, attacker=attacker, damage=damage)
         self.victim = victim
 
-    def judge(self):
+    def judge(self, _: EventEveryTick):
         """
         Decide if the bullet needs to move, cause damage or disappear.
         The direction is decided by the current position of bullet and victim.

@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 import const
+from event_manager import EventEveryTick
 from model.entity import Entity
 
 if TYPE_CHECKING:
@@ -30,5 +31,5 @@ class Bullet(Entity):
         super().__init__(position=position, entity_type=entity_type, team=team)
 
     @abstractmethod
-    def judge(self):
+    def judge(self, _: EventEveryTick):
         pass
