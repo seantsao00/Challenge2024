@@ -164,7 +164,7 @@ def every_tick(api: API):
                         api.action_cast_ability([character])
                         api.action_attack([character], random_target)
                 
-            elif owned_characters_count >= 10:
+            elif recruited_characters_count >= 10:
                 no_sniper_characters = []
                 sniper_characters = []
                 for character in owned_characters:
@@ -191,6 +191,12 @@ def every_tick(api: API):
                         random_target = random.choice(attackable)
                         api.action_cast_ability([character])
                         api.action_attack([character], random_target)
+            else:
+                attackable = api.within_attacking_range(character)
+                if len(attackable) > 0: 
+                    random_target = random.choice(attackable)
+                    api.action_cast_ability([character])
+                    api.action_attack([character], random_target)
         else: 
             
             for tower in owned_tower:
