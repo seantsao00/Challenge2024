@@ -109,8 +109,8 @@ def every_tick(api: API):
             if character.position.distance_to(tower.position) <= 20 and api.get_movement(character).status == MovementStatusClass.STOPPED:
                 recruited = True
                 break
-        if recruited and character.type != CharacterClass.SNIPER: recruited_characters.append(character)
-        elif not recruited: dispatched_characters.append(character)
+        if recruited: recruited_characters.append(character)
+        elif character.type != CharacterClass.SNIPER: dispatched_characters.append(character)
     recruited_characters_count = len(recruited_characters)
     dispatched_characters_count = len(dispatched_characters)
     contestable_tower = []
@@ -134,7 +134,7 @@ def every_tick(api: API):
             api.action_attack([sniper], api.within_attacking_range(sniper)[0])
         else: api.action_wander([sniper])
 
-    if (contestable_tower_count == 0):
+    if (api.get_current_time() <= 35):
         api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.SNIPER]))
         
         if (recruited_characters_count >= 1):
@@ -161,7 +161,7 @@ def every_tick(api: API):
         target_tower = None
         for tower in visible_towers:
             if not tower.is_fountain and tower.team_id != my_team_id:
-                if (target_tower != None and enemies_near_tower(visible_enemy, tower, api) < enemies_near_tower(visible_enemy, target_tower, api)) or target_tower == None:
+                if (target_tower != None and tower.position.distance_to(fountain) < tower.position.distance_to(target_tower)) or target_tower == None:
                     target_tower = tower
         for tower in owned_tower:
             if (tower.is_fountain): 
