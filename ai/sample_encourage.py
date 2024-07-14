@@ -74,7 +74,8 @@ def every_tick(interface: API):
         '在某些地形上會走得比較慢',
         '可以試著在執行時加上 -rq',
         '可以試著在執行時加上 -vvrq',
-        '把滑鼠移到變數/函式上可以看詳細內容'
+        '把滑鼠移到變數/函式上可以看詳細內容',
+        '將變數內容 print 出來可以幫助 debug'
     ]
     chat_guide = [
         '可以 google 查 "python random"',
@@ -87,7 +88,13 @@ def every_tick(interface: API):
         '可以用 class 來存資訊',
         '可以多多寫註解',
         '變數不要亂命名',
-        '在寫 code 的時候可以多用 auto complete'
+        '在寫 code 的時候可以多用 auto complete',
+        '狙擊手的攻擊距離很遠！！但是很脆走路很慢提供視野也很短...',
+        '近戰兵的移動速度很高血量也很多視野也很廣！！但是攻擊距離太短了打不太到移動目標...',
+        '遠程兵的攻擊力很高還自帶範圍傷害技能！！但是太脆了需要有人掩護...',
+        '中立塔可以提供視野，額外分數，也可以生成額外的兵力，是個重要戰略目標！！多多圍繞中立塔擬定策略吧！',
+        '視野很重要！沒有視野就看不到中立塔，也看不到敵人...',
+        '有時，偏門玩法反而有奇效！'
     ]
     chat_other = [
         '只探視野不會贏 QQ',
@@ -96,7 +103,8 @@ def every_tick(interface: API):
         '最新一集劇場版的結局是...',
         '好餓...想吃宵夜了...',
         '(來自 Challenge 員工的哀號)',
-        'Bug 退散！'
+        'Bug 退散！',
+        '維護良好素質，從你我做起！'
     ]
     chat_choices = chat_information + chat_guide + chat_other
     # 以 Const.CHAT_PROBABILITY 的機率隨便說說話
