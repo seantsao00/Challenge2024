@@ -53,9 +53,10 @@ def move_and_attack(characters, visible_enemy, owned_tower, api):
     attackable = api.within_attacking_range(character)
     if defend:
         api.action_move_to(no_sniper_characters, defend_tower.position)
-    elif len(attackable) == 0:
+    elif len(visible_enemy) == 0:
+        api.action_wander(no_sniper_characters)
+    else:
         api.action_move_to(no_sniper_characters, visible_enemy[0].position)
-
     for character in characters:
         index += 1
         
@@ -122,7 +123,7 @@ def every_tick(api: API):
     contestable_tower_count = len(contestable_tower)
     print(owned_characters_count, recruited_characters_count, dispatched_characters_count)
     if (contestable_tower_count == 0):
-        api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE]))
+        api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
         
         if (recruited_characters_count >= 1):
             random_point = None
@@ -138,20 +139,44 @@ def every_tick(api: API):
                     api.action_move_to(recruited_characters[index:(index + 1)], random_point)
             """
             api.action_wander(owned_characters)
+            for character in owned_characters:
+                    attackable = api.within_attacking_range(character)
+                    if len(attackable) > 0: 
+                        random_target = random.choice(attackable)
+                        api.action_cast_ability([character])
+                        api.action_attack([character], random_target)
     else: 
         target_tower = None
-        
+        no_sniper_characters = []
+        sniper_characters = []
+        for character in owned_characters:
+            if character.type != CharacterClass.SNIPER:
+                no_sniper_characters.append(character)
+            else:
+                sniper_characters.append(character)
         for tower in visible_towers:
             if not tower.is_fountain and tower.team_id != my_team_id:
-                target_tower = tower
-                break
+                if (target_tower != None and enemies_near_tower(visible_enemy, tower, api) < enemies_near_tower(visible_enemy, target_tower, api)) or target_tower == None:
+                    target_tower = tower
+        for tower in owned_tower:
+            if (tower.is_fountain): 
+                if len(snipers_defending_tower(fountain, api)) >= 4: 
+                    print("Sniper defending fountain:" + str(len(snipers_defending_tower(fountain, api))))
+                    api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
+                else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER]))
+            else: 
+                print("Sniper defending tower:" + str(len(snipers_defending_tower(tower, api))))
+                if (len(snipers_defending_tower(tower, api)) < 5): api.change_spawn_type(tower, random.choice([CharacterClass.SNIPER]))
+                else: api.change_spawn_type(tower, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
         if target_tower != None:
-            if len(snipers_defending_tower(fountain, api)) >= 4: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
-            else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER]))
+            
             #print(recruited_characters_count, dispatched_characters_count)
             if dispatched_characters_count <= 5 and dispatched_characters_count != 0: 
-                api.action_move_to(dispatched_characters[:],
-                                        fountain.position)
+                occupied_tower = []
+                for tower in owned_tower:
+                    if not tower.is_fountain: occupied_tower.append(tower)
+                if (len(occupied_tower) > 0): api.action_move_to(dispatched_characters + recruited_characters, occupied_tower[0].position)
+                else: api.action_move_to(dispatched_characters + recruited_characters, fountain.position)
                 for character in owned_characters:
                     attackable = api.within_attacking_range(character)
                     if len(attackable) > 0: 
@@ -159,14 +184,8 @@ def every_tick(api: API):
                         api.action_cast_ability([character])
                         api.action_attack([character], random_target)
                 
-            elif dispatched_characters_count + recruited_characters_count >= 10:
-                no_sniper_characters = []
-                sniper_characters = []
-                for character in owned_characters:
-                    if character.type != CharacterClass.SNIPER:
-                        no_sniper_characters.append(character)
-                    else:
-                        sniper_characters.append(character)
+            elif recruited_characters_count + dispatched_characters_count >= 10:
+                
                 if dispatched_characters_count != 0:
                     if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0:
                         target_enemy = random.choice(enemies_near_tower(visible_enemy, target_tower, api))
@@ -187,20 +206,26 @@ def every_tick(api: API):
                         api.action_cast_ability([character])
                         api.action_attack([character], random_target)
             else:
+                if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0:
+                    target_enemy = random.choice(enemies_near_tower(visible_enemy, target_tower, api))
+                    api.action_move_to(no_sniper_characters, target_tower.position)
+                    api.action_attack(no_sniper_characters, target_enemy)
                 attackable = api.within_attacking_range(character)
                 if len(attackable) > 0: 
                     random_target = random.choice(attackable)
                     api.action_cast_ability([character])
                     api.action_attack([character], random_target)
         else: 
-            
-            for tower in owned_tower:
-                if (tower.is_fountain): api.change_spawn_type(tower, random.choice([CharacterClass.RANGER, CharacterClass.MELEE]))
-                else: api.change_spawn_type(tower, random.choice([CharacterClass.SNIPER]))
-            
-            
-            
-            #api.action_move_to(owned_characters[:], visible_enemy[0].position)
             api.action_cast_ability(owned_characters[:])
-            #api.action_attack(owned_characters[:], visible_enemy[0])
-            move_and_attack(owned_characters, visible_enemy, owned_tower, api)
+            if dispatched_characters_count >= 5 or (recruited_characters_count >= 10):
+            
+                #api.action_move_to(owned_characters[:], visible_enemy[0].position)
+                
+                #api.action_attack(owned_characters[:], visible_enemy[0])
+                move_and_attack(owned_characters, visible_enemy, owned_tower, api)
+            else:
+                occupied_tower = []
+                for tower in owned_tower:
+                    if not tower.is_fountain: occupied_tower.append(tower)
+                if (len(occupied_tower) > 0): api.action_move_to(dispatched_characters + recruited_characters, occupied_tower[0].position)
+                else: api.action_move_to(dispatched_characters + recruited_characters, fountain.position)

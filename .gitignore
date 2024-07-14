@@ -174,3 +174,6 @@ debug.py
 
 # Windows
 *Zone.Identifier
+
+# MacOS
+.DS_Store
