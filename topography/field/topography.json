@@ -6,7 +6,7 @@
         [228, 201], [37, 103], [53, 236], [110, 175]
     ],
     "neutral_towers": [
-        [128, 93], [93, 25]
+        [128, 93, "ferris_wheel"], [93, 25, "pylon"]
     ],
     "images": {
         "backgrounds": ["background.png"],
