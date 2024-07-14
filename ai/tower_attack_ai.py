@@ -152,14 +152,12 @@ def every_tick(api: API):
                 target_tower = tower
                 break
         if target_tower != None:
-            api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
+            api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER]))
             #print(recruited_characters_count, dispatched_characters_count)
             if dispatched_characters_count <= 5 and dispatched_characters_count != 0: 
                 api.action_move_to(dispatched_characters[:],
                                         fountain.position)
-                index = -1
                 for character in owned_characters:
-                    index += 1
                     attackable = api.within_attacking_range(character)
                     if len(attackable) > 0: 
                         random_target = random.choice(attackable)
@@ -168,9 +166,12 @@ def every_tick(api: API):
                 
             elif owned_characters_count >= 10:
                 no_sniper_characters = []
+                sniper_characters = []
                 for character in owned_characters:
                     if character.type != CharacterClass.SNIPER:
                         no_sniper_characters.append(character)
+                    else:
+                        sniper_characters.append(character)
                 if dispatched_characters_count != 0:
                     if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0:
                         target_enemy = random.choice(enemies_near_tower(visible_enemy, target_tower, api))
@@ -184,6 +185,12 @@ def every_tick(api: API):
                     #attack(dispatched_characters, api)
                 else:
                     api.action_move_along(no_sniper_characters, pg.Vector2(1, 1))
+                for character in sniper_characters:
+                    attackable = api.within_attacking_range(character)
+                    if len(attackable) > 0: 
+                        random_target = random.choice(attackable)
+                        api.action_cast_ability([character])
+                        api.action_attack([character], random_target)
         else: 
             
             for tower in owned_tower:
