@@ -19,7 +19,7 @@ from controller import Controller
 from event_manager import EventManager
 from model import Model, ModelArguments
 from music.music import BackgroundMusic
-from util import set_verbosity
+from util import disable_print, set_verbosity
 from view import View
 
 
@@ -69,15 +69,21 @@ if __name__ == "__main__":
     parser.add_argument('-q', '--skip-character-selecting', action='store_true',
                         help='Skip character selection and randomly assign characters to teams '
                              'for quick test.')
-
     parser.add_argument('-t', '--show-trajectory', action='store_true',
                         help='Display the trajectory of all characters.')
+    parser.add_argument('-d', '--disable-stdout', action='store_true',
+                        help='Disable all non-logging write attempt to stdout.')
 
     args = parser.parse_args()
 
     if not check_input_validity(args):
         sys.exit()
+
+    if args.disable_stdout:
+        disable_print()
+
     set_verbosity(args.verbose)
+
     pg.init()
     able_play_music = True
     try:

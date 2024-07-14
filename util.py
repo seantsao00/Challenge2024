@@ -1,6 +1,8 @@
 """
 Utility functions that can be utilized across multiple modules.
 """
+import os
+import sys
 
 import cv2
 import pygame as pg
@@ -41,6 +43,10 @@ def crop_image(picture: pg.Surface, desire_width: int, desire_height: int,
 verbosity = 0
 
 
+def disable_print():
+    sys.stdout = open(os.devnull, 'w')
+
+
 def set_verbosity(verb: int):
     global verbosity
     verbosity = verb
@@ -48,19 +54,19 @@ def set_verbosity(verb: int):
 
 def log_critical(msg: str):
     """Print critical logging message."""
-    print(f"\033[91m[Crit] {msg}\033[0m")
+    print(f"\033[91m[Crit] {msg}\033[0m", file=sys.__stdout__)
 
 
 def log_warning(msg: str):
     """Print warning logging message."""
     if verbosity >= 1:
-        print(f"\033[93m[Warn] {msg}\033[0m")
+        print(f"\033[93m[Warn] {msg}\033[0m", file=sys.__stdout__)
 
 
 def log_info(msg: str):
     """Print info logging message."""
     if verbosity >= 2:
-        print(f"[Info] {msg}")
+        print(f"[Info] {msg}", file=sys.__stdout__)
 
 
 def transform_coordinate(point: tuple[float, float], ratio: float) -> tuple[float, float]:
