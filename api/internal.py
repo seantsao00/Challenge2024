@@ -648,5 +648,4 @@ def start_ai(team_id: int) -> threading.Thread:
     t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id], timer))
     t.start()
     timer.set_timer(1 / FPS * DECISION_TICKS, team_id, t.ident)
-    print('test')
     return t
