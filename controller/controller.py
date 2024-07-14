@@ -7,9 +7,9 @@ import pygame as pg
 import const
 import const.controller
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
-                           EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam, EventViewTrajectorySwitch)
+                           EventNyanCat, EventPauseModel, EventQuit, EventResumeModel,
+                           EventSelectCharacter, EventSelectParty, EventUnconditionalTick,
+                           EventUseRangerAbility, EventViewChangeTeam, EventViewTrajectorySwitch)
 from instances_manager import get_event_manager, get_model
 from model import Character, TimerManager, Tower
 from util import log_info
@@ -98,7 +98,7 @@ class Controller:
                 else:
                     self.egg_record = 0
                 if self.egg_record == len(const.controller.EGG_SEQ):
-                    print("Easter egg activated!")
+                    ev_manager.post(EventNyanCat())
                     self.egg_record = 0
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:

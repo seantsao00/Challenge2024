@@ -216,3 +216,8 @@ class EventSendChat(BaseEvent):
     type: const.ChatMessageType
     team: Team
     text: str
+
+
+@dataclass(kw_only=True)
+class EventNyanCat(BaseEvent):
+    """What is this?"""
