@@ -30,6 +30,9 @@ class Controller:
         """
         self.__resize_ratio: float = ScreenInfo.resize_ratio
         self.register_listeners()
+        self.egg_seq = [pg.K_UP, pg.K_UP, pg.K_DOWN, pg.K_DOWN,
+                        pg.K_LEFT, pg.K_RIGHT, pg.K_LEFT, pg.K_RIGHT, pg.K_b, pg.K_a]
+        self.egg_record = 0
 
     def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
@@ -88,6 +91,14 @@ class Controller:
                     ev_manager.post(EventViewChangeTeam())
                 if key == const.TRAJECTORY_SWITCH_BUTTON:
                     ev_manager.post(EventViewTrajectorySwitch())
+                # ???
+                if key == self.egg_seq[self.egg_record]:
+                    self.egg_record += 1
+                else:
+                    self.egg_record = 0
+                if self.egg_record == len(self.egg_seq):
+                    print("Easter egg activated!")
+                    self.egg_record = 0
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
