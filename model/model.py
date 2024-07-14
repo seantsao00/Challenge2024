@@ -149,6 +149,7 @@ class Model:
         for i in range(len(self.teams)):
             if self.__ticks != int(round(const.TICKS_PER_CYCLE * i / len(self.teams))):
                 continue
+            log_info(f"[API] Starting team {i}'s thread...")
             if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
                 self.__team_thread[i] = start_ai(i)
             else:
