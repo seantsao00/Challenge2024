@@ -23,6 +23,7 @@ class Result:
         self.__scope_speed: int = const.SCOPE_SPEED
         self.__scope_status: const.ScopeStatus = const.ScopeStatus.WAITING_INPUT
         self.__parameter_wandering: float = 0
+        self.__final_wandering_parameter = const.final_wanderring_parameter()
 
     def ranking(self):
         model = get_model()
@@ -41,7 +42,10 @@ class Result:
             self.__parameter_wandering += 2*pi*get_model().dt/const.WANDERING_PERIOD
         elif self.__scope_status is const.ScopeStatus.TOWARD_WANDERING:
             if self.arrived():
-                self.__scope_status = const.ScopeStatus.WANDERING
+                if self.__scope_target_index + 1 == self.__number_of_teams:
+                    self.__scope_status = const.ScopeStatus.FINAL_WANDERING
+                else:
+                    self.__scope_status = const.ScopeStatus.WANDERING
                 Timer(interval=const.INVERVAL_WANDERING, function=self.set_toward_target, once=True)
         elif self.__scope_status is const.ScopeStatus.WAITING:
             pass
@@ -49,18 +53,23 @@ class Result:
             if self.arrived():
                 self.__scope_status = const.ScopeStatus.WAITING
                 self.__scope_target_index += 1
-                Timer(interval=const.INVERVAL_WAITING, function=self.set_wandering, once=True)
+                Timer(interval=const.INVERVAL_WAITING, function=self.set_toward_wandering, once=True)
+        elif self.__scope_status is const.ScopeStatus.FINAL_WANDERING:
+            # if self.__final_wandering_parameter == 0:
+            self.__scope_status = const.ScopeStatus.WANDERING
+            # else:
+            #    pass
 
         displacement = (self.__scope_target_position - self.__scope_position).normalize()*self.__scope_speed if (self.__scope_target_position -
                                                                                                                  self.__scope_position).length() > self.__scope_speed else (self.__scope_target_position - self.__scope_position)
         self.__scope_position += displacement
 
-    def set_wandering(self):
+    def set_toward_wandering(self):
         if self.__scope_target_index >= self.__number_of_teams:
             self.__scope_status = const.ScopeStatus.FINISH
             self.__scope_target_position = const.RESULT_FINAL_POSITION
             return
-        self.__scope_status = const.ScopeStatus.WANDERING
+        self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
         self.__parameter_wandering = 0
         Timer(interval=const.INVERVAL_WANDERING, function=self.set_toward_target, once=True)
 

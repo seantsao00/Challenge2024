@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from enum import Enum, auto
 from math import cos, sin
-from random import uniform
+from random import randint, uniform
 
 import pygame as pg
 
@@ -38,6 +38,7 @@ RESULT_FINAL_POSITION: pg.Vector2 = pg.Vector2(1000, 1000)
 class ScopeStatus(Enum):
     WAITING_INPUT = auto()
     WANDERING = auto()
+    FINAL_WANDERING = auto()
     WAITING = auto()
     TOWARD_TARGET = auto()
     TOWARD_WANDERING = auto()
@@ -49,6 +50,10 @@ INVERVAL_WAITING = 1
 INVERVAL_WANDERING = uniform(4.0, 6.5)
 WANDERING_PERIOD = 3
 POSITION_EPSILON = 0.01
+
+
+def final_wanderring_parameter() -> int:
+    return randint(0, 2)
 
 
 def wandering_formula(t: float) -> pg.Vector2:
