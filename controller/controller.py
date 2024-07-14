@@ -162,7 +162,7 @@ class Controller:
                 elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
 
-    def ctrl_result(self, pg_events: list[pg.Event]):
+    def ctrl_result(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is RESULT.
         """
@@ -173,7 +173,7 @@ class Controller:
                 if pg_event.key in const.CONFIRM_BUTTONS:
                     model.result.handle_scopemoving_start()
 
-    def ctrl_cover(self, pg_events: list[pg.Event]):
+    def ctrl_cover(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is COVER.
         """

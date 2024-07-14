@@ -1,12 +1,10 @@
-import random
-from math import cos, pi, sin
+from math import pi
 
 import pygame as pg
 
 import const
 import const.result
-from event_manager import EventChangeParty, EventStartGame
-from instances_manager import get_event_manager, get_model
+from instances_manager import get_model
 from model.team import Team
 from model.timer import Timer
 
