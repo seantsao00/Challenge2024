@@ -13,8 +13,8 @@ import pygame as pg
 import const
 import const.map
 import const.model
-from api.internal import load_ai, start_ai
 import const.team
+from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventBulletExplode, EventCharacterDied, EventCharacterMove,
                            EventCreateEntity, EventEveryTick, EventGameOver, EventInitialize,
@@ -240,8 +240,8 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-                # if running_time >= 1:
-                #     ev_manager.post(EventGameOver())
+                if running_time >= 1:
+                    ev_manager.post(EventGameOver())
             if self.state is const.State.RESULT:
                 self.result.update()
             self.dt = self.global_clock.tick(const.FPS) / 1000
