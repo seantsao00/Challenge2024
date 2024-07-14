@@ -73,7 +73,13 @@ class Result:
             self.__scope_status = const.ScopeStatus.FINISH
             self.__scope_target_position = const.RESULT_FINAL_POSITION
             return
-        self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
+        if self.__scope_target_index + 1 == self.__number_of_teams:
+            self.__scope_status = const.ScopeStatus.TOWARD_TARGET
+            target_team: Team = self.__rank_of_teams[self.__scope_target_index]
+            self.__scope_target_position = self.__team_position[target_team.team_id]
+            return
+        else:
+            self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
         self.__parameter_wandering = 0
         self.__scope_target_position = const.wandering_formula(self.__parameter_wandering)
 
