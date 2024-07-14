@@ -103,6 +103,7 @@ if __name__ == "__main__":
         show_attack_range=args.show_attack_range or args.show_attack_view_range,
         skip_character_selecting=args.skip_character_selecting,
         show_trajectory=args.show_trajectory,
+        show_range=args.show_attack_view_range or args.show_attack_range or args.show_view_range,
         scoreboard_frozen=args.frozen
     ))
     instances_manager.register_model(model)
