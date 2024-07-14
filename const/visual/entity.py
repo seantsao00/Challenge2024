@@ -129,7 +129,7 @@ structure: ENTITY_SIZE[entity][state]
 # Size for clicking
 CLICK_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
-        None: 6.25
+        state: 6.25 for state in CharacterState
     } for character in CharacterType},
     **{tower: {
         None: 20
