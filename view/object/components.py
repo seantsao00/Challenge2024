@@ -70,12 +70,31 @@ def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) 
     return textbox
 
 
+_cache_icon_img: dict[str, pg.Surface] = {}
+_cache_icon: dict[tuple[str, float], pg.Surface] = {}
+
+
+def _getIconImage(file_path: str):
+    if file_path in _cache_icon_img:
+        return _cache_icon_img[file_path]
+    img = pg.image.load(file_path)
+    _cache_icon_img[file_path] = img
+    return img
+
+
+def _getIcon(file_path: str, icon_height: float):
+    if (file_path, icon_height) in _cache_icon:
+        return _cache_icon[(file_path, icon_height)]
+    img = _getIconImage(file_path)
+    w, h = img.get_size()
+    ratio = icon_height / h
+    icon = pg.transform.scale(img, (w * ratio, h * ratio))
+    _cache_icon[(file_path, icon_height)] = icon
+    return icon
+
+
 def createIcon(file_path: str, icon_height: float) -> pg.Surface:
     """
     Load and scale an icon to specified height
     """
-    icon = pg.image.load(file_path)
-    w, h = icon.get_size()
-    ratio = icon_height / h
-    icon = pg.transform.scale(icon, (w * ratio, h * ratio))
-    return icon
+    return _getIcon(file_path, icon_height)
