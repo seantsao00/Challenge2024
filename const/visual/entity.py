@@ -51,15 +51,13 @@ TOWER_IMAGE: dict[TowerType, str] = {
 }
 
 CHARACTER_DIR = 'character/'
-CHARACTER_LEFT_IMAGE: dict[CharacterType, str] = {
-    CharacterType.MELEE: 'melee_left.png',
-    CharacterType.RANGER: 'ranger_left.png',
-    CharacterType.SNIPER: 'sniper_left.png'
-}
-CHARACTER_RIGHTT_IMAGE: dict[CharacterType, str] = {
-    CharacterType.MELEE: 'melee_right.png',
-    CharacterType.RANGER: 'ranger_right.png',
-    CharacterType.SNIPER: 'sniper_right.png'
+CHARACTER_IMAGE: dict[(CharacterType, CharacterState), str] = {
+    (CharacterType.MELEE, CharacterState.LEFT): 'melee_left.png',
+    (CharacterType.RANGER, CharacterState.LEFT): 'ranger_left.png',
+    (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_left.png',
+    (CharacterType.MELEE, CharacterState.RIGHT): 'melee_right.png',
+    (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_right.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png'
 }
 
 WEAPON_DIR = 'weapon/'
@@ -93,9 +91,8 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
-                    CharacterState.LEFT: os.path.join(
-                        IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_LEFT_IMAGE[character])
-                    # CharacterSide.RIGHT: os.path.join(IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_RIGHT_IMAGE[character])
+                    state: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_IMAGE[(character, state)]) for state in CharacterState
                 } for character in CharacterType
             },
             **{
@@ -117,7 +114,7 @@ structure: ENTITY_IMAGE[party][entity][state]
 # Size for showing
 ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
-        CharacterState.LEFT: 6.25
+        state: 6.25 for state in CharacterState
     } for character in CharacterType},
     **{tower: {
         None: 10

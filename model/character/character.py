@@ -103,6 +103,7 @@ class Character(LivingEntity):
 
                 cur_direction += min_direction
 
+        self.update_face_direction(self.__move_direction)
         get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
 
     def __move_toward_position(self):
@@ -143,6 +144,7 @@ class Character(LivingEntity):
         else:
             del self.__move_path[:it]
 
+        self.update_face_direction(self.position - pos_init)
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
 
     def __set_wander_destination(self) -> bool:
@@ -236,6 +238,14 @@ class Character(LivingEntity):
             return False
         self._last_attack_time = now_time
         return True
+
+    def update_face_direction(self, direction: pg.Vector2 | None):
+        if direction == None or direction == pg.Vector2(0, 0):
+            return
+        if direction.x <= 0:
+            self.state = const.CharacterState.LEFT
+        else:
+            self.state = const.CharacterState.RIGHT
 
     @abstractmethod
     def attack(self, enemy: Entity):
