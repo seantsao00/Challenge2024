@@ -73,6 +73,8 @@ if __name__ == "__main__":
                         help='Display the trajectory of all characters.')
     parser.add_argument('-d', '--disable-stdout', action='store_true',
                         help='Disable all non-logging write attempt to stdout.')
+    parser.add_argument('-z', '--frozen', action='store_true',
+                        help='Make scoreboard frozen in last phase.')
 
     args = parser.parse_args()
 
@@ -100,7 +102,8 @@ if __name__ == "__main__":
         show_view_range=args.show_view_range or args.show_attack_view_range,
         show_attack_range=args.show_attack_range or args.show_attack_view_range,
         skip_character_selecting=args.skip_character_selecting,
-        show_trajectory=args.show_trajectory
+        show_trajectory=args.show_trajectory,
+        scoreboard_frozen=args.frozen
     ))
     instances_manager.register_model(model)
 

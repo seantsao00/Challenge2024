@@ -3,8 +3,8 @@ import pygame as pg
 import const
 from const.visual.scorebox import *
 from instances_manager import get_model
-from model.team import Team
 from model.building.tower import Tower
+from model.team import Team
 from view.object import components
 from view.object.animation import LinearAnimation
 from view.object.object_base import ObjectBase
@@ -29,6 +29,7 @@ class Scorebox:
             initial_position[1], SCOREBOX_ANIMATION_DURATION)
 
     def draw(self, canvas: pg.Surface):
+        model = get_model()
         self.__canvas.fill(pg.Color(0, 0, 0, 0))
         # avatar
         self.__canvas.blit(self.__team_avatar, self.__team_avatar.get_rect(
@@ -42,7 +43,11 @@ class Scorebox:
             team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
         # score
-        score_text = self.font_primary.render(f"{int(self.__team_stats.score)}", False, 'black')
+        if model.scoreboard_frozen and model.get_time() > const.FROZEN_TIME:
+            score_text = self.font_primary.render('???', False, 'black')
+        else:
+            score_text = self.font_primary.render(
+                f"{int(self.__team_stats.score)}", False, 'black')
         score_rect = score_text.get_rect(topright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
         self.__canvas.blit(score_text, score_rect)
 
@@ -52,10 +57,9 @@ class Scorebox:
         for tower in self.__team.towers:
             if not tower.is_fountain:
                 tower_icon = components.createIcon(
-                const.ENTITY_IMAGE[self.__team.party][tower.tower_type][None], SI.scale(SCOREBOX_ICON_SIZE))
+                    const.ENTITY_IMAGE[self.__team.party][tower.tower_type][None], SI.scale(SCOREBOX_ICON_SIZE))
                 self.__canvas.blit(tower_icon, tower_icon.get_rect(midright=midright))
                 midright = (midright[0] - SI.scale(4), midright[1])
-
 
         def blitIconAndText(icon_name: str, text_string: str, bottomleft: list[float, float], width: float):
             icon = components.createIcon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))
@@ -68,16 +72,25 @@ class Scorebox:
         field_width = SI.scale(SCOREBOX_WIDTH / 3)
         # unit count
         bottomleft = SI.scale([0, SCOREBOX_HEIGHT])
-        blitIconAndText(SCOREBOX_ICON_UNIT, str(
-            self.__team_stats.units_alive), bottomleft, field_width)
-        # kill count
-        bottomleft[0] += field_width
-        blitIconAndText(SCOREBOX_ICON_KILL, str(
-            self.__team_stats.units_killed), bottomleft, field_width)
-        # dead count
-        bottomleft[0] += field_width
-        blitIconAndText(SCOREBOX_ICON_DEAD, str(
-            self.__team_stats.units_dead), bottomleft, field_width)
+        if model.scoreboard_frozen and model.get_time() > const.FROZEN_TIME:
+            blitIconAndText(SCOREBOX_ICON_UNIT, '???', bottomleft, field_width)
+            # kill count
+            bottomleft[0] += field_width
+            blitIconAndText(SCOREBOX_ICON_KILL, '???', bottomleft, field_width)
+            # dead count
+            bottomleft[0] += field_width
+            blitIconAndText(SCOREBOX_ICON_DEAD, '???', bottomleft, field_width)
+        else:
+            blitIconAndText(SCOREBOX_ICON_UNIT, str(
+                self.__team_stats.units_alive), bottomleft, field_width)
+            # kill count
+            bottomleft[0] += field_width
+            blitIconAndText(SCOREBOX_ICON_KILL, str(
+                self.__team_stats.units_killed), bottomleft, field_width)
+            # dead count
+            bottomleft[0] += field_width
+            blitIconAndText(SCOREBOX_ICON_DEAD, str(
+                self.__team_stats.units_dead), bottomleft, field_width)
 
         # actually draw the box onto the screen
         position = (self.__position_x, self.__position_y.value)
@@ -123,5 +136,7 @@ class ScoreboardView(ObjectBase):
     def update(self):
         self.initialize()
         self.__boxes.sort(key=lambda box: box.cur_score(), reverse=True)
+        model = get_model()
         for i in range(self.__team_count):
-            self.__boxes[i].update(self.__box_positions[i])
+            if not model.scoreboard_frozen or model.get_time() <= const.FROZEN_TIME:
+                self.__boxes[i].update(self.__box_positions[i])

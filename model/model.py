@@ -46,6 +46,7 @@ class ModelArguments:
     show_attack_range: bool
     skip_character_selecting: bool
     show_trajectory: bool
+    scoreboard_frozen: bool
 
 
 class Model:
@@ -93,6 +94,7 @@ class Model:
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
         self.show_trajectory: bool = model_arguments.show_trajectory
+        self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
