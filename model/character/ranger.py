@@ -24,7 +24,8 @@ class Ranger(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
+        super().__init__(position, team, const.RANGER_ATTRIBUTE,
+                         const.CharacterType.RANGER, const.CharacterState.LEFT)
         get_event_manager().register_listener(EventUseRangerAbility,
                                               listener=self.use_ability, channel_id=self.id)
 

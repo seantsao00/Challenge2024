@@ -34,7 +34,8 @@ class Melee(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
+        super().__init__(position, team, const.MELEE_ATTRIBUTE,
+                         const.CharacterType.MELEE, const.CharacterState.LEFT)
         self.__defense: float = 0
 
     def attack(self, enemy: Entity):

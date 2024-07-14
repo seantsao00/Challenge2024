@@ -26,7 +26,8 @@ class CharacterAttribute(LivingEntityAttribute):
 
 
 class CharacterState(Enum):
-    pass
+    LEFT = auto()
+    RIGHT = auto()
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(

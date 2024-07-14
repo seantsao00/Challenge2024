@@ -25,7 +25,8 @@ class Sniper(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.SNIPER_ATTRIBUTE, const.CharacterType.SNIPER, None)
+        super().__init__(position, team, const.SNIPER_ATTRIBUTE,
+                         const.CharacterType.SNIPER, const.CharacterState.LEFT)
         self.ability_active = False
 
     def cast_ability(self, *args, **kwargs):

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import os
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 from const.bullet import BulletType
-from const.character import CharacterType
+from const.character import CharacterState, CharacterType
 from const.team import PartyType
 from const.tower import TowerType
 from const.visual import IMAGE_DIR
@@ -50,10 +51,15 @@ TOWER_IMAGE: dict[TowerType, str] = {
 }
 
 CHARACTER_DIR = 'character/'
-CHARACTER_IMAGE: dict[CharacterType, str] = {
-    CharacterType.MELEE: 'melee.png',
-    CharacterType.RANGER: 'ranger.png',
-    CharacterType.SNIPER: 'sniper.png'
+CHARACTER_LEFT_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: 'melee_left.png',
+    CharacterType.RANGER: 'ranger_left.png',
+    CharacterType.SNIPER: 'sniper_left.png'
+}
+CHARACTER_RIGHTT_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: 'melee_right.png',
+    CharacterType.RANGER: 'ranger_right.png',
+    CharacterType.SNIPER: 'sniper_right.png'
 }
 
 WEAPON_DIR = 'weapon/'
@@ -87,7 +93,9 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_IMAGE[character])
+                    CharacterState.LEFT: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_LEFT_IMAGE[character])
+                    # CharacterSide.RIGHT: os.path.join(IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_RIGHT_IMAGE[character])
                 } for character in CharacterType
             },
             **{
@@ -109,7 +117,7 @@ structure: ENTITY_IMAGE[party][entity][state]
 # Size for showing
 ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
-        None: 6.25
+        CharacterState.LEFT: 6.25
     } for character in CharacterType},
     **{tower: {
         None: 10

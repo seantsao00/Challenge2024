@@ -21,13 +21,13 @@ def _getAvatarImage(party: const.team.PartyType):
 
     if (party is const.team.PartyType.JUNIOR) or (party is const.team.PartyType.FBI):
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[party][const.character.CharacterType.SNIPER][None])
+            const.ENTITY_IMAGE[party][const.character.CharacterType.SNIPER][const.CharacterState.LEFT])
     elif party is const.team.PartyType.POLICE:
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[party][const.character.CharacterType.MELEE][None])
+            const.ENTITY_IMAGE[party][const.character.CharacterType.MELEE][const.CharacterState.LEFT])
     else:
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][None])
+            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][const.CharacterState.LEFT])
 
     _cache_avatar_img[party] = avatar_img
     return avatar_img
