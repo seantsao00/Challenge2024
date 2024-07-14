@@ -578,40 +578,51 @@ class Timer():
             raise OSError
         self.timer = None
         self.started = False
+        self.ended = False
+        self.status_lock = threading.Lock()
+        """A lock protecting multithread timer starting and ending."""
         self.for_player_id = None
 
     def set_timer(self, interval: float, player_id: int, tid: int):
         """Start the timer."""
-        if not self.is_windows:
-            # Should be sig, frame but pylint doesn't like it >:(
-            def handler(_, __):
-                res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-                    ctypes.c_long(tid), ctypes.py_object(TimeoutException))
-                if res != 0:
-                    log_warning(f"[API] TimeoutException killed thread {tid}.")
+        with self.status_lock:
+            if self.ended:
+                return
+            if not self.is_windows:
+                # Should be sig, frame but pylint doesn't like it >:(
+                def handler(_, __):
+                    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+                        ctypes.c_long(tid), ctypes.py_object(TimeoutException))
+                    if res != 0:
+                        log_warning(f"[API] TimeoutException killed thread {tid}.")
 
-            signal.signal(signal.SIGALRM, handler)
+                signal.signal(signal.SIGALRM, handler)
 
-        if not self.is_windows:
-            signal.setitimer(signal.ITIMER_REAL, interval)
-        else:
-            def timeout_alarm(player_id: int):
-                log_critical(f"[API] The AI of player {player_id} timed out!")
+            if not self.is_windows:
+                signal.setitimer(signal.ITIMER_REAL, interval)
+            else:
+                def timeout_alarm(player_id: int):
+                    log_critical(f"[API] The AI of player {player_id} timed out!")
 
-            self.timer = threading.Timer(interval=interval, function=timeout_alarm,
-                                         args=[player_id])
-            self.timer.start()
-        self.started = True
+                self.timer = threading.Timer(interval=interval, function=timeout_alarm,
+                                             args=[player_id])
+                self.timer.start()
+            self.started = True
 
     def cancel_timer(self):
         """Cancel the timer."""
-        try:
-            if not self.is_windows:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-            else:
-                self.timer.cancel()
-        except TimeoutException:
-            log_warning("[API] Perhaps some very slightly timeout.")
+        with self.status_lock:
+            if not self.started:
+                self.ended = True
+                return
+            try:
+                if not self.is_windows:
+                    signal.setitimer(signal.ITIMER_REAL, 0)
+                else:
+                    self.timer.cancel()
+            except TimeoutException:
+                log_warning("[API] Perhaps some very slightly timeout.")
+            self.ended = True
 
 
 helpers = [Internal(i) for i in range(MAX_TEAMS)]
@@ -630,9 +641,6 @@ def load_ai(files: list[str]):
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
     """Threading AI helper function."""
-    # busy wating til timer start, to prevent cancel earlier than start
-    while not timer.started:
-        pass
     try:
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
