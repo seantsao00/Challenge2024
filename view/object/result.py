@@ -18,6 +18,8 @@ class ResultView(ObjectBase):
     background_image: pg.Surface
     bottom_image: pg.Surface
     out_image: pg.Surface
+    gold_circle_image: pg.Surface
+    crown_image: pg.Surface
     party_images_nomal: dict[const.PartyType, pg.Surface] = {}
     party_images_gray: dict[const.PartyType, pg.Surface] = {}
     ratio: float
@@ -29,7 +31,7 @@ class ResultView(ObjectBase):
         self.__scope_destination = const.RESULT_TEAM_POSITION
         self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
         self.__team_out: list[bool] = [False, False, False, False]
-        self.__team_rank: list[int] = [4, 4, 4, 4]
+        self.__team_rank: list[int] = [10, 10, 10, 10]
         self.__team_index: int = 0
         self.__number_of_teams: int = self.__result.number_of_teams()
 
@@ -52,6 +54,14 @@ class ResultView(ObjectBase):
         img = pg.image.load(const.RESULT_OUT)
         cls.out_image = crop_image(
             img, 376 * cls.ratio, 360 * cls.ratio).convert_alpha()
+
+        img = pg.image.load(const.RESULT_GOLDCIRCLE)
+        cls.gold_circle_image = crop_image(
+            img, 587 * cls.ratio, 512 * cls.ratio).convert_alpha()
+
+        img = pg.image.load(const.RESULT_CROWN)
+        cls.crown_image = crop_image(
+            img, 101 * cls.ratio, 88 * cls.ratio).convert_alpha()
 
         for key, path in const.RESULT_IMAGE_NOMAL.items():
             img = pg.image.load(path)
@@ -87,7 +97,6 @@ class ResultView(ObjectBase):
         img = self.background_image
         self.canvas.blit(img, (0, 0))
 
-        img = self.out_image
         for team in model.teams:
             if team.team_id < 2:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 362 / 2) * self.ratio,
@@ -98,11 +107,19 @@ class ResultView(ObjectBase):
 
             if self.__team_out[team.team_id] == True:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 370 / 2) * self.ratio, (
-                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.1f}", 'white', self.__font)
+                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.0f}", 'white', self.__font)
 
                 if self.__team_rank[team.team_id] < self.__number_of_teams:
+                    img = self.out_image
                     self.canvas.blit(img, transform_coordinate(
                         (team_icon_position[team.team_id][0], team_icon_position[team.team_id][1] + 120), self.ratio))
+                elif self.__team_rank[team.team_id] == self.__number_of_teams:
+                    img = self.gold_circle_image
+                    self.canvas.blit(img, transform_coordinate(
+                        (team_icon_position[team.team_id][0] - 102, team_icon_position[team.team_id][1] - 64), self.ratio))
+                    img = self.crown_image
+                    self.canvas.blit(img, transform_coordinate(
+                        (team_icon_position[team.team_id][0] + 200, team_icon_position[team.team_id][1] + 25), self.ratio))
 
         img = self.scope_image
         self.canvas.blit(img, transform_coordinate(self.__result.scope_position, self.ratio))

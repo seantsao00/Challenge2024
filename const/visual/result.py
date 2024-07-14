@@ -15,6 +15,8 @@ RESULT_BACKGROUND: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'background.png')
 RESULT_BOTTOM: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'bottom.png')
 RESULT_SCOPE: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'scope.png')
 RESULT_OUT: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'out_icon.png')
+RESULT_GOLDCIRCLE: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'gold_circle.png')
+RESULT_CROWN: str = os.path.join(IMAGE_DIR, RESULT_DIR, 'crown.png')
 RESULT_IMAGE_NOMAL: dict[PartyType, str] = {
     PartyType.JUNIOR: os.path.join(IMAGE_DIR, RESULT_DIR, 'junior.png'),
     PartyType.FBI: os.path.join(IMAGE_DIR, RESULT_DIR, 'fbi.png'),
