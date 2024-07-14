@@ -13,8 +13,8 @@ import pygame as pg
 import const
 import const.map
 import const.model
-from api.internal import load_ai, start_ai
 import const.team
+from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventBulletExplode, EventCharacterDied, EventCharacterMove,
                            EventCreateEntity, EventEveryTick, EventGameOver, EventInitialize,
@@ -31,7 +31,7 @@ from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.result import Result
 from model.team import NeutralTeam, Team
-from util import log_critical
+from util import log_critical, log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -146,13 +146,14 @@ class Model:
         """
         self.__ticks += 1
         self.__ticks %= const.TICKS_PER_CYCLE
-        if self.__ticks == 0:
-            for i in range(len(self.teams)):
-                if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
-                    self.__team_thread[i] = start_ai(i)
-                else:
-                    log_critical(
-                        f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
+        for i in range(len(self.teams)):
+            if self.__ticks != int(round(const.TICKS_PER_CYCLE * i / len(self.teams))):
+                continue
+            if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
+                self.__team_thread[i] = start_ai(i)
+            else:
+                log_critical(
+                    f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
