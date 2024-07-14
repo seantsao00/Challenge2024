@@ -202,6 +202,11 @@ class EventViewTrajectorySwitch(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventViewShowRangeSwitch(BaseEvent):
+    """Event to turn on and off show range"""
+
+
+@dataclass(kw_only=True)
 class EventUseRangerAbility(BaseEvent):
     position: pg.Vector2 | tuple[float, float]
 

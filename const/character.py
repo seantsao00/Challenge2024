@@ -33,11 +33,11 @@ class CharacterState(Enum):
 MELEE_ATTRIBUTE = CharacterAttribute(
     speed=15,
     attack_range=10,
-    attack_damage=45,
-    max_health=600,
+    attack_damage=36,
+    max_health=620,
     vision=20,
     ability_cd=3,
-    attack_speed=0.8,
+    attack_speed=1,
     ability_variables=3
     # damage per second = 36
 )
@@ -56,7 +56,7 @@ RANGER_ATTRIBUTE = CharacterAttribute(
 
 SNIPER_ATTRIBUTE = CharacterAttribute(
     speed=5,
-    attack_range=45,
+    attack_range=40,
     attack_damage=300,
     max_health=100,
     vision=4,
