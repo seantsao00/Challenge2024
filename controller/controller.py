@@ -61,6 +61,8 @@ class Controller:
             self.ctrl_cover(pg_events)
         elif model.state is const.State.SELECT_PARTY:
             self.ctrl_select_party(pg_events)
+        elif model.state is const.State.RESULT:
+            self.ctrl_result(pg_events)
 
     def ctrl_play(self, pg_events: list[pg.event.Event]):
         """
@@ -160,7 +162,18 @@ class Controller:
                 elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
 
-    def ctrl_cover(self, pg_events: list[pg.event.Event]):
+    def ctrl_result(self, pg_events: list[pg.Event]):
+        """
+        Control depending on key input when the model.state is RESULT.
+        """
+        model = get_model()
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                if pg_event.key in const.CONFIRM_BUTTONS:
+                    model.result.handle_scopemoving_start()
+
+    def ctrl_cover(self, pg_events: list[pg.Event]):
         """
         Control depending on key input when the model.state is COVER.
         """

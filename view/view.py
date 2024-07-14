@@ -12,8 +12,9 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
 from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
-                         EntityView, HealthView, ObjectBase, ParticleManager, PartySelectorView,
-                         PauseMenuView, ScoreboardView, TowerCDView, ViewRangeView)
+                         EntityView, HealthView, ObjectBase, Particle, ParticleManager,
+                         PartySelectorView, PauseMenuView, ResultView, ScoreboardView, TowerCDView,
+                         ViewRangeView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
@@ -47,11 +48,13 @@ class View:
 
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
+        self.__result_view = ResultView(self.__screen, model.result)
 
         self.__cover_image: pg.Surface = load_image(const.COVER_IMAGE, screen_w, screen_h)[0]
         self.__particle_manager = ParticleManager(self.__screen)
 
         PartySelectorView.init_convert()
+        ResultView.init_convert()
 
         self.__entities: set[EntityView] = set()
 
@@ -119,8 +122,10 @@ class View:
             self.__render_party_selector()
         elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
             self.__render_play()
-        elif model.state is const.State.SETTLEMENT:
-            self.__render_settlement()
+        elif model.state is const.State.SELECT_PARTY:
+            self.__render_party_selector()
+        elif model.state is const.State.RESULT:
+            self.render_result()
         pg.display.flip()
 
     def __render_cover(self):
@@ -131,12 +136,12 @@ class View:
         """Render party selecting process"""
         self.__party_selector_view.draw()
 
-    def __render_settlement(self):
-        """Render the game settlement screen"""
-        # setting up a temporary screen till we have a scoreboard image and settlement screen
-        font = font_loader.get_font(size=12)
-        text_surface = font.render('THIS IS SETTLEMENT SCREEN', True, pg.Color('white'))
-        self.__screen.blit(text_surface, (100, 100))
+    def render_result(self):
+        """Render the game result screen"""
+        self.__screen.blit(self.__scoreboard_image, (0, 0))
+        self.__chat.update()
+        self.__chat.draw()
+        self.__result_view.draw()
 
     def __render_play(self):
         """Render scenes when the game is being played"""
