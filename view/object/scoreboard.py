@@ -4,6 +4,7 @@ import const
 from const.visual.scorebox import *
 from instances_manager import get_model
 from model.team import Team
+from model.building.tower import Tower
 from view.object import components
 from view.object.animation import LinearAnimation
 from view.object.object_base import ObjectBase
@@ -22,7 +23,7 @@ class Scorebox:
             f"{self.__team.team_name}", False, 'black')
         self.__team_avatar = components.createTeamAvatar(
             self.__team, int(SI.scale(SCOREBOX_AVATAR_SIZE)))
-        self.__team_towers_count: int = 0
+        # self.__team_towers_count: int = 0
         self.__position_x = initial_position[0]
         self.__position_y = LinearAnimation(
             initial_position[1], SCOREBOX_ANIMATION_DURATION)
@@ -44,14 +45,17 @@ class Scorebox:
         score_text = self.font_primary.render(f"{int(self.__team_stats.score)}", False, 'black')
         score_rect = score_text.get_rect(topright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
         self.__canvas.blit(score_text, score_rect)
-        # show towers owned
-        tower_icon = components.createIcon(
-            SCOREBOX_ICON_NEUTRALTOWER, SI.scale(SCOREBOX_ICON_SIZE))
+
         midright = score_rect.midleft
         midright = (midright[0] - SI.scale(2), midright[1])
-        for _ in range(self.__team_towers_count):
-            self.__canvas.blit(tower_icon, tower_icon.get_rect(midright=midright))
-            midright = (midright[0] - SI.scale(4), midright[1])
+
+        for tower in self.__team.towers:
+            if not tower.is_fountain:
+                tower_icon = components.createIcon(
+                const.ENTITY_IMAGE[self.__team.party][tower.tower_type][None], SI.scale(SCOREBOX_ICON_SIZE))
+                self.__canvas.blit(tower_icon, tower_icon.get_rect(midright=midright))
+                midright = (midright[0] - SI.scale(4), midright[1])
+
 
         def blitIconAndText(icon_name: str, text_string: str, bottomleft: list[float, float], width: float):
             icon = components.createIcon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))
@@ -81,9 +85,6 @@ class Scorebox:
 
     def update(self, position: tuple[float, float]):
         self.__team_stats = self.__team.stats
-        self.__team_towers_count = len(self.__team.towers)
-        if self.__team.fountain is not None:
-            self.__team_towers_count -= 1
         self.__position_y.value = position[1]
 
     def cur_score(self):
