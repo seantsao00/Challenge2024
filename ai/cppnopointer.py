@@ -123,7 +123,7 @@ def every_tick(api: API):
     contestable_tower_count = len(contestable_tower)
     print(owned_characters_count, recruited_characters_count, dispatched_characters_count)
     if (contestable_tower_count == 0):
-        api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
+        api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE]))
         
         if (recruited_characters_count >= 1):
             random_point = None
@@ -219,11 +219,17 @@ def every_tick(api: API):
                 else: 
                     print("Sniper defending tower:" + str(len(snipers_defending_tower(tower, api))))
                     if (len(snipers_defending_tower(tower, api)) < 10): api.change_spawn_type(tower, random.choice([CharacterClass.SNIPER]))
-                    else: api.change_spawn_type(tower, random.choice([CharacterClass.RANGER, CharacterClass.MELEE]))
-            
-            
-            
-            #api.action_move_to(owned_characters[:], visible_enemy[0].position)
+                    else: api.change_spawn_type(tower, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
             api.action_cast_ability(owned_characters[:])
-            #api.action_attack(owned_characters[:], visible_enemy[0])
-            move_and_attack(owned_characters, visible_enemy, owned_tower, api)
+            if dispatched_characters_count >= 5 or (recruited_characters_count >= 10):
+            
+                #api.action_move_to(owned_characters[:], visible_enemy[0].position)
+                
+                #api.action_attack(owned_characters[:], visible_enemy[0])
+                move_and_attack(owned_characters, visible_enemy, owned_tower, api)
+            else:
+                occupied_tower = []
+                for tower in owned_tower:
+                    if not tower.is_fountain: occupied_tower.append(tower)
+                if (len(occupied_tower) > 0): api.action_move_to(dispatched_characters + recruited_characters, occupied_tower[0].position)
+                else: api.action_move_to(dispatched_characters + recruited_characters, fountain.position)
