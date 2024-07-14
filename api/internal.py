@@ -4,6 +4,7 @@ Defines internal API interaction and AI threading.
 
 from __future__ import annotations
 
+import base64
 import ctypes
 import importlib.util
 import os
@@ -549,6 +550,8 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
+        for keyword in const.DIRTY_WORDS:
+            msg = msg.replace(keyword, len(keyword)*'*')
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
@@ -648,5 +651,4 @@ def start_ai(team_id: int) -> threading.Thread:
     t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id], timer))
     t.start()
     timer.set_timer(1 / FPS * DECISION_TICKS, team_id, t.ident)
-    print('test')
     return t
