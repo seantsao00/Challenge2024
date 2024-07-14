@@ -512,7 +512,7 @@ class Internal(prototype.API):
             [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
              for unit in candidates]
         else:
-            candidates = self.get_visible_characters() + self.get_owned_towers()
+            candidates = self.get_visible_characters() + self.get_visible_towers()
 
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
@@ -527,7 +527,7 @@ class Internal(prototype.API):
             [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
              for unit in candidates]
         else:
-            candidates = self.get_visible_characters() + self.get_owned_towers()
+            candidates = self.get_visible_characters() + self.get_visible_towers()
 
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
