@@ -57,6 +57,7 @@ class View:
         ResultView.init_convert()
 
         self.__entities: set[EntityView] = set()
+        self.__entities_wait_add: set[EntityView] = set()
 
         self.vision_of = 0
         self.__scoreboard_image = pg.transform.scale(
@@ -95,23 +96,23 @@ class View:
         from model import Character, Tower
         model = get_model()
         entity = event.entity
-        self.__entities.add(EntityView(self.__arena, entity))
+        self.__entities_wait_add.add(EntityView(self.__arena, entity))
         if isinstance(entity, Character):
             if model.show_view_range:
-                self.__entities.add(ViewRangeView(self.__arena, entity))
+                self.__entities_wait_add.add(ViewRangeView(self.__arena, entity))
             if model.show_attack_range:
-                self.__entities.add(AttackRangeView(self.__arena, entity))
-            self.__entities.add(AbilitiesCDView(self.__arena, entity))
+                self.__entities_wait_add.add(AttackRangeView(self.__arena, entity))
+            self.__entities_wait_add.add(AbilitiesCDView(self.__arena, entity))
             if entity.health is not None:
-                self.__entities.add(HealthView(self.__arena, entity))
+                self.__entities_wait_add.add(HealthView(self.__arena, entity))
         if isinstance(entity, Tower):
             if model.show_view_range:
-                self.__entities.add(ViewRangeView(self.__arena, entity))
+                self.__entities_wait_add.add(ViewRangeView(self.__arena, entity))
             if model.show_attack_range:
-                self.__entities.add(AttackRangeView(self.__arena, entity))
-            self.__entities.add(TowerCDView(self.__arena, entity))
+                self.__entities_wait_add.add(AttackRangeView(self.__arena, entity))
+            self.__entities_wait_add.add(TowerCDView(self.__arena, entity))
             if not entity.is_fountain:
-                self.__entities.add(HealthView(self.__arena, entity))
+                self.__entities_wait_add.add(HealthView(self.__arena, entity))
 
     def handle_unconditional_tick(self, _: EventUnconditionalTick):
         self.__display_fps()
@@ -151,6 +152,8 @@ class View:
 
         discarded_entities: set[EntityView] = set()
 
+        self.__entities.union(self.__entities_wait_add)
+        self.__entities_wait_add.clear()
         for entity in self.__entities:
             if not entity.update():
                 discarded_entities.add(entity)
