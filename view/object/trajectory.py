@@ -23,16 +23,15 @@ class TrajectoryView(EntityObject):
     def draw(self):
         entity = self.entity
         entity_path = entity.move_path
-        entity_path = [[x * ScreenInfo.resize_ratio for x in p] for p in entity_path]
         if entity_path is not None and len(entity_path) > 1:
-            pg.draw.lines(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id], 
-                        False, entity_path, const.TRAJECTORY_WIDTH)
-            pg.draw.lines(self.canvas, (0, 0, 0), 
-                        False, entity_path, 2)
-            pg.draw.circle(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id], 
+            entity_path = [[x * ScreenInfo.resize_ratio for x in p] for p in entity_path]
+            pg.draw.lines(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id],
+                          False, entity_path, const.TRAJECTORY_WIDTH)
+            pg.draw.lines(self.canvas, (0, 0, 0),
+                          False, entity_path, 2)
+            pg.draw.circle(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id],
                            entity_path[-1], const.DESTINATION_RADIUS, const.DESTINATION_RADIUS)
-            pg.draw.lines(self.canvas, 'red', 
-                        False, entity_path[:10], const.TRAJECTORY_WIDTH)
+            pg.draw.lines(self.canvas, 'red',
+                          False, entity_path[:10], const.TRAJECTORY_WIDTH)
             pg.draw.circle(self.canvas, 'red',
-                        entity_path[min(len(entity_path)-1, 10)], const.TRAJECTORY_WIDTH, const.TRAJECTORY_WIDTH)
-        
+                           entity_path[min(len(entity_path)-1, 10)], const.TRAJECTORY_WIDTH, const.TRAJECTORY_WIDTH)

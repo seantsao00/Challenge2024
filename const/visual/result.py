@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from enum import Enum, auto
 from math import cos, sin
-from random import randint, uniform
+from random import getrandbits, uniform
 
 import pygame as pg
 
@@ -47,13 +47,19 @@ class ScopeStatus(Enum):
 
 SCOPE_SPEED = 7
 INVERVAL_WAITING = 1
-INVERVAL_WANDERING = uniform(4.0, 6.5)
 WANDERING_PERIOD = 3
 POSITION_EPSILON = 0.01
+WANDERING_SHIFT: pg.Vector2 = (2, 2)
 
 
-def final_wanderring_parameter() -> int:
-    return randint(0, 2)
+def interval_wandering() -> float:
+    return uniform(3.0, 5.0)
+
+
+def is_final_wandering(num_teams: int) -> bool:
+    if num_teams == 1:
+        return False
+    return bool(getrandbits(1))
 
 
 def wandering_formula(t: float) -> pg.Vector2:
