@@ -5,10 +5,11 @@ The module defines Controller class.
 import pygame as pg
 
 import const
+import const.controller
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
-                           EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam, EventViewShowRangeSwitch,
+                           EventNyanCat, EventPauseModel, EventQuit, EventResumeModel,
+                           EventSelectCharacter, EventSelectParty, EventUnconditionalTick,
+                           EventUseRangerAbility, EventViewChangeTeam, EventViewShowRangeSwitch,
                            EventViewTrajectorySwitch)
 from instances_manager import get_event_manager, get_model
 from model import Character, TimerManager, Tower
@@ -31,6 +32,7 @@ class Controller:
         """
         self.__resize_ratio: float = ScreenInfo.resize_ratio
         self.register_listeners()
+        self.egg_record = 0
 
     def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
@@ -81,16 +83,26 @@ class Controller:
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventPauseModel())
                 if key == const.ABILITY_BUTTON:
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITY))
+                    ev_manager.post(EventHumanInput(
+                        input_type=const.InputTypes.ABILITY))
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
-                    ev_manager.post(EventSelectCharacter(character_type=character_type))
+                    ev_manager.post(EventSelectCharacter(
+                        character_type=character_type))
                 if key == const.CHANGE_TEAM_VISION:
                     ev_manager.post(EventViewChangeTeam())
                 if key == const.TRAJECTORY_SWITCH_BUTTON:
                     ev_manager.post(EventViewTrajectorySwitch())
                 if key == const.SHOWRANGE_SWITCH_BUTTON:
                     ev_manager.post(EventViewShowRangeSwitch())
+                # ???
+                if key == const.controller.EGG_SEQ[self.egg_record]:
+                    self.egg_record += 1
+                else:
+                    self.egg_record = 0
+                if self.egg_record == len(const.controller.EGG_SEQ):
+                    ev_manager.post(EventNyanCat())
+                    self.egg_record = 0
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
@@ -107,7 +119,8 @@ class Controller:
                             model.ranger_controlling.abilities_time = model.get_time()
                             log_info("[Ranger] manual control success")
                         else:
-                            log_info("[Ranger] manual control failed: out of range")
+                            log_info(
+                                "[Ranger] manual control failed: out of range")
                         get_model().ranger_ability = False
                     else:
                         clicked = None
@@ -137,7 +150,8 @@ class Controller:
                         ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
                                         clicked_entity=clicked))
                     else:
-                        log_info('[Controller] Right click non interactable object')
+                        log_info(
+                            '[Controller] Right click non interactable object')
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)
@@ -204,8 +218,12 @@ class Controller:
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
-        ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        ev_manager.register_listener(
+            EventUnconditionalTick, self.handle_unconditional_tick)
         # Listeners for TimerManager
-        ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
-        ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
-        ev_manager.register_listener(EventGameOver, TimerManager.handle_game_over)
+        ev_manager.register_listener(
+            EventPauseModel, TimerManager.pause_all_timer)
+        ev_manager.register_listener(
+            EventResumeModel, TimerManager.resume_all_timer)
+        ev_manager.register_listener(
+            EventGameOver, TimerManager.handle_game_over)

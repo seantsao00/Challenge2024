@@ -4,6 +4,7 @@ from view.object.clock import *
 from view.object.cooldown import *
 from view.object.entity import *
 from view.object.health import *
+from view.object.nyan import *
 from view.object.object_base import *
 from view.object.particle import *
 from view.object.particle_manager import *

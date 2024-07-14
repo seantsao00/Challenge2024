@@ -28,6 +28,7 @@ from model.character import Character, Ranger, Sniper
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
+from model.nyan import Nyan
 from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.result import Result
@@ -101,6 +102,7 @@ class Model:
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
+        self.nyan = Nyan()
         self.ranger_ability = False
         self.ranger_controlling: Ranger = None
 

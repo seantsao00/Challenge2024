@@ -236,3 +236,8 @@ class EventResultWandering(BaseEvent):
 @dataclass(kw_only=True)
 class EventResultChamp(BaseEvent):
     """ In result, the champion is announced."""
+
+
+@dataclass(kw_only=True)
+class EventNyanCat(BaseEvent):
+    """What is this?"""
