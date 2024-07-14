@@ -8,7 +8,7 @@ import pygame as pg
 
 import const
 from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
-                           EventViewChangeTeam)
+                           EventViewChangeTeam, EventViewTrajectorySwitch)
 from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
@@ -60,6 +60,7 @@ class View:
         self.__entities_wait_add: set[EntityView] = set()
 
         self.vision_of = 0
+        self.trajectory_enable = True
         self.__scoreboard_image = pg.transform.scale(
             pg.image.load(os.path.join(const.IMAGE_DIR, 'scoreboard.png')).convert_alpha(),
             ScreenInfo.screen_size
@@ -184,7 +185,7 @@ class View:
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
             if isinstance(obj, TrajectoryView):
-                if self.vision_of == 0 or obj.team_id == (self.vision_of - 1):
+                if self.trajectory_enable and (self.vision_of == 0 or obj.team_id == (self.vision_of - 1)):
                     obj.draw()
             else:
                 obj.draw()
@@ -206,6 +207,9 @@ class View:
     def change_vision_of(self, _: EventViewChangeTeam):
         self.vision_of = (self.vision_of + 1) % (len(get_model().teams) + 1)
 
+    def change_trajectory_enable(self, _: EventViewTrajectorySwitch):
+        self.trajectory_enable = not self.trajectory_enable
+
     def register_listeners(self):
         """Register all listeners of this object with the event manager."""
         ev_manager = get_event_manager()
@@ -213,6 +217,7 @@ class View:
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
         ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
+        ev_manager.register_listener(EventViewTrajectorySwitch, self.change_trajectory_enable)
 
     def __display_fps(self):
         """Display the current fps on the window caption."""
