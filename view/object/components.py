@@ -18,12 +18,17 @@ _cache_avatar: dict[tuple[int, int], pg.Surface] = {}
 def _getAvatarImage(party: const.team.PartyType):
     if party in _cache_avatar_img:
         return _cache_avatar_img[party]
-    if const.character.CharacterType.RANGER in const.ENTITY_IMAGE[party]:
+
+    if (party is const.team.PartyType.JUNIOR) or (party is const.team.PartyType.FBI):
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][None])
+            const.ENTITY_IMAGE[party][const.character.CharacterType.SNIPER][None])
+    elif party is const.team.PartyType.POLICE:
+        avatar_img = pg.image.load(
+            const.ENTITY_IMAGE[party][const.character.CharacterType.MELEE][None])
     else:
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[const.team.PartyType.NEUTRAL][const.tower.TowerType.PYLON][None])
+            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][None])
+
     _cache_avatar_img[party] = avatar_img
     return avatar_img
 
