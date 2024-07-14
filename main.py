@@ -69,6 +69,9 @@ if __name__ == "__main__":
     parser.add_argument('-q', '--skip-character-selecting', action='store_true',
                         help='Skip character selection and randomly assign characters to teams '
                              'for quick test.')
+    
+    parser.add_argument('-t', '--show-trajectory', action='store_true',
+                        help='Display the trajectory of all characters.')
 
     args = parser.parse_args()
 
@@ -85,7 +88,8 @@ if __name__ == "__main__":
         team_controls=args.team_controls,
         show_view_range=args.show_view_range or args.show_attack_view_range,
         show_attack_range=args.show_attack_range or args.show_attack_view_range,
-        skip_character_selecting=args.skip_character_selecting
+        skip_character_selecting=args.skip_character_selecting,
+        show_trajectory=args.show_trajectory
     ))
     instances_manager.register_model(model)
 
