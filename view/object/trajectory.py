@@ -23,12 +23,11 @@ class TrajectoryView(EntityObject):
         entity = self.entity
         entity_path = entity.move_path
         entity_path = [[x * ScreenInfo.resize_ratio for x in p] for p in entity_path]
-        path_offset = [[x for x in p] for p in entity_path]
         if entity_path is not None and len(entity_path) > 1:
             pg.draw.lines(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id], 
                         False, entity_path, const.TRAJECTORY_WIDTH)
             pg.draw.lines(self.canvas, (0, 0, 0), 
-                        False, path_offset, 2)
+                        False, entity_path, 2)
             pg.draw.circle(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id], 
                            entity_path[-1], const.DESTINATION_RADIUS, const.DESTINATION_RADIUS)
             pg.draw.lines(self.canvas, 'red', 

@@ -103,7 +103,7 @@ class View:
             self.__entities.append(AbilitiesCDView(self.__arena, entity))
             if entity.health is not None:
                 self.__entities.append(HealthView(self.__arena, entity))
-            if entity.alive:
+            if model.show_trajectory:
                 self.__entities.append(TrajectoryView(self.__arena, entity))
         if isinstance(entity, Tower):
             if model.show_view_range:
