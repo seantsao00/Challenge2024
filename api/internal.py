@@ -11,6 +11,7 @@ import os
 import signal
 import threading
 import traceback
+from itertools import combinations
 from typing import Iterable
 
 import numpy as np
@@ -550,8 +551,10 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        for keyword in const.DIRTY_WORDS:
-            msg = msg.replace(keyword, len(keyword)*'*')
+        for substring in [msg[x:y] for x, y in sorted(combinations(range(len(msg) + 1), r=2),
+                                                      key=lambda x: x[0]-x[1])]:
+            if substring in const.DIRTY_WORDS:
+                msg = msg.replace(substring, len(substring)*'*')
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
