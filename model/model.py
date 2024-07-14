@@ -20,7 +20,8 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
                            EventCreateEntity, EventEveryTick, EventGameOver, EventInitialize,
                            EventPauseModel, EventPostInitialize, EventQuit,
                            EventRangedBulletDamage, EventResumeModel, EventSelectParty,
-                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
+                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick,
+                           EventViewShowRangeSwitch)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger, Sniper
@@ -46,6 +47,7 @@ class ModelArguments:
     show_attack_range: bool
     skip_character_selecting: bool
     show_trajectory: bool
+    show_range: bool
 
 
 class Model:
@@ -93,6 +95,7 @@ class Model:
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
         self.show_trajectory: bool = model_arguments.show_trajectory
+        self.show_range: bool = model_arguments.show_range
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
@@ -225,6 +228,7 @@ class Model:
         ev_manager.register_listener(EventBulletDamage, self.bullet_damage)
         ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
         ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
+        ev_manager.register_listener(EventViewShowRangeSwitch, self.change_showrange_enable)
 
     def get_time(self):
         return self.__game_clock.get_time()
@@ -285,3 +289,6 @@ class Model:
 
     def __handle_select_party(self, _: EventSelectParty):
         self.state = const.State.SELECT_PARTY
+
+    def change_showrange_enable(self, _: EventViewShowRangeSwitch):
+        self.show_range = not self.show_range

@@ -8,7 +8,8 @@ import const
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
                            EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam, EventViewTrajectorySwitch)
+                           EventViewChangeTeam, EventViewShowRangeSwitch,
+                           EventViewTrajectorySwitch)
 from instances_manager import get_event_manager, get_model
 from model import Character, TimerManager, Tower
 from util import log_info
@@ -88,6 +89,8 @@ class Controller:
                     ev_manager.post(EventViewChangeTeam())
                 if key == const.TRAJECTORY_SWITCH_BUTTON:
                     ev_manager.post(EventViewTrajectorySwitch())
+                if key == const.SHOWRANGE_SWITCH_BUTTON:
+                    ev_manager.post(EventViewShowRangeSwitch())
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
