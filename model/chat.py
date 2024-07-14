@@ -16,9 +16,8 @@ if TYPE_CHECKING:
 
 
 class Chat:
-    def __send_chat(self, type: ChatMessageType, team: Team, text: str):
-        # TODO: rate-limit or similar checking
-        get_event_manager().post(EventSendChat(type=type, team=team, text=text))
+    def __send_chat(self, message_type: ChatMessageType, team: Team, text: str):
+        get_event_manager().post(EventSendChat(type=message_type, team=team, text=text))
 
     def send_comment(self, team: Team, text: str):
         self.__send_chat(ChatMessageType.CHAT_COMMENT, team, text)

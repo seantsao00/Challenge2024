@@ -35,6 +35,24 @@ def assign_random_destination(character: Character, interface: API):
     Information.destinations[character.id] = new_destination
     interface.action_move_to([character], new_destination)
 
+def enemies_near_tower(tower: Tower, interface: API):
+    """傳入一座塔，回傳塔附近所有的敵對單位"""
+    visible_enemies = [character for character in interface.get_visible_characters()
+                if character.team_id != interface.get_team_id()]
+    ret = []
+    for enemy in visible_enemies:
+        if enemy.position.distance_to(tower.position) <= 20:
+            ret.append(enemy)
+    return ret
+
+def allies_near_tower(tower: Tower, interface: API):
+    """傳入一座塔，回傳塔附近所有的友方單位"""
+    allies = [character for character in interface.get_owned_characters()]
+    ret = []
+    for ally in allies:
+        if ally.position.distance_to(tower.position) <= 20:
+            ret.append(ally)
+    return ret
 
 def every_tick(interface: API):
     """一定要被實作的 function ，會定期被遊戲 call"""
@@ -93,8 +111,10 @@ def every_tick(interface: API):
         '近戰兵的移動速度很高血量也很多視野也很廣！！但是攻擊距離太短了打不太到移動目標...',
         '遠程兵的攻擊力很高還自帶範圍傷害技能！！但是太脆了需要有人掩護...',
         '中立塔可以提供視野，額外分數，也可以生成額外的兵力，是個重要戰略目標！！多多圍繞中立塔擬定策略吧！',
-        '視野很重要！沒有視野就看不到中立塔，也看不到敵人...',
-        '有時，偏門玩法反而有奇效！'
+        '視野很重要！沒有視野就看不到中立塔，也看不到敵人...(用 api.action_wander 可以讓角色遊走)',
+        '有時，偏門玩法反而有奇效！',
+        '多研究 API，每個功能都有它的用處！',
+        '善用角色技能！',
     ]
     chat_other = [
         '只探視野不會贏 QQ',
@@ -104,7 +124,8 @@ def every_tick(interface: API):
         '好餓...想吃宵夜了...',
         '(來自 Challenge 員工的哀號)',
         'Bug 退散！',
-        '維護良好素質，從你我做起！'
+        '維護良好素質，從你我做起！',
+        '為甚麼 sample 好像有點強 @@'
     ]
     chat_choices = chat_information + chat_guide + chat_other
     # 以 Const.CHAT_PROBABILITY 的機率隨便說說話
