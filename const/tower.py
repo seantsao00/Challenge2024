@@ -41,7 +41,7 @@ NEUTRAL_TOWER_ATTRIBUTE = TowerAttribute(
 )
 
 TOWER_DEFAULT_GENERATE_CHARACTER = CharacterType.RANGER
-TOWER_GENERATE_DISPLACEMENT = 10
+TOWER_GENERATE_DISPLACEMENT = 5
 """The distance between generated character and the tower will be less than this value."""
 
 TOWER_SPAWN_INITIAL_PERIOD = 1
