@@ -106,6 +106,10 @@ class Tower(LivingEntity):
         if not self.vulnerable(event.attacker) or self.team == event.attacker.team:
             return
 
+        if event.attacker.entity_type is const.CharacterType.MELEE or\
+           event.attacker.entity_type is const.CharacterType.RANGER or\
+           event.attacker.entity_type is const.CharacterType.SNIPER:
+            event.attacker.record_attack(min(self.health, event.damage))
         if self.health - event.damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:
                 ev_manager.post(EventTeamGainTower(tower=self), event.attacker.team.team_id)

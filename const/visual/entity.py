@@ -55,9 +55,20 @@ CHARACTER_IMAGE: dict[(CharacterType, CharacterState), str] = {
     (CharacterType.MELEE, CharacterState.LEFT): 'melee_left.png',
     (CharacterType.RANGER, CharacterState.LEFT): 'ranger_left.png',
     (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_left.png',
+    (CharacterType.MELEE, CharacterState.LEFT_ASCENDED): 'melee_left_ascended.png',
+    (CharacterType.RANGER, CharacterState.LEFT_ASCENDED): 'ranger_left_ascended.png',
+    (CharacterType.SNIPER, CharacterState.LEFT_ASCENDED): 'sniper_left_ascended.png',
     (CharacterType.MELEE, CharacterState.RIGHT): 'melee_right.png',
     (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_right.png',
-    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png'
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png',
+    (CharacterType.MELEE, CharacterState.RIGHT_ASCENDED): 'melee_right_ascended.png',
+    (CharacterType.RANGER, CharacterState.RIGHT_ASCENDED): 'ranger_right_ascended.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT_ASCENDED): 'sniper_right_ascended.png'
+}
+CHARACTER_ASCENDED_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: 'melee_ascended.png',
+    CharacterType.RANGER: 'ranger_ascended.png',
+    CharacterType.SNIPER: 'sniper_ascended.png'
 }
 
 WEAPON_DIR = 'weapon/'

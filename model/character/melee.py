@@ -45,6 +45,15 @@ class Melee(Character):
                                                  damage=self.attribute.attack_damage), enemy.id)
             self._last_attack_time = now_time
 
+    def record_attack(self, damage: float):
+        self.attack_total += damage
+        if not self.ascended and self.attack_total >= self.attribute.ascend_threshold:
+            self.ascended = True
+            if self.state is const.CharacterState.LEFT:
+                self.state = const.CharacterState.LEFT_ASCENDED
+            elif self.state is const.CharacterState.RIGHT:
+                self.state = const.CharacterState.RIGHT_ASCENDED
+
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
             return
@@ -57,6 +66,10 @@ class Melee(Character):
         else:
             new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
+        if event.attacker.entity_type is const.CharacterType.MELEE or\
+           event.attacker.entity_type is const.CharacterType.RANGER or\
+           event.attacker.entity_type is const.CharacterType.SNIPER:
+            event.attacker.record_attack(min(self.health, event.damage))
         if self.health <= 0:
             self.die()
             if event.attacker.team.party is not const.PartyType.NEUTRAL:

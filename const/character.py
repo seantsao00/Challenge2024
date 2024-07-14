@@ -23,11 +23,14 @@ class CharacterAttribute(LivingEntityAttribute):
     speed: float
     ability_cd: float | None
     ability_variables: Any | None
+    ascend_threshold: float
 
 
 class CharacterState(Enum):
     LEFT = auto()
     RIGHT = auto()
+    LEFT_ASCENDED = auto()
+    RIGHT_ASCENDED = auto()
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(
@@ -38,7 +41,8 @@ MELEE_ATTRIBUTE = CharacterAttribute(
     vision=20,
     ability_cd=3,
     attack_speed=1,
-    ability_variables=3
+    ability_variables=3,
+    ascend_threshold=72
     # damage per second = 36
 )
 
@@ -50,7 +54,8 @@ RANGER_ATTRIBUTE = CharacterAttribute(
     vision=15,
     ability_cd=2,
     attack_speed=1.2,
-    ability_variables=[15, 60]  # [range, damage] of ability
+    ability_variables=[15, 60],  # [range, damage] of ability
+    ascend_threshold=144
     # damage per second = 72
 )
 
@@ -62,7 +67,8 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     vision=4,
     ability_cd=4,
     attack_speed=0.5,
-    ability_variables=300  # damage of ability
+    ability_variables=300,  # damage of ability
+    ascend_threshold=300
     # damage per second = 150
 )
 

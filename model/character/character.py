@@ -54,6 +54,8 @@ class Character(LivingEntity):
         self.abilities_time: float = -attribute.ability_cd
         self._last_attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
+        self.ascended: bool = False
+        self.attack_total: float = 0.0
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
@@ -204,10 +206,18 @@ class Character(LivingEntity):
         self.__is_wandering = True
         return True
 
+    @abstractmethod
+    def record_attack(self, damage: float):
+        pass
+
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
             return
 
+        if event.attacker.entity_type is const.CharacterType.MELEE or\
+           event.attacker.entity_type is const.CharacterType.RANGER or\
+           event.attacker.entity_type is const.CharacterType.SNIPER:
+            event.attacker.record_attack(min(self.health, event.damage))
         self.health -= event.damage
         if self.health <= 0:
             self.die()
@@ -242,10 +252,16 @@ class Character(LivingEntity):
     def update_face_direction(self, direction: pg.Vector2 | None):
         if direction == None or direction == pg.Vector2(0, 0):
             return
-        if direction.x <= 0:
-            self.state = const.CharacterState.LEFT
+        if self.ascended:
+            if direction.x <= 0:
+                self.state = const.CharacterState.LEFT_ASCENDED
+            else:
+                self.state = const.CharacterState.RIGHT_ASCENDED
         else:
-            self.state = const.CharacterState.RIGHT
+            if direction.x <= 0:
+                self.state = const.CharacterState.LEFT
+            else:
+                self.state = const.CharacterState.RIGHT
 
     @abstractmethod
     def attack(self, enemy: Entity):
