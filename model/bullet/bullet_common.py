@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from model.team import Team
 
 
-class BulletCommon(Bullet[None]):
+class BulletCommon(Bullet):
     def __init__(self,
                  position: pg.Vector2 | tuple[float, float],
                  team: Team,
@@ -27,7 +27,7 @@ class BulletCommon(Bullet[None]):
                          team=team, speed=speed, attacker=attacker, damage=damage)
         self.victim = victim
 
-    def judge(self, _: None = None):
+    def judge(self):
         """
         Decide if the bullet needs to move, cause damage or disappear.
         The direction is decided by the current position of bullet and victim.
