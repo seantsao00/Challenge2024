@@ -177,10 +177,10 @@ def every_tick(api: API):
                         api.action_cast_ability([character])
                         api.action_attack([character], random_target)
                 
-            elif dispatched_characters_count + recruited_characters_count >= 10:
+            elif recruited_characters_count + dispatched_characters_count >= 10:
                 
                 if dispatched_characters_count != 0:
-                    if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0 and target_tower.health / target_tower.max_health > 0.5:
+                    if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0:
                         target_enemy = random.choice(enemies_near_tower(visible_enemy, target_tower, api))
                         api.action_move_to(no_sniper_characters, target_tower.position)
                         api.action_attack(no_sniper_characters, target_enemy)
@@ -199,7 +199,7 @@ def every_tick(api: API):
                         api.action_cast_ability([character])
                         api.action_attack([character], random_target)
             else:
-                if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0 or ta:
+                if len(enemies_near_tower(visible_enemy, target_tower, api)) > 0:
                     target_enemy = random.choice(enemies_near_tower(visible_enemy, target_tower, api))
                     api.action_move_to(no_sniper_characters, target_tower.position)
                     api.action_attack(no_sniper_characters, target_enemy)
