@@ -131,7 +131,9 @@ class Map:
 
         # helper functions
         def heuristic(cell: tuple[int, int]) -> float:
-            return (cell[0] - cell_end[0]) ** 2 + (cell[1] - cell_end[1]) ** 2
+            est_dist = (pg.Vector2(cell) - pg.Vector2(cell_end)).length()
+            est_speed = (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cell) == const.MAP_PUDDLE else 1)
+            return est_dist / est_speed + dist[cell[0]][cell[1]]
 
         def push_cell(cell: tuple[int, int], new_dist: float, cell_source: tuple[int, int]) -> None:
             cx, cy = cell
@@ -151,7 +153,8 @@ class Map:
                 (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951),
             ]
             for dx, dy, dd in diff:
-                nx, ny, nd = cur_cell[0] + dx, cur_cell[1] + dy, cur_dist + dd
+                nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
+                nd = cur_dist + dd * (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cur_cell) == const.MAP_PUDDLE else 1)
                 if self.is_cell_passable((nx, ny)):
                     yield (nx, ny, nd)
 
