@@ -17,7 +17,6 @@ from model.bullet import BulletCommon
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
-from util import log_info
 
 if TYPE_CHECKING:
     from model.character import Character
@@ -56,7 +55,7 @@ class Tower(LivingEntity):
         ]
         """Grids that can spawn characters for this tower."""
 
-        if  self.__is_fountain:
+        if self.__is_fountain:
             super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
                              team, tower_type, invulnerability=True)
         else:
