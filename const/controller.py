@@ -29,6 +29,8 @@ SHOWRANGE_SWITCH_BUTTON = pg.K_r
 PAUSE_BUTTON = pg.K_ESCAPE
 
 CONFIRM_BUTTONS = [pg.K_SPACE, pg.K_RETURN]
+EGG_SEQ = [pg.K_UP, pg.K_UP, pg.K_DOWN, pg.K_DOWN,
+           pg.K_LEFT, pg.K_RIGHT, pg.K_LEFT, pg.K_RIGHT, pg.K_b, pg.K_a]
 
 
 class PartySelectorInputType(Enum):

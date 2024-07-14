@@ -12,7 +12,7 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
 from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
-                         EntityView, HealthView, ObjectBase, Particle, ParticleManager,
+                         EntityView, HealthView, NyanView, ObjectBase, Particle, ParticleManager,
                          PartySelectorView, PauseMenuView, ResultView, ScoreboardView, TowerCDView,
                          TrajectoryView, ViewRangeView)
 from view.screen_info import ScreenInfo
@@ -49,6 +49,8 @@ class View:
         self.__pause_menu_view = PauseMenuView(self.__screen, model.pause_menu)
         self.__party_selector_view = PartySelectorView(self.__screen, model.party_selector)
         self.__result_view = ResultView(self.__screen, model.result)
+
+        self.__nyan_view = NyanView(self.__screen, model.nyan)
 
         self.__cover_image: pg.Surface = load_image(const.COVER_IMAGE, screen_w, screen_h)[0]
         self.__particle_manager = ParticleManager(self.__screen)
@@ -200,6 +202,8 @@ class View:
         self.__clock.draw()
 
         self.__particle_manager.draw()
+
+        self.__nyan_view.draw()
 
         if model.state == const.State.PAUSE:
             self.__pause_menu_view.draw()
