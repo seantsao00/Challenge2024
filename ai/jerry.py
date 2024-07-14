@@ -30,11 +30,11 @@ class JerryAI:
         self.explored_grids: set[tuple[int, int]] = set()
         self.explorers: set[int] = set()
 
-        self.my_chid_to_ch: dict[int: Character] = dict()
+        self.my_chid_to_ch: dict[int: Character] = {}
         self.my_chs: set[int] = set()
 
         self.target_towerid: int = -1
-        self.towerid_to_tower: dict[int, Tower] = dict()
+        self.towerid_to_tower: dict[int, Tower] = {}
 
     def grid_to_coordiante(self, grid: tuple[int, int]) -> pg.Vector2:
         return pg.Vector2(JerryAI.PER_GRID * grid[0], JerryAI.PER_GRID * grid[1])
@@ -60,6 +60,7 @@ class JerryAI:
         api.action_move_to(api.get_owned_characters(), tower.position)
         for ch in api.get_owned_characters():
             if (tower.position - ch.position).length() <= ch.attack_range:
+                print(tower.position)
                 api.action_attack(api.get_owned_characters(), tower)
             else:
                 enemies = api.within_attacking_range(ch, None)
@@ -83,6 +84,7 @@ class JerryAI:
             if api.get_movement(self.my_chid_to_ch[chid]).vector is None:
                 self.explorers.remove(chid)
                 unused.add(chid)
+            
 
         # if the number of explorers is enough
         if self.EXPLORER_NUM > len(self.explorers):
@@ -101,7 +103,7 @@ class JerryAI:
                     continue
                 self.target_towerid = t.id
                 break
-        
+
         self.attack_tower(api, self.towerid_to_tower[self.target_towerid])
 
     def stage_defence_tower(self, api: API):
@@ -123,23 +125,23 @@ class JerryAI:
     def chat(self, api: API):
         # chs = api.get_owned_characters()
         emoji_list = [
-            "(｡♥‿♥｡)", "(≧◡≦)", "(≧ω≦)", "(◕‿◕✿)", "(づ｡◕‿‿◕｡)づ",
-            "(ʘ‿ʘ)", "(｡◕‿◕｡)", "(♥ω♥*)", "(¬‿¬)", "(✿◠‿◠)",
-            "(╯°□°）╯︵ ┻━┻", "(≧▽≦)", "( ͡° ͜ʖ ͡°)", "(✧ω✧)", "(ᵔᴥᵔ)",
-            "(^_^)", "(ಠ_ಠ)", "(╯︵╰,)", "(T_T)", "(ಥ﹏ಥ)",
-            "(｡•́︿•̀｡)", "(ʘ‿ʘ)", "(•̀ᴗ•́)و ̑̑", "(￣ω￣)", "(￣3￣)",
-            "( ͡ᵔ ͜ʖ ͡ᵔ )", "(◕‿◕✿)", "( ͡° ͜ʖ ͡°)", "(ღ˘⌣˘ღ)", "(✪ω✪)",
-            "(◕‿◕)", "(•ω•)", "(●‿●)", "(≧◡≦)", "(≧ω≦)",
-            "(✧ω✧)", "(✿◠‿◠)", "(╯°□°）╯︵ ┻━┻", "(≧▽≦)", "( ͡° ͜ʖ ͡°)",
-            "(｡♥‿♥｡)", "(≧◡≦)", "(≧ω≦)", "(◕‿◕✿)", "(づ｡◕‿‿◕｡)づ",
-            "(ʘ‿ʘ)", "(｡◕‿◕｡)", "(♥ω♥*)", "(¬‿¬)", "(✿◠‿◠)"
+            "(＾▽＾)", "(￣▽￣)", "(＾_＾)", "(￣ω￣)", "(￣︿￣)",
+            "(Ｔ▽Ｔ)", "(≧ω≦)", "(￣へ￣)", "(＾◇＾)", "(＾ω＾)",
+            "(⊙_⊙)", "(╥_╥)", "(ノಠ益ಠ)ノ", "(￣ー￣)", "(￣∇￣)",
+            "(≧д≦)", "(＾Д＾)", "(￣□￣)", "(＾o＾)", "(￣︶￣)",
+            "(￣ｰ￣)", "(＾▽＾*)", "(￣▽￣*)", "(＾◇＾*)", "(￣∇￣*)",
+            "(￣ー￣*)", "(＾_＾*)", "(＾ω＾*)", "(￣︿￣*)", "(Ｔ▽Ｔ*)",
+            "(≧ω≦*)", "(￣へ￣*)", "(＾◇＾;)", "(￣◇￣;)", "(￣∇￣;)",
+            "(￣ー￣;)", "(＾ω＾;)", "(⊙_⊙;)", "(╥_╥;)", "(ノಠ益ಠ)ノ",
+            "(￣ー￣)", "(￣︶￣)", "(Ｔ▽Ｔ)", "(≧д≦)", "(￣∇￣)",
+            "(＾o＾)", "(＾◇＾)", "(＾_＾)", "(￣ω￣)", "(￣︿￣)", "(╯°□°）╯︵ ┻━┻"
         ]
 
         ch = random.choice(emoji_list)
         api.send_chat(ch)
 
     def run(self, api: API):
-        self.my_chid_to_ch = dict()
+        self.my_chid_to_ch = {}
         self.my_chs = set()
 
         for character in api.get_owned_characters():
