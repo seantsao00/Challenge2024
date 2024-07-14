@@ -104,7 +104,7 @@ class View:
             if entity.health is not None:
                 self.__entities.append(HealthView(self.__arena, entity))
             if model.show_trajectory:
-                self.__entities.append(TrajectoryView(self.__arena, entity))
+                self.__entities.append(TrajectoryView(self.__arena, entity, entity.team.team_id))
         if isinstance(entity, Tower):
             if model.show_view_range:
                 self.__entities.append(ViewRangeView(self.__arena, entity))
@@ -180,7 +180,11 @@ class View:
 
         objects.sort(key=lambda x: x.priority)
         for obj in objects:
-            obj.draw()
+            if isinstance(obj, TrajectoryView):
+                if self.vision_of == 0 or obj.team_id == (self.vision_of - 1):
+                    obj.draw()
+            else:
+                obj.draw()
 
         self.__screen.blit(
             self.__arena, ((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))

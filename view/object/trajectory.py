@@ -14,10 +14,11 @@ if TYPE_CHECKING:
 
 
 class TrajectoryView(EntityObject):
-    def __init__(self, canvas: pg.Surface, entity: Character):
+    def __init__(self, canvas: pg.Surface, entity: Character, team_id: int):
         super().__init__(canvas, entity)
         self.priority[0] = PRIORITY_ARROW
         self.entity: Character
+        self.team_id = team_id
 
     def draw(self):
         entity = self.entity
