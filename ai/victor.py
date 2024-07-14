@@ -1,5 +1,4 @@
-import itertools
-import math
+import math, itertools
 import random
 
 import pygame as pg
@@ -34,9 +33,6 @@ def handle_walker(api: API):
                     break
 
 
->>>>>> > develop
-
-
 def init(api: API):
     global my_team_id, map, alive, walker, enemys_tower, my_tower, my_character, need_change_position
     if len(destination) == 0:
@@ -49,23 +45,8 @@ def init(api: API):
                 t -= 0.01
     my_team_id = api.get_team_id()
     my_character = api.get_owned_characters()
-
-
-<< << << < HEAD
-    my_melee = [melee for melee in my_character if melee.type ==
-                CharacterClass.MELEE and melee.id not in used]
-    my_ranger = [ranger for ranger in my_character if ranger.type ==
-                 CharacterClass.RANGER and ranger.id not in used]
-    my_sniper = [sniper for sniper in my_character if sniper.type ==
-                 CharacterClass.SNIPER and sniper.id not in used]
-    my_tower = api.get_owned_towers()
-    visible_tower = [tower for tower in api.get_visible_towers() if tower.team_id != my_team_id]
-    visible_enemy = [character for character in visible if character.team_id != my_team_id]
-
-== == == =
     enemys_tower = [tower for tower in api.get_visible_towers() if tower.team_id != my_team_id]
     my_tower = api.get_owned_towers()
->>>>>> > develop
     alive.clear()
     for character in itertools.chain(api.get_visible_characters(), api.get_visible_towers()):
         alive[character.id] = character
@@ -115,68 +96,12 @@ def every_tick(api: API):
     if len(map) > 145:
         for tower in my_tower:
             api.change_spawn_type(tower, CharacterClass.MELEE)
-
-
-<< << << < HEAD
-
-    if len(map) > 0:
-        for melee in my_melee:
-            if (melee.position[0] // 14, melee.position[1] // 14) in map:
-                map.remove((melee.position[0] // 14, melee.position[1] // 14))
-        mx = len(my_melee)
-        if len(visible_tower) > 0:
-            mx = min(8, mx)
-        for i in range(mx):
-            w = my_melee[i]
-            print("in", i, w.position, api.get_movement(w).status)
-            if api.get_movement(w).status is not MovementStatusClass.TO_POSITION:
-                choose = random.choice(list(map))
-                for _ in range(25):
-                    x, y = min((random.random() + choose[0]) * 14,
-                               245), min((random.random() + choose[1]) * 14, 245)
-                    if (api.get_terrain(pg.Vector2(x, y)) is not MapTerrain.OBSTACLE
-                            and api.get_terrain(pg.Vector2(x, y)) is not MapTerrain.OUT_OF_BOUNDS):
-                        api.action_move_to([w], pg.Vector2(x, y))
-                        break
-        api.action_move_to(my_melee[mx + 1:], gathering_point)
-
-    if len(visible_tower) > 0:
-        best_choose = (1e9, None)
-        for tower in visible_tower:
-            total = 150
-            for character in visible_enemy:
-                if character.type is CharacterClass.MELEE:
-                    total += 36
-                elif character.type is CharacterClass.RANGER:
-                    total += 72
-                elif character.type is CharacterClass.SNIPER:
-                    total += 150
-            best_choose = min(best_choose, (total, tower))
-        if len(my_ranger) < 8:
-== == == =
     else:
         if len(walker) < 2 and api.get_current_time() < 80: 
             for tower in my_tower:
                 api.change_spawn_type(tower, CharacterClass.MELEE)
         else:
             for tower in my_tower:
-<<<<<<< HEAD
-                api.change_spawn_type(tower, CharacterClass.RANGER)
-        my_total_health = 0
-        for melee in my_melee:
-            if melee.position.distance_to(gathering_point) < 0.1:
-                my_total_health += melee.health
-        group_melee = [_.id for _ in my_melee if _.position.distance_to(gathering_point) < 0.1]
-        group_ranger = [_.id for _ in my_ranger if _.position.distance_to(gathering_point) < 0.1]
-        if len(group_ranger) >= 8 and count_defence(my_total_health, best_choose[0]) > 5:
-            # print("append attack", len(destination))
-            attacker_melee.append(group_melee)
-            attacker_ranger.append(group_ranger)
-            destination.append(best_choose[1].id)
-            for character in itertools.chain(group_melee, group_ranger):
-                if alive[character].position.distance_to(gathering_point) < 0.1:
-                    used.add(character)
-=======
                 api.change_spawn_type(tower, CharacterClass.SNIPER)
     handle_walker(api)
     change_position(api)
@@ -218,4 +143,3 @@ def every_tick(api: API):
                     sniper_order.remove(victim)
                 else:
                     victim.health -= 150
->>>>>>> develop
