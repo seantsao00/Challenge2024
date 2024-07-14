@@ -50,6 +50,7 @@ class Internal(prototype.API):
         self.team_id = team_id
         self.transform: np.ndarray = None
         self.__chat_sent = False
+        self.__last_chat_time_stamp = float('-inf')
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
@@ -536,6 +537,9 @@ class Internal(prototype.API):
 
     def send_chat(self, msg: str) -> bool:
         enforce_type('msg', msg, str)
+        time_stamp = get_model().get_time()
+        if time_stamp - self.__last_chat_time_stamp < 1.0:
+            return False
         if self.__chat_sent:
             return False
         if len(msg) > 30:
@@ -544,6 +548,7 @@ class Internal(prototype.API):
         if '\x00' in msg:
             return False
         self.__chat_sent = True
+        self.__last_chat_time_stamp = time_stamp
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
@@ -643,4 +648,5 @@ def start_ai(team_id: int) -> threading.Thread:
     t = threading.Thread(target=threading_ai, args=(team_id, helpers[team_id], timer))
     t.start()
     timer.set_timer(1 / FPS * DECISION_TICKS, team_id, t.ident)
+    print('test')
     return t
