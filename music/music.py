@@ -1,9 +1,9 @@
 import pygame as pg
 
 import const
-from event_manager import *
+from event_manager import (EventAttack, EventChangeParty, EventCharacterDied, EventCreateEntity,
+                           EventGameOver, EventPauseModel, EventResumeModel, EventStartGame)
 from instances_manager import get_event_manager, get_model
-from util import log_info
 
 
 class BackgroundMusic:
@@ -12,15 +12,16 @@ class BackgroundMusic:
         This function is called when the BackGroundMusic is created to play 
         the background music.
         """
-        pg.mixer.init()
+        if pg.mixer.get_init() is not None:
+            pg.mixer.init()
         pg.mixer.music.load(const.BGM_PATH[const.PartyType.NEUTRAL])
         pg.mixer.music.play(loops=-1)
         self.__default_volume = const.BGM_VOLUME
-        pg.mixer.music.set_volume(self.__default_volume/3)
-        self.sound = {}
+        pg.mixer.music.set_volume(self.__default_volume / 3)
+        self.__sound = {}
         for effect, path in const.EFFECT_PATH.items():
-            self.sound[effect] = pg.mixer.Sound(path)
-            self.sound[effect].set_volume(const.EFFECT_VOLUME[effect])
+            self.__sound[effect] = pg.mixer.Sound(path)
+            self.__sound[effect].set_volume(const.EFFECT_VOLUME[effect])
         self.__register_listeners()
 
     def __handle_start(self, _: EventStartGame):
@@ -34,7 +35,6 @@ class BackgroundMusic:
                          if party not in parties and party != const.PartyType.NEUTRAL][0]
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
-        log_info(const.BGM_PATH[missing_party])
         pg.mixer.music.load(const.BGM_PATH[missing_party])
         pg.mixer.music.play(loops=-1)
         pg.mixer.music.set_volume(self.__default_volume)
@@ -48,13 +48,13 @@ class BackgroundMusic:
             pg.mixer.music.set_volume(self.__default_volume)
 
     def __handle_change_party(self, _: EventChangeParty):
-        self.sound[const.EffectType.SELECT].play()
+        self.__sound[const.EffectType.SELECT].play()
 
     def __handle_attack(self, event: EventAttack):
         if event.attacker.entity_type == const.CharacterType.MELEE:
-            self.sound[const.EffectType.ATTACK_MELEE].play()
+            self.__sound[const.EffectType.ATTACK_MELEE].play()
         else:
-            self.sound[const.EffectType.ATTACK_RANGE].play()
+            self.__sound[const.EffectType.ATTACK_RANGE].play()
 
     def __handle_create_entity(self, event: EventCreateEntity):
         ev_manager = get_event_manager()
@@ -64,20 +64,20 @@ class BackgroundMusic:
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventAttack, self.__handle_attack, event.character.id)
 
-    def __handle_game_over(self, event: EventGameOver):
+    def __handle_game_over(self, _: EventGameOver):
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
         pg.mixer.music.load(const.BGM_END_PATH)
         pg.mixer.music.play(loops=1)
 
     def __handle_change_party(self, _: EventChangeParty):
-        self.sound[const.EffectType.SELECT].play()
+        self.__sound[const.EffectType.SELECT].play()
 
     def __handle_attack(self, event: EventAttack):
         if event.attacker.entity_type == const.CharacterType.MELEE:
-            self.sound[const.EffectType.ATTACK_MELEE].play()
+            self.__sound[const.EffectType.ATTACK_MELEE].play()
         else:
-            self.sound[const.EffectType.ATTACK_RANGE].play()
+            self.__sound[const.EffectType.ATTACK_RANGE].play()
 
     def __handle_create_entity(self, event: EventCreateEntity):
         ev_manager = get_event_manager()
@@ -87,7 +87,7 @@ class BackgroundMusic:
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventAttack, self.__handle_attack, event.character.id)
 
-    def __handle_game_over(self, event: EventGameOver):
+    def __handle_game_over(self, _: EventGameOver):
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
         pg.mixer.music.load(const.BGM_END_PATH)

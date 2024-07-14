@@ -41,7 +41,8 @@ class Tower(LivingEntity):
     """
 
     def __init__(self, position: pg.Vector2, team: Team, tower_type: const.TowerType):
-        self.__is_fountain = tower_type is const.TowerType.FOUNTAIN
+        self.__is_fountain: bool = tower_type is const.TowerType.FOUNTAIN
+        self.__tower_type: const.TowerType = tower_type
         self.__character_type: const.CharacterType = const.CharacterType.RANGER
         self.__enemies: OrderedSet[Character] = OrderedSet()
         self.period: float = const.TOWER_SPAWN_INITIAL_PERIOD
@@ -156,3 +157,7 @@ class Tower(LivingEntity):
     @property
     def character_type(self) -> const.CharacterType:
         return self.__character_type
+
+    @property
+    def tower_type(self) -> const.TowerType:
+        return self.__tower_type
