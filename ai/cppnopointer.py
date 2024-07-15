@@ -131,7 +131,8 @@ def every_tick(api: API):
     
     target_tower = None
     if (len(contestable_tower) == 0):
-        api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.SNIPER]))
+        if (len(no_sniper_characters) >= 10): api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.SNIPER]))
+        else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE]))
         
         if (recruited_characters_count >= 1):
             random_point = None
@@ -163,12 +164,12 @@ def every_tick(api: API):
             if (tower.is_fountain): 
                 if len(snipers_defending_tower(fountain, api)) >= 4: 
                     print("Sniper defending fountain:" + str(len(snipers_defending_tower(fountain, api))))
-                    api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE]))
-                else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.SNIPER]))
+                    api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
+                else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER]))
             else: 
                 print("Sniper defending tower:" + str(len(snipers_defending_tower(tower, api))))
                 if (len(snipers_defending_tower(tower, api)) < 5): api.change_spawn_type(tower, random.choice([CharacterClass.SNIPER]))
-                else: api.change_spawn_type(tower, random.choice([CharacterClass.MELEE]))
+                else: api.change_spawn_type(tower, random.choice([CharacterClass.MELEE, CharacterClass.RANGER]))
         if target_tower != None:
             
             #print(recruited_characters_count, dispatched_characters_count)
@@ -217,10 +218,13 @@ def every_tick(api: API):
             nearest_distance = min(nearest_distance, tower.position.distance_to(sniper.position))
         if len(api.within_attacking_range(sniper)) > 0: 
             api.action_move_clear([sniper])
+            enemy_rangers = []
             for target_enemy in api.within_attacking_range(sniper):
-                if target_enemy.type == CharacterClass.RANGER: break
-            api.action_attack([sniper], target_enemy)
-        elif nearest_distance <= 50:
+                if type(target_enemy) != Tower and target_enemy.type == CharacterClass.RANGER: enemy_rangers.append(target_enemy)
+            if len(enemy_rangers) > 0: api.action_attack([sniper], random.choice(enemy_rangers))
+            else: api.action_attack([sniper], random.choice(api.within_attacking_range(sniper)))
+            
+        elif nearest_distance <= 60:
             api.action_move_clear([sniper])
         elif (target_tower != None): api.action_move_to([sniper], target_tower.position)
         else: api.action_wander([sniper])
