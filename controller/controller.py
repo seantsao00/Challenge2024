@@ -9,8 +9,8 @@ import const.controller
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventNyanCat, EventPauseModel, EventQuit, EventResumeModel,
                            EventSelectCharacter, EventSelectParty, EventUnconditionalTick,
-                           EventUseRangerAbility, EventViewChangeTeam, EventViewShowRangeSwitch,
-                           EventViewTrajectorySwitch)
+                           EventUseRangerAbility, EventViewChangeTeam, EventViewPathSwitch,
+                           EventViewShowRangeSwitch)
 from instances_manager import get_event_manager, get_model
 from model import Character, TimerManager, Tower
 from util import log_info
@@ -82,18 +82,18 @@ class Controller:
                 key = pg_event.key
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventPauseModel())
-                if key == const.ABILITY_BUTTON:
+                if key == const.ABILITY_KEY:
                     ev_manager.post(EventHumanInput(
                         input_type=const.InputTypes.ABILITY))
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
                     ev_manager.post(EventSelectCharacter(
                         character_type=character_type))
-                if key == const.CHANGE_TEAM_VISION:
+                if key == const.CHANGE_TEAM_VISION_KEY:
                     ev_manager.post(EventViewChangeTeam())
-                if key == const.TRAJECTORY_SWITCH_BUTTON:
-                    ev_manager.post(EventViewTrajectorySwitch())
-                if key == const.SHOWRANGE_SWITCH_BUTTON:
+                if key == const.SHOW_PATH_SWITCH_KEY:
+                    ev_manager.post(EventViewPathSwitch())
+                if key == const.SHOW_RANGE_SWITCH_KEY:
                     ev_manager.post(EventViewShowRangeSwitch())
                 # ???
                 if key == const.controller.EGG_SEQ[self.egg_record]:
