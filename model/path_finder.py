@@ -24,6 +24,7 @@ class PathFinder:
         self.__map = map
         self.__is_obstacle = [[map.get_cell_type((x, y)) == const.MAP_OBSTACLE for y in range(max_y)] for x in range(max_x)]
         self.__is_puddle = [[map.get_cell_type((x, y)) == const.MAP_PUDDLE for y in range(max_y)] for x in range(max_x)]
+        self.__neighbors = [[list(self.__get_neighbors((x, y))) for y in range(max_y)] for x in range(max_x)]
         # init A star
         self.__astar_run_id = 0
         # initial values of `dist`, `src` do not matter
@@ -48,7 +49,7 @@ class PathFinder:
             # this should be slower (due to sqrt) but I didn't see significant difference
             # return (dx ** 2 + dy ** 2) ** 0.5 + dist[cell[0]][cell[1]]
     
-    def __get_neighbors(self, cur_cell: tuple[int, int], cur_dist):
+    def __get_neighbors(self, cur_cell: tuple[int, int]):
             diff = (
                 (-1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0), (1, 0, 1.0),
                 (-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
@@ -58,7 +59,7 @@ class PathFinder:
             for dx, dy, dd in diff:
                 nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
                 if self.__is_cell_passable((nx, ny)):
-                    nd = cur_dist + dd / speed_ratio
+                    nd = dd / speed_ratio
                     yield (nx, ny, nd)
     
     def __find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
@@ -122,8 +123,8 @@ class PathFinder:
             visited[cx][cy] = run_id
             if cur_cell == cell_end:
                 break  # path found
-            for nx, ny, nd in self.__get_neighbors(cur_cell, cur_dist):
-                push_cell((nx, ny), nd, cur_cell)
+            for nx, ny, dd in self.__neighbors[cur_cell[0]][cur_cell[1]]:
+                push_cell((nx, ny), cur_dist + dd, cur_cell)
         if visited[cell_end[0]][cell_end[1]] != run_id:
             return None
         
