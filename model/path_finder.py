@@ -16,6 +16,7 @@ class PathFinder:
     This finder is NOT thread safe for optimization purposes. Different threads
     should be using different instances of path finder.
     """
+    INFINITY: int = 10 ** 10
 
     def __init__(self, map: Map):
         max_x, max_y = map.size
@@ -31,6 +32,7 @@ class PathFinder:
         self.__astar_in_queue: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
         self.__astar_src: list[list[tuple[int, int]]] = [[(-1, -1) for __ in range(max_y)] for _ in range(max_x)]
         self.__astar_visited: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
+        self.__dist_hint = PathFinder.INFINITY
 
     def __is_cell_passable(self, cell: tuple[int, int]) -> bool:
         """
@@ -59,7 +61,7 @@ class PathFinder:
                     nd = cur_dist + dd / speed_ratio
                     yield (nx, ny, nd)
     
-    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
+    def __find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
         """
         Find a path from position_begin to position_end with A star algorithm.
         Positions take values in range [0, const.ARENA_SIZE).
@@ -69,6 +71,10 @@ class PathFinder:
         if (not self.__map.is_position_passable(position_begin)
                 or not self.__map.is_position_passable(position_end)):
             return None
+        
+        # swap `begin` and `end` so that `begin` remains the same in batched runs
+        # and it becomes a single source shortest path problem
+        position_begin, position_end = position_end, position_begin
 
         cell_begin = self.__map.position_to_cell(position_begin)
         cell_end = self.__map.position_to_cell(position_end)
@@ -79,6 +85,7 @@ class PathFinder:
         in_queue = self.__astar_in_queue
         src = self.__astar_src
         visited = self.__astar_visited
+        dist_hint = self.__dist_hint
 
         # priority queue for A star containing (heuristic, distance, (x, y))
         pq: list[tuple[float, float, tuple[int, int]]] = []
@@ -89,9 +96,15 @@ class PathFinder:
                 return
             if in_queue[cx][cy] == run_id and dist[cx][cy] <= new_dist:
                 return
-            dist[cx][cy] = new_dist
+            if visited[cx][cy] >= dist_hint:
+                # this cell has been discovered in the same batch before
+                # no need to relax it anymore
+                new_dist = dist[cx][cy]
+                cell_source = src[cx][cy]
+            else:
+                dist[cx][cy] = new_dist
+                src[cx][cy] = cell_source
             in_queue[cx][cy] = run_id
-            src[cx][cy] = cell_source
             new_heur = self.__heuristic_dist_to_target(cell, cell_end)
             # A star: look for the vertix with lowest f(n) = g(n) + h(n),
             # g(n): actual distance travelled
@@ -100,9 +113,8 @@ class PathFinder:
 
         # find single source shortest path
         push_cell(cell_begin, 0, cell_begin)
-        iters = 0
+
         while len(pq) > 0:
-            iters += 1
             _, cur_dist, cur_cell = heapq.heappop(pq)
             cx, cy = cur_cell
             if visited[cx][cy] == run_id:
@@ -114,13 +126,34 @@ class PathFinder:
                 push_cell((nx, ny), nd, cur_cell)
         if visited[cell_end[0]][cell_end[1]] != run_id:
             return None
-
-        # path found
-        path: list[pg.Vector2] = []
-        cur_cell = cell_end
-        while cur_cell != cell_begin:
-            assert visited[cur_cell[0]][cur_cell[1]] == run_id
-            path.append(self.__map.cell_to_position(cur_cell))
-            cur_cell = src[cur_cell[0]][cur_cell[1]]
-        return path[::-1]
+        
+        def restore_path():
+            path: list[pg.Vector2] = []
+            cur_cell = cell_end
+            while cur_cell != cell_begin:
+                if visited[cur_cell[0]][cur_cell[1]] != run_id:
+                    return None
+                assert visited[cur_cell[0]][cur_cell[1]] == run_id
+                path.append(self.__map.cell_to_position(cur_cell))
+                cur_cell = src[cur_cell[0]][cur_cell[1]]
+            return path
+        # no need to reverse the path since begin and end have already been swapped
+        return restore_path()
+    
+    def batch_begin(self):
+        self.__dist_hint = self.__astar_run_id + 1
+    
+    def batch_end(self):
+        self.__dist_hint = PathFinder.INFINITY
+    
+    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
+        return self.__find_path(position_begin, position_end)
+    
+    def find_path_batched(self, position_begin_list: list[pg.Vector2], position_end: pg.Vector2) -> list[list[pg.Vector2] | None]:
+        self.batch_begin()
+        res = []
+        for position_begin in position_begin_list:
+            res.append(self.__find_path(position_begin, position_end))
+        self.batch_end()
+        return res
 

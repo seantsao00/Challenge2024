@@ -437,15 +437,22 @@ class Internal(prototype.API):
         destination_cell = get_model().map.position_to_cell(destination)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
-        for inter in internals:
+
+        def must_move(inter: prototype.Character):
             old_destination = inter.move_destination
             if old_destination is not None and get_model().map.position_to_cell(inter.move_destination) == destination_cell:
-                continue
+                return False
+            return True
+        internals = filter(must_move, internals)
+
+        self.__path_finder.batch_begin()
+        for inter in internals:
             with inter.moving_lock:
                 inter.set_move_stop()
                 path = self.__path_finder.find_path(inter.position, destination)
                 if path is not None and len(path) > 0:
                     inter.set_move_position(path)
+        self.__path_finder.batch_end()
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
         enforce_type('characters', characters, Iterable)
