@@ -70,7 +70,9 @@ class Result:
                 self.set_toward_wandering(False)
 
         displacement = self.__scope_target_position - self.__scope_position
-        self.__scope_position += displacement.clamp_magnitude(self.__scope_speed * get_model().dt)
+        if displacement.length() > 0:
+            self.__scope_position += displacement.clamp_magnitude(
+                self.__scope_speed * get_model().dt)
 
     def set_toward_wandering(self, music: bool):
         if self.__scope_target_index >= self.__number_of_teams:
