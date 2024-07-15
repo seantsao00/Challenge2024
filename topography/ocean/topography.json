@@ -6,7 +6,7 @@
         [20, 230], [20, 20], [230, 230], [230, 20]
     ],
     "neutral_towers": [
-        [105, 15, "pylon"], [135, 200, "pylon"]
+        [97, 20, "pylon"], [135, 200, "pylon"]
     ],
     "images": {
         "backgrounds": ["background.png"],
