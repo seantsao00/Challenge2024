@@ -93,7 +93,7 @@ class Strategy:
 
                     for character in self.owned_characters:
                         if any(character.position.distance_to(tower.position) <= attack_threshold for tower in self.visible_enemy_towers):
-                            self.api.action_move_to([character], position = target_position)
+                            self.api.action_move_to([character], target_position)
                             continue
                             
                     
