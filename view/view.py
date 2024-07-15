@@ -12,7 +12,7 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
 from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
-                         EntityView, HealthView, NyanView, ObjectBase, Particle, ParticleManager,
+                         EntityView, HealthView, NyanView, ObjectBase, ParticleManager,
                          PartySelectorView, PauseMenuView, ResultView, ScoreboardView, TowerCDView,
                          TrajectoryView, ViewRangeView)
 from view.screen_info import ScreenInfo
@@ -167,7 +167,7 @@ class View:
         for entity in discarded_entities:
             entity.unregister_listeners()
 
-        objects: list[type[ObjectBase]] = []
+        objects: list[ObjectBase] = []
 
         objects += self.__background_images
 
