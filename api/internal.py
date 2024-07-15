@@ -553,7 +553,7 @@ class Internal(prototype.API):
         self.__last_chat_time_stamp = time_stamp
         for substring in [msg[x:y] for x, y in sorted(combinations(range(len(msg) + 1), r=2),
                                                       key=lambda x: x[0]-x[1])]:
-            if substring in const.DIRTY_WORDS:
+            if base64.b64encode(substring.encode()) in const.DIRTY_WORDS:
                 msg = msg.replace(substring, len(substring)*'*')
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
