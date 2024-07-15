@@ -5,6 +5,7 @@ This module defines constants associated with model.
 from enum import Enum, auto
 
 FPS = 30
+RESULT_SCREEN_FPS = 60
 
 # the total game time is 3 minutes
 GAME_TIME = 181
