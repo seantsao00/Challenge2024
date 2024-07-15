@@ -99,6 +99,9 @@ class ResultView(ObjectBase):
 
         img = self.background_image
         self.canvas.blit(img, (0, 0))
+        if not model.result_screen_select:
+            draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
+                      40, 'Press SPACE to continue', 'white', self.__font)
 
         for team in model.teams:
             if team.team_id < 2:

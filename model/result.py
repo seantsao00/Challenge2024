@@ -102,6 +102,7 @@ class Result:
 
     def handle_scopemoving_start(self):
         if self.__scope_status is const.ScopeStatus.WAITING_INPUT:
+            get_model().result_screen_select = True
             self.set_toward_wandering(True)
 
     @property
