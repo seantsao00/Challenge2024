@@ -46,12 +46,12 @@ class ParticleManager:
 
     def __handle_bullet_explode(self, event: EventBulletExplode):
         self.__explode(event.bullet.position, const.PARTICLES_BULLET_EXPLODE_AMOUNT,
-                       const.PARTICLES_BULLET_EXPLODE_DURATION, const.PARTICLES_BULLET_EXPLODE_COLOR,
+                       const.PARTICLES_BULLET_EXPLODE_DURATION, const.HEALTH_BAR_COLOR[event.bullet.team.team_id],
                        const.PARTICLES_BULLET_EXPLODE_SPEED)
 
     def __handle_sniper_bullet(self, event: EventSniperBulletParticle):
         self.__explode(event.bullet.position, const.PARTICLES_BULLET_MOVE_AMOUNT,
-                       const.PARTICLES_BULLET_MOVE_DURATION, const.PARTICLES_BULLET_MOVE_COLOR,
+                       const.PARTICLES_BULLET_MOVE_DURATION, const.HEALTH_BAR_COLOR[event.bullet.team.team_id],
                        const.PARTICLES_BULLET_MOVE_SPEED)
 
     def __register_listeners(self):
