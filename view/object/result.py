@@ -75,6 +75,9 @@ class ResultView(ObjectBase):
 
         cls.image_initialized = True
 
+    def hit(self, vector_a: pg.Vector2, vector_b: pg.Vector2):
+        return (vector_a - vector_b).length() < const.POSITION_EPSILON
+
     def draw(self):
         model = get_model()
         img = self.bottom_image
@@ -82,7 +85,7 @@ class ResultView(ObjectBase):
 
         team_icon_position: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
-            if self.__result.scope_position == self.__scope_destination[team.team_id] and self.__team_out[team.team_id] == False:
+            if self.hit(self.__result.scope_position, self.__scope_destination[team.team_id]) and self.__team_out[team.team_id] == False:
                 self.__team_out[team.team_id] = True
                 self.__team_index += 1
                 self.__team_rank[team.team_id] = self.__team_index
