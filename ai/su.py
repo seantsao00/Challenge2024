@@ -78,8 +78,9 @@ class Strategy:
     def print_scores(self):
         scores = []
         for team_id in range(0, 4):
-            scores.append(self.api.get_score_of_team(team_id))
-        print(scores)
+            # scores.append(self.api.get_score_of_team(team_id))
+        # print(scores)
+            pass
         
     def get_fountain(self, visible_towers: list[Tower], my_team_id: int):
         for tower in visible_towers:
