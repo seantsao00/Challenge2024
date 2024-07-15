@@ -38,8 +38,9 @@ class Scorebox:
             bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
 
         def offset(p): return (p[0], p[1] + self.font_primary.get_descent())
-        pg.draw.line(self.__canvas, (239, 192, 131), offset(
-            team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=32)
+        pg.draw.line(self.__canvas, (239, 192, 131), \
+                     offset((team_name_rect.bottomleft[0], team_name_rect.bottomleft[1] - 9)), \
+                     offset((team_name_rect.bottomright[0], team_name_rect.bottomright[1] - 9)), width=27)
         pg.draw.line(self.__canvas, const.HEALTH_BAR_COLOR[self.__team.team_id], offset(
             team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
