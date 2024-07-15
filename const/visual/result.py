@@ -47,11 +47,11 @@ class ScopeStatus(Enum):
     FINISH = auto()
 
 
-SCOPE_SPEED = 7
-INVERVAL_WAITING = 1
+SCOPE_SPEED = 420
+INTERVAL_WAITING = 1
 WANDERING_PERIOD = 3
-POSITION_EPSILON = 0.01
-WANDERING_SHIFT: pg.Vector2 = (2, 2)
+POSITION_EPSILON = 1
+WANDERING_SHIFT: pg.Vector2 = (5, 5)
 
 
 def interval_wandering() -> float:
@@ -65,4 +65,4 @@ def is_final_wandering(num_teams: int) -> bool:
 
 
 def wandering_formula(t: float) -> pg.Vector2:
-    return pg.Vector2(200*cos(t)+450, 100*sin(2*t)+280)
+    return pg.Vector2(200 * cos(t) + 450, 100 * sin(2 * t) + 280)
