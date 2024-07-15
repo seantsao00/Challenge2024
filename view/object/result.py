@@ -29,7 +29,7 @@ class ResultView(ObjectBase):
         super().__init__(canvas, [const.PRIORITY_RESULT])
         self.__result = result
         self.__scope_destination = const.RESULT_TEAM_POSITION
-        self.__font = pg.font.Font(const.REGULAR_FONT, int(12*ScreenInfo.resize_ratio))
+        self.__font = pg.font.Font(const.REGULAR_FONT, int(12 * ScreenInfo.resize_ratio))
         self.__team_out: list[bool] = [False, False, False, False]
         self.__team_rank: list[int] = [10, 10, 10, 10]
         self.__team_index: int = 0
