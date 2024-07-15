@@ -26,8 +26,6 @@ class Strategy:
         self.visible_enemy: list[Character] = []
         self.visible_enemy_towers: list[Tower] = []
         
-        self.cnt: int = 0
-        
     def initialize(self):
         self.my_team_id = self.api.get_team_id()
         self.fountain = self.get_fountain(self.api.get_visible_towers(), self.my_team_id)
@@ -37,9 +35,6 @@ class Strategy:
         if character.team_id != self.my_team_id]
         self.visible_enemy_towers = [tower for tower in self.api.get_visible_towers() if 
                                      tower.team_id != self.my_team_id]
-        
-        self.cnt += 1
-
         
     def send_spam_message(self):
         self.api.send_chat(random.choice(["鄭詠堯說你是2486", "發動精神攻擊", "家人們點個讚", "素質真高", "點了吧沒意思"]))
@@ -73,8 +68,15 @@ class Strategy:
                 
                 attackable_sniper = [snipers for snipers in attackable if type(snipers) == Character 
                                     and (snipers.type == CharacterClass.SNIPER)]
+                attackable_tower = [tower for tower in attackable if type(tower) == Tower]
+                
+                if (len(attackable_tower) > 0):
+                    random_target = random.choice(attackable_tower)
 
-                if (len(attackable_sniper) > 0):
+                if (len(attackable_tower) > 0 and 
+                    random_target.health < 500 and not random_target.is_fountain):
+                    pass
+                elif (len(attackable_sniper) > 0):
                     random_target = random.choice(attackable_sniper)
                 else:
                     random_target = random.choice(attackable)
@@ -86,12 +88,13 @@ class Strategy:
                 self.api.action_wander([character])
                 for tower in self.visible_enemy_towers:
                     
-                    attack_threshold = tower.attack_range + 4.0
-                    target_position = pg.Vector2(20, 20)
+                    attack_threshold = tower.attack_range + 7.0
+                    target_position = pg.Vector2(0, 0)
 
                     for character in self.owned_characters:
                         if any(character.position.distance_to(tower.position) <= attack_threshold for tower in self.visible_enemy_towers):
                             self.api.action_move_to([character], target_position)
+                            continue
                             
                     
         
