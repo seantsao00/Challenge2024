@@ -10,7 +10,7 @@ import pygame as pg
 
 
 class CharacterClass(IntEnum):
-    """角色種類。"""
+    """士兵種類。"""
 
     MELEE = auto()
     SNIPER = auto()
@@ -19,7 +19,7 @@ class CharacterClass(IntEnum):
 
 
 class Character:
-    """角色。"""
+    """士兵。"""
 
     def __init__(self,
                  _id: int,
@@ -34,41 +34,41 @@ class Character:
                  _max_health: float,
                  _team_id: int):
         self.id = _id
-        """角色獨一的編號。編號可以用來識別不同時間的角色是否是相同的一個實體。"""
+        """士兵唯一的編號。編號可以在不同時間，用來識別某個士兵是否為相同的一個實體。"""
 
         self.type = _type
-        """角色的兵種。"""
+        """士兵的兵種。"""
 
         self.position = _position
-        """角色的位置。"""
+        """士兵的位置。"""
 
         self.speed = _speed
-        """角色的最大移動速度。"""
+        """士兵的最大移動速度。"""
 
         self.attack_range = _attack_range
-        """角色的最大攻擊範圍。"""
+        """士兵的最大攻擊範圍。"""
 
         self.attack_speed = _attack_speed
-        """角色的攻擊時間間隔。"""
+        """士兵的攻擊時間間隔。"""
 
         self.damage = _damage
-        """角色的傷害。"""
+        """士兵的傷害。"""
 
         self.vision = _vision
-        """角色的視野半徑。"""
+        """士兵的視野半徑。"""
 
         self.health = _health
-        """角色的當下血量。"""
+        """士兵的當下血量。"""
 
         self.max_health = _max_health
-        """角色的最大血量。"""
+        """士兵的最大血量。"""
 
         self.team_id = _team_id
-        """角色所屬的隊伍編號，編號為 1 至 4 的正整數。"""
+        """士兵所屬的隊伍編號，編號為 1 至 4 的正整數。"""
 
 
 class Tower:
-    """建築物。"""
+    """塔。"""
 
     def __init__(self,
                  _id: int,
@@ -83,37 +83,37 @@ class Tower:
                  _max_health: float,
                  _team_id: int):
         self.id = _id
-        """建築物獨一的編號。編號可以用來識別不同時間的建築物是否是相同的一個實體。"""
+        """塔唯一的編號。編號可以在不同時間，用來識別某個塔是否為相同的一個實體。"""
 
         self.period = _period
-        """建築物產生角色的所需時間。"""
+        """塔產生一隻士兵的所需時間。"""
 
         self.position = _position
-        """建築物所在的位置。"""
+        """塔所在的位置。"""
 
         self.is_fountain = _is_fountain
-        """建築物是否是溫泉（每個隊伍一開始的建築）。"""
+        """塔是否是主堡（每個隊伍一開始的塔）。"""
 
         self.spawn_character_type = _spawn_character_type
-        """建築物即將生成的角色種類。"""
+        """塔即將生成的士兵種類。"""
 
         self.attack_range = _attack_range
-        """建築物的攻擊範圍。"""
+        """塔的攻擊範圍。"""
 
         self.damage = _damage
-        """建築物的傷害。"""
+        """塔的傷害。"""
 
         self.vision = _vision
-        """建築物的視野範圍。"""
+        """塔的視野範圍。"""
 
         self.health = _health
-        """建築物的血量。"""
+        """塔的當下血量。"""
 
         self.max_health = _max_health
-        """建築物的最大血量。"""
+        """塔的最大血量。"""
 
         self.team_id = _team_id
-        """建築物所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
+        """塔所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
 
 
 class MapTerrain(IntEnum):
@@ -126,26 +126,26 @@ class MapTerrain(IntEnum):
     """道路。走路的速度是正常的。"""
 
     OFFROAD = auto()
-    """道路外，走路會減速。"""
+    """非道路，走路會減速。"""
 
     OBSTACLE = auto()
     """障礙物，無法通過。"""
 
 
 class MovementStatusClass(IntEnum):
-    """角色移動的狀態。 """
+    """士兵移動的狀態。 """
 
     STOPPED = auto()
-    """角色目前停止。 """
+    """士兵目前停止。 """
 
     TO_DIRECTION = auto()
-    """角色目前正朝某個方向前進。 """
+    """士兵目前正朝某個方向前進。 """
 
     TO_POSITION = auto()
-    """角色目前朝著某個點為目的地前進。 """
+    """士兵目前朝著某個點為目的地前進。 """
 
     UNKNOWN = auto()
-    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
+    """無法得知的狀況，例如無法得知敵對士兵的移動策略。"""
 
 
 class Movement:
@@ -154,12 +154,12 @@ class Movement:
                  _is_wandering: bool,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
-        """角色的移動狀態。 """
+        """士兵的移動狀態。 """
 
         self.is_wandering = _is_wandering
         """
-        角色是否在遊蕩狀態。
-        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
+        士兵是否在遊蕩狀態。
+        一個士兵一旦被設為遊蕩，則除非該士兵無法再遊蕩，或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
         """
 
         self.vector = _vector
@@ -201,7 +201,7 @@ class API:
     @abstractmethod
     def get_visibility(self) -> list[list[int]]:
         """
-        回傳目前的所有視野狀態。回傳值是一個二維的表格，長寬皆為 `get_grid_size()` 的回傳值。
+        回傳目前所有的視野狀態。回傳值是一個二維的表格，長寬皆為 `get_grid_size()` 的回傳值。
         """
         raise NotImplementedError
 
@@ -221,19 +221,19 @@ class API:
     def get_map_name(self) -> str:
         """回傳當前地圖的名稱"""
 
-    # ==== 角色建築資訊獲取 ====
+    # ==== 士兵、塔資訊獲取 ====
 
     @abstractmethod
     def get_sample_character(self, type_class: CharacterClass) -> Character:
         """
-        給定角色種類，回傳一個「無法控制」的角色，這個角色會擁有給定角色種類的數值，
-        可以用來獲取特定的角色數據。`id` 為 -1、座標為原點、而隊伍 `team_id` 為 0。
+        給定士兵種類，回傳一個「無法控制」的士兵，這個士兵會擁有給定士兵種類的數值，
+        可以用來獲取特定的士兵數據。`id` 為 -1、座標為原點、而隊伍 `team_id` 為 0。
 
-        @type_class: 角色種類，不能是 `UNKNOWN`。
+        @type_class: 士兵種類，不能是 `UNKNOWN`。
 
         ## 使用範例：
 
-        輸出進戰角色的血量。
+        輸出近戰士兵的血量。
 
         >>> interface: api.prototype.API
         >>> sample_melee = interface.get_sample_character(api.prototype.CharacterClass.MELEE)
@@ -244,63 +244,63 @@ class API:
     @abstractmethod
     def get_owned_characters(self) -> list[Character]:
         """
-        回傳自己隊伍所擁有的角色。
-        預設回傳按照角色的 `id` 排序。
+        回傳自己隊伍所擁有的士兵。
+        預設回傳按照士兵的 `id` 排序。
         """
         raise NotImplementedError
 
     @abstractmethod
     def get_owned_towers(self) -> list[Tower]:
         """
-        回傳自己隊伍所擁有的建築。
-        預設回傳按照角色的 `id` 排序。
+        回傳自己隊伍所擁有的塔。
+        預設回傳按照塔的 `id` 排序。
         """
         raise NotImplementedError
 
     @abstractmethod
     def get_visible_characters(self) -> list[Character]:
         """
-        回傳在自己視野範圍當中的角色，請注意這個函數也會回傳自己的角色。
-        預設回傳按照角色的 `id` 排序。
+        回傳在自己視野範圍當中的士兵，請注意這個函數也會回傳自己的士兵。
+        預設回傳按照士兵的 `id` 排序。
         """
         raise NotImplementedError
 
     @abstractmethod
     def get_visible_towers(self) -> list[Tower]:
         """
-        回傳在自己視野範圍當中的建築，請注意這個函數也會回傳自己的建築。
-        預設回傳按照角色的 `id` 排序。
+        回傳在自己視野範圍當中的塔，請注意這個函數也會回傳自己的塔。
+        預設回傳按照士兵的 `id` 排序。
         """
         raise NotImplementedError
 
     @abstractmethod
     def refresh_character(self, character: Character) -> Character | None:
         """
-        更新一個角色的數值。如果角色死亡則回傳 None。  
-        @character: 目標的角色。
+        更新一個士兵的數值。如果士兵死亡則回傳 None。  
+        @character: 目標的士兵。
         """
 
     @abstractmethod
     def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個建築物的數值。  
-        @tower: 目標的建築。
+        更新一個塔的數值。  
+        @tower: 目標的塔。
         """
 
     @abstractmethod
     def get_movement(self, character: Character) -> Movement:
         """
-        回傳一個角色目前的移動狀況。角色必須是自己的且當下存活，否則會回傳 `UNKNOWN`。  
-        @character: 目標的角色。
+        回傳目標士兵目前的移動狀況。士兵必須是自己的且當下存活，否則會回傳 `UNKNOWN`。  
+        @character: 目標的士兵。
         """
 
-    # ==== 角色操作相關 ====
+    # ==== 士兵操作相關 ====
 
     @abstractmethod
     def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
         """
-        將所有列表中的角色設定為沿著某個向量移動。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        將所有列表中的士兵，設定為沿著某個向量移動。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @direction: 移動的向量。
         """
         raise NotImplementedError
@@ -308,9 +308,9 @@ class API:
     @abstractmethod
     def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2) -> None:
         """
-        將所有列表中的角色設定為朝著某個目的地移動。如果目標不是可以行走的位置則不會生效。
+        將所有列表中的士兵，設定為朝著某個目的地移動。如果目的地不是可行走的位置則不會生效。
         這個函數會使用內建的尋路，可能會耗費大量時間，使用時請注意。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
@@ -318,24 +318,24 @@ class API:
     @abstractmethod
     def action_wander(self, characters: Iterable[Character]) -> None:
         """
-        將所有列表內的角色設定為遊蕩。
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        將所有列表內的士兵設定為遊蕩狀態。
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         raise NotImplementedError
 
     @abstractmethod
     def action_move_clear(self, characters: Iterable[Character]) -> None:
         """
-        將所有列表中的角色設定為不移動。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。
+        將所有列表中的士兵設定為不移動。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。
         """
         raise NotImplementedError
 
     @abstractmethod
     def action_attack(self, characters: Iterable[Character], target: Character | Tower) -> None:
         """
-        將所有列表中的角色設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        將所有列表中的士兵設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
@@ -343,19 +343,19 @@ class API:
     @abstractmethod
     def action_cast_ability(self, characters: Iterable[Character], **kwargs) -> None:
         """
-        將所有列表中的角色設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
-        @characters: 角色的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        將所有列表中的士兵設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
         @kwargs: 所有技能參數的聯集，以下是可用列表：
-         - `position`: `pg.Vector2`，遠程角色使用技能的位置   
+         - `position`: `pg.Vector2`，遠程士兵使用技能的位置   
 
         ### 使用範例
 
-        使用所有角色的技能，不過遠程會在自己的位置釋放：
+        使用所有士兵的技能，不過遠程會在自己的位置釋放：
 
         >>> interface: api.prototype.API
         >>> interface.action_cast_ability(interface.get_owned_character())
 
-        使用所有遠程的技能，在自己的溫泉釋放：
+        使用所有遠程的技能，在自己的主堡釋放：
 
         >>> interface: api.prototype.API
         >>> fountain = interface.get_owned_towers()[0]
@@ -368,13 +368,13 @@ class API:
         """
         raise NotImplementedError
 
-    # ==== 建築操作 ====
+    # ==== 塔操作 ====
 
     @abstractmethod
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass) -> None:
         """
         改變指定塔所生成的兵種。  
-        @tower: 指定的建築。  
+        @tower: 指定的塔。  
         @spawn_type: 指定的兵種。
         """
         raise NotImplementedError
@@ -384,8 +384,8 @@ class API:
     @abstractmethod
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
         """
-        將各角色依據其與目標的距離排序，若距離一樣則隨意排序。  
-        @characters: 指定的角色列表。  
+        將各士兵依據其與目標的距離排序，若距離一樣則隨意排序。  
+        @characters: 指定的士兵列表。  
         @target: 指定的目標座標。
         """
         raise NotImplementedError
@@ -394,7 +394,7 @@ class API:
     def within_attacking_range(self, unit: Character | Tower,
                                candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
         """
-        給定一個實體以及潛在目標，回傳可以攻擊的到的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵對實體。
+        給定一個實體以及潛在目標，回傳可以攻擊到的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵對實體。
         這個函數只是普通暴力的包裝。  
         @unit: 指定的攻擊者。  
         @candidates: 要考慮的所有實體。
