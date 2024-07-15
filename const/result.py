@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from enum import Enum, auto
-from math import cos, pi, sin
 
 import pygame as pg
 

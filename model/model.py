@@ -105,6 +105,7 @@ class Model:
         self.nyan = Nyan()
         self.ranger_ability = False
         self.ranger_controlling: Ranger = None
+        self.result_screen_select: bool = False
 
         self.__register_listeners()
 
@@ -252,9 +253,11 @@ class Model:
                     ev_manager.post(EventGameOver())
                 # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
+            fps = const.FPS
             if self.state is const.State.RESULT:
                 self.result.update()
-            self.dt = self.global_clock.tick(const.FPS) / 1000
+                fps = const.RESULT_SCREEN_FPS
+            self.dt = self.global_clock.tick(fps) / 1000
 
     def __handle_quit(self, _: EventQuit):
         """

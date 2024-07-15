@@ -64,7 +64,8 @@ class Sniper(Character):
                                       team=self.team,
                                       attacker=self,
                                       damage=const.SNIPER_ATTRIBUTE.ability_variables,
-                                      speed=const.BULLET_SNIPER_SPEED)
+                                      speed=const.BULLET_SNIPER_SPEED,
+                                      is_sniper_ability=True)
                 self.ability_active = False
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self._last_attack_time = now_time
