@@ -409,8 +409,11 @@ class Internal(prototype.API):
         raise GameError("Unkown terrain type.")
 
     def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('direction', direction, pg.Vector2)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+            
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -422,8 +425,11 @@ class Internal(prototype.API):
                 inter.set_move_direction(direction)
 
     def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('destination', destination, pg.Vector2)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
