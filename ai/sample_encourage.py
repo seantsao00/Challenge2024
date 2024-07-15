@@ -22,7 +22,7 @@ class Const:
 
 
 def assign_random_destination(character: Character, interface: API):
-    """assign 一個還沒有開視野的 random position 給 character 。"""
+    """指定一個還沒有開視野的隨機位置給 character 。"""
     new_destination = pg.Vector2(random.uniform(0, interface.get_grid_size() - 1),
                                  random.uniform(0, interface.get_grid_size() - 1))
     i = 0
