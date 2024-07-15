@@ -95,9 +95,25 @@ class Strategy:
         if (len(self.visible_enemy_towers) > 0):
             self.api.change_spawn_type(self.fountain, CharacterClass.SNIPER)
         
+        for tower in self.owned_towers:
+            if (tower != self.fountain):
+                self.api.change_spawn_type(tower, CharacterClass.SNIPER)
         # raise NotImplementedError
         
     def effective_attack(self):
+        flag = False
+        for tower in self.visible_enemy_towers:
+            if (self.api.get_current_time() < 60.0):
+                print("Time: ", self.api.get_current_time())
+                print(tower.position)
+                self.api.action_move_to(self.owned_characters, tower.position)
+                self.api.action_cast_ability(self.owned_characters)                    
+                self.api.action_attack(self.owned_characters, tower)
+                flag = True
+        
+        if (flag):
+            return
+        
         for character in self.owned_characters:
             attackable = self.api.within_attacking_range(character)
             if (len(attackable) > 0):
@@ -130,24 +146,12 @@ class Strategy:
         
         if (len(self.api.get_owned_towers()) <= 1):
             self.api.action_wander(self.owned_characters)
-            
-            if (len(self.visible_enemy) > 0):
-                self.effective_attack()
 
         else:
-            if (len(self.owned_characters) < 15 and len(self.owned_towers) <= 1):
-                if (len(self.owned_characters) > len(self.visible_enemy) and len(self.visible_enemy) > 0):
-                    self.effective_attack()
-                else:
-                    self.api.action_move_to(self.owned_characters[:], pg.Vector2(20, 20))
-                
-            elif (len(self.visible_enemy) > 0 and len(self.owned_characters) - len(self.visible_enemy) > 15):
+            if (len(self.visible_enemy) + len(self.visible_enemy_towers) > 0):
                 self.effective_attack()
-            else:                
-                if (len(self.visible_enemy_towers) > 0):
-                    self.effective_attack()
-                else:
-                    self.api.action_wander(self.owned_characters)
+            else:
+                self.api.action_wander(self.owned_characters)
                 
                 
         
