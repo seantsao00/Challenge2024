@@ -5,7 +5,8 @@ import pygame as pg
 
 import const
 import const.result
-from event_manager.events import EventResultChamp, EventResultChoseCharacter, EventResultWandering
+from event_manager.events import (EventQuit, EventResultChamp, EventResultChoseCharacter,
+                                  EventResultWandering)
 from instances_manager import get_event_manager, get_model
 from model.team import Team
 from model.timer import Timer
@@ -44,7 +45,7 @@ class Result:
     def update(self):
         if self.__scope_status is const.ScopeStatus.FINISH:
             if self.arrived():
-                return
+                self.__scope_status = const.ScopeStatus.WAITING_QUIT
         elif self.__scope_status is const.ScopeStatus.WANDERING:
             self.__scope_target_position = const.wandering_formula(self.__parameter_wandering)
             self.__parameter_wandering += 2 * pi * get_model().dt / const.WANDERING_PERIOD
@@ -105,9 +106,18 @@ class Result:
             get_model().result_screen_select = True
             self.set_toward_wandering(True)
 
+    def handle_ending(self):
+        if self.__scope_status is const.ScopeStatus.WAITING_QUIT:
+            get_event_manager().post(EventQuit())
+
     @property
     def scope_position(self) -> pg.Vector2:
         return self.__scope_position
 
+    @property
     def number_of_teams(self) -> int:
         return self.__number_of_teams
+
+    @property
+    def scope_status(self) -> const.ScopeStatus:
+        return self.__scope_status

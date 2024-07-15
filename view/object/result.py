@@ -33,7 +33,7 @@ class ResultView(ObjectBase):
         self.__team_out: list[bool] = [False, False, False, False]
         self.__team_rank: list[int] = [10, 10, 10, 10]
         self.__team_index: int = 0
-        self.__number_of_teams: int = self.__result.number_of_teams()
+        self.__number_of_teams: int = self.__result.number_of_teams
 
     @classmethod
     def init_convert(cls):
@@ -101,7 +101,10 @@ class ResultView(ObjectBase):
         self.canvas.blit(img, (0, 0))
         if not model.result_screen_select:
             draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
-                      40, 'Press SPACE to continue', 'white', self.__font)
+                      40, 'Press SPACE/ENTER to continue', 'white', self.__font)
+        elif self.__result.scope_status is const.ScopeStatus.WAITING_QUIT:
+            draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
+                      40, 'Press SPACE/ENTER to quit', 'white', self.__font)
 
         for team in model.teams:
             if team.team_id < 2:

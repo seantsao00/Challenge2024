@@ -16,8 +16,19 @@ class InputTypes(Enum):
 
 class PartyType(Enum):
     NEUTRAL = auto()
+    """中立"""
+
     JUNIOR = auto()
+    """少年偵探團"""
+
     FBI = auto()
+    """FBI"""
+
     POLICE = auto()
+    """警視廳"""
+
     BLACK = auto()
+    """黑衣組織"""
+
     MOURI = auto()
+    """毛利偵探事務所"""

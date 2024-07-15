@@ -43,7 +43,11 @@ def _getTeamAvatar(team: Team, size: int):
     # resize and crop unwanted parts
     ratio = size / avatar_img.get_width()
     dim = avatar_img.get_size()
-    dim = (dim[0] * ratio, dim[1] * ratio)
+    # if party is JUNIOR, zoom in slightly
+    if team.party == const.PartyType.JUNIOR:
+        dim = (dim[0] * ratio, dim[1] * ratio - 2.5)
+    else:
+        dim = (dim[0] * ratio, dim[1] * ratio)
     avatar_img = pg.transform.scale(avatar_img, dim)
     avatar.blit(avatar_img, (0, 0))
 

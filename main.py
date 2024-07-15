@@ -19,7 +19,7 @@ from controller import Controller
 from event_manager import EventManager
 from model import Model, ModelArguments
 from music.music import BackgroundMusic
-from util import disable_print, set_verbosity
+from util import disable_print, log_critical, set_verbosity
 from view import View
 
 
@@ -28,17 +28,17 @@ def check_input_validity(received_args) -> bool:
     game_map = received_args.map
 
     if len(team_controls) > 4:
-        print('Too many teams')
+        log_critical('Too many teams')
         return False
     if team_controls.count('human') > 1:
-        print('At most one human')
+        log_critical('At most one human')
         return False
     for team in team_controls:
         if team != 'human' and not os.path.isfile(f'./ai/{team}.py'):
-            print(f'{team}.py does not exist')
+            log_critical(f'{team}.py does not exist')
             return False
     if not os.path.isdir(f'./topography/{game_map}'):
-        print(f'{game_map} map does not exist')
+        log_critical(f'{game_map} map does not exist')
         return False
 
     return True
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     parser.add_argument('team_controls', nargs='+',
                         help='List who controls the teams: "human" or AI names from the ai/ directory '
                              'for player-controlled teams. Accepts 1 to 4 entries. Available AI names: '
-                             + ', '.join(['"' + dirname[:-3] + '"' for dirname in os.listdir('./ai/') 
+                             + ', '.join(['"' + dirname[:-3] + '"' for dirname in os.listdir('./ai/')
                                           if not dirname in dir_ignore_list]) + '.')
     parser.add_argument('--show-view-range', action='store_true',
                         help='Displays the viewing range of all characters and towers.')
@@ -67,14 +67,14 @@ if __name__ == "__main__":
                         help='Displays the attack range of all characters and towers.')
     parser.add_argument('-d', '--disable-stdout', action='store_true',
                         help='Disable all non-logging write attempt to stdout. '
-                             'Can be used to stop spam from your or others AIs.')
+                             'Can be used to stop spam output from your or others AIs.')
     parser.add_argument('-m', '--mute', action='store_true',
-                        help='Mute all background music and sound effects.')
+                        help='Mute background music and sound effects.')
     parser.add_argument('-p', '--show-path', action='store_true',
                         help='Display the path to the destination of all characters. '
                              'Press key P to toggle this function during games.')
-    parser.add_argument('-q', '--skip-character-selecting', action='store_true',
-                        help='Skip character selection and randomly assign characters to teams '
+    parser.add_argument('-q', '--skip-party-selecting', action='store_true',
+                        help='Skip party selector and randomly assign parties to teams '
                              'for quick test.')
     parser.add_argument('-r', '--show-attack-view-range', action='store_true',
                         help='Combination of --show-view-range and --show-attack-range. '
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         team_controls=args.team_controls,
         show_view_range=args.show_view_range or args.show_attack_view_range,
         show_attack_range=args.show_attack_range or args.show_attack_view_range,
-        skip_character_selecting=args.skip_character_selecting,
+        skip_party_selecting=args.skip_party_selecting,
         show_path=args.show_path,
         show_range=args.show_attack_view_range or args.show_attack_range or args.show_view_range,
         scoreboard_frozen=args.frozen

@@ -62,7 +62,7 @@ def move_and_attack(characters, visible_enemy, owned_tower, no_sniper_characters
         if (len(attackable) == 0): 
             if (character.type != CharacterClass.SNIPER):
                 if (len(visible_enemy) == 0):
-                    print("no enemies seen")
+                    #print("no enemies seen")
                     api.action_wander(characters[index:index + 1])
             if (len(visible_enemy) != 0): api.action_attack(characters[index:index + 1], visible_enemy[0])
             continue
@@ -164,7 +164,7 @@ def every_tick(api: API):
         if (recruited_characters_count >= 1):
             random_point = None
             while True:
-                random_point = pg.Vector2(random.random() * 250, random.random() * 250)
+                random_point = pg.Vector2(random.random() * api.get_grid_size(), random.random() * api.get_grid_size())
                 if not api.is_visible(random_point):
                     break
             #print(random_point)
@@ -233,7 +233,7 @@ def every_tick(api: API):
             
         else: 
             
-            if dispatched_characters_count >= 5 or (recruited_characters_count >= 10):
+            if dispatched_characters_count + recruited_characters_count >= 15 or dispatched_characters_count >= 5:
             
                 #api.action_move_to(owned_characters[:], visible_enemy[0].position)
                 

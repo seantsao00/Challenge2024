@@ -46,7 +46,7 @@ class ModelArguments:
     team_controls: list[str]
     show_view_range: bool
     show_attack_range: bool
-    skip_character_selecting: bool
+    skip_party_selecting: bool
     show_path: bool
     show_range: bool
     scoreboard_frozen: bool
@@ -87,7 +87,7 @@ class Model:
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
-        if model_arguments.skip_character_selecting:
+        if model_arguments.skip_party_selecting:
             self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
