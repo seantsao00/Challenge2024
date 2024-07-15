@@ -33,6 +33,7 @@ from model.party_selector import PartySelector
 from model.pause_menu import PauseMenu
 from model.result import Result
 from model.team import NeutralTeam, Team
+from model.path_finder import PathFinder
 from util import log_critical, log_info
 
 if TYPE_CHECKING:
@@ -85,6 +86,7 @@ class Model:
         self.characters: list[Character] = []
         self.towers: list[Tower] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
+        self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
         if model_arguments.skip_character_selecting:

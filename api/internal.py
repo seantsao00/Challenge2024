@@ -17,6 +17,7 @@ import const
 import const.map
 import model
 import model.chat
+import model.path_finder
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
@@ -54,6 +55,9 @@ class Internal(prototype.API):
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
+
+    def post_init(self):
+        self.__path_finder = model.path_finder.PathFinder(get_model().map)
 
     def clear(self):
         self.__chat_sent = False
@@ -341,7 +345,9 @@ class Internal(prototype.API):
             if character.move_state is CharacterMovingState.TO_DIRECTION:
                 return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
             if character.move_state is CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, False, self.__transform(character.move_destination, is_position=True))
+            if character.move_state is CharacterMovingState.WANDERING:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, True, self.__transform(character.move_destination, is_position=True))
             raise ValueError
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
@@ -437,7 +443,7 @@ class Internal(prototype.API):
                 continue
             with inter.moving_lock:
                 inter.set_move_stop()
-                path = get_model().map.find_path(inter.position, destination)
+                path = self.__path_finder.find_path(inter.position, destination)
                 if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
@@ -492,7 +498,7 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
-                inter.set_wandering()
+                inter.set_wandering(self.__path_finder)
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -648,6 +654,7 @@ def load_ai(files: list[str]):
         spec = importlib.util.find_spec('ai.' + file)
         ai[i] = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(ai[i])
+        helpers[i].post_init()
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
