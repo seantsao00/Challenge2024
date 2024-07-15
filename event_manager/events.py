@@ -197,6 +197,16 @@ class EventViewChangeTeam(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventViewPathSwitch(BaseEvent):
+    """Event to turn on and off path"""
+
+
+@dataclass(kw_only=True)
+class EventViewShowRangeSwitch(BaseEvent):
+    """Event to turn on and off show range"""
+
+
+@dataclass(kw_only=True)
 class EventUseRangerAbility(BaseEvent):
     position: pg.Vector2 | tuple[float, float]
 
@@ -211,3 +221,23 @@ class EventSendChat(BaseEvent):
     type: const.ChatMessageType
     team: Team
     text: str
+
+
+@dataclass(kw_only=True)
+class EventResultChoseCharacter(BaseEvent):
+    """ In result, second to fourth place are chosen."""
+
+
+@dataclass(kw_only=True)
+class EventResultWandering(BaseEvent):
+    """ In result, scope left characters and start wandering."""
+
+
+@dataclass(kw_only=True)
+class EventResultChamp(BaseEvent):
+    """ In result, the champion is announced."""
+
+
+@dataclass(kw_only=True)
+class EventNyanCat(BaseEvent):
+    """What is this?"""

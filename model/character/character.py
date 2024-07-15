@@ -103,13 +103,14 @@ class Character(LivingEntity):
 
                 cur_direction += min_direction
 
+        self.update_face_direction(self.__move_direction)
         get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
 
     def __move_toward_position(self):
         """
         move along the predetermined path as far as it can
         """
-        EPS = 1e-8
+        eps = 1e-8
 
         if self.__move_path is None or len(self.__move_path) == 0:
             return
@@ -119,8 +120,8 @@ class Character(LivingEntity):
         movement = 0
         model = get_model()
         while (it < len(self.__move_path)
-               and movement + EPS <= self.get_speed() * model.dt):
-            if (self.__move_path[it] - self.position).length() < EPS:
+               and movement + eps <= self.get_speed() * model.dt):
+            if (self.__move_path[it] - self.position).length() < eps:
                 it += 1
                 continue
             ratio = ((self.get_speed() * model.dt - movement)
@@ -143,6 +144,7 @@ class Character(LivingEntity):
         else:
             del self.__move_path[:it]
 
+        self.update_face_direction(self.position - pos_init)
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
 
     def __set_wander_destination(self) -> bool:
@@ -196,12 +198,11 @@ class Character(LivingEntity):
         """Set the character to be wandering. Returns True/False on success/failure. If the character is already wandering, this method will return False. """
         if self.__is_wandering:
             return False
-        else:
-            if not self.__set_wander_destination():
-                self.__is_wandering = False
-                return False
-            self.__is_wandering = True
-            return True
+        if not self.__set_wander_destination():
+            self.__is_wandering = False
+            return False
+        self.__is_wandering = True
+        return True
 
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
@@ -238,6 +239,14 @@ class Character(LivingEntity):
         self._last_attack_time = now_time
         return True
 
+    def update_face_direction(self, direction: pg.Vector2 | None):
+        if direction == None or direction == pg.Vector2(0, 0):
+            return
+        if direction.x <= 0:
+            self.state = const.CharacterState.LEFT
+        else:
+            self.state = const.CharacterState.RIGHT
+
     @abstractmethod
     def attack(self, enemy: Entity):
         pass
@@ -264,19 +273,21 @@ class Character(LivingEntity):
         because I did not come up a nice solution to integrate with API.
         Refactor will be great.
         """
-        pass
 
     @property
     def move_direction(self) -> pg.Vector2:
         return self.__move_direction
 
     @property
+    def move_path(self) -> list[pg.Vector2] | None:
+        return self.__move_path
+
+    @property
     def move_destination(self) -> pg.Vector2 | None:
         if self.__move_state == CharacterMovingState.TO_POSITION:
             if self.__move_path != None and len(self.__move_path) > 0:
                 return self.__move_path[-1]
-            else:
-                return self.position
+            return self.position
         return None
 
     @property

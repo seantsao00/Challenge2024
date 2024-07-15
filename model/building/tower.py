@@ -17,7 +17,6 @@ from model.bullet import BulletCommon
 from model.character import Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
-from util import log_info
 
 if TYPE_CHECKING:
     from model.character import Character
@@ -40,18 +39,27 @@ class Tower(LivingEntity):
      - attack_timer: The timer to periodcally attack characters.
     """
 
-    def __init__(self, position: pg.Vector2, team: Team, is_fountain: bool = False):
-        self.__is_fountain = is_fountain
+    def __init__(self, position: pg.Vector2, team: Team, tower_type: const.TowerType):
+        self.__is_fountain: bool = tower_type is const.TowerType.FOUNTAIN
+        self.__tower_type: const.TowerType = tower_type
         self.__character_type: const.CharacterType = const.CharacterType.RANGER
         self.__enemies: OrderedSet[Character] = OrderedSet()
         self.period: float = const.TOWER_SPAWN_INITIAL_PERIOD
         self.last_generate: float = -1e9
+        self.__spawn_grids: list[pg.Vector2] = [
+            position + pg.Vector2(x, y)
+            for x in range(-const.TOWER_GENERATE_DISPLACEMENT, const.TOWER_GENERATE_DISPLACEMENT)
+            for y in range(-const.TOWER_GENERATE_DISPLACEMENT, const.TOWER_GENERATE_DISPLACEMENT)
+            if ((x*x + y*y <= const.TOWER_GENERATE_DISPLACEMENT ** 2)
+                and (get_model().map.get_position_type(position + pg.Vector2(x, y)) != const.MAP_OBSTACLE))
+        ]
+        """Grids that can spawn characters for this tower."""
 
-        if is_fountain:
+        if self.__is_fountain:
             super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
-                             team, const.TowerType.FOUNTAIN, invulnerability=True)
+                             team, tower_type, invulnerability=True)
         else:
-            super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, const.TowerType.HOTEL)
+            super().__init__(position, const.NEUTRAL_TOWER_ATTRIBUTE, team, tower_type)
 
         self.register_listeners()
 
@@ -83,9 +91,9 @@ class Tower(LivingEntity):
                 character_type = Sniper
             else:
                 raise TypeError(f'Character type error: {self.__character_type}')
-            new_position = pg.Vector2()
-            new_position.from_polar((random.uniform(0, 10), random.uniform(0, 360)))
-            new_character = character_type(self.position + new_position, self.team)
+            new_position = random.choice(self.__spawn_grids) + \
+                pg.Vector2(random.random(), random.random())
+            new_character = character_type(new_position, self.team)
             self.last_generate = get_model().get_time()
             get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.team_id)
 
@@ -148,3 +156,7 @@ class Tower(LivingEntity):
     @property
     def character_type(self) -> const.CharacterType:
         return self.__character_type
+
+    @property
+    def tower_type(self) -> const.TowerType:
+        return self.__tower_type

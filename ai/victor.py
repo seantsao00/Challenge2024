@@ -1,6 +1,6 @@
 import math, itertools
 import random
-
+from ordered_set import OrderedSet
 import pygame as pg
 
 from api.prototype import *
@@ -97,7 +97,7 @@ def every_tick(api: API):
         for tower in my_tower:
             api.change_spawn_type(tower, CharacterClass.MELEE)
     else:
-        if len(walker) < 2 and api.get_current_time() < 80: 
+        if len(walker) < 2 and api.get_current_time() < 50: 
             for tower in my_tower:
                 api.change_spawn_type(tower, CharacterClass.MELEE)
         else:
@@ -109,7 +109,7 @@ def every_tick(api: API):
     enemys_ranger = [character for character in all_character if character.team_id != my_team_id and character.type is CharacterClass.RANGER]
     enemys_sniper = [character for character in all_character if character.team_id != my_team_id and character.type is CharacterClass.SNIPER]
     enemys_melee = [character for character in all_character if character.team_id != my_team_id and character.type is CharacterClass.MELEE]
-    sniper_order = set(enemys_ranger + enemys_sniper + enemys_melee)
+    sniper_order = OrderedSet(enemys_ranger + enemys_sniper + enemys_melee)
     for x in api.get_owned_characters():
         if x.type is CharacterClass.SNIPER:
             now_time = api.get_current_time()    

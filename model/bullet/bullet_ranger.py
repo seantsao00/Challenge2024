@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventRangedBulletDamage
+from event_manager import EventEveryTick, EventRangedBulletDamage
 from instances_manager import get_event_manager, get_model
 from model.bullet.bullet import Bullet
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from model.team import Team
 
 
-class BulletRanger(Bullet[None]):
+class BulletRanger(Bullet):
     def __init__(self,
                  target: pg.Vector2 | tuple[float, float],
                  position: pg.Vector2 | tuple[float, float],
@@ -26,10 +26,10 @@ class BulletRanger(Bullet[None]):
         self.target = target
         self.range = const.RANGER_ATTRIBUTE.ability_variables[0]
 
-        self.direction = (self.target - self.position)
+        self.direction = self.target - self.position
         self.direction = self.direction.normalize() if self.direction.length() != 0 else pg.Vector2(1, 0)
 
-    def judge(self, _: None = None):
+    def judge(self, _: EventEveryTick):
         """
         Decide if the bullet needs to move, cause damage or disappear.
         The direction is fixed.

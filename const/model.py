@@ -4,7 +4,7 @@ This module defines constants associated with model.
 
 from enum import Enum, auto
 
-FPS = 60
+FPS = 30
 
 # the total game time is 3 minutes
 GAME_TIME = 181
@@ -16,4 +16,4 @@ class State(Enum):
     SELECT_PARTY = auto()
     PLAY = auto()
     PAUSE = auto()
-    SETTLEMENT = auto()  # 結算畫面
+    RESULT = auto()  # 結算畫面

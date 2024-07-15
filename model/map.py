@@ -19,7 +19,7 @@ class Map:
     backgrounds: list[str]
     objects: dict[str, int]
     fountains: list[tuple[int, int]]
-    neutral_towers: list[tuple[int, int]]
+    neutral_towers: list[tuple[tuple[int, int], const.TowerType]]
     map_dir: str
 
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
@@ -109,8 +109,8 @@ class Map:
 
     def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
         """
-        Find a path from position_begin to position_end. Positions take values
-        in range [0, const.ARENA_SIZE).
+        Find a path from position_begin to position_end with A star algorithm.
+        Positions take values in range [0, const.ARENA_SIZE).
         Returns a list of positions describing the path, or None if the algorithm
         did not find a path.
         """
@@ -130,10 +130,12 @@ class Map:
         pq: list[tuple[float, float, tuple[int, int]]] = []
 
         # helper functions
-        def heuristic(cell: tuple[int, int]) -> float:
-            est_dist = (pg.Vector2(cell) - pg.Vector2(cell_end)).length()
-            est_speed = (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cell) == const.MAP_PUDDLE else 1)
-            return est_dist / est_speed + dist[cell[0]][cell[1]]
+        def heuristic_dist_to_target(cell: tuple[int, int]) -> float:
+            dx = abs(cell[0] - cell_end[0])
+            dy = abs(cell[1] - cell_end[1])
+            return dx + dy - (2 - 2 ** 0.5) * min(dx, dy)
+            # this should be faster but I didn't see significant difference
+            # return (dx ** 2 + dy ** 2) ** 0.5 + dist[cell[0]][cell[1]]
 
         def push_cell(cell: tuple[int, int], new_dist: float, cell_source: tuple[int, int]) -> None:
             cx, cy = cell
@@ -143,8 +145,11 @@ class Map:
                 return
             dist[cx][cy] = new_dist
             src[cx][cy] = cell_source
-            new_heur = heuristic(cell)
-            heapq.heappush(pq, (new_heur, new_dist, cell))
+            new_heur = heuristic_dist_to_target(cell)
+            # A star: look for the vertix with lowest f(n) = g(n) + h(n),
+            # g(n): actual distance travelled
+            # h(n): heuristic function that estimates distance to target
+            heapq.heappush(pq, (new_heur + new_dist, new_dist, cell))
 
         def get_neighbors(cur_cell: tuple[int, int], cur_dist):
             diff = [
@@ -154,7 +159,7 @@ class Map:
             ]
             for dx, dy, dd in diff:
                 nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
-                nd = cur_dist + dd * (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cur_cell) == const.MAP_PUDDLE else 1)
+                nd = cur_dist + dd / (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cur_cell) == const.MAP_PUDDLE else 1)
                 if self.is_cell_passable((nx, ny)):
                     yield (nx, ny, nd)
 
@@ -200,7 +205,18 @@ def load_map(map_dir):
     size = (data['width'], data['height'])
 
     fountains = [tuple(i) for i in data['fountains']]
-    neutral_towers = [tuple(i) for i in data['neutral_towers']]
+    neutral_towers: list[tuple[tuple[int, int], const.TowerType]] = []
+    for i in data['neutral_towers']:
+        if i[-1] == "ferris_wheel":
+            tower_type = const.TowerType.FERRIS_WHEEL
+        elif i[-1] == "hotel":
+            tower_type = const.TowerType.HOTEL
+        elif i[-1] == "pylon":
+            tower_type = const.TowerType.PYLON
+        else:
+            raise TypeError(f"neutral tower type '{i[-1]}' is unknown")
+        neutral_towers.append((tuple(i[:2]), tower_type))
+
     with open(map_file, encoding='utf-8') as f:
         rows = list(csv.reader(f))
         map_list = [[0] * size[1] for _ in range(0, size[0])]

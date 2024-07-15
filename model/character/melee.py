@@ -8,14 +8,11 @@ import const
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
 from model.character.character import Character
+from model.entity import Entity
 from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
-
-from event_manager import EventAttack
-from instances_manager import get_event_manager, get_model
-from model.entity import Entity
 
 
 class Melee(Character):
@@ -34,7 +31,8 @@ class Melee(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
+        super().__init__(position, team, const.MELEE_ATTRIBUTE,
+                         const.CharacterType.MELEE, const.CharacterState.LEFT)
         self.__defense: float = 0
 
     def attack(self, enemy: Entity):
