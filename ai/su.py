@@ -73,11 +73,11 @@ class Strategy:
                 if (len(attackable_tower) > 0):
                     random_target = random.choice(attackable_tower)
 
-                if (len(attackable_sniper) > 0):
-                    random_target = random.choice(attackable_sniper)
-                elif (len(attackable_tower) > 0 and 
-                    random_target.health < 1000):
+                if (len(attackable_tower) > 0 and 
+                    random_target.health < 500 and not random_target.is_fountain):
                     pass
+                elif (len(attackable_sniper) > 0):
+                    random_target = random.choice(attackable_sniper)
                 else:
                     random_target = random.choice(attackable)
 
@@ -88,7 +88,7 @@ class Strategy:
                 self.api.action_wander([character])
                 for tower in self.visible_enemy_towers:
                     
-                    attack_threshold = tower.attack_range + 5.0
+                    attack_threshold = tower.attack_range + 7.0
                     target_position = pg.Vector2(0, 0)
 
                     for character in self.owned_characters:
