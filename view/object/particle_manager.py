@@ -32,7 +32,7 @@ class ParticleManager:
             _pos = (pos * ScreenInfo.resize_ratio
                     + pg.Vector2((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
             print(_pos)
-            _speed = random.uniform(40, 60) * speed
+            _speed = random.uniform(20, 60) * speed
             _duration = random.uniform(1, 1.4) * duration
             _size = random.uniform(0.8, 1.2)
             angle = random.uniform(0, 2 * math.pi)

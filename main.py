@@ -49,14 +49,18 @@ if __name__ == "__main__":
     # faulthandler.enable()
 
     # Argument parser
+    dir_ignore_list: list[str] = ['.DS_Store', '__pycache__', '.vscode']
+
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument('map',
                         help='Specify one of the map names: '
                              + ', '.join(['"' + dirname + '"' for dirname in os.listdir('./topography/')
-                                          if not dirname.startswith('.')]) + '.')
+                                          if not dirname in dir_ignore_list]) + '.')
     parser.add_argument('team_controls', nargs='+',
-                        help='List who controls the teams: AI names from the ai/ directory or '
-                             '"human" for player-controlled teams. Accepts 1 to 4 entries.')
+                        help='List who controls the teams: "human" or AI names from the ai/ directory '
+                             'for player-controlled teams. Accepts 1 to 4 entries. Available AI names: '
+                             + ', '.join(['"' + dirname[:-3] + '"' for dirname in os.listdir('./ai/') 
+                                          if not dirname in dir_ignore_list]) + '.')
     parser.add_argument('--show-view-range', action='store_true',
                         help='Displays the viewing range of all characters and towers.')
     parser.add_argument('--show-attack-range', action='store_true',
