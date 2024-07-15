@@ -36,23 +36,27 @@ def assign_random_destination(character: Character, interface: API):
     interface.action_move_to([character], new_destination)
 
 def enemies_near_tower(tower: Tower, interface: API):
-    """傳入一座塔，回傳塔附近所有的敵對單位"""
-    visible_enemies = [character for character in interface.get_visible_characters()
-                if character.team_id != interface.get_team_id()]
-    ret = []
+    """傳入一座塔，回傳塔附近所有視野可及的敵隊士兵"""
+    visible_enemies = [] # 創造空列表，存取所有視野可及的敵隊士兵
+    for character in interface.get_visible_characters():
+        if character.team_id != interface.get_team_id():
+            visible_enemies.append(character)
+
+    near_enemies = [] # 創造空列表，存取所有視野可及，且距離塔 20 單位距離以內的敵隊士兵
     for enemy in visible_enemies:
         if enemy.position.distance_to(tower.position) <= 20:
-            ret.append(enemy)
-    return ret
+            near_enemies.append(enemy)
+    return near_enemies
 
 def allies_near_tower(tower: Tower, interface: API):
-    """傳入一座塔，回傳塔附近己方隊伍所有的塔"""
-    allies = [character for character in interface.get_owned_characters()]
-    ret = []
+    """傳入一座塔，回傳塔附近所有己方隊伍的士兵"""
+    allies = interface.get_owned_characters()
+    
+    near_allies = []
     for ally in allies:
-        if ally.position.distance_to(tower.position) <= 20:
-            ret.append(ally)
-    return ret
+        if ally.position.distance_to(tower.position) <= 20: 
+            near_allies.append(ally)
+    return near_allies
 
 def every_tick(interface: API):
     """一定要被實作的 function ，會定期被遊戲 call"""
@@ -65,14 +69,14 @@ def every_tick(interface: API):
 
     my_characters = interface.get_owned_characters()
     for character in my_characters:  # 用 for 迴圈遍歷所有自己的士兵
-        if character.id in Information.destinations:  # 這個士兵曾經被 assign 過要往哪裡走
-            # 士兵沒有辦法走到任意的實數座標上，所以如果用註解掉的部分判斷是否到達目的地，會覺得士兵永遠沒有走到
+        if character.id in Information.destinations:  # 這個士兵曾經被指定過要往哪裡走
+            # 士兵沒有辦法走到任意的實數座標上，所以如果用以下註解掉的程式碼判斷是否到達目的地，會覺得士兵永遠沒有走到
             # if character.position == Information.destinations[character.id]: # 這個士兵已經走到他的目的地
             #     assign_random_destination(character, interface)
             if (character.position - Information.destinations[character.id]).length() < 1:
                 print(f'{character.id} 已經夠接近目的地了')
                 assign_random_destination(character, interface)
-        else:  # 這個士兵未曾被 assign 過要往哪裡走
+        else:  # 這個士兵未曾被指定過要往哪裡走
             assign_random_destination(character, interface)
 
     current_time = interface.get_current_time()
