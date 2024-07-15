@@ -191,6 +191,7 @@ class Controller:
             if pg_event.type == pg.KEYDOWN:
                 if pg_event.key in const.CONFIRM_BUTTONS:
                     model.result.handle_scopemoving_start()
+                    model.result.handle_ending()
 
     def ctrl_cover(self, pg_events: list[pg.event.Event]):
         """

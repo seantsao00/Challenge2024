@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventBulletDamage, EventBulletDisappear, EventEveryTick
+from event_manager import (EventBulletDamage, EventBulletDisappear, EventEveryTick,
+                           EventSniperBulletParticle)
 from instances_manager import get_event_manager, get_model
 from model.bullet.bullet import Bullet
 
@@ -22,10 +23,13 @@ class BulletCommon(Bullet):
                  attacker: LivingEntity,
                  speed: float,
                  victim: LivingEntity | None = None,
-                 entity_type: const.EntityType = const.BulletType.COMMON):
+                 entity_type: const.EntityType = const.BulletType.COMMON,
+                 is_sniper_ability: bool = False):
         super().__init__(position=position, entity_type=entity_type,
                          team=team, speed=speed, attacker=attacker, damage=damage)
         self.victim = victim
+        self.is_sniper_ability = is_sniper_ability
+        self.particle_dt: float = 0
 
     def judge(self, _: EventEveryTick):
         """
@@ -44,3 +48,7 @@ class BulletCommon(Bullet):
             self.direction = (victim_pos - original_pos).normalize()
             self.position += self.direction * self.speed * model.dt
             self.view_rotate = self.direction.angle_to(pg.Vector2(-1, 0))
+            self.particle_dt += model.dt
+            if self.is_sniper_ability and self.particle_dt >= const.BULLET_SNIPER_PARTICLE_DT:
+                self.particle_dt %= const.BULLET_SNIPER_PARTICLE_DT
+                ev_manager.post(EventSniperBulletParticle(bullet=self))

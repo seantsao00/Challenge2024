@@ -13,37 +13,6 @@ import pygame as pg
 
 from api.prototype import *
 
-
-def get_fountain(visible_towers, my_team_id):
-    for tower in visible_towers:
-        if tower.is_fountain and my_team_id == tower.team_id:
-            return tower
-
-def attack_nearest_enemy(api: API,owned_characters: list[Character], visible_enemy: list[Character]):
-    cnt = 0
-    res = 0
-    min_dist = 1e6
-    for enermies in visible_enemy:
-        now_dist = owned_characters[0].position.distance_to(enermies.position)
-        if (now_dist < min_dist):
-            res = cnt
-            min_dist = now_dist
-        cnt += 1
-    
-    return res
-
-def handle_attack(api: API):
-    api.send_chat(random.choice(["鄭詠堯說你是2486"]))
-
-def handle_spawn(api: API):
-    api.send_chat(random.choice(["鄭詠堯說你是2486"]))
-
-def init(api: API):
-    api.send_chat(random.choice(["鄭詠堯說你是2486"]))
-
-def send_spam_message(api: API):
-    api.send_chat(random.choice(["鄭詠堯說你是2486"]))
-
 class Strategy:
     def __init__(self):
         self.api: API | None = None
@@ -57,8 +26,6 @@ class Strategy:
         self.visible_enemy: list[Character] = []
         self.visible_enemy_towers: list[Tower] = []
         
-        self.cnt: int = 0
-        
     def initialize(self):
         self.my_team_id = self.api.get_team_id()
         self.fountain = self.get_fountain(self.api.get_visible_towers(), self.my_team_id)
@@ -69,12 +36,8 @@ class Strategy:
         self.visible_enemy_towers = [tower for tower in self.api.get_visible_towers() if 
                                      tower.team_id != self.my_team_id]
         
-        
-        self.cnt += 1
-
-        
     def send_spam_message(self):
-        self.api.send_chat(random.choice(["鄭詠堯說你是2486", "發動精神攻擊", "家人們點個讚"]))
+        self.api.send_chat(random.choice(["鄭詠堯說你是2486", "發動精神攻擊", "家人們點個讚", "素質真高", "點了吧沒意思"]))
     def print_scores(self):
         scores = []
         for team_id in range(0, 4):
@@ -105,8 +68,15 @@ class Strategy:
                 
                 attackable_sniper = [snipers for snipers in attackable if type(snipers) == Character 
                                     and (snipers.type == CharacterClass.SNIPER)]
+                attackable_tower = [tower for tower in attackable if type(tower) == Tower]
+                
+                if (len(attackable_tower) > 0):
+                    random_target = random.choice(attackable_tower)
 
-                if (len(attackable_sniper) > 0):
+                if (len(attackable_tower) > 0 and 
+                    random_target.health < 500 and not random_target.is_fountain):
+                    pass
+                elif (len(attackable_sniper) > 0):
                     random_target = random.choice(attackable_sniper)
                 else:
                     random_target = random.choice(attackable)
@@ -118,12 +88,13 @@ class Strategy:
                 self.api.action_wander([character])
                 for tower in self.visible_enemy_towers:
                     
-                    attack_threshold = tower.attack_range + 4.0
-                    target_position = pg.Vector2(20, 20)
+                    attack_threshold = tower.attack_range + 7.0
+                    target_position = pg.Vector2(0, 0)
 
                     for character in self.owned_characters:
                         if any(character.position.distance_to(tower.position) <= attack_threshold for tower in self.visible_enemy_towers):
                             self.api.action_move_to([character], target_position)
+                            continue
                             
                     
         
@@ -157,7 +128,7 @@ class Strategy:
     def run(self, api: API):
         self.api = api
         self.send_spam_message()
-        self.print_scores()
+        # self.print_scores()
         
         self.initialize()
         
