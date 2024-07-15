@@ -413,7 +413,7 @@ class Internal(prototype.API):
         enforce_type('direction', direction, pg.Vector2)
         if isinstance(characters, prototype.Character):
             characters = [characters]
-            
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -448,7 +448,10 @@ class Internal(prototype.API):
                     inter.set_move_position(path)
 
     def action_move_clear(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -459,8 +462,11 @@ class Internal(prototype.API):
                 inter.set_move_stop()
 
     def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
-        enforce_type('characters', characters, Iterable)
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -476,7 +482,10 @@ class Internal(prototype.API):
             internal.attack(target_internal)
 
     def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
-        enforce_type('characters', characters, Iterable)
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
         if 'position' in kwargs:
@@ -490,7 +499,10 @@ class Internal(prototype.API):
             inter.cast_ability(**kwargs)
 
     def action_wander(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
