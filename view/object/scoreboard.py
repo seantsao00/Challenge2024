@@ -23,7 +23,6 @@ class Scorebox:
             f"{self.__team.team_name}", False, 'black')
         self.__team_avatar = components.createTeamAvatar(
             self.__team, int(SI.scale(SCOREBOX_AVATAR_SIZE)))
-        # self.__team_towers_count: int = 0
         self.__position_x = initial_position[0]
         self.__position_y = LinearAnimation(
             initial_position[1], SCOREBOX_ANIMATION_DURATION)
@@ -39,6 +38,8 @@ class Scorebox:
             bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
 
         def offset(p): return (p[0], p[1] + self.font_primary.get_descent())
+        pg.draw.line(self.__canvas, (239, 192, 131), offset(
+            team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=32)
         pg.draw.line(self.__canvas, const.HEALTH_BAR_COLOR[self.__team.team_id], offset(
             team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
