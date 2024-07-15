@@ -73,7 +73,7 @@ def move_and_attack(characters, visible_enemy, owned_tower, no_sniper_characters
 def enemies_near_tower(visible_enemies, tower, api):
     ret = []
     for enemy in visible_enemies:
-        if enemy.position.distance_to(tower.position) <= 20:
+        if enemy.position.distance_to(tower.position) <= 40:
             ret.append(enemy)
     return ret
 
@@ -106,7 +106,7 @@ def every_tick(api: API):
     for character in owned_characters:
         recruited = False
         for tower in owned_tower:
-            if character.position.distance_to(tower.position) <= 20 and api.get_movement(character).status == MovementStatusClass.STOPPED:
+            if character.position.distance_to(tower.position) <= 40 and api.get_movement(character).status == MovementStatusClass.STOPPED:
                 recruited = True
                 break
         if recruited: recruited_characters.append(character)
@@ -211,7 +211,18 @@ def every_tick(api: API):
                     if not tower.is_fountain: occupied_tower.append(tower)
                 if (len(occupied_tower) > 0): api.action_move_to(dispatched_characters + recruited_characters, occupied_tower[0].position)
                 else: api.action_move_to(dispatched_characters + recruited_characters, fountain.position)
+    
     for sniper in sniper_characters:
+        
+        while True:
+            random_point = pg.Vector2((random.random() * api.get_grid_size(), random.random() * api.get_grid_size()))
+            vulnerable = False
+            for enemy in visible_enemy:
+                if random_point.distance_to(enemy.position) <= enemy.attack_range:
+                    vulnerable = True
+                    break
+            if (api.is_visible(random_point) and not vulnerable): break
+        print(random_point)
         nearest_distance = 1e9
         for tower in contestable_tower:
             if tower.team_id == my_team_id: continue
@@ -227,4 +238,5 @@ def every_tick(api: API):
         elif nearest_distance <= 60:
             api.action_move_clear([sniper])
         elif (target_tower != None): api.action_move_to([sniper], target_tower.position)
-        else: api.action_wander([sniper])
+        else: 
+            if (api.get_movement(sniper).status == MovementStatusClass.STOPPED): api.action_move_to([sniper], random_point)
