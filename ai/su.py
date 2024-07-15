@@ -74,7 +74,7 @@ class Strategy:
 
         
     def send_spam_message(self):
-        self.api.send_chat(random.choice(["鄭詠堯說你是2486", "我只會打人"]))
+        self.api.send_chat(random.choice(["鄭詠堯說你是2486"]))
     def print_scores(self):
         scores = []
         for team_id in range(0, 4):
@@ -87,23 +87,17 @@ class Strategy:
                 return tower
         
     def handle_spawn(self):
-        if (len(self.owned_characters) <= 4 and len(self.api.get_visible_towers()) <= 1):
+        if (len(self.owned_characters) <= 6 and len(self.api.get_visible_towers()) <= 1):
             self.api.change_spawn_type(self.fountain, CharacterClass.MELEE)
         else:
-            if (int(self.cnt) % 4 < 3):
-                self.api.change_spawn_type(self.fountain, CharacterClass.SNIPER)
-            else:   
-                self.api.change_spawn_type(self.fountain, CharacterClass.MELEE)
+            self.api.change_spawn_type(self.fountain, CharacterClass.SNIPER)
             
         if (len(self.visible_enemy_towers) > 0):
             self.api.change_spawn_type(self.fountain, CharacterClass.SNIPER)
         
-        for tower in self.owned_towers:
-            if (tower != self.fountain):
-                self.api.change_spawn_type(tower, CharacterClass.SNIPER)
+        # raise NotImplementedError
         
     def effective_attack(self):
-        
         for character in self.owned_characters:
             attackable = self.api.within_attacking_range(character)
             if (len(attackable) > 0):
@@ -123,7 +117,7 @@ class Strategy:
                 self.api.action_wander([character])
                 for tower in self.visible_enemy_towers:
                     
-                    attack_threshold = tower.attack_range + 5.0
+                    attack_threshold = tower.attack_range + 3.0
                     target_position = pg.Vector2(20, 20)
 
                     for character in self.owned_characters:
