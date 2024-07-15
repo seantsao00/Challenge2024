@@ -20,6 +20,8 @@ BGM_PATH: dict[PartyType, str] = {
     PartyType.MOURI: os.path.join(BGM_DIR, 'mouri.mp3')
 }
 
+BGM_ROLL_PATH = os.path.join(BGM_DIR, 'roll.mp3')
+
 BGM_END_PATH = os.path.join(BGM_DIR, 'end.mp3')
 
 BGM_VOLUME = 0.5
@@ -32,16 +34,19 @@ class EffectType(Enum):
     SELECT = auto()
     ATTACK_MELEE = auto()
     ATTACK_RANGE = auto()
+    SHOT = auto()
 
 
 EFFECT_PATH: dict[EffectType, str] = {
     EffectType.SELECT: os.path.join(EFFECT_DIR, 'select.mp3'),
     EffectType.ATTACK_MELEE: os.path.join(EFFECT_DIR, 'attack_melee.mp3'),
-    EffectType.ATTACK_RANGE: os.path.join(EFFECT_DIR, 'attack_range.mp3')
+    EffectType.ATTACK_RANGE: os.path.join(EFFECT_DIR, 'attack_range.mp3'),
+    EffectType.SHOT: os.path.join(EFFECT_DIR, 'shot.mp3')
 }
 
 EFFECT_VOLUME: dict[EffectType, float] = {
     EffectType.SELECT: 0.2,
     EffectType.ATTACK_MELEE: 0.1,
-    EffectType.ATTACK_RANGE: 0.1
+    EffectType.ATTACK_RANGE: 0.1,
+    EffectType.SHOT: 0.4
 }

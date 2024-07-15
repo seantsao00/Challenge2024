@@ -18,50 +18,6 @@ class CharacterClass(IntEnum):
     UNKNOWN = auto()
 
 
-class MapTerrain(IntEnum):
-    """地圖地形。"""
-    OUT_OF_BOUNDS = auto()
-    """界外。"""
-    ROAD = auto()
-    """道路。走路的速度是正常的。"""
-    OFFROAD = auto()
-    """道路外，走路會減速。"""
-    OBSTACLE = auto()
-    """障礙物，無法通過。"""
-
-
-class MovementStatusClass(IntEnum):
-    """角色移動的狀態。 """
-    STOPPED = auto()
-    """角色目前停止。 """
-    TO_DIRECTION = auto()
-    """角色目前正朝某個方向前進。 """
-    TO_POSITION = auto()
-    """角色目前朝著某個點為目的地前進。 """
-    UNKNOWN = auto()
-    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
-
-
-class Movement:
-    def __init__(self,
-                 _status: MovementStatusClass,
-                 _is_wandering: bool,
-                 _vector: pg.Vector2 | None = None):
-        self.status = _status
-        """角色的移動狀態。 """
-        self.is_wandering = _is_wandering
-        """
-        角色是否在遊蕩狀態。
-        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
-        """
-        self.vector = _vector
-        """
-        當停止時，為 `None`。
-        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
-        當朝著某個點時，為該點的座標。
-        """
-
-
 class Character:
     """角色。"""
 
@@ -140,8 +96,54 @@ class Tower:
         """建築物所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
 
 
+class MapTerrain(IntEnum):
+    """地圖地形。"""
+    OUT_OF_BOUNDS = auto()
+    """界外。"""
+    ROAD = auto()
+    """道路。走路的速度是正常的。"""
+    OFFROAD = auto()
+    """道路外，走路會減速。"""
+    OBSTACLE = auto()
+    """障礙物，無法通過。"""
+
+
+class MovementStatusClass(IntEnum):
+    """角色移動的狀態。 """
+    STOPPED = auto()
+    """角色目前停止。 """
+    TO_DIRECTION = auto()
+    """角色目前正朝某個方向前進。 """
+    TO_POSITION = auto()
+    """角色目前朝著某個點為目的地前進。 """
+    UNKNOWN = auto()
+    """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
+
+
+class Movement:
+    def __init__(self,
+                 _status: MovementStatusClass,
+                 _is_wandering: bool,
+                 _vector: pg.Vector2 | None = None):
+        self.status = _status
+        """角色的移動狀態。 """
+        self.is_wandering = _is_wandering
+        """
+        角色是否在遊蕩狀態。
+        一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
+        """
+        self.vector = _vector
+        """
+        當停止時，為 `None`。
+        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
+        當朝著某個點時，為該點的座標。
+        """
+
+
 class API:
     """與遊戲互動的方法。傳入 AI 的方法是作為 `every_tick` 的第一個引數。"""
+
+    """場地資訊獲取"""
 
     @abstractmethod
     def get_current_time(self) -> float:
@@ -165,6 +167,31 @@ class API:
         @index: 隊伍的編號或者是 `None`（代表自己的小隊）
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def get_visibility(self) -> list[list[int]]:
+        """
+        回傳目前的所有視野狀態。回傳值是一個二維的表格，長寬皆為 `get_grid_size()` 的回傳值。
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_visible(self, position: pg.Vector2) -> bool:
+        """回傳某個位置是否在視野範圍內。如果位置在地圖之外，永遠回傳 `False`。  
+        @position: 要檢查的位置。"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_terrain(self, position: pg.Vector2) -> MapTerrain:
+        """回傳某個位置的地形，不需在視野範圍內就能呼叫。  
+        如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
+        @position: 要檢查的位置。"""
+
+    @abstractmethod
+    def get_map_name(self) -> str:
+        """回傳當前地圖的名稱"""
+
+    """角色建築資訊獲取"""
 
     @abstractmethod
     def get_sample_character(self, type_class: CharacterClass) -> Character:
@@ -237,24 +264,7 @@ class API:
         @character: 目標的角色。
         """
 
-    @abstractmethod
-    def get_visibility(self) -> list[list[int]]:
-        """
-        回傳目前的所有視野狀態。回傳值是一個二維的表格，長寬皆為 `get_grid_size()` 的回傳值。
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def is_visible(self, position: pg.Vector2) -> bool:
-        """回傳某個位置是否在視野範圍內。如果位置在地圖之外，永遠回傳 `False`。  
-        @position: 要檢查的位置。"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_terrain(self, position: pg.Vector2) -> MapTerrain:
-        """回傳某個位置的地形，不需在視野範圍內就能呼叫。  
-        如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
-        @position: 要檢查的位置。"""
+    """角色操作相關"""
 
     @abstractmethod
     def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
@@ -328,6 +338,8 @@ class API:
         """
         raise NotImplementedError
 
+    """建築操作"""
+
     @abstractmethod
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass) -> None:
         """
@@ -336,6 +348,8 @@ class API:
         @spawn_type: 指定的兵種。
         """
         raise NotImplementedError
+
+    """輔助函數"""
 
     @abstractmethod
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
@@ -368,13 +382,11 @@ class API:
         """
         raise NotImplementedError
 
+    """聊天室"""
+
     @abstractmethod
     def send_chat(self, msg: str) -> bool:
         """
         傳送聊天室訊息，每個 `every_tick` 的呼叫當中只能傳送一次。回傳值為傳送成功或失敗。每一次訊息成功傳送後要等待一秒才能傳送下一則訊息。
         @msg: 要傳送的訊息，長度不得超過 30、不得包含 NULL 字元。部分字元可能會因為字體無法顯示。
         """
-
-    @abstractmethod
-    def get_map_name(self) -> str:
-        """回傳當前地圖的名稱"""

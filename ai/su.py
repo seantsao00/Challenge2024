@@ -74,7 +74,7 @@ class Strategy:
 
         
     def send_spam_message(self):
-        self.api.send_chat(random.choice(["鄭詠堯說你是2486"]))
+        self.api.send_chat(random.choice(["鄭詠堯說你是2486", "發動精神攻擊", "家人們點個讚"]))
     def print_scores(self):
         scores = []
         for team_id in range(0, 4):
@@ -87,39 +87,65 @@ class Strategy:
                 return tower
         
     def handle_spawn(self):
-        if (len(self.owned_characters) <= 5 and len(self.api.get_visible_towers()) <= 1):
+        if (len(self.owned_characters) <= 4 and len(self.api.get_visible_towers()) <= 1):
             self.api.change_spawn_type(self.fountain, CharacterClass.MELEE)
         else:
-            self.api.change_spawn_type(self.fountain, CharacterClass.RANGER)
+            self.api.change_spawn_type(self.fountain, CharacterClass.SNIPER)
+            
+        if (len(self.visible_enemy_towers) > 0):
+            self.api.change_spawn_type(self.fountain, CharacterClass.SNIPER)
         
         # raise NotImplementedError
         
-    def attack_target(self, target: Character | Tower):
-        self.api.action_move_to(self.owned_characters, target.position)
-        self.api.action_attack(self.owned_characters, target)
-        self.api.action_cast_ability(self.owned_characters, position = target.position)
-    
+    def effective_attack(self):
+        for character in self.owned_characters:
+            attackable = self.api.within_attacking_range(character)
+            if (len(attackable) > 0):
+                
+                attackable_sniper = [snipers for snipers in attackable if type(snipers) == Character 
+                                    and (snipers.type == CharacterClass.SNIPER)]
+
+                if (len(attackable_sniper) > 0):
+                    random_target = random.choice(attackable_sniper)
+                else:
+                    random_target = random.choice(attackable)
+
+                self.api.action_cast_ability([character], position = random_target.position)                    
+                self.api.action_attack([character], random_target)
+
+            else:
+                self.api.action_wander([character])
+                for tower in self.visible_enemy_towers:
+                    
+                    attack_threshold = tower.attack_range + 4.0
+                    target_position = pg.Vector2(20, 20)
+
+                    for character in self.owned_characters:
+                        if any(character.position.distance_to(tower.position) <= attack_threshold for tower in self.visible_enemy_towers):
+                            self.api.action_move_to([character], target_position)
+                            
+                    
         
     def handle_attack(self):
         
         if (len(self.api.get_owned_towers()) <= 1):
             self.api.action_wander(self.owned_characters)
             
-            if (len(self.visible_enemy) > 0):
-                self.attack_target(self.visible_enemy[0])
+            if (len(self.visible_enemy) + len(self.visible_enemy_towers) > 0):
+                self.effective_attack()
 
         else:
             if (len(self.owned_characters) < 15 and len(self.owned_towers) <= 1):
                 if (len(self.owned_characters) > len(self.visible_enemy) and len(self.visible_enemy) > 0):
-                    self.attack_target(self.visible_enemy[0])
+                    self.effective_attack()
                 else:
                     self.api.action_move_to(self.owned_characters[:], pg.Vector2(20, 20))
                 
             elif (len(self.visible_enemy) > 0 and len(self.owned_characters) - len(self.visible_enemy) > 15):
-                self.attack_target(self.visible_enemy[0])
+                self.effective_attack()
             else:                
                 if (len(self.visible_enemy_towers) > 0):
-                    self.attack_target(self.visible_enemy_towers[0])
+                    self.effective_attack()
                 else:
                     self.api.action_wander(self.owned_characters)
                 
