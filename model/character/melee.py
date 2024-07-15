@@ -45,15 +45,6 @@ class Melee(Character):
                                                  damage=self.attribute.attack_damage), enemy.id)
             self._last_attack_time = now_time
 
-    def record_attack(self, damage: float):
-        self.attack_total += damage
-        if not self.ascended and self.attack_total >= self.attribute.ascend_threshold:
-            self.ascended = True
-            if self.state is const.CharacterState.LEFT:
-                self.state = const.CharacterState.LEFT_ASCENDED
-            elif self.state is const.CharacterState.RIGHT:
-                self.state = const.CharacterState.RIGHT_ASCENDED
-
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
             return

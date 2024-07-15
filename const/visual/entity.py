@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 from const.bullet import BulletType
-from const.character import CharacterState, CharacterType
+from const.character import AscendanceType, CharacterState, CharacterType
 from const.team import PartyType
 from const.tower import TowerType
 from const.visual import IMAGE_DIR
@@ -55,15 +55,9 @@ CHARACTER_IMAGE: dict[(CharacterType, CharacterState), str] = {
     (CharacterType.MELEE, CharacterState.LEFT): 'melee_left.png',
     (CharacterType.RANGER, CharacterState.LEFT): 'ranger_left.png',
     (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_left.png',
-    (CharacterType.MELEE, CharacterState.LEFT_ASCENDED): 'melee_left_ascended.png',
-    (CharacterType.RANGER, CharacterState.LEFT_ASCENDED): 'ranger_left_ascended.png',
-    (CharacterType.SNIPER, CharacterState.LEFT_ASCENDED): 'sniper_left_ascended.png',
     (CharacterType.MELEE, CharacterState.RIGHT): 'melee_right.png',
     (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_right.png',
     (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png',
-    (CharacterType.MELEE, CharacterState.RIGHT_ASCENDED): 'melee_right_ascended.png',
-    (CharacterType.RANGER, CharacterState.RIGHT_ASCENDED): 'ranger_right_ascended.png',
-    (CharacterType.SNIPER, CharacterState.RIGHT_ASCENDED): 'sniper_right_ascended.png'
 }
 CHARACTER_ASCENDED_IMAGE: dict[CharacterType, str] = {
     CharacterType.MELEE: 'melee_ascended.png',
@@ -83,6 +77,12 @@ BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.COMMON: 'common.png',
     BulletType.SNIPER: 'sniper.png',
     BulletType.RANGER: 'ranger.png',
+}
+
+ASCENDANCE = 'ascendance'
+ASCENDANCE_IMAGE: dict[AscendanceType, str] = {
+    AscendanceType.ARMOR: 'armor.png',
+    AscendanceType.CROWN: 'crown.png',
 }
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {

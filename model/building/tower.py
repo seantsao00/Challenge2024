@@ -14,12 +14,11 @@ from event_manager import (EventAttack, EventBulletCreate, EventCreateTower, Eve
                            EventSpawnCharacter, EventTeamGainTower, EventTeamLoseTower)
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon
-from model.character import Melee, Ranger, Sniper
+from model.character import Character, Melee, Ranger, Sniper
 from model.entity import LivingEntity
 from model.timer import Timer
 
 if TYPE_CHECKING:
-    from model.character import Character
     from model.model import Model
     from model.team import Team
 
@@ -106,9 +105,7 @@ class Tower(LivingEntity):
         if not self.vulnerable(event.attacker) or self.team == event.attacker.team:
             return
 
-        if event.attacker.entity_type is const.CharacterType.MELEE or\
-           event.attacker.entity_type is const.CharacterType.RANGER or\
-           event.attacker.entity_type is const.CharacterType.SNIPER:
+        if isinstance(event.attacker, Character):
             event.attacker.record_attack(min(self.health, event.damage))
         if self.health - event.damage <= 0:
             if self.team.party is const.PartyType.NEUTRAL:

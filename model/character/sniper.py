@@ -44,15 +44,6 @@ class Sniper(Character):
         self.ability_active = True
         log_info("[Sniper] Use ability")
 
-    def record_attack(self, damage: float):
-        self.attack_total += damage
-        if not self.ascended and self.attack_total >= self.attribute.ascend_threshold:
-            self.ascended = True
-            if self.state is const.CharacterState.LEFT:
-                self.state = const.CharacterState.LEFT_ASCENDED
-            elif self.state is const.CharacterState.RIGHT:
-                self.state = const.CharacterState.RIGHT_ASCENDED
-
     def attack(self, enemy: Entity):
 
         now_time = get_model().get_time()

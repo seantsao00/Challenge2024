@@ -54,7 +54,7 @@ class Character(LivingEntity):
         self.abilities_time: float = -attribute.ability_cd
         self._last_attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
-        self.ascended: bool = False
+        self.ascendance: set[const.AscendanceType] = set()
         self.attack_total: float = 0.0
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
@@ -206,17 +206,17 @@ class Character(LivingEntity):
         self.__is_wandering = True
         return True
 
-    @abstractmethod
     def record_attack(self, damage: float):
-        pass
+        self.attack_total += damage
+        if (const.AscendanceType.CROWN not in self.ascendance
+                and self.attack_total >= self.attribute.crown_ascendance_threshold):
+            self.ascendance.add(const.AscendanceType.CROWN)
 
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
             return
 
-        if event.attacker.entity_type is const.CharacterType.MELEE or\
-           event.attacker.entity_type is const.CharacterType.RANGER or\
-           event.attacker.entity_type is const.CharacterType.SNIPER:
+        if isinstance(event.attacker, Character):
             event.attacker.record_attack(min(self.health, event.damage))
         self.health -= event.damage
         if self.health <= 0:
@@ -252,16 +252,10 @@ class Character(LivingEntity):
     def update_face_direction(self, direction: pg.Vector2 | None):
         if direction == None or direction == pg.Vector2(0, 0):
             return
-        if self.ascended:
-            if direction.x <= 0:
-                self.state = const.CharacterState.LEFT_ASCENDED
-            else:
-                self.state = const.CharacterState.RIGHT_ASCENDED
+        if direction.x <= 0:
+            self.state = const.CharacterState.LEFT
         else:
-            if direction.x <= 0:
-                self.state = const.CharacterState.LEFT
-            else:
-                self.state = const.CharacterState.RIGHT
+            self.state = const.CharacterState.RIGHT
 
     @abstractmethod
     def attack(self, enemy: Entity):
