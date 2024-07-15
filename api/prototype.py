@@ -297,54 +297,54 @@ class API:
     # ==== 士兵操作相關 ====
 
     @abstractmethod
-    def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
+    def action_move_along(self, characters: Iterable[Character] | Character, direction: pg.Vector2) -> None:
         """
         將所有列表中的士兵，設定為沿著某個向量移動。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @direction: 移動的向量。
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2) -> None:
+    def action_move_to(self, characters: Iterable[Character] | Character, destination: pg.Vector2) -> None:
         """
         將所有列表中的士兵，設定為朝著某個目的地移動。如果目的地不是可行走的位置則不會生效。
         這個函數會使用內建的尋路，可能會耗費大量時間，使用時請注意。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_wander(self, characters: Iterable[Character]) -> None:
+    def action_wander(self, characters: Iterable[Character] | Character) -> None:
         """
         將所有列表內的士兵設定為遊蕩狀態。
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_move_clear(self, characters: Iterable[Character]) -> None:
+    def action_move_clear(self, characters: Iterable[Character] | Character) -> None:
         """
         將所有列表中的士兵設定為不移動。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_attack(self, characters: Iterable[Character], target: Character | Tower) -> None:
+    def action_attack(self, characters: Iterable[Character] | Character, target: Character | Tower) -> None:
         """
         將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_cast_ability(self, characters: Iterable[Character], **kwargs) -> None:
+    def action_cast_ability(self, characters: Iterable[Character] | Character, **kwargs) -> None:
         """
         將所有列表中的士兵設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @kwargs: 所有技能參數的聯集，以下是可用列表：
          - `position`: `pg.Vector2`，遠程士兵使用技能的位置   
 
