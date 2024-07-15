@@ -47,11 +47,11 @@ class ScopeStatus(Enum):
     FINISH = auto()
 
 
-SCOPE_SPEED = 420
+SCOPE_SPEED = 450
 INTERVAL_WAITING = 1
-WANDERING_PERIOD = 3
-POSITION_EPSILON = 1
-WANDERING_SHIFT: pg.Vector2 = (5, 5)
+WANDERING_PERIOD = 1219 / SCOPE_SPEED
+POSITION_EPSILON = 0.3
+WANDERING_SHIFT: pg.Vector2 = (3, 6)
 
 
 def interval_wandering() -> float:

@@ -69,6 +69,8 @@ class Tower(LivingEntity):
         if self.team.party is not const.PartyType.NEUTRAL:
             self.last_generate = get_model().get_time()
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.team_id)
+        else:
+            self.health = const.NEUTRAL_TOWER_ATTRIBUTE.neautral_initial_health
         get_event_manager().post(EventCreateTower(tower=self))
 
     def __str__(self):

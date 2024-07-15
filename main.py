@@ -51,7 +51,9 @@ if __name__ == "__main__":
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument('map',
-                        help='Specify the map name from the topography/ directory, e.g., "ruins".')
+                        help='Specify one of the map names: '
+                             + ', '.join(['"' + dirname + '"' for dirname in os.listdir('./topography/')
+                                          if not dirname.startswith('.')]) + '.')
     parser.add_argument('team_controls', nargs='+',
                         help='List who controls the teams: AI names from the ai/ directory or '
                              '"human" for player-controlled teams. Accepts 1 to 4 entries.')
@@ -65,19 +67,19 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--mute', action='store_true',
                         help='Mute all background music and sound effects.')
     parser.add_argument('-p', '--show-path', action='store_true',
-                        help='Display the path of all characters. '
+                        help='Display the path to the destination of all characters. '
                              'Press key P to toggle this function during games.')
     parser.add_argument('-q', '--skip-character-selecting', action='store_true',
                         help='Skip character selection and randomly assign characters to teams '
                              'for quick test.')
     parser.add_argument('-r', '--show-attack-view-range', action='store_true',
-                        help='Shorthand of combination of --show-view-range and --show-attack-range. '
+                        help='Combination of --show-view-range and --show-attack-range. '
                              'Press key R to toggle this function during games.')
     parser.add_argument('-v', '--verbose', action='count', default=0,
                         help='Controls verbosity: 0 for critical messages, 1 for warnings, '
                              '2 for informational messages.')
     parser.add_argument('-z', '--frozen', action='store_true',
-                        help='Make scoreboard frozen in last phase.')
+                        help='Freeze scoreboard in the last 30 seconds.')
 
     args = parser.parse_args()
 
