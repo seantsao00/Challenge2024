@@ -45,6 +45,7 @@ class ScopeStatus(Enum):
     TOWARD_TARGET = auto()
     TOWARD_WANDERING = auto()
     FINISH = auto()
+    WAITING_QUIT = auto()
 
 
 SCOPE_SPEED = 450

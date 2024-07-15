@@ -63,4 +63,4 @@ class PartySelectorView(ObjectBase):
         self.canvas.blit(img, (0, 0))
         if self.__party_selector.is_ready():
             draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
-                      40, 'Press SPACE to continue', 'white', self.__font)
+                      40, 'Press SPACE/ENTER to continue', 'white', self.__font)
