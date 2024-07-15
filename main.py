@@ -51,7 +51,9 @@ if __name__ == "__main__":
     # Argument parser
     parser = argparse.ArgumentParser(prog='Challenge2024')
     parser.add_argument('map',
-                        help=f'Specify one of the map names: {", ".join(['"' + dirname + '"' for dirname in os.listdir("./topography/")  if not dirname.startswith(".")])}.')
+                        help='Specify one of the map names: '
+                             + ', '.join(['"' + dirname + '"' for dirname in os.listdir('./topography/')
+                                          if not dirname.startswith('.')]) + '.')
     parser.add_argument('team_controls', nargs='+',
                         help='List who controls the teams: AI names from the ai/ directory or '
                              '"human" for player-controlled teams. Accepts 1 to 4 entries.')
