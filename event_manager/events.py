@@ -197,8 +197,8 @@ class EventViewChangeTeam(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventViewTrajectorySwitch(BaseEvent):
-    """Event to turn on and off trajectory"""
+class EventViewPathSwitch(BaseEvent):
+    """Event to turn on and off path"""
 
 
 @dataclass(kw_only=True)
