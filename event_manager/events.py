@@ -187,6 +187,11 @@ class EventRangedBulletDamage(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventSniperBulletParticle(BaseEvent):
+    bullet: BulletCommon
+
+
+@dataclass(kw_only=True)
 class EventBulletDisappear(BaseEvent):
     bullet: Bullet
 

@@ -4,7 +4,7 @@ import random
 import pygame as pg
 
 import const
-from event_manager import EventBulletExplode, EventEveryTick
+from event_manager import EventBulletExplode, EventEveryTick, EventSniperBulletParticle
 from instances_manager import get_event_manager
 from util import clamp
 from view.object.particle import Particle
@@ -26,12 +26,13 @@ class ParticleManager:
                 wait_remove.add(p)
         self.__particles.difference_update(wait_remove)
 
-    def __explode(self, pos, amount, duration, color):
+    def __explode(self, pos, amount, duration, color, speed):
         """Accept arena coordinate."""
         for _ in range(amount):
             _pos = (pos * ScreenInfo.resize_ratio
                     + pg.Vector2((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
-            _speed = random.uniform(40, 60)
+            print(_pos)
+            _speed = random.uniform(40, 60) * speed
             _duration = random.uniform(1, 1.4) * duration
             _size = random.uniform(0.8, 1.2)
             angle = random.uniform(0, 2 * math.pi)
@@ -45,12 +46,19 @@ class ParticleManager:
 
     def __handle_bullet_explode(self, event: EventBulletExplode):
         self.__explode(event.bullet.position, const.PARTICLES_BULLET_EXPLODE_AMOUNT,
-                       const.PARTICLES_BULLET_EXPLODE_DURATION, const.PARTICLES_BULLET_EXPLODE_COLOR)
+                       const.PARTICLES_BULLET_EXPLODE_DURATION, const.PARTICLES_BULLET_EXPLODE_COLOR,
+                       const.PARTICLES_BULLET_EXPLODE_SPEED)
+
+    def __handle_sniper_bullet(self, event: EventSniperBulletParticle):
+        self.__explode(event.bullet.position, const.PARTICLES_BULLET_MOVE_AMOUNT,
+                       const.PARTICLES_BULLET_MOVE_DURATION, const.PARTICLES_BULLET_MOVE_COLOR,
+                       const.PARTICLES_BULLET_MOVE_SPEED)
 
     def __register_listeners(self):
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventEveryTick, self.__handle_event_every_tick)
         ev_manager.register_listener(EventBulletExplode, self.__handle_bullet_explode)
+        ev_manager.register_listener(EventSniperBulletParticle, self.__handle_sniper_bullet)
 
     def blood(self, pos, amount, duration):
         color = (200, 0, 0)
