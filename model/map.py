@@ -22,26 +22,6 @@ class Map:
     neutral_towers: list[tuple[tuple[int, int], const.TowerType]]
     map_dir: str
 
-    # __astar_run_id: int
-    # __astar_dist: list[list[float]]
-    # __astar_in_queue: list[list[int]]
-    # __astar_src: list[list[tuple[int, int]]]
-    # __astar_visited: list[list[int]]
-
-    def initialize(self):
-        max_x, max_y = const.ARENA_SIZE
-        
-        self.__is_obstacle = [[self.map_list[x][y] == const.MAP_OBSTACLE for y in range(max_y)] for x in range(max_x)]
-        
-        # init A star
-        self.__astar_run_id = 0
-        # initial values of `dist`, `src` do not matter
-        # initial values of `in_queue`, `visited` must be smaller than `astar_runid`
-        self.__astar_dist: list[list[float]] = [[-1] * max_y for _ in range(max_x)]
-        self.__astar_in_queue: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
-        self.__astar_src: list[list[tuple[int, int]]] = [[(-1, -1) for __ in range(max_y)] for _ in range(max_x)]
-        self.__astar_visited: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
-
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
         """
         Return the coordinate based on self.size of position.
@@ -88,7 +68,7 @@ class Map:
         Cell takes in *integer* coordinates in range [0, Map.size)
         """
         return (0 <= cell[0] < self.size[0] and 0 <= cell[1] < self.size[1]
-                and not self.__is_obstacle[cell[0]][cell[1]])
+                and self.get_cell_type(cell) != const.MAP_OBSTACLE)
 
     def is_position_passable(self, position: pg.Vector2) -> bool:
         """
@@ -142,17 +122,9 @@ class Map:
         cell_begin = self.position_to_cell(position_begin)
         cell_end = self.position_to_cell(position_end)
 
-        run_id = self.__astar_run_id
-        self.__astar_run_id += 1
-        dist = self.__astar_dist
-        in_queue = self.__astar_in_queue
-        src = self.__astar_src
-        visited = self.__astar_visited
-        # run_id = 48763
-        # dist: list[list[float]] = [[-1] * max_y for _ in range(max_x)]
-        # in_queue: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
-        # src: list[list[tuple[int, int]]] = [[(-1, -1) for __ in range(max_y)] for _ in range(max_x)]
-        # visited: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
+        dist: list[list[float]] = [[8] * max_y for _ in range(max_x)]
+        src: list[list[None | tuple[int, int]]] = [[None] * max_y for _ in range(max_x)]
+        visited: list[list[bool]] = [[False] * max_y for _ in range(max_x)]
 
         # priority queue for A star containing (heuristic, distance, (x, y))
         pq: list[tuple[float, float, tuple[int, int]]] = []
@@ -167,12 +139,11 @@ class Map:
 
         def push_cell(cell: tuple[int, int], new_dist: float, cell_source: tuple[int, int]) -> None:
             cx, cy = cell
-            if visited[cx][cy] == run_id:
+            if visited[cx][cy]:
                 return
-            if in_queue[cx][cy] == run_id and dist[cx][cy] <= new_dist:
+            if src[cx][cy] is not None and dist[cx][cy] <= new_dist:
                 return
             dist[cx][cy] = new_dist
-            in_queue[cx][cy] = run_id
             src[cx][cy] = cell_source
             new_heur = heuristic_dist_to_target(cell)
             # A star: look for the vertix with lowest f(n) = g(n) + h(n),
@@ -181,16 +152,15 @@ class Map:
             heapq.heappush(pq, (new_heur + new_dist, new_dist, cell))
 
         def get_neighbors(cur_cell: tuple[int, int], cur_dist):
-            diff = (
+            diff = [
                 (-1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0), (1, 0, 1.0),
                 (-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
                 (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951),
-            )
-            speed_ratio = (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cur_cell) == const.MAP_PUDDLE else 1)
+            ]
             for dx, dy, dd in diff:
                 nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
+                nd = cur_dist + dd / (const.PUDDLE_SPEED_RATIO if self.get_cell_type(cur_cell) == const.MAP_PUDDLE else 1)
                 if self.is_cell_passable((nx, ny)):
-                    nd = cur_dist + dd / speed_ratio
                     yield (nx, ny, nd)
 
         # find single source shortest path
@@ -200,20 +170,21 @@ class Map:
             iters += 1
             _, cur_dist, cur_cell = heapq.heappop(pq)
             cx, cy = cur_cell
-            if visited[cx][cy] == run_id:
+            if visited[cx][cy]:
                 continue
-            visited[cx][cy] = run_id
+            visited[cx][cy] = True
             if cur_cell == cell_end:
                 break  # path found
             for nx, ny, nd in get_neighbors(cur_cell, cur_dist):
                 push_cell((nx, ny), nd, cur_cell)
-        if visited[cell_end[0]][cell_end[1]] != run_id:
+        if not visited[cell_end[0]][cell_end[1]]:
             return None
 
         # path found
         path: list[pg.Vector2] = []
         cur_cell = cell_end
         while cur_cell != cell_begin:
+            assert cur_cell is not None
             path.append(self.cell_to_position(cur_cell))
             cur_cell = src[cur_cell[0]][cur_cell[1]]
         return path[::-1]
@@ -252,8 +223,6 @@ def load_map(map_dir):
         for y, row in enumerate(rows):
             for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
-    map = Map(
+    return Map(
         name, size, map_list, backgrounds, objects, fountains, neutral_towers, map_dir
     )
-    map.initialize()
-    return map
