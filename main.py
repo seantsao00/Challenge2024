@@ -66,8 +66,8 @@ if __name__ == "__main__":
     parser.add_argument('--show-attack-range', action='store_true',
                         help='Displays the attack range of all characters and towers.')
     parser.add_argument('-d', '--disable-stdout', action='store_true',
-                        help='Disable all non-logging write attempt to stdout. '
-                             'Can be used to stop spam output from your or others AIs.')
+                        help='Disable all non-logging write attempts to stdout. '
+                             'Can be used to stop spam output from you or others\' AIs.')
     parser.add_argument('-m', '--mute', action='store_true',
                         help='Mute background music and sound effects.')
     parser.add_argument('-p', '--show-path', action='store_true',
