@@ -408,9 +408,12 @@ class Internal(prototype.API):
             return prototype.MapTerrain.OBSTACLE
         raise GameError("Unkown terrain type.")
 
-    def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+    def action_move_along(self, characters: Iterable[prototype.Character] | prototype.Character, direction: pg.Vector2):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('direction', direction, pg.Vector2)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -421,9 +424,12 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_direction(direction)
 
-    def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('destination', destination, pg.Vector2)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -441,8 +447,11 @@ class Internal(prototype.API):
                 if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
-    def action_move_clear(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
+    def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -452,9 +461,12 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
 
-    def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
-        enforce_type('characters', characters, Iterable)
+    def action_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -469,8 +481,11 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
-        enforce_type('characters', characters, Iterable)
+    def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
         if 'position' in kwargs:
@@ -483,8 +498,11 @@ class Internal(prototype.API):
         for inter in internals:
             inter.cast_ability(**kwargs)
 
-    def action_wander(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
+    def action_wander(self, characters: Iterable[prototype.Character] | prototype.Character):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
