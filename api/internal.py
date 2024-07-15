@@ -554,7 +554,7 @@ class Internal(prototype.API):
         if self.__chat_sent:
             return False
         if len(msg) > 30:
-            return False
+            msg = msg[:30]
         # Bad special case, I know. However, that is ensured in the pygame documentation.
         if '\x00' in msg:
             return False
