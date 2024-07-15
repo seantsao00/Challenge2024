@@ -46,7 +46,7 @@ def enemies_near_tower(tower: Tower, interface: API):
     return ret
 
 def allies_near_tower(tower: Tower, interface: API):
-    """傳入一座塔，回傳塔附近己方隊伍所有的塔"""
+    """傳入一座塔，回傳塔附近己方隊伍所有的友方單位"""
     allies = [character for character in interface.get_owned_characters()]
     ret = []
     for ally in allies:
