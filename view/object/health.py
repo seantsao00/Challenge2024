@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+import const.tower
 from const.visual.priority import PRIORITY_CD
+from model import Tower
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
 
@@ -22,7 +24,11 @@ class HealthView(EntityObject):
     def draw(self):
         entity = self.entity
         entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
-        blood_width = (entity.health / entity.attribute.max_health) * \
+        if entity.team.party is const.PartyType.NEUTRAL and isinstance(entity, Tower):
+            max_health = entity.attribute.neautral_initial_health
+        else:
+            max_health = entity.attribute.max_health
+        blood_width = (entity.health / max_health) * \
             entity_size * 2 * ScreenInfo.resize_ratio
         top = (self.entity.position.x - entity_size) * ScreenInfo.resize_ratio
         left = (self.entity.position.y - entity_size -
