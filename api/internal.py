@@ -2,8 +2,6 @@
 Defines internal API interaction and AI threading.
 """
 
-from __future__ import annotations
-
 import ctypes
 import importlib.util
 import os
@@ -599,8 +597,8 @@ class Timer():
             if self.ended:
                 return
             if not self.is_windows:
-                # Should be sig, frame but pylint doesn't like it >:(
-                def handler(_, __):
+                # pylint: disable=unused-argument
+                def handler(sig, frame):
                     res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
                         ctypes.c_long(tid), ctypes.py_object(TimeoutException))
                     if res != 0:
