@@ -47,7 +47,7 @@ class ModelArguments:
     show_view_range: bool
     show_attack_range: bool
     skip_character_selecting: bool
-    show_trajectory: bool
+    show_path: bool
     show_range: bool
     scoreboard_frozen: bool
 
@@ -59,7 +59,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool, show_trajectory: bool):
+    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool, show_path: bool):
     def __init__(self, model_arguments: ModelArguments):
         """
         Initialize the Model object.
@@ -96,7 +96,7 @@ class Model:
         self.__team_files_names: list[str] = model_arguments.team_controls
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
-        self.show_trajectory: bool = model_arguments.show_trajectory
+        self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
 

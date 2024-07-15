@@ -2,7 +2,8 @@ import pygame as pg
 
 import const
 from event_manager import (EventAttack, EventChangeParty, EventCharacterDied, EventCreateEntity,
-                           EventGameOver, EventPauseModel, EventResumeModel, EventStartGame)
+                           EventGameOver, EventPauseModel, EventResumeModel, EventStartGame,
+                           EventResultWandering, EventResultChoseCharacter, EventResultChamp)
 from instances_manager import get_event_manager, get_model
 
 
@@ -64,12 +65,6 @@ class BackgroundMusic:
         ev_manager = get_event_manager()
         ev_manager.unregister_listener(EventAttack, self.__handle_attack, event.character.id)
 
-    def __handle_game_over(self, _: EventGameOver):
-        pg.mixer.music.fadeout(500)
-        pg.mixer.music.unload()
-        pg.mixer.music.load(const.BGM_END_PATH)
-        pg.mixer.music.play(loops=1)
-
     def __handle_change_party(self, _: EventChangeParty):
         self.__sound[const.EffectType.SELECT].play()
 
@@ -90,8 +85,23 @@ class BackgroundMusic:
     def __handle_game_over(self, _: EventGameOver):
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
+        pg.mixer.music.load(const.BGM_ROLL_PATH)
+        pg.mixer.music.set_volume(self.__default_volume / 4)
+        pg.mixer.music.play(loops=-1)
+    
+    def __handle_result_wandering(self, _: EventResultWandering):
+        if pg.mixer.music.get_busy():
+            pg.mixer.music.set_volume(self.__default_volume)
+
+    def __handle_chose_character(self, _: EventResultChoseCharacter):
+        if pg.mixer.music.get_busy():
+            pg.mixer.music.set_volume(self.__default_volume / 4)
+        self.__sound[const.EffectType.SHOT].play()
+
+    def __handle_result_champ(self, _: EventResultChamp):
         pg.mixer.music.load(const.BGM_END_PATH)
-        pg.mixer.music.play(loops=1)
+        pg.mixer.music.set_volume(self.__default_volume * 1.5)
+        pg.mixer.music.play(loops=0)
 
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
@@ -103,3 +113,6 @@ class BackgroundMusic:
         ev_manager.register_listener(EventCreateEntity, self.__handle_create_entity)
         ev_manager.register_listener(EventCharacterDied, self.__handle_character_died)
         ev_manager.register_listener(EventGameOver, self.__handle_game_over)
+        ev_manager.register_listener(EventResultWandering, self.__handle_result_wandering)
+        ev_manager.register_listener(EventResultChoseCharacter, self.__handle_chose_character)
+        ev_manager.register_listener(EventResultChamp, self.__handle_result_champ)
