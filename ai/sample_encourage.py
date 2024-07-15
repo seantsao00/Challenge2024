@@ -10,7 +10,7 @@ class Information:
     destinations: dict[int, pg.Vector2] = {}
     """
     冒號是 type hint 的意思，只是為了註解這個變數是什麼型別。
-    這是一個放 id 會拿到該角色目前目的地的 dictionary。
+    這是一個放 id 會拿到該士兵目前目的地的 dictionary。
     """
     last_time_report: int = math.inf  # 無限
     """上次報時的秒數"""
@@ -46,7 +46,7 @@ def enemies_near_tower(tower: Tower, interface: API):
     return ret
 
 def allies_near_tower(tower: Tower, interface: API):
-    """傳入一座塔，回傳塔附近所有的友方單位"""
+    """傳入一座塔，回傳塔附近己方隊伍所有的塔"""
     allies = [character for character in interface.get_owned_characters()]
     ret = []
     for ally in allies:
@@ -60,19 +60,19 @@ def every_tick(interface: API):
 
     for tower in my_towers:
         if tower.spawn_character_type is not CharacterClass.MELEE:
-            # 把塔所生的角色種類改成進戰，因為近戰走得比較快
+            # 把塔所生的士兵種類改成近戰，因為近戰走得比較快
             interface.change_spawn_type(tower, CharacterClass.MELEE)
 
     my_characters = interface.get_owned_characters()
-    for character in my_characters:  # 用 for 迴圈遍歷所有自己的角色
-        if character.id in Information.destinations:  # 這個角色曾經被 assign 過要往哪裡走
-            # 角色沒有辦法走到任意的實數座標上，所以如果用註解掉的部分判斷是否到達目的地，會覺得角色永遠沒有走到
-            # if character.position == Information.destinations[character.id]: # 這個角色已經走到他的目的地
+    for character in my_characters:  # 用 for 迴圈遍歷所有自己的士兵
+        if character.id in Information.destinations:  # 這個士兵曾經被 assign 過要往哪裡走
+            # 士兵沒有辦法走到任意的實數座標上，所以如果用註解掉的部分判斷是否到達目的地，會覺得士兵永遠沒有走到
+            # if character.position == Information.destinations[character.id]: # 這個士兵已經走到他的目的地
             #     assign_random_destination(character, interface)
             if (character.position - Information.destinations[character.id]).length() < 1:
                 print(f'{character.id} 已經夠接近目的地了')
                 assign_random_destination(character, interface)
-        else:  # 這個角色未曾被 assign 過要往哪裡走
+        else:  # 這個士兵未曾被 assign 過要往哪裡走
             assign_random_destination(character, interface)
 
     current_time = interface.get_current_time()
@@ -98,10 +98,10 @@ def every_tick(interface: API):
     chat_guide = [
         '可以 google 查 "python random"',
         '可以 google 查 "python 標準函式庫"',
-        '不同角色是不是會互相克制？',
+        '不同士兵是不是會互相克制？',
         '遇到 bug 時可以試著把東西 print 出來',
         '可以為不同的地圖做不同的策略',
-        '可以為不同的角色做不同的策略',
+        '可以為不同的士兵做不同的策略',
         '可以為不同的策略做不同的 function',
         '可以用 class 來存資訊',
         '可以多多寫註解',
@@ -111,10 +111,10 @@ def every_tick(interface: API):
         '近戰兵的移動速度很高血量也很多視野也很廣！！但是攻擊距離太短了打不太到移動目標...',
         '遠程兵的攻擊力很高還自帶範圍傷害技能！！但是太脆了需要有人掩護...',
         '中立塔可以提供視野，額外分數，也可以生成額外的兵力，是個重要戰略目標！！多多圍繞中立塔擬定策略吧！',
-        '視野很重要！沒有視野就看不到中立塔，也看不到敵人...(用 api.action_wander 可以讓角色遊走)',
+        '視野很重要！沒有視野就看不到中立塔，也看不到敵人...(用 api.action_wander 可以讓士兵遊走)',
         '有時，偏門玩法反而有奇效！',
         '多研究 API，每個功能都有它的用處！',
-        '善用角色技能！',
+        '善用士兵技能！',
     ]
     chat_other = [
         '只探視野不會贏 QQ',
