@@ -79,11 +79,16 @@ BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.RANGER: 'ranger.png',
 }
 
-ASCENDANCE = 'ascendance'
-ASCENDANCE_IMAGE: dict[AscendanceType, str] = {
-    AscendanceType.ARMOR: 'armor.png',
-    AscendanceType.CROWN: 'crown.png',
+ASCENDANCE_DIR = 'ascendance'
+ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, str]] = {
+    party: {
+        AscendanceType.ARMOR: os.path.join(IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, 'armor.png'),
+        AscendanceType.CROWN: os.path.join(IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, 'crown.png'),
+    } for party in PartyType if party is not PartyType.NEUTRAL
 }
+"""
+structure: ASCENDANCE_IMAGE[party][ascendance]
+"""
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
