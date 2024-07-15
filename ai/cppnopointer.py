@@ -86,6 +86,12 @@ def snipers_defending_tower(tower, api):
     return [character for character in api.get_visible_characters()
                 if character.team_id == api.get_team_id() and character.type == CharacterClass.SNIPER and character.position.distance_to(tower.position) <= 40]
 
+def get_vision(character, api):
+    target_point = None
+    tries = 0
+    while tries <= 10:
+        target_point = character.position()
+
 def every_tick(api: API):
     
     my_team_id = api.get_team_id()
@@ -130,7 +136,7 @@ def every_tick(api: API):
             sniper_characters.append(character)
     
     target_tower = None
-    if (len(contestable_tower) == 0):
+    if (len(contestable_tower) == 0 and api.get_current_time() <= 60):
         if (len(no_sniper_characters) >= 10): api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.SNIPER]))
         else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE]))
         
