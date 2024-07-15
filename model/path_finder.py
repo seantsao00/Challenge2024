@@ -11,6 +11,11 @@ if TYPE_CHECKING:
     from model.map import Map
 
 class PathFinder:
+    """
+    A path finder for a map that implements A star algorithm.
+    This finder is NOT thread safe for optimization purposes. Different threads
+    should be using different instances of path finder.
+    """
 
     def __init__(self, map: Map):
         max_x, max_y = map.size
@@ -114,15 +119,6 @@ class PathFinder:
         path: list[pg.Vector2] = []
         cur_cell = cell_end
         while cur_cell != cell_begin:
-            if visited[cur_cell[0]][cur_cell[1]] != run_id:
-                print(run_id)
-                print(f"{cur_cell=}")
-                print(f"{cell_begin=}")
-                print(f"{cell_end=}")
-                print(f"{dist=}")
-                print(f"{in_queue=}")
-                print(f"{src=}")
-                print(f"{visited=}")
             assert visited[cur_cell[0]][cur_cell[1]] == run_id
             path.append(self.__map.cell_to_position(cur_cell))
             cur_cell = src[cur_cell[0]][cur_cell[1]]
