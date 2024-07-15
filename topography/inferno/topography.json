@@ -3,10 +3,10 @@
     "width": 250,
     "height": 250,
     "fountains": [
-        [17,42], [38,190], [231,42], [215,188]
+        [17, 42], [38, 190], [231, 42], [215, 188]
     ],
     "neutral_towers": [
-        [128,114], [129,234], [138,26]
+        [128, 114, "ferris_wheel"], [129, 234, "pylon"], [138, 26, "hotel"]
     ],
     "images": {
         "backgrounds": ["background.png"],
