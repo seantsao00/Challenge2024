@@ -1,6 +1,5 @@
 """
 This file ONLY defines prototype. No actual thing is done in this file.
-The document of the API is at https://hackmd.io/@seantsao00/challenge_2024_api/edit.
 """
 
 from abc import abstractmethod
@@ -12,6 +11,7 @@ import pygame as pg
 
 class CharacterClass(IntEnum):
     """角色種類。"""
+
     MELEE = auto()
     SNIPER = auto()
     RANGER = auto()
@@ -35,24 +35,34 @@ class Character:
                  _team_id: int):
         self.id = _id
         """角色獨一的編號。編號可以用來識別不同時間的角色是否是相同的一個實體。"""
+
         self.type = _type
         """角色的兵種。"""
+
         self.position = _position
         """角色的位置。"""
+
         self.speed = _speed
         """角色的最大移動速度。"""
+
         self.attack_range = _attack_range
         """角色的最大攻擊範圍。"""
+
         self.attack_speed = _attack_speed
         """角色的攻擊時間間隔。"""
+
         self.damage = _damage
         """角色的傷害。"""
+
         self.vision = _vision
         """角色的視野半徑。"""
+
         self.health = _health
         """角色的當下血量。"""
+
         self.max_health = _max_health
         """角色的最大血量。"""
+
         self.team_id = _team_id
         """角色所屬的隊伍編號，編號為 1 至 4 的正整數。"""
 
@@ -74,48 +84,66 @@ class Tower:
                  _team_id: int):
         self.id = _id
         """建築物獨一的編號。編號可以用來識別不同時間的建築物是否是相同的一個實體。"""
+
         self.period = _period
         """建築物產生角色的所需時間。"""
+
         self.position = _position
         """建築物所在的位置。"""
+
         self.is_fountain = _is_fountain
         """建築物是否是溫泉（每個隊伍一開始的建築）。"""
+
         self.spawn_character_type = _spawn_character_type
         """建築物即將生成的角色種類。"""
+
         self.attack_range = _attack_range
         """建築物的攻擊範圍。"""
+
         self.damage = _damage
         """建築物的傷害。"""
+
         self.vision = _vision
         """建築物的視野範圍。"""
+
         self.health = _health
         """建築物的血量。"""
+
         self.max_health = _max_health
         """建築物的最大血量。"""
+
         self.team_id = _team_id
         """建築物所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
 
 
 class MapTerrain(IntEnum):
     """地圖地形。"""
+
     OUT_OF_BOUNDS = auto()
     """界外。"""
+
     ROAD = auto()
     """道路。走路的速度是正常的。"""
+
     OFFROAD = auto()
     """道路外，走路會減速。"""
+
     OBSTACLE = auto()
     """障礙物，無法通過。"""
 
 
 class MovementStatusClass(IntEnum):
     """角色移動的狀態。 """
+
     STOPPED = auto()
     """角色目前停止。 """
+
     TO_DIRECTION = auto()
     """角色目前正朝某個方向前進。 """
+
     TO_POSITION = auto()
     """角色目前朝著某個點為目的地前進。 """
+
     UNKNOWN = auto()
     """無法得知的狀況，例如對於敵對角色是無法得知移動策略。"""
 
@@ -127,11 +155,13 @@ class Movement:
                  _vector: pg.Vector2 | None = None):
         self.status = _status
         """角色的移動狀態。 """
+
         self.is_wandering = _is_wandering
         """
         角色是否在遊蕩狀態。
         一個角色一旦被設為遊蕩，則除非該角色無法再遊蕩或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
         """
+
         self.vector = _vector
         """
         當停止時，為 `None`。
@@ -143,7 +173,7 @@ class Movement:
 class API:
     """與遊戲互動的方法。傳入 AI 的方法是作為 `every_tick` 的第一個引數。"""
 
-    """場地資訊獲取"""
+    # ==== 場地資訊獲取 ====
 
     @abstractmethod
     def get_current_time(self) -> float:
@@ -191,7 +221,7 @@ class API:
     def get_map_name(self) -> str:
         """回傳當前地圖的名稱"""
 
-    """角色建築資訊獲取"""
+    # ==== 角色建築資訊獲取 ====
 
     @abstractmethod
     def get_sample_character(self, type_class: CharacterClass) -> Character:
@@ -264,7 +294,7 @@ class API:
         @character: 目標的角色。
         """
 
-    """角色操作相關"""
+    # ==== 角色操作相關 ====
 
     @abstractmethod
     def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
@@ -338,7 +368,7 @@ class API:
         """
         raise NotImplementedError
 
-    """建築操作"""
+    # ==== 建築操作 ====
 
     @abstractmethod
     def change_spawn_type(self, tower: Tower, spawn_type: CharacterClass) -> None:
@@ -349,7 +379,7 @@ class API:
         """
         raise NotImplementedError
 
-    """輔助函數"""
+    # ==== 輔助函數 ====
 
     @abstractmethod
     def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
@@ -382,7 +412,7 @@ class API:
         """
         raise NotImplementedError
 
-    """聊天室"""
+    # ==== 聊天室 ====
 
     @abstractmethod
     def send_chat(self, msg: str) -> bool:
