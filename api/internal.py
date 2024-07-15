@@ -47,6 +47,7 @@ class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.transform: np.ndarray = None
+        self.__inv_transform: np.ndarray = None
         self.__chat_sent = False
         self.__last_chat_time_stamp = float('-inf')
         self.__character_map = {}
@@ -108,11 +109,12 @@ class Internal(prototype.API):
         """
         if self.transform is None:
             self.__build_transform_matrix()
+            self.__inv_transform = np.linalg.inv(self.transform)
 
         vector = np.array([[position.x],
                            [position.y],
                            [1 if is_position else 0]])
-        vector = np.dot(np.linalg.inv(self.transform) if inverse else self.transform,
+        vector = np.dot(self.__inv_transform if inverse else self.transform,
                         vector)
         return pg.Vector2(vector[0][0], vector[1][0])
 
@@ -365,6 +367,7 @@ class Internal(prototype.API):
         vision_grid = np.flip(vision_grid, axis=0)
         if self.transform is None:
             self.__build_transform_matrix()
+            self.__inv_transform = np.linalg.inv(self.transform)
 
         # Rotate visibility matrix base on transform
         if self.transform[0][0] == 0 and self.transform[0][1] == 1:

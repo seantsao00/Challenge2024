@@ -7,7 +7,7 @@ import pygame as pg
 import const
 import const.tower
 from const.visual.priority import PRIORITY_CD
-from model import Tower
+from model import Team, Tower
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
 
@@ -35,5 +35,5 @@ class HealthView(EntityObject):
                 const.HEALTH_BAR_UPPER + const.DRAW_DISPLACEMENT_Y) * ScreenInfo.resize_ratio
         pg.draw.rect(self.canvas, (0, 0, 0),
                      (top, left, entity_size * 2 * ScreenInfo.resize_ratio, 2 * ScreenInfo.resize_ratio))
-        pg.draw.rect(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id],
+        pg.draw.rect(self.canvas, 'red' if not isinstance(entity.team, Team) else const.HEALTH_BAR_COLOR[entity.team.team_id],
                      (top, left, blood_width, 2 * ScreenInfo.resize_ratio))

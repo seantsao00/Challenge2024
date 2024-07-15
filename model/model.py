@@ -105,6 +105,7 @@ class Model:
         self.nyan = Nyan()
         self.ranger_ability = False
         self.ranger_controlling: Ranger = None
+        self.result_screen_select: bool = False
 
         self.__register_listeners()
 
