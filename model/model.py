@@ -88,7 +88,7 @@ class Model:
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
         if model_arguments.skip_character_selecting:
-            self.party_selector.select_random_party()
+            self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
