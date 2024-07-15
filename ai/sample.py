@@ -18,6 +18,6 @@ def every_tick(interface: API):
                                 pg.Vector2(2 * math.cos(interface.get_current_time() / 20),
                                            2 * math.sin(interface.get_current_time() / 20)))
     # 將所有己方隊伍的士兵移動到列表內的第一個敵方士兵，並統一攻擊它
-    if len(visible):
+    if len(visible): # 若視野內存在敵方士兵
         interface.action_move_to(interface.get_owned_characters()[1:], visible[0].position)
         interface.action_attack(interface.get_owned_characters()[1:], visible[0])
