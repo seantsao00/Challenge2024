@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-import const.entity
 from util import load_image
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
@@ -29,6 +28,7 @@ class AscendanceView(EntityObject):
     def __init__(self, canvas: pg.Surface, entity: Character):
         self.entity: Character = entity
         super().__init__(canvas, entity, self.entity.position[1])
+        self.priority[0] = const.PRIORITY_ASCENDENCE
         self.register_listeners()
 
     @classmethod
@@ -38,7 +38,6 @@ class AscendanceView(EntityObject):
             for ascendance, character_dict in ascendance_dict.items():
                 for character, state_dict in character_dict.items():
                     for state, path in state_dict.items():
-                        print(path)
                         w = const.ENTITY_SIZE[character][state] * 2 * ScreenInfo.resize_ratio
                         h = const.ENTITY_SIZE[character][state] * 2 * ScreenInfo.resize_ratio
                         cls.__images[(party, ascendance, character, state)
@@ -48,12 +47,13 @@ class AscendanceView(EntityObject):
     def draw(self):
         # TODO: add its priority
         entity = self.entity
-        self.ascendance = Character.ascendance
-        print(self.ascendance)
+        self.ascendance = entity.ascendance
         for ascendance in self.ascendance:
+            w = const.ENTITY_SIZE[entity.entity_type][entity.state]
+            h = const.ENTITY_SIZE[entity.entity_type][entity.state]
             img = self.__images[(entity.team.party, ascendance, entity.entity_type, entity.state)]
-            self.canvas.blit(img[0], img.get_rect(center=ScreenInfo.resize_ratio *
-                                                  (entity.position + const.DRAW_DISPLACEMENT)+img[1]))
+            self.canvas.blit(img[0], ScreenInfo.resize_ratio *
+                             (entity.position - pg.Vector2(w, h * 1.5)) + img[1])
 
     def update(self):
         if not self.exist:

@@ -102,8 +102,8 @@ ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, dict[CharacterType, dict[
             **{
                 AscendanceType.CROWN: {
                     character: {
-                        None: os.path.join(
-                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character])
+                        state: os.path.join(
+                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character]) for state in CharacterState
                     } for character in CharacterType
                 }
             }
