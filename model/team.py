@@ -129,10 +129,16 @@ class Team(NeutralTeam):
                 self.vision.update_vision(event.tower)
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
+        model = get_model()
+        if model.state is const.State.PLAY:
+            model.chat.send_system(f'{self.__team_name} gained a tower!')
 
     def lose_tower(self, event: EventTeamLoseTower):
         log_info(f'{self.__team_name} lost a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
+        model = get_model()
+        if model.state is const.State.PLAY or model.state is const.State.PAUSE:
+            model.chat.send_system(f'{self.__team_name} lost a tower!')
         with self.tower_lock:
             if event.tower in self.__towers:
                 self.__towers.remove(event.tower)
@@ -164,7 +170,7 @@ class Team(NeutralTeam):
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
             log_info(
-                f'Character type of Team {self.team_id} is modified to {event.character_type}')
+                f'Character type of Team {self.team_id + 1} is modified to {event.character_type}')
             self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):

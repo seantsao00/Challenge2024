@@ -3,7 +3,7 @@ from enum import Enum, auto
 
 class ChatMessageType(Enum):
     CHAT_COMMENT = auto()
-    CHAT_BULLET = auto()
+    CHAT_SYSTEM = auto()
 
 
 CHAT_POSITION = (362, 13)

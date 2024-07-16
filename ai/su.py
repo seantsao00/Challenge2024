@@ -69,12 +69,17 @@ class Strategy:
                 attackable_sniper = [snipers for snipers in attackable if type(snipers) == Character 
                                     and (snipers.type == CharacterClass.SNIPER)]
                 attackable_tower = [tower for tower in attackable if type(tower) == Tower]
+                near_tower = [near_towers for near_towers in self.visible_enemy_towers if near_towers.health < 500 
+                              and near_towers.position.distance_to(character.position) <= (near_towers.attack_range + 20.0)]
                 
                 if (len(attackable_tower) > 0):
                     random_target = random.choice(attackable_tower)
 
                 if (len(attackable_tower) > 0 and 
                     random_target.health < 500 and not random_target.is_fountain):
+                    pass
+                elif (len(near_tower) > 0):
+                    random_target = random.choice(near_tower)
                     pass
                 elif (len(attackable_sniper) > 0):
                     random_target = random.choice(attackable_sniper)
