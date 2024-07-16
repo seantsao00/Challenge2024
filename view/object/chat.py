@@ -35,10 +35,10 @@ class CommentBox:
         font = font_loader.get_font(size=const.CHAT_FONT_SIZE)
         avatar_size = user_avatar.get_size()
         if not critical:
-            text_surf = components.createTextBox(
+            text_surf = components.create_text_box(
                 text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
         else:
-            text_surf = components.createTextBox(
+            text_surf = components.create_text_box(
                 text, (230, 0, 0), font, width - consts.SPACING[0] * 3)
 
         text_size = text_surf.get_size()
@@ -97,7 +97,7 @@ class ChatView(ObjectBase):
             self.add_comment(team, e.text)
 
     def add_comment(self, team: Team, text: str):
-        avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
+        avatar = components.create_team_avatar(team, consts.AVATAR_WIDTH)
         critical = (team.party is const.PartyType.NEUTRAL)
         comment_box = CommentBox(text, avatar, consts.CHAT_SIZE[0], critical)
         self.__comments.append(comment_box)
