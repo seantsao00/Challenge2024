@@ -146,6 +146,7 @@ class Model:
         for position, tower_type in self.map.neutral_towers:
             self.__tower.append(Tower(position, self.neutral_team, tower_type))
         self.state = const.State.PLAY
+        self.chat.send_system("Game Start!")
 
     def __post_initialize(self, _: EventPostInitialize):
         load_ai(self.__team_files_names)
@@ -300,6 +301,7 @@ class Model:
         End the game and show scoreboard on the result screen.
         """
         self.result.ranking()
+        self.chat.send_system("Game Over!")
         self.state = const.State.RESULT
 
     def __handle_select_party(self, _: EventSelectParty):

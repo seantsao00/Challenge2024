@@ -131,14 +131,14 @@ class Team(NeutralTeam):
                  f'with id {event.tower.id} at {event.tower.position}')
         model = get_model()
         if model.state is const.State.PLAY:
-            model.chat.send_system(f'{self.__team_name} gained a tower!')
+            model.chat.send_system(f'{self.__team_name} gained a tower')
 
     def lose_tower(self, event: EventTeamLoseTower):
         log_info(f'{self.__team_name} lost a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
         model = get_model()
         if model.state is const.State.PLAY or model.state is const.State.PAUSE:
-            model.chat.send_system(f'{self.__team_name} lost a tower!')
+            model.chat.send_system(f'{self.__team_name} lost a tower')
         with self.tower_lock:
             if event.tower in self.__towers:
                 self.__towers.remove(event.tower)
