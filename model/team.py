@@ -164,7 +164,7 @@ class Team(NeutralTeam):
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
             log_info(
-                f'Character type of Team {self.team_id} is modified to {event.character_type}')
+                f'Character type of Team {self.team_id + 1} is modified to {event.character_type}')
             self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):

@@ -215,7 +215,7 @@ class Internal(prototype.API):
         """
         if id(extern) not in self.__reverse_character_map:
             log_warning(
-                f"[AI] AI of team {self.team_id} used invalid prototype.Character. Maybe it is already expired.")
+                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
             return None
         return self.__reverse_character_map[id(extern)]
 
@@ -225,7 +225,7 @@ class Internal(prototype.API):
         """
         if id(extern) not in self.__reverse_tower_map:
             log_warning(
-                f"[AI] AI of team {self.team_id} used invalid prototype.Tower. Maybe it is already expired.")
+                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
             return None
         return self.__reverse_tower_map[id(extern)]
 
@@ -267,6 +267,8 @@ class Internal(prototype.API):
 
         if index is None:
             index = self.team_id
+        else:
+            index = self.__map_team_id(index)
         if index < 0 or index >= len(get_model().teams):
             raise IndexError
         team = get_model().teams[index]
@@ -673,10 +675,10 @@ def threading_ai(team_id: int, helper: Internal, timer: Timer):
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
     except TimeoutException:
-        log_critical(f"[API] AI of team {team_id} timed out!")
+        log_critical(f"[API] AI of team {team_id + 1} timed out!")
     # pylint: disable=broad-exception-caught
     except Exception:
-        log_critical(f"Caught exception in AI of team {team_id}:\n{traceback.format_exc()}")
+        log_critical(f"Caught exception in AI of team {team_id + 1}:\n{traceback.format_exc()}")
     finally:
         timer.cancel_timer()
 
