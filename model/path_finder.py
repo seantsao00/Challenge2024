@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 import heapq
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -9,6 +9,7 @@ import const
 
 if TYPE_CHECKING:
     from model.map import Map
+
 
 class PathFinder:
     """
@@ -18,20 +19,24 @@ class PathFinder:
     """
     INFINITY: int = 10 ** 10
 
-    def __init__(self, map: Map):
-        max_x, max_y = map.size
-        
-        self.__map = map
-        self.__is_obstacle = [[map.get_cell_type((x, y)) == const.MAP_OBSTACLE for y in range(max_y)] for x in range(max_x)]
-        self.__is_puddle = [[map.get_cell_type((x, y)) == const.MAP_PUDDLE for y in range(max_y)] for x in range(max_x)]
-        self.__neighbors = [[list(self.__get_neighbors((x, y))) for y in range(max_y)] for x in range(max_x)]
+    def __init__(self, game_map: Map):
+        max_x, max_y = game_map.size
+
+        self.__map = game_map
+        self.__is_obstacle = [[game_map.get_cell_type(
+            (x, y)) == const.MAP_OBSTACLE for y in range(max_y)] for x in range(max_x)]
+        self.__is_puddle = [[game_map.get_cell_type(
+            (x, y)) == const.MAP_PUDDLE for y in range(max_y)] for x in range(max_x)]
+        self.__neighbors = [[list(self.__get_neighbors((x, y)))
+                             for y in range(max_y)] for x in range(max_x)]
         # init A star
         self.__astar_run_id = 0
         # initial values of `dist`, `src` do not matter
         # initial values of `in_queue`, `visited` must be smaller than `astar_runid`
         self.__astar_dist: list[list[float]] = [[-1] * max_y for _ in range(max_x)]
         self.__astar_in_queue: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
-        self.__astar_src: list[list[tuple[int, int]]] = [[(-1, -1) for __ in range(max_y)] for _ in range(max_x)]
+        self.__astar_src: list[list[tuple[int, int]]] = [
+            [(-1, -1) for __ in range(max_y)] for _ in range(max_x)]
         self.__astar_visited: list[list[int]] = [[-1] * max_y for _ in range(max_x)]
         self.__dist_hint = PathFinder.INFINITY
 
@@ -41,27 +46,28 @@ class PathFinder:
         """
         return (0 <= cell[0] < self.__map.size[0] and 0 <= cell[1] < self.__map.size[1]
                 and not self.__is_obstacle[cell[0]][cell[1]])
-    
+
     def __heuristic_dist_to_target(self, cell: tuple[int, int], cell_end: tuple[int, int]) -> float:
-            dx = abs(cell[0] - cell_end[0])
-            dy = abs(cell[1] - cell_end[1])
-            return dx + dy - (2 - 2 ** 0.5) * min(dx, dy)
-            # this should be slower (due to sqrt) but I didn't see significant difference
-            # return (dx ** 2 + dy ** 2) ** 0.5 + dist[cell[0]][cell[1]]
-    
+        dx = abs(cell[0] - cell_end[0])
+        dy = abs(cell[1] - cell_end[1])
+        return dx + dy - (2 - 2 ** 0.5) * min(dx, dy)
+        # this should be slower (due to sqrt) but I didn't see significant difference
+        # return (dx ** 2 + dy ** 2) ** 0.5 + dist[cell[0]][cell[1]]
+
     def __get_neighbors(self, cur_cell: tuple[int, int]):
-            diff = (
-                (-1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0), (1, 0, 1.0),
-                (-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
-                (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951),
-            )
-            speed_ratio = (const.PUDDLE_SPEED_RATIO if self.__is_puddle[cur_cell[0]][cur_cell[1]] else 1)
-            for dx, dy, dd in diff:
-                nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
-                if self.__is_cell_passable((nx, ny)):
-                    nd = dd / speed_ratio
-                    yield (nx, ny, nd)
-    
+        diff = (
+            (-1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0), (1, 0, 1.0),
+            (-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
+            (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951),
+        )
+        speed_ratio = (
+            const.PUDDLE_SPEED_RATIO if self.__is_puddle[cur_cell[0]][cur_cell[1]] else 1)
+        for dx, dy, dd in diff:
+            nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
+            if self.__is_cell_passable((nx, ny)):
+                nd = dd / speed_ratio
+                yield (nx, ny, nd)
+
     def __find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
         """
         Find a path from position_begin to position_end with A star algorithm.
@@ -72,7 +78,7 @@ class PathFinder:
         if (not self.__map.is_position_passable(position_begin)
                 or not self.__map.is_position_passable(position_end)):
             return None
-        
+
         # swap `begin` and `end` so that `begin` remains the same in batched runs
         # and it becomes a single source shortest path problem
         position_begin, position_end = position_end, position_begin
@@ -127,7 +133,7 @@ class PathFinder:
                 push_cell((nx, ny), cur_dist + dd, cur_cell)
         if visited[cell_end[0]][cell_end[1]] != run_id:
             return None
-        
+
         def restore_path():
             path: list[pg.Vector2] = []
             cur_cell = cell_end
@@ -140,16 +146,16 @@ class PathFinder:
             return path
         # no need to reverse the path since begin and end have already been swapped
         return restore_path()
-    
+
     def batch_begin(self):
         self.__dist_hint = self.__astar_run_id + 1
-    
+
     def batch_end(self):
         self.__dist_hint = PathFinder.INFINITY
-    
+
     def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
         return self.__find_path(position_begin, position_end)
-    
+
     def find_path_batched(self, position_begin_list: list[pg.Vector2], position_end: pg.Vector2) -> list[list[pg.Vector2] | None]:
         self.batch_begin()
         res = []
@@ -157,4 +163,3 @@ class PathFinder:
             res.append(self.__find_path(position_begin, position_end))
         self.batch_end()
         return res
-

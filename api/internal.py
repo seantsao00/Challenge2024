@@ -115,12 +115,9 @@ class Internal(prototype.API):
             self.__build_transform_matrix()
             self.__inv_transform = np.linalg.inv(self.transform)
 
-        vector = np.array([[position.x],
-                           [position.y],
-                           [1 if is_position else 0]])
-        vector = np.dot(self.__inv_transform if inverse else self.transform,
-                        vector)
-        return pg.Vector2(vector[0][0], vector[1][0])
+        vector = np.asarray([position.x, position.y, 1 if is_position else 0])
+        vector = (self.__inv_transform if inverse else self.transform) @ vector
+        return pg.Vector2(vector[0], vector[1])
 
     @classmethod
     def __map_character_type(cls, class_type: prototype.CharacterClass):
@@ -690,11 +687,11 @@ def threading_ai(team_id: int, helper: Internal, timer: Timer):
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
     except TimeoutException:
-        log_critical(f"[API] AI of team {Internal.__cast_team_id(team_id)} timed out!")
+        log_critical(f"[API] AI of team {team_id + 1} timed out!")
     # pylint: disable=broad-exception-caught
     except Exception:
         log_critical(
-            f"Caught exception in AI of team {Internal.__cast_team_id(team_id)}:\n{traceback.format_exc()}")
+            f"Caught exception in AI of team {team_id + 1}:\n{traceback.format_exc()}")
     finally:
         timer.cancel_timer()
 
