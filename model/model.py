@@ -100,7 +100,7 @@ class Model:
         self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
-        self.frozened: bool = False
+        self.frozen: bool = False
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
@@ -253,8 +253,9 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-                if not self.frozened and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
-                    self.frozened = True
+                if not self.frozen and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
+                    self.frozen = True
+                    chat.send_system("Scoreboard is now frozen!")
                 # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
             fps = const.FPS

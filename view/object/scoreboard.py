@@ -48,7 +48,7 @@ class Scorebox:
             team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
         # score
-        if model.frozened:
+        if model.frozen:
             score_text = self.font_primary.render('???', False, 'black')
         else:
             score_text = self.font_primary.render(
@@ -77,7 +77,7 @@ class Scorebox:
         field_width = SI.scale(SCOREBOX_WIDTH / 3)
         # unit count
         bottomleft = SI.scale([0, SCOREBOX_HEIGHT])
-        if model.frozened:
+        if model.frozen:
             blitIconAndText(SCOREBOX_ICON_UNIT, '???', bottomleft, field_width)
             # kill count
             bottomleft[0] += field_width
@@ -143,5 +143,5 @@ class ScoreboardView(ObjectBase):
         self.__boxes.sort(key=lambda box: box.cur_score(), reverse=True)
         model = get_model()
         for i in range(self.__team_count):
-            if not model.frozened:
+            if not model.frozen:
                 self.__boxes[i].update(self.__box_positions[i])
