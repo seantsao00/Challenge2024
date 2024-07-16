@@ -10,8 +10,8 @@ import pygame as pg
 import const
 import const.team
 from event_manager import EventSendChat
-from instances_manager import get_event_manager
-from model.team import Team
+from instances_manager import get_event_manager, get_model
+from model.team import NeutralTeam, Team
 from view.object import components
 from view.object.animation import LinearAnimation, LinearAnimationEasings
 from view.object.object_base import ObjectBase
@@ -89,7 +89,8 @@ class ChatView(ObjectBase):
         if e.type == const.ChatMessageType.CHAT_COMMENT:
             self.add_comment(e.team, e.text)
         elif e.type == const.ChatMessageType.CHAT_SYSTEM:
-            self.add_comment(e.team, e.text)
+            team = get_model().neutral_team
+            self.add_comment(team, e.text)
 
     def add_comment(self, team: Team, text: str):
         avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
