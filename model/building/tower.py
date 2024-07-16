@@ -74,7 +74,7 @@ class Tower(LivingEntity):
         get_event_manager().post(EventCreateTower(tower=self))
 
     def __str__(self):
-        return f'tower {self.id} (team {self.team.team_id})'
+        return f'tower {self.id} (team {self.team.team_id + 1})'
 
     def update_period(self):
         self.period = const.count_period_ms(len(self.team.character_list))

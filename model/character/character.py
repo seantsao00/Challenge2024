@@ -69,7 +69,7 @@ class Character(LivingEntity):
         self.attribute: const.CharacterAttribute
 
     def __str__(self):
-        return f'character {self.id} (team {self.team.team_id})'
+        return f'character {self.id} (team {self.team.team_id + 1})'
 
     def __move_along_direction(self):
         """

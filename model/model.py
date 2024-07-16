@@ -160,15 +160,15 @@ class Model:
         """
         self.__ticks += 1
         self.__ticks %= const.TICKS_PER_CYCLE
-        for i in range(len(self.teams)):
+        for i, team in enumerate(self.teams):
             if self.__ticks != int(round(const.TICKS_PER_CYCLE * i / len(self.teams))):
                 continue
-            log_info(f"[API] Starting team {i + 1}'s thread...")
+            log_info(f"[API] Starting team {team.team_id + 1}'s thread...")
             if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
                 self.__team_thread[i] = start_ai(i)
             else:
                 log_critical(
-                    f"[API] AI of team {i + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
+                    f"[API] AI of team {team.team_id + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:

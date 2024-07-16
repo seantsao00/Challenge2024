@@ -72,7 +72,7 @@ class Team(NeutralTeam):
         if team_name:
             self.__team_name = team_name
         else:
-            self.__team_name = 'team' + str(self.__team_id)
+            self.__team_name = 'team' + str(self.__team_id + 1)
         self.__stats = Team.TeamStats(0, 0, 0, 0)
         self.__towers: set[Tower] = set()
         self.tower_lock = Lock()
@@ -170,7 +170,7 @@ class Team(NeutralTeam):
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
             log_info(
-                f'Character type of Team {self.team_id + 1} is modified to {event.character_type}')
+                f'Character type of team {self.team_id + 1} is modified to {event.character_type}')
             self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):
