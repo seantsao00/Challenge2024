@@ -31,6 +31,7 @@ from model.grid import Grid
 from model.map import load_map
 from model.nyan import Nyan
 from model.party_selector import PartySelector
+from model.path_finder import PathFinder
 from model.pause_menu import PauseMenu
 from model.result import Result
 from model.team import NeutralTeam, Team
@@ -87,6 +88,7 @@ class Model:
         self.chat = Chat()
         self.towers: list[Tower] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
+        self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
         if model_arguments.skip_party_selecting:
