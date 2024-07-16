@@ -25,6 +25,7 @@ from view import View
 
 def check_input_validity(received_args) -> bool:
     team_controls = received_args.team_controls
+    existing_ai = os.listdir('./ai')
     game_map = received_args.map
 
     if len(team_controls) > 4:
@@ -34,13 +35,12 @@ def check_input_validity(received_args) -> bool:
         log_critical('At most one human')
         return False
     for team in team_controls:
-        if team != 'human' and not os.path.isfile(f'./ai/{team}.py'):
+        if team != 'human' and (team + '.py') not in existing_ai:
             log_critical(f'{team}.py does not exist')
             return False
     if not os.path.isdir(f'./topography/{game_map}'):
         log_critical(f'{game_map} map does not exist')
         return False
-
     return True
 
 
