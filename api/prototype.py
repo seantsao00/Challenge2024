@@ -13,16 +13,9 @@ class CharacterClass(IntEnum):
     """士兵種類。"""
 
     MELEE = auto()
-    """近戰"""
-
     SNIPER = auto()
-    """狙擊"""
-
     RANGER = auto()
-    """遠程"""
-
     UNKNOWN = auto()
-    """錯誤"""
 
 
 class Character:

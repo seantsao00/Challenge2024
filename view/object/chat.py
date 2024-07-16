@@ -8,10 +8,9 @@ from __future__ import annotations
 import pygame as pg
 
 import const
-import const.team
 from event_manager import EventSendChat
-from instances_manager import get_event_manager, get_model
-from model.team import NeutralTeam, Team
+from instances_manager import get_event_manager
+from model.team import Team
 from view.object import components
 from view.object.animation import LinearAnimation, LinearAnimationEasings
 from view.object.object_base import ObjectBase
@@ -31,23 +30,15 @@ consts: _RescaledConstants | None = None
 
 
 class CommentBox:
-    def __init__(self, text: str, user_avatar: pg.Surface | None, width: float, critical: bool = True):
+    def __init__(self, text: str, user_avatar: pg.Surface, width: float):
         font = font_loader.get_font(size=const.CHAT_FONT_SIZE)
         avatar_size = user_avatar.get_size()
-        if not critical:
-            text_surf = components.createTextBox(
-                text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
-        else:
-            text_surf = components.createTextBox(
-                text, (230, 0, 0), font, width - consts.SPACING[0] * 3)
-
+        text_surf = components.createTextBox(
+            text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
         text_size = text_surf.get_size()
 
         height = max(avatar_size[1], text_size[1]) + consts.SPACING[1] * 2
         self.__size = (width, height)
-        self.__background_surf = pg.Surface((width, height), pg.SRCALPHA)
-        self.__background_surf.set_alpha(128)
-        self.__background_surf.fill((220, 220, 220))
         self.__surf = pg.Surface((width, height), pg.SRCALPHA)
         self.__surf.blit(user_avatar, (consts.SPACING[0], consts.SPACING[1]))
         self.__surf.blit(text_surf, (consts.SPACING[0] * 2 + avatar_size[0], consts.SPACING[1]))
@@ -56,7 +47,6 @@ class CommentBox:
         return self.__size
 
     def draw(self, canvas: pg.Surface, position: tuple[int, int]):
-        canvas.blit(self.__background_surf, position)
         canvas.blit(self.__surf, position)
 
     def update(self):
@@ -92,14 +82,13 @@ class ChatView(ObjectBase):
     def handle_new_chat(self, e: EventSendChat):
         if e.type == const.ChatMessageType.CHAT_COMMENT:
             self.add_comment(e.team, e.text)
-        elif e.type == const.ChatMessageType.CHAT_SYSTEM:
-            team = get_model().neutral_team
-            self.add_comment(team, e.text)
+        elif e.type == const.ChatMessageType.CHAT_BULLET:
+            # TODO
+            print("Bullet messages are not supported yet!")
 
     def add_comment(self, team: Team, text: str):
         avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
-        critical = (team.party is const.PartyType.NEUTRAL)
-        comment_box = CommentBox(text, avatar, consts.CHAT_SIZE[0], critical)
+        comment_box = CommentBox(text, avatar, consts.CHAT_SIZE[0])
         self.__comments.append(comment_box)
         self.__total_scroll += comment_box.get_size()[1] + consts.SPACING[1]
         self.__scroll.value = self.__total_scroll

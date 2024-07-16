@@ -25,13 +25,11 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger, Sniper
-from model.chat import Chat
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
 from model.nyan import Nyan
 from model.party_selector import PartySelector
-from model.path_finder import PathFinder
 from model.pause_menu import PauseMenu
 from model.result import Result
 from model.team import NeutralTeam, Team
@@ -85,16 +83,14 @@ class Model:
         self.entity_lock = threading.Lock()
         self.entities: list[Entity] = []
         self.characters: list[Character] = []
-        self.chat = Chat()
         self.towers: list[Tower] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
-        self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
         if model_arguments.skip_party_selecting:
             self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
-        self.neutral_team: NeutralTeam = None
+        self.__neutral_team: NeutralTeam
         self.__tower: list[Tower] = []
         self.__team_thread: list[threading.Thread] = [None] * len(model_arguments.team_controls)
         self.__team_files_names: list[str] = model_arguments.team_controls
@@ -103,7 +99,6 @@ class Model:
         self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
-        self.frozen: bool = False
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
@@ -142,9 +137,9 @@ class Model:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i)
 
-        self.neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
+        self.__neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
         for position, tower_type in self.map.neutral_towers:
-            self.__tower.append(Tower(position, self.neutral_team, tower_type))
+            self.__tower.append(Tower(position, self.__neutral_team, tower_type))
         self.state = const.State.PLAY
 
     def __post_initialize(self, _: EventPostInitialize):
@@ -162,12 +157,12 @@ class Model:
         for i in range(len(self.teams)):
             if self.__ticks != int(round(const.TICKS_PER_CYCLE * i / len(self.teams))):
                 continue
-            log_info(f"[API] Starting team {i + 1}'s thread...")
+            log_info(f"[API] Starting team {i}'s thread...")
             if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
                 self.__team_thread[i] = start_ai(i)
             else:
                 log_critical(
-                    f"[API] AI of team {i + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
+                    f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
@@ -256,9 +251,6 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-                if not self.frozen and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
-                    self.frozen = True
-                    self.chat.send_system("Scoreboard is now frozen!")
                 # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
             fps = const.FPS

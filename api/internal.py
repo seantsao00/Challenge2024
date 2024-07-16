@@ -17,7 +17,6 @@ import const
 import const.map
 import model
 import model.chat
-import model.path_finder
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
@@ -55,9 +54,6 @@ class Internal(prototype.API):
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
-
-    def post_init(self):
-        self.__path_finder = model.path_finder.PathFinder(get_model().map)
 
     def clear(self):
         self.__chat_sent = False
@@ -220,7 +216,7 @@ class Internal(prototype.API):
         """
         if id(extern) not in self.__reverse_character_map:
             log_warning(
-                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
+                f"[AI] AI of team {self.team_id} used invalid prototype.Character. Maybe it is already expired.")
             return None
         return self.__reverse_character_map[id(extern)]
 
@@ -230,7 +226,7 @@ class Internal(prototype.API):
         """
         if id(extern) not in self.__reverse_tower_map:
             log_warning(
-                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
+                f"[AI] AI of team {self.team_id} used invalid prototype.Tower. Maybe it is already expired.")
             return None
         return self.__reverse_tower_map[id(extern)]
 
@@ -272,8 +268,6 @@ class Internal(prototype.API):
 
         if index is None:
             index = self.team_id
-        else:
-            index = self.__map_team_id(index)
         if index < 0 or index >= len(get_model().teams):
             raise IndexError
         team = get_model().teams[index]
@@ -347,9 +341,7 @@ class Internal(prototype.API):
             if character.move_state is CharacterMovingState.TO_DIRECTION:
                 return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
             if character.move_state is CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, False, self.__transform(character.move_destination, is_position=True))
-            if character.move_state is CharacterMovingState.WANDERING:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, True, self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
             raise ValueError
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
@@ -445,22 +437,15 @@ class Internal(prototype.API):
         destination_cell = get_model().map.position_to_cell(destination)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
-
-        def must_move(inter: prototype.Character):
+        for inter in internals:
             old_destination = inter.move_destination
             if old_destination is not None and get_model().map.position_to_cell(inter.move_destination) == destination_cell:
-                return False
-            return True
-        internals = filter(must_move, internals)
-
-        self.__path_finder.batch_begin()
-        for inter in internals:
+                continue
             with inter.moving_lock:
                 inter.set_move_stop()
-                path = self.__path_finder.find_path(inter.position, destination)
+                path = get_model().map.find_path(inter.position, destination)
                 if path is not None and len(path) > 0:
                     inter.set_move_position(path)
-        self.__path_finder.batch_end()
 
     def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character):
         enforce_type('characters', characters, Iterable | prototype.Character)
@@ -525,7 +510,7 @@ class Internal(prototype.API):
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
-                inter.set_wandering(self.__path_finder)
+                inter.set_wandering()
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -593,7 +578,7 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        get_model().chat.send_comment(team=self.__team(), text=msg)
+        model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
     def get_map_name(self) -> str:
@@ -681,7 +666,6 @@ def load_ai(files: list[str]):
         spec = importlib.util.find_spec('ai.' + file)
         ai[i] = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(ai[i])
-        helpers[i].post_init()
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
@@ -690,10 +674,10 @@ def threading_ai(team_id: int, helper: Internal, timer: Timer):
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
     except TimeoutException:
-        log_critical(f"[API] AI of team {team_id + 1} timed out!")
+        log_critical(f"[API] AI of team {team_id} timed out!")
     # pylint: disable=broad-exception-caught
     except Exception:
-        log_critical(f"Caught exception in AI of team {team_id + 1}:\n{traceback.format_exc()}")
+        log_critical(f"Caught exception in AI of team {team_id}:\n{traceback.format_exc()}")
     finally:
         timer.cancel_timer()
 

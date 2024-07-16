@@ -5,6 +5,7 @@ The module defines Controller class.
 import pygame as pg
 
 import const
+import const.controller
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
                            EventNyanCat, EventPauseModel, EventQuit, EventResumeModel,
                            EventSelectCharacter, EventSelectParty, EventUnconditionalTick,
@@ -95,17 +96,11 @@ class Controller:
                 if key == const.SHOW_RANGE_SWITCH_KEY:
                     ev_manager.post(EventViewShowRangeSwitch())
                 # ???
-                if key == const.EGG_SEQ[self.egg_record]:
+                if key == const.controller.EGG_SEQ[self.egg_record]:
                     self.egg_record += 1
                 else:
-                    if key == const.EGG_SEQ[0]:
-                        if self.egg_record <= 2:
-                            pass
-                        else:
-                            self.egg_record = 1
-                    else:
-                        self.egg_record = 0
-                if self.egg_record == len(const.EGG_SEQ):
+                    self.egg_record = 0
+                if self.egg_record == len(const.controller.EGG_SEQ):
                     ev_manager.post(EventNyanCat())
                     self.egg_record = 0
 

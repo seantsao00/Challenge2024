@@ -25,12 +25,10 @@ def _getAvatarImage(party: const.team.PartyType):
     elif party is const.team.PartyType.POLICE:
         avatar_img = pg.image.load(
             const.ENTITY_IMAGE[party][const.character.CharacterType.MELEE][const.CharacterState.LEFT])
-    elif (party is const.team.PartyType.BLACK) or (party is const.team.PartyType.MOURI):
-        avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][const.CharacterState.LEFT])
     else:
         avatar_img = pg.image.load(
-            const.ICON_IMAGE)
+            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][const.CharacterState.LEFT])
+
     _cache_avatar_img[party] = avatar_img
     return avatar_img
 
