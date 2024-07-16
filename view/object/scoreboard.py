@@ -16,7 +16,8 @@ class Scorebox:
     def __init__(self, team: Team, initial_position: tuple[int, int]):
         self.__canvas = pg.Surface(SI.translate((SCOREBOX_WIDTH, SCOREBOX_HEIGHT)), pg.SRCALPHA)
         self.font_primary = font_loader.get_font(size=SCOREBOX_FONT_SIZE_PRIMARY)
-        self.font_secondary = font_loader.get_font(name=SCOREBOX_SECONDARY_FONT, size=SCOREBOX_FONT_SIZE_SECONDARY)
+        self.font_secondary = font_loader.get_font(
+            name=SCOREBOX_SECONDARY_FONT, size=SCOREBOX_FONT_SIZE_SECONDARY)
         self.__team = team
         self.__team_stats = self.__team.stats
         self.__team_name_surface = self.font_primary.render(
@@ -38,16 +39,16 @@ class Scorebox:
             bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
 
         def offset(p): return (p[0], p[1] + self.font_primary.get_descent())
-        # background of the team name, draw a line of background color 
-        pg.draw.line(self.__canvas, (239, 192, 131), \
-                     offset((team_name_rect.bottomleft[0], team_name_rect.bottomleft[1] - 9)), \
+        # background of the team name, draw a line of background color
+        pg.draw.line(self.__canvas, (239, 192, 131),
+                     offset((team_name_rect.bottomleft[0], team_name_rect.bottomleft[1] - 9)),
                      offset((team_name_rect.bottomright[0], team_name_rect.bottomright[1] - 9)), width=27)
         # team coler underscore
         pg.draw.line(self.__canvas, const.HEALTH_BAR_COLOR[self.__team.team_id], offset(
             team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
         self.__canvas.blit(self.__team_name_surface, team_name_rect)
         # score
-        if model.scoreboard_frozen and model.get_time() > const.FROZEN_TIME:
+        if model.frozened:
             score_text = self.font_primary.render('???', False, 'black')
         else:
             score_text = self.font_primary.render(
@@ -76,7 +77,7 @@ class Scorebox:
         field_width = SI.scale(SCOREBOX_WIDTH / 3)
         # unit count
         bottomleft = SI.scale([0, SCOREBOX_HEIGHT])
-        if model.scoreboard_frozen and model.get_time() > const.FROZEN_TIME:
+        if model.frozened:
             blitIconAndText(SCOREBOX_ICON_UNIT, '???', bottomleft, field_width)
             # kill count
             bottomleft[0] += field_width
@@ -142,5 +143,5 @@ class ScoreboardView(ObjectBase):
         self.__boxes.sort(key=lambda box: box.cur_score(), reverse=True)
         model = get_model()
         for i in range(self.__team_count):
-            if not model.scoreboard_frozen or model.get_time() <= const.FROZEN_TIME:
+            if not model.frozened:
                 self.__boxes[i].update(self.__box_positions[i])
