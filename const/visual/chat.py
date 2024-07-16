@@ -7,7 +7,7 @@ class ChatMessageType(Enum):
 
 
 CHAT_POSITION = (362, 13)
-CHAT_SIZE = (77, 204)
+CHAT_SIZE = (77, 203)
 CHAT_FONT_SIZE = 6
 AVATAR_WIDTH = 10
 SPACING = (3, 3)
