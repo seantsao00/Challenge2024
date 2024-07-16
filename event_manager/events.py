@@ -229,6 +229,11 @@ class EventSendChat(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventLoadUpdate(BaseEvent):
+    msg: str
+
+
+@dataclass(kw_only=True)
 class EventResultChoseCharacter(BaseEvent):
     """ In result, second to fourth place are chosen."""
 
