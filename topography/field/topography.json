@@ -3,10 +3,13 @@
     "width": 250,
     "height": 250,
     "fountains": [
-        [228, 201], [37, 103], [53, 236], [110, 175]
+        [86,21],
+        [30,116],
+        [225,87],
+        [182,202]
     ],
     "neutral_towers": [
-        [128, 93, "ferris_wheel"], [93, 25, "pylon"]
+        [187, 36, "ferris_wheel"], [49, 236, "pylon"]
     ],
     "images": {
         "backgrounds": ["background.png"],
