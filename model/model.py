@@ -25,6 +25,7 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger, Sniper
+from model.chat import chat
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
@@ -252,6 +253,8 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
+                if not self.frozened and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
+                    self.frozened = True
                 # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
             fps = const.FPS
@@ -259,8 +262,6 @@ class Model:
                 self.result.update()
                 fps = const.RESULT_SCREEN_FPS
             self.dt = self.global_clock.tick(fps) / 1000
-            if not self.frozened and self.scoreboard_frozen and self.get_time() >= const.FROZEN_TIME:
-                self.frozened = True
 
     def __handle_quit(self, _: EventQuit):
         """

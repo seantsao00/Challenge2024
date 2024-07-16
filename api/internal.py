@@ -578,7 +578,7 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        model.chat.chat.send_comment(team=self.__team(), text=msg)
+        model.chat.send_comment(team=self.__team(), text=msg)
         return True
 
     def get_map_name(self) -> str:
