@@ -20,6 +20,7 @@ def every_tick(api: API):
             visible.append(character)
 
     # 將所有己方隊伍的士兵移動到某個隨機的位置
+    # 一直讓自己的所有士兵在每一個 tick 都找新的一條到遙遠目的的路徑是很花時間的，在後期擁有很多士兵時，這樣的操作很容易超過時限。
     api.action_move_to(api.get_owned_characters(), pg.Vector2(
         random.random() * 250, random.random() * 250))
 

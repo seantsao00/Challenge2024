@@ -4,7 +4,6 @@ from random import getrandbits
 import pygame as pg
 
 import const
-import const.result
 from event_manager.events import (EventQuit, EventResultChamp, EventResultChoseCharacter,
                                   EventResultWandering)
 from instances_manager import get_event_manager, get_model
