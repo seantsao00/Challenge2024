@@ -45,6 +45,9 @@ class CommentBox:
 
         height = max(avatar_size[1], text_size[1]) + consts.SPACING[1] * 2
         self.__size = (width, height)
+        self.__background_surf = pg.Surface((width, height), pg.SRCALPHA)
+        self.__background_surf.set_alpha(128)
+        self.__background_surf.fill((220, 220, 220))
         self.__surf = pg.Surface((width, height), pg.SRCALPHA)
         self.__surf.blit(user_avatar, (consts.SPACING[0], consts.SPACING[1]))
         self.__surf.blit(text_surf, (consts.SPACING[0] * 2 + avatar_size[0], consts.SPACING[1]))
@@ -53,6 +56,7 @@ class CommentBox:
         return self.__size
 
     def draw(self, canvas: pg.Surface, position: tuple[int, int]):
+        canvas.blit(self.__background_surf, position)
         canvas.blit(self.__surf, position)
 
     def update(self):
