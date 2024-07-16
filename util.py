@@ -1,6 +1,10 @@
 """
 Utility functions that can be utilized across multiple modules.
 """
+import base64
+import os
+import sys
+import time
 
 import cv2
 import pygame as pg
@@ -41,26 +45,51 @@ def crop_image(picture: pg.Surface, desire_width: int, desire_height: int,
 verbosity = 0
 
 
+def disable_print():
+    sys.stdout = open(os.devnull, 'w')
+
+
 def set_verbosity(verb: int):
     global verbosity
     verbosity = verb
+    if 5 <= verb < 10:
+        print(f"What are you looking for? There is nothing more to print.\n", file=sys.__stdout__)
+    elif 10 <= verb < 15:
+        print(f"I bet you are a really curious person, but that is not going to work. What you are questing is simply non-existence.\n", file=sys.__stdout__)
+    elif 15 <= verb < 20:
+        print(f"Alright, but unfortunately, I have nothing to give you. Here is a joke compensating your wasted passion.\n", file=sys.__stdout__)
+        print("My mom told me I had no sense of direction, so I packed up my stuff and right.",
+              file=sys.__stdout__)
+    elif 20 <= verb < 25:
+        print(f"It is not gonna work. Give up.\n", file=sys.__stdout__)
+    elif 25 <= verb < 30:
+        print(f"Do me a favor, go outside and touch some grass. It is really meaningless beyond this point.\n", file=sys.__stdout__)
+    elif 30 <= verb < 35:
+        print(f"You are not going to give up, are you?\n", file=sys.__stdout__)
+    elif 35 <= verb < 40:
+        print(f"...\n", file=sys.__stdout__)
+    elif 40 <= verb < 45:
+        print(f"Stop it. Life is still great and you shouldn't focus on this stupid conversation.\n", file=sys.__stdout__)
+    elif 45 <= verb < 50:
+        print(f"Anyways.\n", file=sys.__stdout__)
+    sleep(1)
 
 
 def log_critical(msg: str):
     """Print critical logging message."""
-    print(f"\033[91m[Crit] {msg}\033[0m")
+    print(f"\033[91m[Crit] {msg}\033[0m", file=sys.__stdout__)
 
 
 def log_warning(msg: str):
     """Print warning logging message."""
     if verbosity >= 1:
-        print(f"\033[93m[Warn] {msg}\033[0m")
+        print(f"\033[93m[Warn] {msg}\033[0m", file=sys.__stdout__)
 
 
 def log_info(msg: str):
     """Print info logging message."""
     if verbosity >= 2:
-        print(f"[Info] {msg}")
+        print(f"[Info] {msg}", file=sys.__stdout__)
 
 
 def transform_coordinate(point: tuple[float, float], ratio: float) -> tuple[float, float]:
@@ -86,3 +115,10 @@ def load_image(filepath: str, width: int, height: int) -> tuple[pg.Surface, pg.V
     picture = pg.transform.scale(picture, (width, height))
     picture = picture.subsurface(pg.Rect(x, y, w, h))
     return (picture, pg.Vector2(x, y))
+
+
+def sleep(_):
+    time.sleep(1)
+    if verbosity >= 50:
+        print("Finally, the easter egg. I know you are the special one. Go ahead and tell the staff!")
+        print(base64.b64decode("ICAgICAgICAgIOKWiOKWiOKWiOKWiOKWiOKWiOKWiOKWiCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICDilojiloggICAgICAgIOKWiOKWiCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgIOKWiOKWiOKWkuKWkuKWkuKWkiAgICAgICAg4paI4paIICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICDilojilojilpLilpLilpLilpLilpLilpIgICAgICDilpLilpLilpLilpLilojiloggICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICDilojilojilpLilpLilpLilpLilpLilpIgICAgICDilpLilpLilpLilpLilojiloggICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAg4paI4paIICDilpLilpLilpLilpIgICAgICAgIOKWkuKWkuKWkuKWkuKWkuKWkuKWiOKWiCAgICAgICAgICAgICAgICAgICAgICAgICAgCiAg4paI4paIICAgICAgICAgICAgICAgIOKWkuKWkuKWkuKWkuKWiOKWiCAgICAgICAgICAgICAgICAgICAgICAgICAgCuKWiOKWiOKWkuKWkiAgICAgIOKWkuKWkuKWkuKWkuKWkuKWkiAgICAgICAgICDilojiloggICAgICAgICAgICAgICAgICAgICAgICAK4paI4paIICAgICAg4paS4paS4paS4paS4paS4paS4paS4paS4paS4paSICAgICAgICDilojiloggICAgICAgICAgICAgICAgICAgICAgICAK4paI4paIICAgICAg4paS4paS4paS4paS4paS4paS4paS4paS4paS4paSICAgIOKWkuKWkuKWkuKWkuKWiOKWiCAgICAgICAgICAgICAgICAgICAgICAgIArilojilojilpLilpLilpLilpIgIOKWkuKWkuKWkuKWkuKWkuKWkuKWkuKWkuKWkuKWkiAg4paS4paS4paS4paS4paS4paS4paI4paIICAgICAgICAgICAgICAgICAgICAgICAgCiAg4paI4paI4paS4paS4paS4paSICDilpLilpLilpLilpLilpLilpIgICAg4paS4paS4paS4paS4paI4paIICAgICAgICAgICAgICAgICAgICAgICAgICAKICDilojilojilpLilpLilpLilpIgICAgICAgICAgICDilpLilpLilpLilpLilojiloggICAgICAgICAgICAgICAgICAgICAgICAgIAogICAg4paI4paI4paS4paSICAgICAgICAgICAgICDilojiloggICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgIOKWiOKWiOKWiOKWiCAgICAgICAg4paI4paI4paI4paIICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICDilojilojilojilojilojilojilojilog=").decode("utf-8"))

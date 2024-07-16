@@ -24,7 +24,8 @@ class Ranger(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.RANGER_ATTRIBUTE, const.CharacterType.RANGER, None)
+        super().__init__(position, team, const.RANGER_ATTRIBUTE,
+                         const.CharacterType.RANGER, const.CharacterState.LEFT)
         get_event_manager().register_listener(EventUseRangerAbility,
                                               listener=self.use_ability, channel_id=self.id)
 
@@ -69,7 +70,7 @@ class Ranger(Character):
         # self.abilities_time = now_time
         get_model().ranger_ability = True
         get_model().ranger_controlling = self
-        log_info("[Ranger] Ability is on")
+        log_info(f"[Ranger] {self} Ability is on")
 
     def use_ability(self, event: EventUseRangerAbility):
         """This function is called after clicked Q and left button, it would generate bullet"""
@@ -78,7 +79,7 @@ class Ranger(Character):
 
         # In case of API cast ability, this controlling will not be overritten,
         # to ensure API does not interrupt human control.
-        log_info("[Ranger] Cast ablility")
+        log_info(f"[Ranger] {self} Cast ablility")
         bullet = BulletRanger(position=self.position,
                               target=event.position,
                               team=self.team,

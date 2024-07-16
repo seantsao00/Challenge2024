@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from const import ChatMessageType
+from const import ChatMessageType, PartyType
 from event_manager.events import EventSendChat
 from instances_manager import get_event_manager
 
@@ -16,15 +16,14 @@ if TYPE_CHECKING:
 
 
 class Chat:
-    def __send_chat(self, type: ChatMessageType, team: Team, text: str):
-        # TODO: rate-limit or similar checking
-        get_event_manager().post(EventSendChat(type=type, team=team, text=text))
+    def __send_chat(self, message_type: ChatMessageType, team: Team | None, text: str):
+        get_event_manager().post(EventSendChat(type=message_type, team=team, text=text))
 
     def send_comment(self, team: Team, text: str):
         self.__send_chat(ChatMessageType.CHAT_COMMENT, team, text)
 
-    def send_bullet(self, team: Team, text: str):
-        self.__send_chat(ChatMessageType.CHAT_BULLET, team, text)
+    def send_system(self, text: str):
+        self.__send_chat(ChatMessageType.CHAT_SYSTEM, None, text)
 
 
 chat = Chat()

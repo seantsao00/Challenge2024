@@ -147,8 +147,6 @@ class TeamVisionGrid:
                    const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)
         x, y = int(entity.position.x /
                    const.VISION_BLOCK_SIZE), int(entity.position.y / const.VISION_BLOCK_SIZE)
-        if entity.alive is False or self.visit[x][y] is True or self.heuristic_test(entity.position) is False:
-            return
         self.brute_modify(pg.Vector2(x, y), entity.attribute.vision)
 
 
@@ -167,6 +165,8 @@ class TeamVision(TeamVisionGrid):
             or self.heuristic_test(event.character.position) is False
                 or event.character.alive is False):
             return
+        if event.character.attribute.vision < 5:
+            self.update_vision(event.character)
         self.set.add((x, y, event.character.attribute.vision))
         self.visit[x][y] = True
         # self.modify_vision()

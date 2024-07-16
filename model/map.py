@@ -1,5 +1,4 @@
 import csv
-import heapq
 import json
 import os
 import random
@@ -19,7 +18,7 @@ class Map:
     backgrounds: list[str]
     objects: dict[str, int]
     fountains: list[tuple[int, int]]
-    neutral_towers: list[tuple[int, int]]
+    neutral_towers: list[tuple[tuple[int, int], const.TowerType]]
     map_dir: str
 
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
@@ -107,80 +106,6 @@ class Map:
             )
         return ret
 
-    def find_path(self, position_begin: pg.Vector2, position_end: pg.Vector2) -> list[pg.Vector2] | None:
-        """
-        Find a path from position_begin to position_end. Positions take values
-        in range [0, const.ARENA_SIZE).
-        Returns a list of positions describing the path, or None if the algorithm
-        did not find a path.
-        """
-        if (not self.is_position_passable(position_begin)
-                or not self.is_position_passable(position_end)):
-            return None
-
-        max_x, max_y = self.size
-        cell_begin = self.position_to_cell(position_begin)
-        cell_end = self.position_to_cell(position_end)
-
-        dist: list[list[float]] = [[8] * max_y for _ in range(max_x)]
-        src: list[list[None | tuple[int, int]]] = [[None] * max_y for _ in range(max_x)]
-        visited: list[list[bool]] = [[False] * max_y for _ in range(max_x)]
-
-        # priority queue for A star containing (heuristic, distance, (x, y))
-        pq: list[tuple[float, float, tuple[int, int]]] = []
-
-        # helper functions
-        def heuristic(cell: tuple[int, int]) -> float:
-            return (cell[0] - cell_end[0]) ** 2 + (cell[1] - cell_end[1]) ** 2
-
-        def push_cell(cell: tuple[int, int], new_dist: float, cell_source: tuple[int, int]) -> None:
-            cx, cy = cell
-            if visited[cx][cy]:
-                return
-            if src[cx][cy] is not None and dist[cx][cy] <= new_dist:
-                return
-            dist[cx][cy] = new_dist
-            src[cx][cy] = cell_source
-            new_heur = heuristic(cell)
-            heapq.heappush(pq, (new_heur, new_dist, cell))
-
-        def get_neighbors(cur_cell: tuple[int, int], cur_dist):
-            diff = [
-                (-1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0), (1, 0, 1.0),
-                (-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
-                (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951),
-            ]
-            for dx, dy, dd in diff:
-                nx, ny, nd = cur_cell[0] + dx, cur_cell[1] + dy, cur_dist + dd
-                if self.is_cell_passable((nx, ny)):
-                    yield (nx, ny, nd)
-
-        # find single source shortest path
-        push_cell(cell_begin, 0, cell_begin)
-        iters = 0
-        while len(pq) > 0:
-            iters += 1
-            _, cur_dist, cur_cell = heapq.heappop(pq)
-            cx, cy = cur_cell
-            if visited[cx][cy]:
-                continue
-            visited[cx][cy] = True
-            if cur_cell == cell_end:
-                break  # path found
-            for nx, ny, nd in get_neighbors(cur_cell, cur_dist):
-                push_cell((nx, ny), nd, cur_cell)
-        if not visited[cell_end[0]][cell_end[1]]:
-            return None
-
-        # path found
-        path: list[pg.Vector2] = []
-        cur_cell = cell_end
-        while cur_cell != cell_begin:
-            assert cur_cell is not None
-            path.append(self.cell_to_position(cur_cell))
-            cur_cell = src[cur_cell[0]][cur_cell[1]]
-        return path[::-1]
-
 
 def load_map(map_dir):
     json_file = os.path.join(map_dir, 'topography.json')
@@ -197,7 +122,18 @@ def load_map(map_dir):
     size = (data['width'], data['height'])
 
     fountains = [tuple(i) for i in data['fountains']]
-    neutral_towers = [tuple(i) for i in data['neutral_towers']]
+    neutral_towers: list[tuple[tuple[int, int], const.TowerType]] = []
+    for i in data['neutral_towers']:
+        if i[-1] == "ferris_wheel":
+            tower_type = const.TowerType.FERRIS_WHEEL
+        elif i[-1] == "hotel":
+            tower_type = const.TowerType.HOTEL
+        elif i[-1] == "pylon":
+            tower_type = const.TowerType.PYLON
+        else:
+            raise TypeError(f"neutral tower type '{i[-1]}' is unknown")
+        neutral_towers.append((tuple(i[:2]), tower_type))
+
     with open(map_file, encoding='utf-8') as f:
         rows = list(csv.reader(f))
         map_list = [[0] * size[1] for _ in range(0, size[0])]

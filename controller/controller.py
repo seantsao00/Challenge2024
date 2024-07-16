@@ -2,19 +2,16 @@
 The module defines Controller class.
 """
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 import pygame as pg
 
 import const
 from event_manager import (EventChangeParty, EventGameOver, EventHumanInput, EventInitialize,
-                           EventPauseModel, EventQuit, EventResumeModel, EventSelectCharacter,
-                           EventSelectParty, EventUnconditionalTick, EventUseRangerAbility,
-                           EventViewChangeTeam)
+                           EventNyanCat, EventPauseModel, EventQuit, EventResumeModel,
+                           EventSelectCharacter, EventSelectParty, EventUnconditionalTick,
+                           EventUseRangerAbility, EventViewChangeTeam, EventViewPathSwitch,
+                           EventViewShowRangeSwitch)
 from instances_manager import get_event_manager, get_model
-from model import Character, LivingEntity, TimerManager
+from model import Character, TimerManager, Tower
 from util import log_info
 from view import ScreenInfo
 
@@ -34,6 +31,7 @@ class Controller:
         """
         self.__resize_ratio: float = ScreenInfo.resize_ratio
         self.register_listeners()
+        self.egg_record = 0
 
     def initialize(self, _: EventInitialize):
         """Initialize attributes related to a game."""
@@ -65,8 +63,10 @@ class Controller:
             self.ctrl_cover(pg_events)
         elif model.state is const.State.SELECT_PARTY:
             self.ctrl_select_party(pg_events)
+        elif model.state is const.State.RESULT:
+            self.ctrl_result(pg_events)
 
-    def ctrl_play(self, pg_events: list[pg.Event]):
+    def ctrl_play(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is PLAY.
 
@@ -81,13 +81,33 @@ class Controller:
                 key = pg_event.key
                 if key == const.PAUSE_BUTTON:
                     ev_manager.post(EventPauseModel())
-                if key == const.ABILITY_BUTTON:
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ABILITY))
+                if key == const.ABILITY_KEY:
+                    ev_manager.post(EventHumanInput(
+                        input_type=const.InputTypes.ABILITY))
                 if key in const.TOWER_CHANGE_TYPE_BUTTONS_MAP:
                     character_type = const.TOWER_CHANGE_TYPE_BUTTONS_MAP[key]
-                    ev_manager.post(EventSelectCharacter(character_type=character_type))
-                if key == const.CHANGE_TEAM_VISION:
+                    ev_manager.post(EventSelectCharacter(
+                        character_type=character_type))
+                if key == const.CHANGE_TEAM_VISION_KEY:
                     ev_manager.post(EventViewChangeTeam())
+                if key == const.SHOW_PATH_SWITCH_KEY:
+                    ev_manager.post(EventViewPathSwitch())
+                if key == const.SHOW_RANGE_SWITCH_KEY:
+                    ev_manager.post(EventViewShowRangeSwitch())
+                # ???
+                if key == const.EGG_SEQ[self.egg_record]:
+                    self.egg_record += 1
+                else:
+                    if key == const.EGG_SEQ[0]:
+                        if self.egg_record <= 2:
+                            pass
+                        else:
+                            self.egg_record = 1
+                    else:
+                        self.egg_record = 0
+                if self.egg_record == len(const.EGG_SEQ):
+                    ev_manager.post(EventNyanCat())
+                    self.egg_record = 0
 
             if pg_event.type == pg.MOUSEBUTTONDOWN:
                 x, y = pg_event.pos
@@ -104,7 +124,8 @@ class Controller:
                             model.ranger_controlling.abilities_time = model.get_time()
                             log_info("[Ranger] manual control success")
                         else:
-                            log_info("[Ranger] manual control failed: out of range")
+                            log_info(
+                                "[Ranger] manual control failed: out of range")
                         get_model().ranger_ability = False
                     else:
                         clicked = None
@@ -114,21 +135,28 @@ class Controller:
                                     clicked = entity
                                     break
                         if isinstance(clicked, Character):
-                            ev_manager.post(EventHumanInput(
-                                input_type=const.InputTypes.PICK, clicked_entity=clicked))
+                            ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
+                                                            clicked_entity=clicked))
 
                 if pg_event.button == 3:  # Right mouse button
                     log_info(f"[Controller] Right click position: ({x}, {y})")
-                    if model.ranger_ability:
-                        model.ranger_ability = False
+                    model.ranger_ability = False
                     clicked = None
-                    with model.entity_lock:
-                        for entity in model.towers + model.characters:  # Tower first
-                            if isinstance(entity, LivingEntity) and entity.alive and (pg.Vector2(x, y) - entity.position).length() < const.CLICK_SIZE[entity.entity_type][entity.state]:
-                                clicked = entity
-                                break
-                    ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
-                                    clicked_entity=clicked, displacement=pg.Vector2(x, y)))
+                    for entity in model.towers + model.characters:  # Tower first
+                        if (entity.alive and (pg.Vector2(x, y) - entity.position).length()
+                                < const.CLICK_SIZE[entity.entity_type][entity.state]):
+                            clicked = entity
+                            log_info(f"[Controller] Right click on: {clicked}")
+                            break
+                    if isinstance(clicked, Character):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.ATTACK,
+                                                        clicked_entity=clicked))
+                    elif isinstance(clicked, Tower):
+                        ev_manager.post(EventHumanInput(input_type=const.InputTypes.PICK,
+                                        clicked_entity=clicked))
+                    else:
+                        log_info(
+                            '[Controller] Right click non interactable object')
 
         pressed_keys = pg.key.get_pressed()
         direction = pg.Vector2(0, 0)
@@ -139,7 +167,7 @@ class Controller:
         ev_manager.post(EventHumanInput(
             input_type=const.InputTypes.MOVE, displacement=direction))
 
-    def ctrl_pause(self, pg_events: list[pg.Event]):
+    def ctrl_pause(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is PAUSE.
         """
@@ -158,7 +186,19 @@ class Controller:
                 elif key in const.CONFIRM_BUTTONS:
                     model.pause_menu.execute()
 
-    def ctrl_cover(self, pg_events: list[pg.Event]):
+    def ctrl_result(self, pg_events: list[pg.event.Event]):
+        """
+        Control depending on key input when the model.state is RESULT.
+        """
+        model = get_model()
+
+        for pg_event in pg_events:
+            if pg_event.type == pg.KEYDOWN:
+                if pg_event.key in const.CONFIRM_BUTTONS:
+                    model.result.handle_scopemoving_start()
+                    model.result.handle_ending()
+
+    def ctrl_cover(self, pg_events: list[pg.event.Event]):
         """
         Control depending on key input when the model.state is COVER.
         """
@@ -170,7 +210,7 @@ class Controller:
                 if pg_event.key in const.CONFIRM_BUTTONS:
                     ev_manager.post(EventSelectParty())
 
-    def ctrl_select_party(self, pg_events: list[pg.Event]):
+    def ctrl_select_party(self, pg_events: list[pg.event.Event]):
         """Select party for each team."""
         ev_manager = get_event_manager()
         for pg_event in pg_events:
@@ -184,8 +224,12 @@ class Controller:
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.initialize)
-        ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
+        ev_manager.register_listener(
+            EventUnconditionalTick, self.handle_unconditional_tick)
         # Listeners for TimerManager
-        ev_manager.register_listener(EventPauseModel, TimerManager.pause_all_timer)
-        ev_manager.register_listener(EventResumeModel, TimerManager.resume_all_timer)
-        ev_manager.register_listener(EventGameOver, TimerManager.handle_game_over)
+        ev_manager.register_listener(
+            EventPauseModel, TimerManager.pause_all_timer)
+        ev_manager.register_listener(
+            EventResumeModel, TimerManager.resume_all_timer)
+        ev_manager.register_listener(
+            EventGameOver, TimerManager.handle_game_over)

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from collections import defaultdict
-from itertools import chain
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -47,12 +45,12 @@ class EntityView(EntityObject):
     def draw(self):
         entity = self.entity
         img = self.__images[(entity.team.party, entity.entity_type, entity.state)]
-        # if isinstance(self.entity, Bullet):
-        #     img = pg.transform.rotate(img, self.entity.view_rotate)
+        if isinstance(self.entity, Bullet):
+            img = pg.transform.rotate(img, self.entity.view_rotate)
         self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
                          (entity.position + const.DRAW_DISPLACEMENT)))
 
-    def move(self):
+    def update(self):
         if not self.exist:
             return False
         self.priority[1] = int(self.entity.position[1])

@@ -14,8 +14,13 @@ MAX_WANDERING = 50
 
 class CharacterType(Enum):
     MELEE = auto()
+    """近戰"""
+
     RANGER = auto()
+    """遠程"""
+
     SNIPER = auto()
+    """狙擊"""
 
 
 @dataclass(kw_only=True)
@@ -26,17 +31,18 @@ class CharacterAttribute(LivingEntityAttribute):
 
 
 class CharacterState(Enum):
-    pass
+    LEFT = auto()
+    RIGHT = auto()
 
 
 MELEE_ATTRIBUTE = CharacterAttribute(
     speed=15,
     attack_range=10,
-    attack_damage=45,
-    max_health=600,
+    attack_damage=36,
+    max_health=620,
     vision=20,
     ability_cd=3,
-    attack_speed=0.8,
+    attack_speed=1,
     ability_variables=3
     # damage per second = 36
 )
@@ -55,10 +61,10 @@ RANGER_ATTRIBUTE = CharacterAttribute(
 
 SNIPER_ATTRIBUTE = CharacterAttribute(
     speed=5,
-    attack_range=45,
+    attack_range=40,
     attack_damage=300,
     max_health=100,
-    vision=0,
+    vision=4,
     ability_cd=4,
     attack_speed=0.5,
     ability_variables=300  # damage of ability

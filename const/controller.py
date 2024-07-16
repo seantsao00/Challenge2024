@@ -21,12 +21,16 @@ TOWER_CHANGE_TYPE_BUTTONS_MAP = {
     pg.K_3: CharacterType.SNIPER,
 }
 
-ABILITY_BUTTON = pg.K_q
-CHANGE_TEAM_VISION = pg.K_TAB
+ABILITY_KEY = pg.K_q
+CHANGE_TEAM_VISION_KEY = pg.K_TAB
+SHOW_RANGE_SWITCH_KEY = pg.K_r
+SHOW_PATH_SWITCH_KEY = pg.K_p
 
 PAUSE_BUTTON = pg.K_ESCAPE
 
 CONFIRM_BUTTONS = [pg.K_SPACE, pg.K_RETURN]
+EGG_SEQ = [pg.K_UP, pg.K_UP, pg.K_DOWN, pg.K_DOWN,
+           pg.K_LEFT, pg.K_RIGHT, pg.K_LEFT, pg.K_RIGHT, pg.K_b, pg.K_a]
 
 
 class PartySelectorInputType(Enum):

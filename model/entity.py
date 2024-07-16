@@ -45,7 +45,7 @@ class Entity:
         get_event_manager().post(EventCreateEntity(entity=self))
 
     def __str__(self):
-        return f'living entity {self.id} (team {self.team.team_id})'
+        return f'living entity {self.id} (team {self.team.team_id + 1})'
 
     def discard(self):
         ev_manager = get_event_manager()

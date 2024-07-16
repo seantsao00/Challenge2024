@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import pygame as pg
 
-from const import ChatMessageType
-from const.visual import chat as CHAT
+import const
+import const.team
 from event_manager import EventSendChat
 from instances_manager import get_event_manager, get_model
-from model.team import Team
+from model.team import NeutralTeam, Team
 from view.object import components
 from view.object.animation import LinearAnimation, LinearAnimationEasings
 from view.object.object_base import ObjectBase
@@ -21,25 +21,33 @@ from view.textutil import font_loader
 
 class _RescaledConstants:
     def __init__(self):
-        self.CHAT_POSITION = ScreenInfo.scale(CHAT.CHAT_POSITION)
-        self.CHAT_SIZE = ScreenInfo.scale(CHAT.CHAT_SIZE)
-        self.AVATAR_WIDTH = int(ScreenInfo.scale(CHAT.AVATAR_WIDTH))
-        self.SPACING = ScreenInfo.scale(CHAT.SPACING)
+        self.CHAT_POSITION = ScreenInfo.scale(const.CHAT_POSITION)
+        self.CHAT_SIZE = ScreenInfo.scale(const.CHAT_SIZE)
+        self.AVATAR_WIDTH = int(ScreenInfo.scale(const.AVATAR_WIDTH))
+        self.SPACING = ScreenInfo.scale(const.SPACING)
 
 
 consts: _RescaledConstants | None = None
 
 
 class CommentBox:
-    def __init__(self, text: str, user_avatar: pg.Surface, width: float):
-        font = font_loader.get_font(size=CHAT.CHAT_FONT_SIZE)
+    def __init__(self, text: str, user_avatar: pg.Surface | None, width: float, critical: bool = True):
+        font = font_loader.get_font(size=const.CHAT_FONT_SIZE)
         avatar_size = user_avatar.get_size()
-        text_surf = components.createTextBox(
-            text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
+        if not critical:
+            text_surf = components.createTextBox(
+                text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
+        else:
+            text_surf = components.createTextBox(
+                text, (230, 0, 0), font, width - consts.SPACING[0] * 3)
+
         text_size = text_surf.get_size()
 
         height = max(avatar_size[1], text_size[1]) + consts.SPACING[1] * 2
         self.__size = (width, height)
+        self.__background_surf = pg.Surface((width, height), pg.SRCALPHA)
+        self.__background_surf.set_alpha(128)
+        self.__background_surf.fill((220, 220, 220))
         self.__surf = pg.Surface((width, height), pg.SRCALPHA)
         self.__surf.blit(user_avatar, (consts.SPACING[0], consts.SPACING[1]))
         self.__surf.blit(text_surf, (consts.SPACING[0] * 2 + avatar_size[0], consts.SPACING[1]))
@@ -48,6 +56,7 @@ class CommentBox:
         return self.__size
 
     def draw(self, canvas: pg.Surface, position: tuple[int, int]):
+        canvas.blit(self.__background_surf, position)
         canvas.blit(self.__surf, position)
 
     def update(self):
@@ -80,19 +89,17 @@ class ChatView(ObjectBase):
             del self.__comments[:(iter + 1)]
         self.__canvas.blit(self.__chat_surface, consts.CHAT_POSITION)
 
-    def update(self):
-        pass
-
     def handle_new_chat(self, e: EventSendChat):
-        if e.type == ChatMessageType.CHAT_COMMENT:
+        if e.type == const.ChatMessageType.CHAT_COMMENT:
             self.add_comment(e.team, e.text)
-        elif e.type == ChatMessageType.CHAT_BULLET:
-            # TODO
-            print("Bullet messages are not supported yet!")
+        elif e.type == const.ChatMessageType.CHAT_SYSTEM:
+            team = get_model().neutral_team
+            self.add_comment(team, e.text)
 
     def add_comment(self, team: Team, text: str):
         avatar = components.createTeamAvatar(team, consts.AVATAR_WIDTH)
-        comment_box = CommentBox(text, avatar, consts.CHAT_SIZE[0])
+        critical = (team.party is const.PartyType.NEUTRAL)
+        comment_box = CommentBox(text, avatar, consts.CHAT_SIZE[0], critical)
         self.__comments.append(comment_box)
         self.__total_scroll += comment_box.get_size()[1] + consts.SPACING[1]
         self.__scroll.value = self.__total_scroll

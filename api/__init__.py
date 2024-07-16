@@ -5,5 +5,3 @@ There are two modules inside this module:
    You only needs to import and refer to this module for developing AI.
  - `internal`: implement AI threading and API interaction.
 """
-
-import api.prototype

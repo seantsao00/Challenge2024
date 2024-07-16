@@ -1,48 +1,39 @@
-from __future__ import annotations
-
 import math
 import random
 
 import pygame as pg
 
-from const.visual import PRIORITY_PARTICLE
-from const.visual.particles import *
-from event_manager import EventBulletExplode, EventEveryTick
+import const
+from event_manager import EventBulletExplode, EventEveryTick, EventSniperBulletParticle
 from instances_manager import get_event_manager
-from view.object.object_base import ObjectBase
+from util import clamp
 from view.object.particle import Particle
 from view.screen_info import ScreenInfo
 
 
-class ParticleManager(ObjectBase):
+class ParticleManager:
     def __init__(self, canvas: pg.Surface):
-        self.image_initialized = True
-        super().__init__(canvas, PRIORITY_PARTICLE)
-        self.canvas = canvas
-        self.particles = []
+        self.__canvas = canvas
+        self.__particles: set[Particle] = set()
 
-        self.register_events()
+        self.__register_listeners()
 
-    def register_events(self):
-        ev_manager = get_event_manager()
-        get_event_manager().register_listener(EventEveryTick, self.on_every_tick)
-        ev_manager.register_listener(EventBulletExplode, self.bullet_explode)
-
-    def draw(self):
-        for p in self.particles:
-            p.draw()
-
-    def on_every_tick(self, _: EventEveryTick):
-        for p in self.particles:
+    def __handle_event_every_tick(self, _: EventEveryTick):
+        wait_remove = set()
+        for p in self.__particles:
             p.move()
             if p.dead:
-                self.particles.remove(p)
+                wait_remove.add(p)
+        self.__particles.difference_update(wait_remove)
 
-    def explode(self, pos, amount, duration, color):
+    def __explode(self, pos, amount, duration, color, speed):
+        """Accept arena coordinate."""
         for _ in range(amount):
-            _pos = pos * ScreenInfo.resize_ratio
-            _speed = random.uniform(40, 60)
-            _duration = random.uniform(0.8, 1.2) * duration
+            _pos = (pos * ScreenInfo.resize_ratio
+                    + pg.Vector2((ScreenInfo.screen_size[0] - ScreenInfo.screen_size[1]) / 2, 0))
+            # print(_pos)
+            _speed = random.uniform(20, 60) * speed
+            _duration = random.uniform(1, 1.4) * duration
             _size = random.uniform(0.8, 1.2)
             angle = random.uniform(0, 2 * math.pi)
             _direction = pg.Vector2(math.cos(angle), math.sin(angle)).normalize()
@@ -50,8 +41,24 @@ class ParticleManager(ObjectBase):
                       clamp(color[1] + random.randint(-20, 20), 0, 255),
                       clamp(color[2] + random.randint(-20, 20), 0, 255))
 
-            self.particles.append(Particle(self.canvas, _pos, _direction,
-                                  _speed, _size, _duration, _color))
+            self.__particles.add(Particle(self.__canvas, _pos, _direction,
+                                          _speed, _size, _duration, _color))
+
+    def __handle_bullet_explode(self, event: EventBulletExplode):
+        self.__explode(event.bullet.position, const.PARTICLES_BULLET_EXPLODE_AMOUNT,
+                       const.PARTICLES_BULLET_EXPLODE_DURATION, const.HEALTH_BAR_COLOR[event.bullet.team.team_id],
+                       const.PARTICLES_BULLET_EXPLODE_SPEED)
+
+    def __handle_sniper_bullet(self, event: EventSniperBulletParticle):
+        self.__explode(event.bullet.position, const.PARTICLES_BULLET_MOVE_AMOUNT,
+                       const.PARTICLES_BULLET_MOVE_DURATION, const.HEALTH_BAR_COLOR[event.bullet.team.team_id],
+                       const.PARTICLES_BULLET_MOVE_SPEED)
+
+    def __register_listeners(self):
+        ev_manager = get_event_manager()
+        ev_manager.register_listener(EventEveryTick, self.__handle_event_every_tick)
+        ev_manager.register_listener(EventBulletExplode, self.__handle_bullet_explode)
+        ev_manager.register_listener(EventSniperBulletParticle, self.__handle_sniper_bullet)
 
     def blood(self, pos, amount, duration):
         color = (200, 0, 0)
@@ -65,13 +72,9 @@ class ParticleManager(ObjectBase):
                       clamp(color[1] + random.randint(-20, 20), 0, 255),
                       clamp(color[2] + random.randint(-20, 20), 0, 255))
 
-            self.particles.append(Particle(self.canvas, _pos, _direction,
-                                  _speed, _size, _duration, _color))
+            self.__particles.add(Particle(self.__canvas, _pos, _direction,
+                                          _speed, _size, _duration, _color))
 
-    def bullet_explode(self, event: EventBulletExplode):
-        self.explode(event.bullet.position, PARTICLES_BULLET_EXPLODE_AMOUNT,
-                     PARTICLES_BULLET_EXPLODE_DURATION, PARTICLES_BULLET_EXPLODE_COLOR)
-
-
-def clamp(value, min_val, max_val):
-    return max(min_val, min(max_val, value))
+    def draw(self):
+        for p in self.__particles:
+            p.draw()

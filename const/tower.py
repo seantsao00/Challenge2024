@@ -17,7 +17,7 @@ class TowerType(Enum):
 
 @dataclass(kw_only=True)
 class TowerAttribute(LivingEntityAttribute):
-    pass
+    neautral_initial_health: float | None
 
 
 class TowerState(Enum):
@@ -29,6 +29,7 @@ FOUNTAIN_ATTRIBUTE = TowerAttribute(
     attack_speed=1,
     attack_range=45,
     max_health=1000,
+    neautral_initial_health=None,
     vision=45
 )
 
@@ -37,11 +38,12 @@ NEUTRAL_TOWER_ATTRIBUTE = TowerAttribute(
     attack_speed=1,
     attack_range=45,
     max_health=1000,
+    neautral_initial_health=2500,
     vision=45
 )
 
 TOWER_DEFAULT_GENERATE_CHARACTER = CharacterType.RANGER
-TOWER_GENERATE_DISPLACEMENT = 10
+TOWER_GENERATE_DISPLACEMENT = 5
 """The distance between generated character and the tower will be less than this value."""
 
 TOWER_SPAWN_INITIAL_PERIOD = 1
@@ -49,4 +51,4 @@ TOWER_SPAWN_INITIAL_PERIOD = 1
 
 
 def count_period_ms(entity_number: int) -> float:
-    return TOWER_SPAWN_INITIAL_PERIOD * (1 + (entity_number / 20) ** (2))
+    return TOWER_SPAWN_INITIAL_PERIOD * (1 + (entity_number / 10) ** (2))

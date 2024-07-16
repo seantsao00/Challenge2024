@@ -2,10 +2,8 @@
 Defines internal API interaction and AI threading.
 """
 
-from __future__ import annotations
-
 import ctypes
-import importlib
+import importlib.util
 import os
 import signal
 import threading
@@ -19,11 +17,12 @@ import const
 import const.map
 import model
 import model.chat
+import model.path_finder
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
 from model.character.character import CharacterMovingState
-from util import log_critical, log_info, log_warning
+from util import log_critical, log_warning
 
 
 class GameError(Exception):
@@ -49,11 +48,16 @@ class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.transform: np.ndarray = None
+        self.__inv_transform: np.ndarray = None
         self.__chat_sent = False
+        self.__last_chat_time_stamp = float('-inf')
         self.__character_map = {}
         self.__tower_map = {}
         self.__reverse_character_map = {}
         self.__reverse_tower_map = {}
+
+    def post_init(self):
+        self.__path_finder = model.path_finder.PathFinder(get_model().map)
 
     def clear(self):
         self.__chat_sent = False
@@ -78,12 +82,12 @@ class Internal(prototype.API):
 
     def __build_transform_matrix(self):
         assert const.ARENA_SIZE[0] == const.ARENA_SIZE[1]
-        W = const.ARENA_SIZE[1]
+        w = const.ARENA_SIZE[1]
 
         self.transform = np.array([[1, 0, 0],
-                                   [0, -1, W],
+                                   [0, -1, w],
                                    [0, 0, 1]], dtype=float)
-        rotate = np.array([[0, -1, W],
+        rotate = np.array([[0, -1, w],
                            [1, 0, 0],
                            [0, 0, 1]])
         fountain_position = self.__team().fountain.position
@@ -91,7 +95,7 @@ class Internal(prototype.API):
                             [fountain_position.y],
                             [1]])
         best = 1e9
-        EPS = 1e-9
+        eps = 1e-9
         for _ in range(4):
             self.transform = np.dot(rotate, self.transform)
             transformed = np.dot(self.transform, respect)
@@ -100,7 +104,7 @@ class Internal(prototype.API):
         for _ in range(4):
             self.transform = np.dot(rotate, self.transform)
             transformed = np.dot(self.transform, respect)
-            if abs(np.linalg.norm(transformed) - best) < EPS:
+            if abs(np.linalg.norm(transformed) - best) < eps:
                 break
 
     def __transform(self, position: pg.Vector2, is_position: bool, inverse: bool = False):
@@ -109,13 +113,11 @@ class Internal(prototype.API):
         """
         if self.transform is None:
             self.__build_transform_matrix()
+            self.__inv_transform = np.linalg.inv(self.transform)
 
-        vector = np.array([[position.x],
-                           [position.y],
-                           [1 if is_position else 0]])
-        vector = np.dot(np.linalg.inv(self.transform) if inverse else self.transform,
-                        vector)
-        return pg.Vector2(vector[0][0], vector[1][0])
+        vector = np.asarray([position.x, position.y, 1 if is_position else 0])
+        vector = (self.__inv_transform if inverse else self.transform) @ vector
+        return pg.Vector2(vector[0], vector[1])
 
     @classmethod
     def __map_character_type(cls, class_type: prototype.CharacterClass):
@@ -149,6 +151,7 @@ class Internal(prototype.API):
             _position=self.__transform(internal.position, is_position=True),
             _speed=internal.attribute.attack_speed,
             _attack_range=internal.attribute.attack_range,
+            _attack_speed=1 / internal.attribute.attack_speed,
             _damage=internal.attribute.attack_damage,
             _vision=internal.attribute.vision,
             _health=internal.health,
@@ -182,7 +185,7 @@ class Internal(prototype.API):
             _max_health=internal.attribute.max_health,
             _team_id=0 if internal.team is None else Internal.__cast_team_id(
                 internal.team.team_id),
-            _spwan_character_type=character_class
+            _spawn_character_type=character_class
         )
         return extern
 
@@ -214,7 +217,7 @@ class Internal(prototype.API):
         """
         if id(extern) not in self.__reverse_character_map:
             log_warning(
-                f"[AI] AI of team {self.team_id} used invalid prototype.Character. Maybe it is already expired.")
+                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
             return None
         return self.__reverse_character_map[id(extern)]
 
@@ -224,7 +227,7 @@ class Internal(prototype.API):
         """
         if id(extern) not in self.__reverse_tower_map:
             log_warning(
-                f"[AI] AI of team {self.team_id} used invalid prototype.Tower. Maybe it is already expired.")
+                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
             return None
         return self.__reverse_tower_map[id(extern)]
 
@@ -233,7 +236,9 @@ class Internal(prototype.API):
                 obj.team == self.__team() and
                 obj.health > 0)
 
-    """Methods defined below are all callable from AI."""
+    # ===============================================================
+    # ======= Methods defined below are all callable from AI. =======
+    # ===============================================================
 
     def get_current_time(self):
         return get_model().get_time()
@@ -264,7 +269,9 @@ class Internal(prototype.API):
 
         if index is None:
             index = self.team_id
-        if index < 0 or index >= MAX_TEAMS:
+        else:
+            index = self.__map_team_id(index)
+        if index < 0 or index >= len(get_model().teams):
             raise IndexError
         team = get_model().teams[index]
         # Should be correct, if model implementation changes this should fail
@@ -272,6 +279,36 @@ class Internal(prototype.API):
             log_critical("[API] Team ID mismatch: team.team_id, index")
             raise GameError("Team ID implement has changed.")
         return team.points
+
+    def get_sample_character(self, type_class: prototype.CharacterClass) -> prototype.Character:
+        enforce_type('type_class', type_class, prototype.CharacterClass)
+
+        if type_class is prototype.CharacterClass.UNKNOWN:
+            raise ValueError
+        stats: const.CharacterAttribute
+        if type_class is prototype.CharacterClass.MELEE:
+            stats = const.MELEE_ATTRIBUTE
+        elif type_class is prototype.CharacterClass.SNIPER:
+            stats = const.SNIPER_ATTRIBUTE
+        elif type_class is prototype.CharacterClass.RANGER:
+            stats = const.RANGER_ATTRIBUTE
+        else:
+            raise ValueError
+
+        extern = prototype.Character(
+            _id=-1,
+            _type=type_class,
+            _position=pg.Vector2(0, 0),
+            _speed=stats.speed,
+            _attack_range=stats.attack_range,
+            _attack_speed=1 / stats.attack_speed,
+            _damage=stats.attack_damage,
+            _vision=stats.vision,
+            _health=stats.max_health,
+            _max_health=stats.max_health,
+            _team_id=0
+        )
+        return extern
 
     def get_visible_characters(self) -> list[prototype.Character]:
         vision = self.__team().vision
@@ -300,14 +337,17 @@ class Internal(prototype.API):
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
         if not self.__is_controllable(character):
-            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
+            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN, False)
         with character.moving_lock:
             if character.move_state is CharacterMovingState.STOPPED:
                 return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
-            elif character.move_state is CharacterMovingState.TO_DIRECTION:
+            if character.move_state is CharacterMovingState.TO_DIRECTION:
                 return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
-            elif character.move_state is CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, character.is_wandering, self.__transform(character.move_destination, is_position=True))
+            if character.move_state is CharacterMovingState.TO_POSITION:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, False, self.__transform(character.move_destination, is_position=True))
+            if character.move_state is CharacterMovingState.WANDERING:
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, True, self.__transform(character.move_destination, is_position=True))
+            raise ValueError
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
         enforce_type('character', character, prototype.Character, type(None))
@@ -332,6 +372,7 @@ class Internal(prototype.API):
         vision_grid = np.flip(vision_grid, axis=0)
         if self.transform is None:
             self.__build_transform_matrix()
+            self.__inv_transform = np.linalg.inv(self.transform)
 
         # Rotate visibility matrix base on transform
         if self.transform[0][0] == 0 and self.transform[0][1] == 1:
@@ -360,8 +401,8 @@ class Internal(prototype.API):
         return self.__access_character(character).is_wandering
 
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
-        W = const.ARENA_SIZE[1]
-        if position.x < 0 or position.x > W or position.y < 0 or position.x > W:
+        w = const.ARENA_SIZE[1]
+        if position.x < 0 or position.x > w or position.y < 0 or position.x > w:
             return prototype.MapTerrain.OUT_OF_BOUNDS
         terrain = get_model().map.get_position_type(self.__transform(position, is_position=True, inverse=True))
         if terrain == const.map.MAP_ROAD:
@@ -372,10 +413,14 @@ class Internal(prototype.API):
             return prototype.MapTerrain.OBSTACLE
         raise GameError("Unkown terrain type.")
 
-    def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+    def action_move_along(self, characters: Iterable[prototype.Character] | prototype.Character, direction: pg.Vector2):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('direction', direction, pg.Vector2)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
 
         direction = self.__transform(direction, is_position=False, inverse=True)
         internals = [self.__access_character(ch) for ch in characters]
@@ -384,28 +429,43 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_direction(direction)
 
-    def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('destination', destination, pg.Vector2)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
 
         destination = self.__transform(destination, is_position=True, inverse=True)
         destination_cell = get_model().map.position_to_cell(destination)
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
-        for inter in internals:
+
+        def must_move(inter: prototype.Character):
             old_destination = inter.move_destination
             if old_destination is not None and get_model().map.position_to_cell(inter.move_destination) == destination_cell:
-                continue
+                return False
+            return True
+        internals = filter(must_move, internals)
+
+        self.__path_finder.batch_begin()
+        for inter in internals:
             with inter.moving_lock:
                 inter.set_move_stop()
-                path = get_model().map.find_path(inter.position, destination)
+                path = self.__path_finder.find_path(inter.position, destination)
                 if path is not None and len(path) > 0:
                     inter.set_move_position(path)
+        self.__path_finder.batch_end()
 
-    def action_move_clear(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+    def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
@@ -413,10 +473,14 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
 
-    def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
-        enforce_type('characters', characters, Iterable)
+    def action_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
 
         target_internal = None
         if isinstance(target, prototype.Character):
@@ -429,9 +493,13 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
-        enforce_type('characters', characters, Iterable)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+    def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
         if 'position' in kwargs:
             enforce_type('position', kwargs['position'], pg.Vector2)
             kwargs['position'] = self.__transform(
@@ -442,15 +510,19 @@ class Internal(prototype.API):
         for inter in internals:
             inter.cast_ability(**kwargs)
 
-    def action_wander(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+    def action_wander(self, characters: Iterable[prototype.Character] | prototype.Character):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
         for inter in internals:
             with inter.moving_lock:
-                inter.set_wandering()
+                inter.set_wandering(self.__path_finder)
 
     def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
         """change the type of character the tower spawns"""
@@ -466,7 +538,8 @@ class Internal(prototype.API):
     def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2) -> list[prototype.Character]:
         enforce_type('characters', characters, Iterable)
         enforce_type('target', target, pg.Vector2)
-        [enforce_type('element of characters', ch, prototype.Character) for ch in characters]
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
 
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
@@ -478,10 +551,10 @@ class Internal(prototype.API):
         enforce_type('unit', unit, prototype.Character, prototype.Tower)
         enforce_type('candidates', candidates, list, type(None))
         if candidates is not None:
-            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
-             for unit in candidates]
+            for u in candidates:
+                enforce_type('element of candidates', u, prototype.Character, prototype.Tower)
         else:
-            candidates = self.get_visible_characters() + self.get_owned_towers()
+            candidates = self.get_visible_characters() + self.get_visible_towers()
 
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
@@ -493,10 +566,10 @@ class Internal(prototype.API):
         enforce_type('unit', unit, prototype.Character, prototype.Tower)
         enforce_type('candidates', candidates, list, type(None))
         if candidates is not None:
-            [enforce_type('element of candidates', unit, prototype.Character, prototype.Tower)
-             for unit in candidates]
+            for u in candidates:
+                enforce_type('element of candidates', u, prototype.Character, prototype.Tower)
         else:
-            candidates = self.get_visible_characters() + self.get_owned_towers()
+            candidates = self.get_visible_characters() + self.get_visible_towers()
 
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
@@ -505,16 +578,23 @@ class Internal(prototype.API):
 
     def send_chat(self, msg: str) -> bool:
         enforce_type('msg', msg, str)
+        time_stamp = get_model().get_time()
+        if time_stamp - self.__last_chat_time_stamp < 1.0:
+            return False
         if self.__chat_sent:
             return False
         if len(msg) > 30:
-            return False
+            msg = msg[:30]
         # Bad special case, I know. However, that is ensured in the pygame documentation.
         if '\x00' in msg:
             return False
         self.__chat_sent = True
-        model.chat.chat.send_comment(team=self.__team(), text=msg)
+        self.__last_chat_time_stamp = time_stamp
+        get_model().chat.send_comment(team=self.__team(), text=msg)
         return True
+
+    def get_map_name(self) -> str:
+        return get_model().map.name
 
 
 class TimeoutException(BaseException):
@@ -539,40 +619,51 @@ class Timer():
             raise OSError
         self.timer = None
         self.started = False
+        self.ended = False
+        self.status_lock = threading.Lock()
+        """A lock protecting multithread timer starting and ending."""
         self.for_player_id = None
 
     def set_timer(self, interval: float, player_id: int, tid: int):
         """Start the timer."""
-        if not self.is_windows:
-            # Should be sig, frame but pylint doesn't like it >:(
-            def handler(_, __):
-                res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-                    ctypes.c_long(tid), ctypes.py_object(TimeoutException))
-                if res != 0:
-                    log_warning(f"[API] TimeoutException killed thread {tid}.")
+        with self.status_lock:
+            if self.ended:
+                return
+            if not self.is_windows:
+                # pylint: disable=unused-argument
+                def handler(sig, frame):
+                    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+                        ctypes.c_long(tid), ctypes.py_object(TimeoutException))
+                    if res != 0:
+                        log_warning(f"[API] TimeoutException killed thread {tid}.")
 
-            signal.signal(signal.SIGALRM, handler)
+                signal.signal(signal.SIGALRM, handler)
 
-        if not self.is_windows:
-            signal.setitimer(signal.ITIMER_REAL, interval)
-        else:
-            def timeout_alarm(player_id: int):
-                log_critical(f"[API] The AI of player {player_id} timed out!")
+            if not self.is_windows:
+                signal.setitimer(signal.ITIMER_REAL, interval)
+            else:
+                def timeout_alarm(player_id: int):
+                    log_critical(f"[API] The AI of player {player_id} timed out!")
 
-            self.timer = threading.Timer(interval=interval, function=timeout_alarm,
-                                         args=[player_id])
-            self.timer.start()
-        self.started = True
+                self.timer = threading.Timer(interval=interval, function=timeout_alarm,
+                                             args=[player_id])
+                self.timer.start()
+            self.started = True
 
     def cancel_timer(self):
         """Cancel the timer."""
-        try:
-            if not self.is_windows:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-            else:
-                self.timer.cancel()
-        except TimeoutException:
-            log_warning("[API] Perhaps some very slightly timeout.")
+        with self.status_lock:
+            if not self.started:
+                self.ended = True
+                return
+            try:
+                if not self.is_windows:
+                    signal.setitimer(signal.ITIMER_REAL, 0)
+                else:
+                    self.timer.cancel()
+            except TimeoutException:
+                log_warning("[API] Perhaps some very slightly timeout.")
+            self.ended = True
 
 
 helpers = [Internal(i) for i in range(MAX_TEAMS)]
@@ -584,21 +675,23 @@ def load_ai(files: list[str]):
     for i, file in enumerate(files):
         if file == 'human':
             continue
-        ai[i] = importlib.import_module('ai.' + file)
+        spec = importlib.util.find_spec('ai.' + file)
+        ai[i] = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ai[i])
+        helpers[i].post_init()
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
     """Threading AI helper function."""
-    # busy wating til timer start, to prevent cancel earlier than start
-    while not timer.started:
-        pass
     try:
         if ai[team_id] is not None:
             ai[team_id].every_tick(helper)
-    except Exception:
-        log_critical(f"Caught exception in AI of team {team_id}:\n{traceback.format_exc()}")
     except TimeoutException:
-        log_critical(f"[API] AI of team {team_id} timed out!")
+        log_critical(f"[API] AI of team {team_id + 1} timed out!")
+    # pylint: disable=broad-exception-caught
+    except Exception:
+        log_critical(
+            f"Caught exception in AI of team {team_id + 1}:\n{traceback.format_exc()}")
     finally:
         timer.cancel_timer()
 

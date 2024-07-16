@@ -18,12 +18,19 @@ _cache_avatar: dict[tuple[int, int], pg.Surface] = {}
 def _getAvatarImage(party: const.team.PartyType):
     if party in _cache_avatar_img:
         return _cache_avatar_img[party]
-    if const.character.CharacterType.RANGER in const.ENTITY_IMAGE[party]:
+
+    if (party is const.team.PartyType.JUNIOR) or (party is const.team.PartyType.FBI):
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][None])
+            const.ENTITY_IMAGE[party][const.character.CharacterType.SNIPER][const.CharacterState.LEFT])
+    elif party is const.team.PartyType.POLICE:
+        avatar_img = pg.image.load(
+            const.ENTITY_IMAGE[party][const.character.CharacterType.MELEE][const.CharacterState.LEFT])
+    elif (party is const.team.PartyType.BLACK) or (party is const.team.PartyType.MOURI):
+        avatar_img = pg.image.load(
+            const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][const.CharacterState.LEFT])
     else:
         avatar_img = pg.image.load(
-            const.ENTITY_IMAGE[const.team.PartyType.NEUTRAL][const.tower.TowerType.PYLON][None])
+            const.ICON_IMAGE)
     _cache_avatar_img[party] = avatar_img
     return avatar_img
 
@@ -38,7 +45,11 @@ def _getTeamAvatar(team: Team, size: int):
     # resize and crop unwanted parts
     ratio = size / avatar_img.get_width()
     dim = avatar_img.get_size()
-    dim = (dim[0] * ratio, dim[1] * ratio)
+    # if party is JUNIOR, zoom in slightly
+    if team.party == const.PartyType.JUNIOR:
+        dim = (dim[0] * ratio, dim[1] * ratio - 2.5)
+    else:
+        dim = (dim[0] * ratio, dim[1] * ratio)
     avatar_img = pg.transform.scale(avatar_img, dim)
     avatar.blit(avatar_img, (0, 0))
 
@@ -70,12 +81,31 @@ def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) 
     return textbox
 
 
+_cache_icon_img: dict[str, pg.Surface] = {}
+_cache_icon: dict[tuple[str, float], pg.Surface] = {}
+
+
+def _getIconImage(file_path: str):
+    if file_path in _cache_icon_img:
+        return _cache_icon_img[file_path]
+    img = pg.image.load(file_path)
+    _cache_icon_img[file_path] = img
+    return img
+
+
+def _getIcon(file_path: str, icon_height: float):
+    if (file_path, icon_height) in _cache_icon:
+        return _cache_icon[(file_path, icon_height)]
+    img = _getIconImage(file_path)
+    w, h = img.get_size()
+    ratio = icon_height / h
+    icon = pg.transform.scale(img, (w * ratio, h * ratio))
+    _cache_icon[(file_path, icon_height)] = icon
+    return icon
+
+
 def createIcon(file_path: str, icon_height: float) -> pg.Surface:
     """
     Load and scale an icon to specified height
     """
-    icon = pg.image.load(file_path)
-    w, h = icon.get_size()
-    ratio = icon_height / h
-    icon = pg.transform.scale(icon, (w * ratio, h * ratio))
-    return icon
+    return _getIcon(file_path, icon_height)

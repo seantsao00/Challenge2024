@@ -13,6 +13,7 @@ import util
 from event_manager import EventAttack, EventCharacterDied, EventCharacterMove, EventEveryTick
 from instances_manager import get_event_manager, get_model
 from model.entity import LivingEntity
+from model.path_finder import PathFinder
 from util import log_info
 
 if TYPE_CHECKING:
@@ -24,6 +25,7 @@ class CharacterMovingState(Enum):
     STOPPED = auto()
     TO_POSITION = auto()
     TO_DIRECTION = auto()
+    WANDERING = auto()
 
 
 class Character(LivingEntity):
@@ -57,7 +59,6 @@ class Character(LivingEntity):
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
-        self.__is_wandering: bool = False
 
         super().__init__(position, attribute, team, entity_type, state)
 
@@ -68,9 +69,9 @@ class Character(LivingEntity):
         self.attribute: const.CharacterAttribute
 
     def __str__(self):
-        return f'character {self.id} (team {self.team.team_id})'
+        return f'character {self.id} (team {self.team.team_id + 1})'
 
-    def __move_toward_direction(self):
+    def __move_along_direction(self):
         """
         Move the character in the given direction.
         """
@@ -103,24 +104,26 @@ class Character(LivingEntity):
 
                 cur_direction += min_direction
 
+        self.update_face_direction(self.__move_direction)
         get_event_manager().post(EventCharacterMove(character=self, original_pos=original_pos))
 
-    def __move_toward_position(self):
+    def __move_along_path(self) -> bool:
         """
-        move along the predetermined path as far as it can
+        move along the predetermined path as far as it can.
+        returns whether the character has arrived
         """
-        EPS = 1e-8
+        eps = 1e-8
 
         if self.__move_path is None or len(self.__move_path) == 0:
-            return
+            return True
 
         it = 0
         pos_init = self.position
         movement = 0
         model = get_model()
         while (it < len(self.__move_path)
-               and movement + EPS <= self.get_speed() * model.dt):
-            if (self.__move_path[it] - self.position).length() < EPS:
+               and movement + eps <= self.get_speed() * model.dt):
+            if (self.__move_path[it] - self.position).length() < eps:
                 it += 1
                 continue
             ratio = ((self.get_speed() * model.dt - movement)
@@ -135,17 +138,19 @@ class Character(LivingEntity):
 
         if it == len(self.__move_path):
             self.__move_path = []
-            self.__move_state = CharacterMovingState.STOPPED
-            if self.__is_wandering:
-                self.__set_wander_destination()
-            else:
-                log_info(f"[API] Character {self.id}: arrive at destination")
+            return True
         else:
             del self.__move_path[:it]
 
+        self.update_face_direction(self.position - pos_init)
         get_event_manager().post(EventCharacterMove(character=self, original_pos=pos_init))
+        return False
 
-    def __set_wander_destination(self) -> bool:
+    def __set_wander_destination(self, path_finder: PathFinder | None) -> bool:
+        """
+        path_finder is the path finder to use. None means it's on the main thread,
+        so model.path_finder will be used
+        """
         destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
                                  uniform(0, const.ARENA_SIZE[1])])
         cnt = 0
@@ -155,31 +160,37 @@ class Character(LivingEntity):
             cnt += 1
         if cnt >= const.MAX_WANDERING:
             return False
-        self.__move_path = get_model().map.find_path(self.position, destination)
+        if path_finder is None:
+            path_finder = get_model().path_finder
+        self.__move_path = path_finder.find_path(self.position, destination)
         if self.__move_path is None:
             return False
-        self.__move_state = CharacterMovingState.TO_POSITION
         return True
 
     def tick_move(self, _: EventEveryTick):
         """Move but it is called by every tick."""
         with self.moving_lock:
             if self.__move_state == CharacterMovingState.TO_DIRECTION:
-                self.__move_toward_direction()
+                self.__move_along_direction()
             elif self.__move_state == CharacterMovingState.TO_POSITION:
-                self.__move_toward_position()
+                arrived = self.__move_along_path()
+                if arrived:
+                    self.__move_state = CharacterMovingState.STOPPED
+                    log_info(f"[API] Character {self.id}: arrive at destination")
+            elif self.__move_state == CharacterMovingState.WANDERING:
+                arrived = self.__move_along_path()
+                if arrived:
+                    self.__set_wander_destination(None)
 
     def set_move_stop(self) -> bool:
         """Stop movement of the character. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.STOPPED
-        self.__is_wandering = False
         return True
 
     def set_move_direction(self, direction: pg.Vector2) -> bool:
         """Set character movement toward a direction. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.TO_DIRECTION
         self.__move_direction = direction
-        self.__is_wandering = False
         return True
 
     def set_move_position(self, path: list[pg.Vector2] | None):
@@ -189,19 +200,16 @@ class Character(LivingEntity):
         self.__move_path = path
         self.__move_state = CharacterMovingState.TO_POSITION
         self.__move_direction = pg.Vector2(0, 0)
-        self.__is_wandering = False
         return True
 
-    def set_wandering(self) -> bool:
+    def set_wandering(self, path_finder: PathFinder) -> bool:
         """Set the character to be wandering. Returns True/False on success/failure. If the character is already wandering, this method will return False. """
-        if self.__is_wandering:
+        if self.__move_state == CharacterMovingState.WANDERING:
             return False
-        else:
-            if not self.__set_wander_destination():
-                self.__is_wandering = False
-                return False
-            self.__is_wandering = True
-            return True
+        if not self.__set_wander_destination(path_finder):
+            return False
+        self.__move_state = CharacterMovingState.WANDERING
+        return True
 
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
@@ -238,12 +246,20 @@ class Character(LivingEntity):
         self._last_attack_time = now_time
         return True
 
+    def update_face_direction(self, direction: pg.Vector2 | None):
+        if direction == None or direction == pg.Vector2(0, 0):
+            return
+        if direction.x <= 0:
+            self.state = const.CharacterState.LEFT
+        else:
+            self.state = const.CharacterState.RIGHT
+
     @abstractmethod
     def attack(self, enemy: Entity):
         pass
 
     def die(self):
-        log_info(f"Character {self.id} in Team {self.team.team_id} died")
+        log_info(f"Character {self.id} in Team {self.team.team_id + 1} died")
         self.alive = False
         # self.hidden = True
         get_event_manager().post(EventCharacterDied(character=self))
@@ -264,19 +280,21 @@ class Character(LivingEntity):
         because I did not come up a nice solution to integrate with API.
         Refactor will be great.
         """
-        pass
 
     @property
     def move_direction(self) -> pg.Vector2:
         return self.__move_direction
 
     @property
+    def move_path(self) -> list[pg.Vector2] | None:
+        return self.__move_path
+
+    @property
     def move_destination(self) -> pg.Vector2 | None:
-        if self.__move_state == CharacterMovingState.TO_POSITION:
-            if len(self.__move_path) > 0:
+        if self.__move_state == CharacterMovingState.TO_POSITION or self.__move_state == CharacterMovingState.WANDERING:
+            if self.__move_path != None and len(self.__move_path) > 0:
                 return self.__move_path[-1]
-            else:
-                return self.position
+            return self.position
         return None
 
     @property
@@ -285,4 +303,4 @@ class Character(LivingEntity):
 
     @property
     def is_wandering(self) -> bool:
-        return self.__is_wandering
+        return self.__move_state == CharacterMovingState.WANDERING

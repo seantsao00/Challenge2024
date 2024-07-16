@@ -13,24 +13,29 @@ import pygame as pg
 import const
 import const.map
 import const.model
+import const.team
 from api.internal import load_ai, start_ai
 from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, EventBulletDisappear,
                            EventBulletExplode, EventCharacterDied, EventCharacterMove,
                            EventCreateEntity, EventEveryTick, EventGameOver, EventInitialize,
                            EventPauseModel, EventPostInitialize, EventQuit,
                            EventRangedBulletDamage, EventResumeModel, EventSelectParty,
-                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick)
+                           EventSpawnCharacter, EventStartGame, EventUnconditionalTick,
+                           EventViewShowRangeSwitch)
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger, Sniper
+from model.chat import Chat
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
+from model.nyan import Nyan
 from model.party_selector import PartySelector
+from model.path_finder import PathFinder
 from model.pause_menu import PauseMenu
+from model.result import Result
 from model.team import NeutralTeam, Team
-from model.timer import Timer
-from util import log_critical
+from util import log_critical, log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -43,7 +48,10 @@ class ModelArguments:
     team_controls: list[str]
     show_view_range: bool
     show_attack_range: bool
-    skip_character_selecting: bool
+    skip_party_selecting: bool
+    show_path: bool
+    show_range: bool
+    scoreboard_frozen: bool
 
 
 class Model:
@@ -53,7 +61,7 @@ class Model:
     The main loop of the game is in Model.run()
     """
 
-    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool):
+    # def __init__(self, map_name: str, team_files: list[str], show_view_range: bool, show_attack_range: bool, show_path: bool):
     def __init__(self, model_arguments: ModelArguments):
         """
         Initialize the Model object.
@@ -77,23 +85,32 @@ class Model:
         self.entity_lock = threading.Lock()
         self.entities: list[Entity] = []
         self.characters: list[Character] = []
+        self.chat = Chat()
         self.towers: list[Tower] = []
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
+        self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
-        if model_arguments.skip_character_selecting:
-            self.party_selector.select_random_party()
+        if model_arguments.skip_party_selecting:
+            self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
-        self.__neutral_team: NeutralTeam
+        self.neutral_team: NeutralTeam = None
         self.__tower: list[Tower] = []
         self.__team_thread: list[threading.Thread] = [None] * len(model_arguments.team_controls)
         self.__team_files_names: list[str] = model_arguments.team_controls
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
+        self.show_path: bool = model_arguments.show_path
+        self.show_range: bool = model_arguments.show_range
+        self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
+        self.frozen: bool = False
 
+        self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
+        self.nyan = Nyan()
         self.ranger_ability = False
         self.ranger_controlling: Ranger = None
+        self.result_screen_select: bool = False
 
         self.__register_listeners()
 
@@ -115,7 +132,7 @@ class Model:
             team = Team(team_master == 'human',
                         selected_parties[i],
                         team_master)
-            fountain = Tower(new_position, team, True)
+            fountain = Tower(new_position, team, const.TowerType.FOUNTAIN)
             self.teams.append(team)
             self.__tower.append(fountain)
             team.fountain = fountain
@@ -125,10 +142,11 @@ class Model:
                     get_event_manager().register_listener(EventSpawnCharacter,
                                                           team.handle_others_character_spawn, i)
 
-        self.__neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
-        for position in self.map.neutral_towers:
-            self.__tower.append(Tower(position, self.__neutral_team))
+        self.neutral_team = NeutralTeam(const.PartyType.NEUTRAL)
+        for position, tower_type in self.map.neutral_towers:
+            self.__tower.append(Tower(position, self.neutral_team, tower_type))
         self.state = const.State.PLAY
+        self.chat.send_system("Game Start!")
 
     def __post_initialize(self, _: EventPostInitialize):
         load_ai(self.__team_files_names)
@@ -142,13 +160,15 @@ class Model:
         """
         self.__ticks += 1
         self.__ticks %= const.TICKS_PER_CYCLE
-        if self.__ticks == 0:
-            for i in range(len(self.teams)):
-                if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
-                    self.__team_thread[i] = start_ai(i)
-                else:
-                    log_critical(
-                        f"[API] AI of team {i} occurs a hard-to-kill timeout. New thread is NOT started.")
+        for i, team in enumerate(self.teams):
+            if self.__ticks != int(round(const.TICKS_PER_CYCLE * i / len(self.teams))):
+                continue
+            log_info(f"[API] Starting team {team.team_id + 1}'s thread...")
+            if self.__team_thread[i] is None or not self.__team_thread[i].is_alive():
+                self.__team_thread[i] = start_ai(i)
+            else:
+                log_critical(
+                    f"[API] AI of team {team.team_id + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
@@ -219,6 +239,7 @@ class Model:
         ev_manager.register_listener(EventBulletDamage, self.bullet_damage)
         ev_manager.register_listener(EventBulletDisappear, self.bullet_disappear)
         ev_manager.register_listener(EventSelectParty, self.__handle_select_party)
+        ev_manager.register_listener(EventViewShowRangeSwitch, self.change_showrange_enable)
 
     def get_time(self):
         return self.__game_clock.get_time()
@@ -236,7 +257,16 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
-            self.dt = self.global_clock.tick(const.FPS) / 1000
+                if not self.frozen and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
+                    self.frozen = True
+                    self.chat.send_system("Scoreboard is now frozen!")
+                # if running_time >= 1:
+                #     ev_manager.post(EventGameOver())
+            fps = const.FPS
+            if self.state is const.State.RESULT:
+                self.result.update()
+                fps = const.RESULT_SCREEN_FPS
+            self.dt = self.global_clock.tick(fps) / 1000
 
     def __handle_quit(self, _: EventQuit):
         """
@@ -268,9 +298,14 @@ class Model:
 
     def handle_game_over(self, _: EventGameOver):
         """
-        End the game and show scoreboard on the settlement screen.
+        End the game and show scoreboard on the result screen.
         """
-        self.state = const.State.SETTLEMENT
+        self.result.ranking()
+        self.chat.send_system("Game Over!")
+        self.state = const.State.RESULT
 
     def __handle_select_party(self, _: EventSelectParty):
         self.state = const.State.SELECT_PARTY
+
+    def change_showrange_enable(self, _: EventViewShowRangeSwitch):
+        self.show_range = not self.show_range

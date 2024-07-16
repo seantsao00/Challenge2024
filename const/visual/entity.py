@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import os
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import pygame as pg
 
 from const.bullet import BulletType
-from const.character import CharacterType
+from const.character import CharacterState, CharacterType
 from const.team import PartyType
 from const.tower import TowerType
 from const.visual import IMAGE_DIR
@@ -18,7 +19,8 @@ ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
 CD_BAR_COLOR = 'blue'
 # open for color recommandation
-HEALTH_BAR_COLOR = ['yellow', 'green', 'orange', 'violet', 'red']
+# HEALTH_BAR_COLOR = ['yellow', 'paleturquoise2', 'orange', 'violet']
+HEALTH_BAR_COLOR = [(255, 255, 0), (175, 238, 238), (255, 165, 0), (238, 130, 238)]
 
 HEALTH_BAR_UPPER = 5
 CD_BAR_UPPER = 6
@@ -50,10 +52,13 @@ TOWER_IMAGE: dict[TowerType, str] = {
 }
 
 CHARACTER_DIR = 'character/'
-CHARACTER_IMAGE: dict[CharacterType, str] = {
-    CharacterType.MELEE: 'melee.png',
-    CharacterType.RANGER: 'ranger.png',
-    CharacterType.SNIPER: 'sniper.png'
+CHARACTER_IMAGE: dict[(CharacterType, CharacterState), str] = {
+    (CharacterType.MELEE, CharacterState.LEFT): 'melee_left.png',
+    (CharacterType.RANGER, CharacterState.LEFT): 'ranger_left.png',
+    (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_left.png',
+    (CharacterType.MELEE, CharacterState.RIGHT): 'melee_right.png',
+    (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_right.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png'
 }
 
 WEAPON_DIR = 'weapon/'
@@ -87,7 +92,8 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
         } if party is PartyType.NEUTRAL else {
             **{
                 character: {
-                    None: os.path.join(IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_IMAGE[character])
+                    state: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], CHARACTER_DIR, CHARACTER_IMAGE[(character, state)]) for state in CharacterState
                 } for character in CharacterType
             },
             **{
@@ -109,7 +115,7 @@ structure: ENTITY_IMAGE[party][entity][state]
 # Size for showing
 ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
-        None: 6.25
+        state: 6.25 for state in CharacterState
     } for character in CharacterType},
     **{tower: {
         None: 10
@@ -124,7 +130,7 @@ structure: ENTITY_SIZE[entity][state]
 # Size for clicking
 CLICK_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
-        None: 6.25
+        state: 6.25 for state in CharacterState
     } for character in CharacterType},
     **{tower: {
         None: 20
@@ -137,3 +143,6 @@ structure: CLICK_SIZE[entity][state]
 
 DRAW_DISPLACEMENT = pg.Vector2(0, -3.125)
 DRAW_DISPLACEMENT_Y = -3.125
+
+PATH_WIDTH = 6
+DESTINATION_RADIUS = 8

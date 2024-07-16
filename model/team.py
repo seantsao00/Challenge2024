@@ -14,7 +14,7 @@ from instances_manager import get_event_manager, get_model
 from model.building import Tower
 from model.character import Character
 from model.team_vision import TeamVision
-from util import log_info
+from util import log_critical, log_info
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -72,7 +72,7 @@ class Team(NeutralTeam):
         if team_name:
             self.__team_name = team_name
         else:
-            self.__team_name = 'team' + str(self.__team_id)
+            self.__team_name = 'team' + str(self.__team_id + 1)
         self.__stats = Team.TeamStats(0, 0, 0, 0)
         self.__towers: set[Tower] = set()
         self.tower_lock = Lock()
@@ -92,12 +92,15 @@ class Team(NeutralTeam):
         clicked_entity = event.clicked_entity
 
         if event.input_type == const.InputTypes.PICK:
-            if clicked_entity and clicked_entity.team is self:
-                if isinstance(self.__controlling, Character) and self.__controlling.team is self and self.__controlling is not None:
+            if clicked_entity is None:
+                log_critical('post EventHumanInput PICK without clicked entity')
+                return
+            if clicked_entity.team is self:
+                if isinstance(self.__controlling, Character) and self.__controlling.team is self:
                     self.__controlling.set_move_stop()
                 self.__controlling = clicked_entity
             else:
-                log_info('picked a non interactable entity')
+                log_info('selected an entity that is not for your team')
 
         if self.__controlling is None:
             return
@@ -105,10 +108,11 @@ class Team(NeutralTeam):
         if event.input_type == const.InputTypes.MOVE and isinstance(self.__controlling, Character):
             self.__controlling.set_move_direction(event.displacement)
         elif event.input_type == const.InputTypes.ATTACK:
-            if isinstance(clicked_entity, Tower) and clicked_entity.team is self:  # Utilize ATTACK to pick tower
-                self.__controlling = clicked_entity
-            elif isinstance(self.__controlling, Character) and (isinstance(clicked_entity, Character) or isinstance(clicked_entity, Tower) and not clicked_entity.is_fountain):
+            if isinstance(self.__controlling, Character):
                 self.__controlling.attack(clicked_entity)
+            else:
+                log_info(
+                    f'try to attack when controlling {self.__controlling}, which can not attack')
         elif event.input_type is const.InputTypes.ABILITY:
             if isinstance(self.__controlling, Character):
                 self.__controlling.manual_cast_ability()
@@ -125,10 +129,16 @@ class Team(NeutralTeam):
                 self.vision.update_vision(event.tower)
         log_info(f'{self.__team_name} gained a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
+        model = get_model()
+        if model.state is const.State.PLAY:
+            model.chat.send_system(f'{self.__team_name} gained a tower')
 
     def lose_tower(self, event: EventTeamLoseTower):
         log_info(f'{self.__team_name} lost a tower '
                  f'with id {event.tower.id} at {event.tower.position}')
+        model = get_model()
+        if model.state is const.State.PLAY or model.state is const.State.PAUSE:
+            model.chat.send_system(f'{self.__team_name} lost a tower')
         with self.tower_lock:
             if event.tower in self.__towers:
                 self.__towers.remove(event.tower)
@@ -160,7 +170,7 @@ class Team(NeutralTeam):
     def select_character(self, event: EventSelectCharacter):
         if isinstance(self.__controlling, Tower) and self.__controlling.team == self:
             log_info(
-                f'Character type of Team {self.team_id} is modified to {event.character_type}')
+                f'Character type of team {self.team_id + 1} is modified to {event.character_type}')
             self.__controlling.update_character_type(event.character_type)
 
     def register_listeners(self):

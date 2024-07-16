@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -8,14 +9,11 @@ import const
 from event_manager import EventAttack
 from instances_manager import get_event_manager, get_model
 from model.character.character import Character
+from model.entity import Entity
 from util import log_info
 
 if TYPE_CHECKING:
     from model.team import Team
-
-from event_manager import EventAttack
-from instances_manager import get_event_manager, get_model
-from model.entity import Entity
 
 
 class Melee(Character):
@@ -34,7 +32,8 @@ class Melee(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.MELEE_ATTRIBUTE, const.CharacterType.MELEE, None)
+        super().__init__(position, team, const.MELEE_ATTRIBUTE,
+                         const.CharacterType.MELEE, const.CharacterState.LEFT)
         self.__defense: float = 0
 
     def attack(self, enemy: Entity):
@@ -61,12 +60,16 @@ class Melee(Character):
         self.health -= new_damage
         if self.health <= 0:
             self.die()
+            if event.attacker.team.party is not const.PartyType.NEUTRAL:
+                event.attacker.team.gain_point_kill()
+                log_info(
+                    f"[Team] {event.attacker.team.team_name} get score, score is {event.attacker.team.points}")
 
     def cast_ability(self, *args, **kwargs):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        log_info("[Melee] Cast ability")
+        log_info(f"[Melee] {self} Cast ability")
         self.abilities_time = now_time
         self.ability()
 
@@ -75,4 +78,5 @@ class Melee(Character):
 
     def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables
-        self.abilities_time = 1e9
+        self.abilities_time = math.inf
+        # ability will disappear after the melee is hit self.__defense times.

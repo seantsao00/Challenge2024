@@ -6,7 +6,7 @@
         [20, 20], [20, 230], [230, 20], [230, 230]
     ],
     "neutral_towers": [
-        [94, 151]
+        [96, 150, "pylon"], [115, 40, "hotel"], [183, 155, "ferris_wheel"]
     ],
     "images": {
         "backgrounds": ["background.png", "buildings/building6.png", "buildings/building7.png"],

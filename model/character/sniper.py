@@ -7,7 +7,7 @@ import pygame as pg
 import const
 from event_manager import EventBulletCreate
 from instances_manager import get_event_manager, get_model
-from model.bullet import BulletCommon, BulletSniper
+from model.bullet import BulletCommon
 from model.character import Character
 from util import log_info
 
@@ -25,7 +25,8 @@ class Sniper(Character):
     """
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team):
-        super().__init__(position, team, const.SNIPER_ATTRIBUTE, const.CharacterType.SNIPER, None)
+        super().__init__(position, team, const.SNIPER_ATTRIBUTE,
+                         const.CharacterType.SNIPER, const.CharacterState.LEFT)
         self.ability_active = False
 
     def cast_ability(self, *args, **kwargs):
@@ -41,7 +42,7 @@ class Sniper(Character):
     def ability(self):
         """Make the bullet become BulletSniper"""
         self.ability_active = True
-        log_info("[Sniper] Use ability")
+        log_info(f"[Sniper] {self} Use ability")
 
     def attack(self, enemy: Entity):
 
@@ -58,10 +59,13 @@ class Sniper(Character):
                                       damage=const.SNIPER_ATTRIBUTE.attack_damage,
                                       speed=const.BULLET_COMMON_SPEED)
             else:
-                bullet = BulletSniper(position=self.position,
+                bullet = BulletCommon(position=self.position,
                                       victim=enemy,
                                       team=self.team,
-                                      attacker=self)
+                                      attacker=self,
+                                      damage=const.SNIPER_ATTRIBUTE.ability_variables,
+                                      speed=const.BULLET_SNIPER_SPEED,
+                                      is_sniper_ability=True)
                 self.ability_active = False
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self._last_attack_time = now_time

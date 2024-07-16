@@ -7,6 +7,7 @@ from const.visual import IMAGE_DIR
 
 PARTY_SELECTOR_DIR = 'party_selection/'
 PARTY_SELECTOR_BACKGROUND: str = os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'background.png')
+PARTY_SELECTOR_BOTTOM: str = os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'bottom.png')
 PARTY_SELECTOR_IMAGE: dict[None | PartyType, str] = {
     None: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'default.png'),
     PartyType.JUNIOR: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'junior.png'),
