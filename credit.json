@@ -2,7 +2,7 @@
     "game_title": "CSIE Camp Challenge 2024 幻影的競技場",
     "title": "Credit",
     "content": {
-        "Game Develop": [
+        "Game Design & Game Programming": [
             "王淇 littlecube8152",
             "李瑞恩 LEbullient",
             "周昀蓉 miachou1225",
@@ -24,16 +24,19 @@
             "蘇翊軒 brizxz"
         ],
         "Art": [
+            "李佩恆 pei-heng-li",
             "周昀蓉 miachou1225",
-            "邱子芹",
+            "邱子芹 cthziun",
             "胡祐誠 HyperSoWeak",
             "笪瑜庭 iazzenma",
-            "陳愷欣 kxcathy"
+            "陳柏靜 ldOwObl",
+            "陳愷欣 kxcathy",
+            "陳嘉翎 ChiaLingChen"
         ],
         "Composition & Sound Design": [
             "黃睿加 rueijiahuang"
         ],
-        "AI Design and Game Testing": [
+        "AI Design & Game Testing": [
             "王淇 littlecube8152",
             "高嘉泓 victor0206",
             "劉丞浩 CppNoPointer",
@@ -41,7 +44,7 @@
             "鄭詠堯 yungyaoc",
             "蘇翊軒 brizxz"
         ],
-        "Project Management": [
+        "Project Management & Quality Assurance": [
             "洪銘德 shimeming",
             "曹紹洵 seantsao00"
         ],
