@@ -30,36 +30,44 @@ def assign_random_destination(character: Character, interface: API):
         new_destination = pg.Vector2(random.uniform(0, interface.get_grid_size() - 1),
                                      random.uniform(0, interface.get_grid_size() - 1))
         i += 1
-        if i == 10: # 最多嘗試 10 次
+        if i == 10:  # 最多嘗試 10 次
             break
     Information.destinations[character.id] = new_destination
-    interface.action_move_to([character], new_destination)
+    interface.action_move_to(character, new_destination)
+
 
 def enemies_near_tower(tower: Tower, interface: API):
     """傳入一座塔，回傳塔附近所有視野可及的敵隊士兵"""
-    visible_enemies = [] # 創造空列表，存取所有視野可及的敵隊士兵
+    visible_enemies = []  # 創造空列表，存取所有視野可及的敵隊士兵
     for character in interface.get_visible_characters():
         if character.team_id != interface.get_team_id():
             visible_enemies.append(character)
 
-    near_enemies = [] # 創造空列表，存取所有視野可及，且距離塔 20 單位距離以內的敵隊士兵
+    near_enemies = []  # 創造空列表，存取所有視野可及，且距離塔 20 單位距離以內的敵隊士兵
     for enemy in visible_enemies:
         if enemy.position.distance_to(tower.position) <= 20:
             near_enemies.append(enemy)
     return near_enemies
 
+
 def allies_near_tower(tower: Tower, interface: API):
     """傳入一座塔，回傳塔附近所有己方隊伍的士兵"""
     allies = interface.get_owned_characters()
-    
+
     near_allies = []
     for ally in allies:
-        if ally.position.distance_to(tower.position) <= 20: 
+        if ally.position.distance_to(tower.position) <= 20:
             near_allies.append(ally)
     return near_allies
 
+
 def every_tick(interface: API):
-    """一定要被實作的 function ，會定期被遊戲 call"""
+    """
+    一定要被實作的 function ，會定期被遊戲 call
+    在使用 VS Code 寫 code 的時候可以把滑鼠移到變數、函數上方，看它們的詳細解說。
+    在使用 VS Code 寫 code 的時候可以按住 Ctrl 再用滑鼠點擊變數、函數，來跳轉到與它們相關的地方。
+    在測試的時候可以只放一隻 ai 、在執行時一次加很多 arguments (如 -qrp)。
+    """
     my_towers = interface.get_owned_towers()
 
     for tower in my_towers:
@@ -129,7 +137,7 @@ def every_tick(interface: API):
         '(來自 Challenge 員工的哀號)',
         'Bug 退散！',
         '維護良好素質，從你我做起！',
-        '為甚麼 sample 好像有點強 @@'
+        '為什麼 sample 好像有點強 @@'
     ]
     chat_choices = chat_information + chat_guide + chat_other
     # 以 Const.CHAT_PROBABILITY 的機率隨便說說話
