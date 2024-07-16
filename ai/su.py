@@ -68,6 +68,9 @@ class Strategy:
                 
                 attackable_sniper = [snipers for snipers in attackable if type(snipers) == Character 
                                     and (snipers.type == CharacterClass.SNIPER)]
+                attackable_ranger = [rangers for rangers in attackable if type(rangers) == Character 
+                                    and (rangers.type == CharacterClass.RANGER)]
+                
                 attackable_tower = [tower for tower in attackable if type(tower) == Tower and not tower.is_fountain]
                 near_tower = [near_towers for near_towers in self.visible_enemy_towers if near_towers.health < 500 and not near_towers.is_fountain 
                               and near_towers.position.distance_to(character.position) <= (near_towers.attack_range + 20.0)]
@@ -82,6 +85,8 @@ class Strategy:
                     random_target = random.choice(near_tower)
                 elif (len(attackable_sniper) > 0):
                     random_target = random.choice(attackable_sniper)
+                elif (len(attackable_ranger) > 0):
+                    random_target = random.choice(attackable_ranger)
                 else:
                     random_target = random.choice(attackable)
 
