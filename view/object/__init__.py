@@ -1,4 +1,3 @@
-from view.object.ascendance import *
 from view.object.background_object import *
 from view.object.chat import *
 from view.object.clock import *
