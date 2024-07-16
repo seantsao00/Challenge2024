@@ -10,22 +10,20 @@ from typing import TYPE_CHECKING
 from const import ChatMessageType, PartyType
 from event_manager.events import EventSendChat
 from instances_manager import get_event_manager
-from model.team import NeutralTeam
 
 if TYPE_CHECKING:
     from model.team import Team
 
 
 class Chat:
-    def __send_chat(self, message_type: ChatMessageType, team: Team, text: str):
+    def __send_chat(self, message_type: ChatMessageType, team: Team | None, text: str):
         get_event_manager().post(EventSendChat(type=message_type, team=team, text=text))
 
     def send_comment(self, team: Team, text: str):
         self.__send_chat(ChatMessageType.CHAT_COMMENT, team, text)
 
     def send_system(self, text: str):
-        team = NeutralTeam(PartyType.NEUTRAL)
-        self.__send_chat(ChatMessageType.CHAT_SYSTEM, team, text)
+        self.__send_chat(ChatMessageType.CHAT_SYSTEM, None, text)
 
 
 chat = Chat()

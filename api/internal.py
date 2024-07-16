@@ -16,7 +16,6 @@ import pygame as pg
 import const
 import const.map
 import model
-import model.chat
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
 from instances_manager import get_model
@@ -578,7 +577,7 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        model.chat.send_comment(team=self.__team(), text=msg)
+        get_model().chat.send_comment(team=self.__team(), text=msg)
         return True
 
     def get_map_name(self) -> str:
