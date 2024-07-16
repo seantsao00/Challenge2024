@@ -136,7 +136,7 @@ class Strategy:
         
     def run(self, api: API):
         self.api = api
-        self.send_spam_message()
+        # self.send_spam_message()
         # self.print_scores()
         
         self.initialize()

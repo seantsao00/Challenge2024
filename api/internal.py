@@ -115,12 +115,9 @@ class Internal(prototype.API):
             self.__build_transform_matrix()
             self.__inv_transform = np.linalg.inv(self.transform)
 
-        vector = np.array([[position.x],
-                           [position.y],
-                           [1 if is_position else 0]])
-        vector = np.dot(self.__inv_transform if inverse else self.transform,
-                        vector)
-        return pg.Vector2(vector[0][0], vector[1][0])
+        vector = np.asarray([position.x, position.y, 1 if is_position else 0])
+        vector = (self.__inv_transform if inverse else self.transform) @ vector
+        return pg.Vector2(vector[0], vector[1])
 
     @classmethod
     def __map_character_type(cls, class_type: prototype.CharacterClass):

@@ -4,23 +4,25 @@
     "height": 250,
     "fountains": [
         [86,21],
-        [30,116],
+        [49, 236],
         [225,87],
         [182,202]
     ],
     "neutral_towers": [
-        [187, 36, "ferris_wheel"], [49, 236, "pylon"]
+        [48, 118, "ferris_wheel"],
+        [156, 84, "hotel"],
+        [125, 191, "pylon"]
     ],
     "images": {
         "backgrounds": ["background.png"],
         "objects": 
         {
-            "trees/tree1.png": 145,
-            "trees/tree2.png": 135,
-            "trees/tree3.png": 122,
-            "trees/tree4.png": 91,
-            "trees/tree5.png": 28,
-            "trees/tree6.png": 0
+            "trees/tree1.png": 188,
+            "trees/tree2.png": 174,
+            "trees/tree3.png": 161,
+            "trees/tree4.png": 124,
+            "trees/tree5.png": 59,
+            "trees/tree6.png": 17
         }
     }
 }
