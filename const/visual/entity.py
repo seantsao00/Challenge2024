@@ -19,7 +19,8 @@ ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
 CD_BAR_COLOR = 'blue'
 # open for color recommandation
-HEALTH_BAR_COLOR = ['yellow', 'paleturquoise2', 'orange', 'violet']
+# HEALTH_BAR_COLOR = ['yellow', 'paleturquoise2', 'orange', 'violet']
+HEALTH_BAR_COLOR = [(255, 255, 0), (175, 238, 238), (255, 165, 0), (238, 130, 238)]
 
 HEALTH_BAR_UPPER = 5
 CD_BAR_UPPER = 6

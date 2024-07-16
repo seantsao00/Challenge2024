@@ -13,9 +13,16 @@ class CharacterClass(IntEnum):
     """士兵種類。"""
 
     MELEE = auto()
+    """近戰"""
+
     SNIPER = auto()
+    """狙擊"""
+
     RANGER = auto()
+    """遠程"""
+
     UNKNOWN = auto()
+    """錯誤"""
 
 
 class Character:
@@ -145,7 +152,7 @@ class MovementStatusClass(IntEnum):
     """士兵目前朝著某個點為目的地前進。 """
 
     UNKNOWN = auto()
-    """無法得知的狀況，例如無法得知敵對士兵的移動策略。"""
+    """無法得知的狀況，例如無法得知敵隊士兵的移動狀況。"""
 
 
 class Movement:
@@ -171,7 +178,7 @@ class Movement:
 
 
 class API:
-    """與遊戲互動的方法。傳入 AI 的方法是作為 `every_tick` 的第一個引數。"""
+    """與遊戲互動的方法。傳入 AI 的方法是讓其作為 `every_tick` 的第一個引數。"""
 
     # ==== 場地資訊獲取 ====
 
@@ -214,7 +221,7 @@ class API:
     @abstractmethod
     def get_terrain(self, position: pg.Vector2) -> MapTerrain:
         """回傳某個位置的地形，不需在視野範圍內就能呼叫。  
-        如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。  
+        如果位置在地圖之外，回傳 `OUT_OF_BOUNDS`。
         @position: 要檢查的位置。"""
 
     @abstractmethod
@@ -226,8 +233,8 @@ class API:
     @abstractmethod
     def get_sample_character(self, type_class: CharacterClass) -> Character:
         """
-        給定士兵種類，回傳一個「無法控制」的士兵，這個士兵會擁有給定士兵種類的數值，
-        可以用來獲取特定的士兵數據。`id` 為 -1、座標為原點、而隊伍 `team_id` 為 0。
+        給定士兵種類，回傳一個「無法控制」的士兵，這個士兵會擁有給定士兵種類的數值（例如血量），
+        可以用來獲取特定種類士兵的數據。這個士兵的`id` 為 -1、座標為原點、而隊伍 `team_id` 為 0。
 
         @type_class: 士兵種類，不能是 `UNKNOWN`。
 
@@ -269,7 +276,7 @@ class API:
     def get_visible_towers(self) -> list[Tower]:
         """
         回傳在自己視野範圍當中的塔，請注意這個函數也會回傳自己的塔。
-        預設回傳按照士兵的 `id` 排序。
+        預設回傳按照塔的 `id` 排序。
         """
         raise NotImplementedError
 
@@ -290,61 +297,61 @@ class API:
     @abstractmethod
     def get_movement(self, character: Character) -> Movement:
         """
-        回傳目標士兵目前的移動狀況。士兵必須是自己的且當下存活，否則會回傳 `UNKNOWN`。  
+        回傳目標士兵目前的移動狀況。士兵必須是自己隊伍的且當下活著，否則會回傳 `UNKNOWN`。  
         @character: 目標的士兵。
         """
 
     # ==== 士兵操作相關 ====
 
     @abstractmethod
-    def action_move_along(self, characters: Iterable[Character], direction: pg.Vector2) -> None:
+    def action_move_along(self, characters: Iterable[Character] | Character, direction: pg.Vector2) -> None:
         """
         將所有列表中的士兵，設定為沿著某個向量移動。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @direction: 移動的向量。
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_move_to(self, characters: Iterable[Character], destination: pg.Vector2) -> None:
+    def action_move_to(self, characters: Iterable[Character] | Character, destination: pg.Vector2) -> None:
         """
         將所有列表中的士兵，設定為朝著某個目的地移動。如果目的地不是可行走的位置則不會生效。
         這個函數會使用內建的尋路，可能會耗費大量時間，使用時請注意。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_wander(self, characters: Iterable[Character]) -> None:
+    def action_wander(self, characters: Iterable[Character] | Character) -> None:
         """
         將所有列表內的士兵設定為遊蕩狀態。
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_move_clear(self, characters: Iterable[Character]) -> None:
+    def action_move_clear(self, characters: Iterable[Character] | Character) -> None:
         """
         將所有列表中的士兵設定為不移動。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_attack(self, characters: Iterable[Character], target: Character | Tower) -> None:
+    def action_attack(self, characters: Iterable[Character] | Character, target: Character | Tower) -> None:
         """
-        將所有列表中的士兵設定為攻擊某個目標。如果是友方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @destination: 移動的目的地。
         """
         raise NotImplementedError
 
     @abstractmethod
-    def action_cast_ability(self, characters: Iterable[Character], **kwargs) -> None:
+    def action_cast_ability(self, characters: Iterable[Character] | Character, **kwargs) -> None:
         """
         將所有列表中的士兵設定為使用技能。如果是技能冷卻還未結束或者是不在攻擊範圍內則不會使用。  
-        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）。  
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
         @kwargs: 所有技能參數的聯集，以下是可用列表：
          - `position`: `pg.Vector2`，遠程士兵使用技能的位置   
 
@@ -394,10 +401,10 @@ class API:
     def within_attacking_range(self, unit: Character | Tower,
                                candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
         """
-        給定一個實體以及潛在目標，回傳可以攻擊到的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵對實體。
-        這個函數只是普通暴力的包裝。  
+        給定一個攻擊者以及潛在目標，回傳在潛在目標的列表中，攻擊者可以攻擊到的所有目標。如果潛在目標為 None 則預設其為所有看的到的實體。只會回傳敵隊實體。
+        這個函數只是普通暴力的包裝。
         @unit: 指定的攻擊者。  
-        @candidates: 要考慮的所有實體。
+        @candidates: 潛在目標（要考慮的所有實體）。
         """
         raise NotImplementedError
 
@@ -405,7 +412,7 @@ class API:
     def within_vulnerable_range(self, unit: Character | Tower,
                                 candidates: list[Character | Tower] | None = None) -> list[Character | Tower]:
         """
-        給定一個實體以及潛在目標，回傳可能被攻擊的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵對實體。
+        給定一個實體以及潛在目標，回傳可能被攻擊的所有目標。如果潛在目標為 None 則預設為所有看的到的實體。只會回傳敵隊實體。
         這個函數只是普通暴力的包裝。
         @unit: 指定的被攻擊者。  
         @candidates: 要考慮的所有實體。
@@ -418,5 +425,5 @@ class API:
     def send_chat(self, msg: str) -> bool:
         """
         傳送聊天室訊息，每個 `every_tick` 的呼叫當中只能傳送一次。回傳值為傳送成功或失敗。每一次訊息成功傳送後要等待一秒才能傳送下一則訊息。
-        @msg: 要傳送的訊息，長度不得超過 30、不得包含 NULL 字元。部分字元可能會因為字體無法顯示。
+        @msg: 要傳送的訊息，長度如果超過 30 後面的文字會被忽略、不得包含 NULL 字元。部分字元可能會因為字體無法顯示。
         """
