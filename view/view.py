@@ -11,10 +11,10 @@ from event_manager import (EventCreateEntity, EventInitialize, EventUnconditiona
                            EventViewChangeTeam, EventViewTrajectorySwitch)
 from instances_manager import get_event_manager, get_model
 from util import load_image
-from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
-                         EntityView, HealthView, ObjectBase, Particle, ParticleManager,
-                         PartySelectorView, PauseMenuView, ResultView, ScoreboardView, TowerCDView,
-                         TrajectoryView, ViewRangeView)
+from view.object import (AbilitiesCDView, AscendanceView, AttackRangeView, BackgroundObject,
+                         ChatView, ClockView, EntityView, HealthView, ObjectBase, Particle,
+                         ParticleManager, PartySelectorView, PauseMenuView, ResultView,
+                         ScoreboardView, TowerCDView, TrajectoryView, ViewRangeView)
 from view.screen_info import ScreenInfo
 from view.textutil import font_loader
 
@@ -104,6 +104,7 @@ class View:
             if model.show_attack_range:
                 self.__entities_wait_add.add(AttackRangeView(self.__arena, entity))
             self.__entities_wait_add.add(AbilitiesCDView(self.__arena, entity))
+            self.__entities_wait_add.add(AscendanceView(self.__arena, entity))
             if entity.health is not None:
                 self.__entities_wait_add.add(HealthView(self.__arena, entity))
             if model.show_trajectory:

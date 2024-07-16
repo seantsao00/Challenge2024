@@ -45,7 +45,7 @@ MELEE_ATTRIBUTE = CharacterAttribute(
     ability_cd=3,
     attack_speed=1,
     ability_variables=3,
-    crown_ascendance_threshold=720
+    crown_ascendance_threshold=0
     # damage per second = 36
 )
 

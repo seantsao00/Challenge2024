@@ -59,10 +59,18 @@ CHARACTER_IMAGE: dict[(CharacterType, CharacterState), str] = {
     (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_right.png',
     (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png',
 }
-CHARACTER_ASCENDED_IMAGE: dict[CharacterType, str] = {
-    CharacterType.MELEE: 'melee_ascended.png',
-    CharacterType.RANGER: 'ranger_ascended.png',
-    CharacterType.SNIPER: 'sniper_ascended.png'
+CHARACTER_ASCENDED_ARMOR_IMAGE: dict[(CharacterType, CharacterState), str] = {
+    (CharacterType.MELEE, CharacterState.LEFT): 'melee_ascended_left.png',
+    (CharacterType.RANGER, CharacterState.LEFT): 'ranger_ascended_left.png',
+    (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_ascended_left.png',
+    (CharacterType.MELEE, CharacterState.RIGHT): 'melee_ascended_right.png',
+    (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_ascended_right.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_ascended_right.png',
+}
+CHARACTER_ASCENDED_CROWN_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: 'melee_crown.png',
+    CharacterType.RANGER: 'ranger_crown.png',
+    CharacterType.SNIPER: 'sniper_crown.png',
 }
 
 WEAPON_DIR = 'weapon/'
@@ -79,15 +87,31 @@ BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.RANGER: 'ranger.png',
 }
 
-ASCENDANCE_DIR = 'ascendance'
-ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, str]] = {
-    party: {
-        AscendanceType.ARMOR: os.path.join(IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, 'armor.png'),
-        AscendanceType.CROWN: os.path.join(IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, 'crown.png'),
-    } for party in PartyType if party is not PartyType.NEUTRAL
+ASCENDANCE_DIR = 'ascendance/'
+ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, dict[CharacterType, dict[CharacterState, str]]]] = {
+    party: (
+        {
+            **{
+                AscendanceType.ARMOR: {
+                    character: {
+                        state: os.path.join(
+                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_ARMOR_IMAGE[(character, state)]) for state in CharacterState
+                    } for character in CharacterType
+                }
+            },
+            **{
+                AscendanceType.CROWN: {
+                    character: {
+                        None: os.path.join(
+                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character])
+                    } for character in CharacterType
+                }
+            }
+        }
+    ) for party in PartyType if party is not PartyType.NEUTRAL
 }
 """
-structure: ASCENDANCE_IMAGE[party][ascendance]
+structure: ASCENDANCE_IMAGE[party][ascendance][character][state]
 """
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
