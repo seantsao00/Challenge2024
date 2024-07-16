@@ -14,8 +14,13 @@ MAX_WANDERING = 50
 
 class CharacterType(Enum):
     MELEE = auto()
+    """近戰"""
+
     RANGER = auto()
+    """遠程"""
+
     SNIPER = auto()
+    """狙擊"""
 
 
 @dataclass(kw_only=True)

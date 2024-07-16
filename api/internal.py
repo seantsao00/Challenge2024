@@ -47,6 +47,7 @@ class Internal(prototype.API):
     def __init__(self, team_id: int):
         self.team_id = team_id
         self.transform: np.ndarray = None
+        self.__inv_transform: np.ndarray = None
         self.__chat_sent = False
         self.__last_chat_time_stamp = float('-inf')
         self.__character_map = {}
@@ -108,11 +109,12 @@ class Internal(prototype.API):
         """
         if self.transform is None:
             self.__build_transform_matrix()
+            self.__inv_transform = np.linalg.inv(self.transform)
 
         vector = np.array([[position.x],
                            [position.y],
                            [1 if is_position else 0]])
-        vector = np.dot(np.linalg.inv(self.transform) if inverse else self.transform,
+        vector = np.dot(self.__inv_transform if inverse else self.transform,
                         vector)
         return pg.Vector2(vector[0][0], vector[1][0])
 
@@ -367,6 +369,7 @@ class Internal(prototype.API):
         vision_grid = np.flip(vision_grid, axis=0)
         if self.transform is None:
             self.__build_transform_matrix()
+            self.__inv_transform = np.linalg.inv(self.transform)
 
         # Rotate visibility matrix base on transform
         if self.transform[0][0] == 0 and self.transform[0][1] == 1:
@@ -407,9 +410,12 @@ class Internal(prototype.API):
             return prototype.MapTerrain.OBSTACLE
         raise GameError("Unkown terrain type.")
 
-    def action_move_along(self, characters: Iterable[prototype.Character], direction: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+    def action_move_along(self, characters: Iterable[prototype.Character] | prototype.Character, direction: pg.Vector2):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('direction', direction, pg.Vector2)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -420,9 +426,12 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_direction(direction)
 
-    def action_move_to(self, characters: Iterable[prototype.Character], destination: pg.Vector2):
-        enforce_type('characters', characters, Iterable)
+    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('destination', destination, pg.Vector2)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -440,8 +449,11 @@ class Internal(prototype.API):
                 if path is not None and len(path) > 0:
                     inter.set_move_position(path)
 
-    def action_move_clear(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
+    def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -451,9 +463,12 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
 
-    def action_attack(self, characters: Iterable[prototype.Character], target: prototype.Character | prototype.Tower):
-        enforce_type('characters', characters, Iterable)
+    def action_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower):
+        enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -468,8 +483,11 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character], **kwargs):
-        enforce_type('characters', characters, Iterable)
+    def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
         if 'position' in kwargs:
@@ -482,8 +500,11 @@ class Internal(prototype.API):
         for inter in internals:
             inter.cast_ability(**kwargs)
 
-    def action_wander(self, characters: Iterable[prototype.Character]):
-        enforce_type('characters', characters, Iterable)
+    def action_wander(self, characters: Iterable[prototype.Character] | prototype.Character):
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
         for ch in characters:
             enforce_type('element of characters', ch, prototype.Character)
 
@@ -553,13 +574,13 @@ class Internal(prototype.API):
         if self.__chat_sent:
             return False
         if len(msg) > 30:
-            return False
+            msg = msg[:30]
         # Bad special case, I know. However, that is ensured in the pygame documentation.
         if '\x00' in msg:
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        model.chat.chat.send_comment(team=self.__team(), text=msg)
+        model.chat.send_comment(team=self.__team(), text=msg)
         return True
 
     def get_map_name(self) -> str:

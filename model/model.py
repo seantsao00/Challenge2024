@@ -25,6 +25,7 @@ from event_manager import (EventAttack, EventBulletCreate, EventBulletDamage, Ev
 from instances_manager import get_event_manager
 from model.building import Tower
 from model.character import Character, Ranger, Sniper
+from model.chat import chat
 from model.clock import Clock
 from model.grid import Grid
 from model.map import load_map
@@ -46,7 +47,7 @@ class ModelArguments:
     team_controls: list[str]
     show_view_range: bool
     show_attack_range: bool
-    skip_character_selecting: bool
+    skip_party_selecting: bool
     show_path: bool
     show_range: bool
     scoreboard_frozen: bool
@@ -87,7 +88,7 @@ class Model:
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.grid: Grid = Grid(250, 250)
         self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
-        if model_arguments.skip_character_selecting:
+        if model_arguments.skip_party_selecting:
             self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
         self.__neutral_team: NeutralTeam
@@ -99,6 +100,7 @@ class Model:
         self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
+        self.frozen: bool = False
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
@@ -251,6 +253,9 @@ class Model:
                 running_time = self.get_time()
                 if running_time >= const.model.GAME_TIME:
                     ev_manager.post(EventGameOver())
+                if not self.frozen and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
+                    self.frozen = True
+                    chat.send_system("Scoreboard is now frozen!")
                 # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
             fps = const.FPS

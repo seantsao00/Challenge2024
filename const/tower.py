@@ -38,7 +38,7 @@ NEUTRAL_TOWER_ATTRIBUTE = TowerAttribute(
     attack_speed=1,
     attack_range=45,
     max_health=1000,
-    neautral_initial_health=5000,
+    neautral_initial_health=2500,
     vision=45
 )
 
