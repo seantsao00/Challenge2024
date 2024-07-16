@@ -152,9 +152,23 @@ def every_tick(api: API):
         if len(attackable) > 0:
             api.action_cast_ability([sniper])
     
-    
+    defend = False
+    defend_tower = None
+    for tower in owned_tower:
+        if tower.is_fountain: continue
+        if len(enemies_near_tower(visible_enemy, tower, api)) > 0:
+            defend = True
+            defend_tower = tower
+            break
     target_tower = None
-    if (len(contestable_tower) == 0 and api.get_current_time() <= 60):
+    if (defend): 
+        api.action_move_to(no_sniper_characters, defend_tower.position)
+        for character in owned_characters:
+            attackable = api.within_attacking_range(character)
+            if len(attackable) > 0: 
+                random_target = random.choice(attackable)
+                api.action_attack([character], random_target)
+    elif (len(contestable_tower) == 0 and api.get_current_time() <= 60):
         if (len(no_sniper_characters) >= 10): api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE, CharacterClass.SNIPER]))
         else: api.change_spawn_type(fountain, random.choice([CharacterClass.MELEE]))
         for tower in owned_tower:
@@ -174,16 +188,9 @@ def every_tick(api: API):
                 if api.get_movement(recruited_characters[index]).status == MovementStatusClass.STOPPED:
                     api.action_move_to(recruited_characters[index:(index + 1)], random_point)
             """
-            defend = False
-            defend_tower = None
-            for tower in owned_tower:
-                if tower.is_fountain: continue
-                if len(enemies_near_tower(visible_enemy, tower, api)) > 0:
-                    defend = True
-                    defend_tower = tower
-                    break
-            if (defend): api.action_move_to(no_sniper_characters, defend_tower.position)
-            else: api.action_wander(owned_characters)
+            
+            
+            api.action_wander(owned_characters)
             for character in owned_characters:
                 attackable = api.within_attacking_range(character)
                 if len(attackable) > 0: 
