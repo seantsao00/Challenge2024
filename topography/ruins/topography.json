@@ -14,7 +14,9 @@
         {
             "buildings/building1.png": 230,
             "buildings/building2.png": 67,
-            "buildings/building3.png": 65,
+            "buildings/building3_left.png": 60,
+            "buildings/building3_center.png": 64,
+            "buildings/building3_right.png": 69,
             "buildings/building4.png": 206,
             "buildings/building5.png": 127,
             "trees/tree1.png": 42,
