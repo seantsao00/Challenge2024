@@ -252,7 +252,7 @@ class Character(LivingEntity):
         pass
 
     def die(self):
-        log_info(f"Character {self.id} in Team {self.team.team_id} died")
+        log_info(f"Character {self.id} in Team {self.team.team_id + 1} died")
         self.alive = False
         # self.hidden = True
         get_event_manager().post(EventCharacterDied(character=self))
