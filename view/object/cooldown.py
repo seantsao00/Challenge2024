@@ -34,16 +34,15 @@ class AbilitiesCDView(BarCDView):
 
     def draw(self):
         entity = self.entity
-        entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
+        w, h = pg.Vector2(const.ENTITY_SIZE[entity.entity_type]
+                          [entity.state]) * ScreenInfo.resize_ratio
+        w, h = int(w), int(h)
         cd_width = min(get_model().get_time() - entity.abilities_time, entity.attribute.ability_cd) / \
-            entity.attribute.ability_cd * entity_size * 2 * ScreenInfo.resize_ratio
-        top = (self.entity.position.x - entity_size) * ScreenInfo.resize_ratio
-        left = (self.entity.position.y - entity_size -
-                const.CD_BAR_UPPER) * ScreenInfo.resize_ratio
-        pg.draw.rect(self.canvas, (0, 0, 0),
-                     (top, left, entity_size * 2 * ScreenInfo.resize_ratio, 2 * ScreenInfo.resize_ratio))
-        pg.draw.rect(self.canvas, (0, 0, 255),
-                     (top, left, cd_width, 2 * ScreenInfo.resize_ratio))
+            entity.attribute.ability_cd * w
+        top_left = (self.entity.position + const.CD_BAR_UPPER) * \
+            ScreenInfo.resize_ratio - pg.Vector2(w/2, h)
+        pg.draw.rect(self.canvas, (0, 0, 0), (*top_left, w, 1 * ScreenInfo.resize_ratio))
+        pg.draw.rect(self.canvas, (0, 0, 255), (*top_left, cd_width, 1 * ScreenInfo.resize_ratio))
 
 
 class TowerCDView(BarCDView):
@@ -67,16 +66,18 @@ class TowerCDView(BarCDView):
         if entity.last_generate < 0:
             return
 
-        entity_size = const.ENTITY_SIZE[entity.entity_type][entity.state]
+        w, h = pg.Vector2(const.ENTITY_SIZE[entity.entity_type]
+                          [entity.state]) * ScreenInfo.resize_ratio
+        w, h = int(w), int(h)
         radius, inner_radius = pg.Vector2(const.TOWER_CD_RADIUS) * ScreenInfo.resize_ratio
         width = const.TOWER_CD_RADIUS[0] - const.TOWER_CD_RADIUS[1]
-        position = ScreenInfo.resize_ratio * \
-            (entity.position + pg.Vector2(entity_size, entity_size) + const.DRAW_DISPLACEMENT)
+        position = ScreenInfo.resize_ratio * entity.position + pg.Vector2(w/2, h/2)
         pg.draw.circle(self.canvas, const.TOWER_CD_COLOR[0], position, radius, int(
             width * ScreenInfo.resize_ratio))
         pg.draw.circle(self.canvas, const.TOWER_CD_COLOR[2], position, inner_radius, 0)
         img = self.images[entity.character_type]
         self.canvas.blit(img, img.get_rect(center=position))
         cd_remaining = (get_model().get_time() - entity.last_generate) / entity.period
-        pg.draw.arc(self.canvas, const.CD_BAR_COLOR, pg.Rect((ScreenInfo.resize_ratio*(entity.position+const.DRAW_DISPLACEMENT) + pg.Vector2(ScreenInfo.resize_ratio*entity_size - radius,
-                    ScreenInfo.resize_ratio*entity_size - radius)), pg.Vector2(radius*2, radius*2)), pi / 2 - pi * 2 * cd_remaining, pi / 2, int(width*ScreenInfo.resize_ratio))
+        pg.draw.arc(self.canvas, const.CD_BAR_COLOR,
+                    pg.Rect((position + pg.Vector2(-radius, -radius)),
+                            pg.Vector2(radius*2, radius*2)), pi / 2 - pi * 2 * cd_remaining, pi / 2, int(width*ScreenInfo.resize_ratio))

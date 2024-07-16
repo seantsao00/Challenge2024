@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from model import Bullet
-from util import crop_image
+from model import Bullet, Character
+from util import load_image
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
 
@@ -16,14 +16,19 @@ if TYPE_CHECKING:
 
 class EntityView(EntityObject):
     __images: dict[tuple[const.PartyType, const.EntityType, const.EntityState],
-                   pg.Surface] = {}
+                   tuple[pg.Surface, pg.Vector2]] = {}
     """
-    structure: images[party][entity][state]
+    structure: __images[(party, entity, state)]
 
     The static dict that stores entity images.
 
     This dict is shared among all Entity instances,
     built from const, and initialized only once in init_convert.
+    """
+    __ascendance_character_images: dict[tuple[const.PartyType, const.EntityType, const.EntityState, frozenset[const.AscendanceType]],
+                                        tuple[pg.Surface, pg.Vector2]] = {}
+    """
+    structure: __ascendance_images[(party, entity, state, frozenset(ascendance))]
     """
 
     def __init__(self, canvas: pg.Surface, entity: Entity):
@@ -36,19 +41,48 @@ class EntityView(EntityObject):
         for party, entity_dict in const.ENTITY_IMAGE.items():
             for entity, state_dict in entity_dict.items():
                 for state, path in state_dict.items():
-                    img = pg.image.load(path)
-                    w = const.ENTITY_SIZE[entity][state] * 2 * ScreenInfo.resize_ratio
-                    h = const.ENTITY_SIZE[entity][state] * 2 * ScreenInfo.resize_ratio
-                    cls.__images[(party, entity, state)] = crop_image(img, w, h).convert_alpha()
+                    w, h = pg.Vector2(const.ENTITY_SIZE[entity][state]) * ScreenInfo.resize_ratio
+                    w, h = int(w), int(h)
+                    cls.__images[(party, entity, state)] = load_image(path, w, h)
         cls.image_initialized = True
+
+    @classmethod
+    def __stack_ascendant_character(cls, party: const.PartyType, character_type: const.CharacterType, state: const.EntityState, ascendance_set: frozenset):
+        w, h = pg.Vector2(const.ENTITY_SIZE[character_type][state]) * ScreenInfo.resize_ratio
+        w, h = int(w), int(h)
+        surface = pg.Surface((w, h), pg.SRCALPHA)
+        img, displacement = load_image(const.ENTITY_IMAGE[party][character_type][state], w, h)
+        surface.blit(img, displacement)
+        for ascendance in ascendance_set:
+            print(party, character_type, state, ascendance, w, h)
+            img, displacement = load_image(
+                const.ASCENDANCE_IMAGE[party][character_type][state][ascendance], w, h)
+            surface.blit(img, displacement)
+        cls.__ascendance_character_images[(
+            party, character_type, state, ascendance_set)] = surface, pg.Vector2(0, 0)
 
     def draw(self):
         entity = self.entity
-        img = self.__images[(entity.team.party, entity.entity_type, entity.state)]
-        if isinstance(self.entity, Bullet):
-            img = pg.transform.rotate(img, self.entity.view_rotate)
-        self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
-                         (entity.position + const.DRAW_DISPLACEMENT)))
+        img, displacement = self.__images[(entity.team.party, entity.entity_type, entity.state)]
+        party, entity_type, state = entity.team.party, entity.entity_type, entity.state
+        w, h = pg.Vector2(const.ENTITY_SIZE[entity_type][state]) * ScreenInfo.resize_ratio
+        w, h = int(w), int(h)
+        if isinstance(entity, Character):
+            index = (party, entity_type, state, frozenset(entity.ascendance))
+            if index not in self.__ascendance_character_images:
+                self.__stack_ascendant_character(*index)
+            img, displacement = self.__ascendance_character_images[index]
+            self.canvas.blit(img, ScreenInfo.resize_ratio * (entity.position) -
+                             pg.Vector2(w/2, h) + displacement)
+        elif isinstance(entity, Bullet):
+            img = pg.transform.rotate(img, entity.view_rotate)
+            self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
+                                               (entity.position + const.DRAW_DISPLACEMENT)))
+        else:
+            index = (party, entity_type, state)
+            img, displacement = self.__images[index]
+            self.canvas.blit(img, ScreenInfo.resize_ratio * (entity.position) -
+                             pg.Vector2(w/2, h) + displacement)
 
     def update(self):
         if not self.exist:

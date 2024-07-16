@@ -21,8 +21,8 @@ CD_BAR_COLOR = 'blue'
 # open for color recommandation
 HEALTH_BAR_COLOR = ['yellow', 'green', 'orange', 'violet', 'red']
 
-HEALTH_BAR_UPPER = 5
-CD_BAR_UPPER = 6
+HEALTH_BAR_UPPER = pg.Vector2(0, -6)
+CD_BAR_UPPER = pg.Vector2(0, -4)
 TEAM_VISION_BLOCK = 8
 VISION_BLOCK_SIZE = 2
 
@@ -91,27 +91,22 @@ ASCENDANCE_DIR = 'ascendance/'
 ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, dict[CharacterType, dict[CharacterState, str]]]] = {
     party: (
         {
-            **{
-                AscendanceType.ARMOR: {
-                    character: {
-                        state: os.path.join(
-                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_ARMOR_IMAGE[(character, state)]) for state in CharacterState
-                    } for character in CharacterType
-                }
-            },
-            **{
-                AscendanceType.CROWN: {
-                    character: {
-                        state: os.path.join(
-                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character]) for state in CharacterState
-                    } for character in CharacterType
-                }
-            }
+            character: {
+                state: {
+                    AscendanceType.ARMOR: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_ARMOR_IMAGE[(
+                            character, state)]
+                    ),
+                    AscendanceType.CROWN: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character]
+                    )
+                } for state in CharacterState
+            } for character in CharacterType
         }
     ) for party in PartyType if party is not PartyType.NEUTRAL
 }
 """
-structure: ASCENDANCE_IMAGE[party][ascendance][character][state]
+structure: ASCENDANCE_IMAGE[party][character][state][ascendance]
 """
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
@@ -152,15 +147,15 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
 structure: ENTITY_IMAGE[party][entity][state]
 """
 # Size for showing
-ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
+ENTITY_SIZE: dict[EntityType, dict[EntityState, tuple[float, float]]] = {
     **{character: {
-        state: 6.25 for state in CharacterState
+        state: (9, 12) for state in CharacterState
     } for character in CharacterType},
     **{tower: {
-        None: 10
+        None: (20, 12)
     } for tower in TowerType},
     **{bullet: {
-        None: 2,
+        None: (4, 4),
     } for bullet in BulletType}
 }
 """

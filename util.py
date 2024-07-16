@@ -5,6 +5,7 @@ import os
 import sys
 
 import cv2
+import numpy as np
 import pygame as pg
 
 
@@ -80,13 +81,17 @@ def load_image(filepath: str, width: int, height: int) -> tuple[pg.Surface, pg.V
     Return the image and the left top position of the result surface.
     This function WON'T ignore transparent part of the image.
     """
-    assert isinstance(width, int) and isinstance(height, int)
+    assert isinstance(width, int) and isinstance(height, int), 'width, height must be int'
+    assert os.path.exists(filepath), f'{filepath} does not exist'
     loaded_image = cv2.imread(
         filepath, cv2.IMREAD_UNCHANGED
     )
     loaded_image = cv2.resize(
         loaded_image, (width, height), interpolation=cv2.INTER_AREA
     )
+    if loaded_image.dtype == np.uint16:
+        loaded_image = (loaded_image / 256).astype(np.uint8)
+        # for boundingRect
     x, y, w, h = cv2.boundingRect(loaded_image[..., 3])
     picture = pg.image.load(filepath).convert_alpha()
     picture = pg.transform.scale(picture, (width, height))
