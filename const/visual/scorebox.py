@@ -12,4 +12,4 @@ SCOREBOX_ICON_NEUTRALTOWER = "./image/entity/neutral/tower/neutral_hotel.png"
 SCOREBOX_ICON_UNIT = "./image/icon/human.png"
 SCOREBOX_ICON_DEAD = "./image/icon/dead.png"
 SCOREBOX_ICON_KILL = "./image/icon/knife.png"
-FROZEN_TIME = 150
+FROZEN_TIME = 10

@@ -99,6 +99,7 @@ class Model:
         self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
+        self.frozened: bool = False
 
         self.result: Result = Result(len(model_arguments.team_controls))
         self.pause_menu: PauseMenu = PauseMenu()
@@ -258,6 +259,8 @@ class Model:
                 self.result.update()
                 fps = const.RESULT_SCREEN_FPS
             self.dt = self.global_clock.tick(fps) / 1000
+            if not self.frozened and self.scoreboard_frozen and self.get_time() >= const.FROZEN_TIME:
+                self.frozened = True
 
     def __handle_quit(self, _: EventQuit):
         """
