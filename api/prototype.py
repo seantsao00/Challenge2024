@@ -427,3 +427,12 @@ class API:
         傳送聊天室訊息，每個 `every_tick` 的呼叫當中只能傳送一次。回傳值為傳送成功或失敗。每一次訊息成功傳送後要等待一秒才能傳送下一則訊息。
         @msg: 要傳送的訊息，長度如果超過 30 後面的文字會被忽略、不得包含 NULL 字元。部分字元可能會因為字體無法顯示。
         """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_chat_history(self, num: int = 15) -> list[tuple[int, str]]:
+        """
+        回傳最近的聊天室訊息。回傳值的`list`存有 `(team.id, msg)`，並從最新排到最舊。
+        @num: 要取得幾則訊息，預設為15。若訊息數量少於指定數目，會回傳所有訊息(可能會是空list)。若 num 為 0，則回傳所有訊息。
+        """
+        raise NotImplementedError

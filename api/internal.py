@@ -594,6 +594,10 @@ class Internal(prototype.API):
         get_model().chat.send_comment(team=self.__team(), text=msg)
         return True
 
+
+    def get_chat_history(self, num: int = 15) -> list[tuple[int, str]]:
+        return get_model().chat.get_comment_history(num)[::-1]
+    
     def get_map_name(self) -> str:
         return get_model().map.name
 
