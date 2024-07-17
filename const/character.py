@@ -34,7 +34,7 @@ class CharacterAttribute(LivingEntityAttribute):
     ability_cd: float | None
     ability_variables: Any | None
     crown_ascendance_threshold: float
-    armor_show_time: float
+    armor_show_time: float | None
 
 
 class CharacterState(Enum):
@@ -52,7 +52,7 @@ MELEE_ATTRIBUTE = CharacterAttribute(
     attack_speed=1,
     ability_variables=3,
     crown_ascendance_threshold=720,
-    armor_show_time=0
+    armor_show_time=None
     # damage per second = 36
 )
 
