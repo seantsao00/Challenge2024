@@ -4,6 +4,7 @@ The module defines the main game engine.
 from __future__ import annotations
 
 import os.path
+import random
 import threading
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -98,6 +99,8 @@ class Model:
         self.__tower: list[Tower] = []
         self.__team_thread: list[threading.Thread] = [None] * len(model_arguments.team_controls)
         self.__team_files_names: list[str] = model_arguments.team_controls
+        self.rng = random.Random()
+        """Random number generator. This is used to patch potential RNG manipulation."""
         self.show_view_range: bool = model_arguments.show_view_range
         self.show_attack_range: bool = model_arguments.show_attack_range
         self.show_path: bool = model_arguments.show_path

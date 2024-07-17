@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import os
+import random
 from enum import Enum, auto
 from math import cos, sin
-from random import getrandbits, uniform
 
 import pygame as pg
 
@@ -36,6 +36,9 @@ RESULT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
 RESULT_INITIAL_POSITION: pg.Vector2 = pg.Vector2(-300, -300)
 RESULT_FINAL_POSITION: pg.Vector2 = pg.Vector2(1000, 1000)
 
+__rng = random.Random()
+"""Random number generator. This is used to patch potential RNG manipulation."""
+
 
 class ScopeStatus(Enum):
     WAITING_INPUT = auto()
@@ -56,13 +59,13 @@ WANDERING_SHIFT: pg.Vector2 = (3, 6)
 
 
 def interval_wandering() -> float:
-    return uniform(3.0, 5.0)
+    return __rng.uniform(3.0, 5.0)
 
 
 def is_final_wandering(num_teams: int) -> bool:
     if num_teams == 1:
         return False
-    return bool(getrandbits(1))
+    return bool(__rng.getrandbits(1))
 
 
 def wandering_formula(t: float) -> pg.Vector2:

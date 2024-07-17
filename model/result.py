@@ -1,5 +1,4 @@
 from math import pi
-from random import getrandbits
 
 import pygame as pg
 
@@ -31,7 +30,7 @@ class Result:
         model = get_model()
         self.__rank_of_teams = sorted(model.teams, key=lambda team: team.points)
         if self.__final_wandering_parameter:
-            if bool(getrandbits(1)):
+            if bool(get_model().__rng.getrandbits(1)):
                 target: Team = self.__rank_of_teams[self.__number_of_teams - 1]
             else:
                 target: Team = self.__rank_of_teams[self.__number_of_teams - 2]

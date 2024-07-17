@@ -21,6 +21,10 @@ class Map:
     neutral_towers: list[tuple[tuple[int, int], const.TowerType]]
     map_dir: str
 
+    def __post_init__(self):
+        self.__rng = random.Random()
+        """Random number generator. This is used to patch potential RNG manipulation."""
+
     def position_to_cell(self, position: pg.Vector2) -> tuple[int, int]:
         """
         Return the coordinate based on self.size of position.
@@ -96,13 +100,13 @@ class Map:
         Return a random position in map that is not of type "obstacle"
         """
         ret = pg.Vector2(
-            random.randint(r, const.ARENA_SIZE[0] - r),
-            random.randint(r, const.ARENA_SIZE[1] - r),
+            self.__rng.randint(r, const.ARENA_SIZE[0] - r),
+            self.__rng.randint(r, const.ARENA_SIZE[1] - r),
         )
         while not self.is_position_passable(ret):
             ret = pg.Vector2(
-                random.randint(r, const.ARENA_SIZE[0] - r),
-                random.randint(r, const.ARENA_SIZE[1] - r),
+                self.__rng.randint(r, const.ARENA_SIZE[0] - r),
+                self.__rng.randint(r, const.ARENA_SIZE[1] - r),
             )
         return ret
 
