@@ -42,7 +42,9 @@ class Strategy:
             scores.append(self.api.get_score_of_team(team_id))
             
         if (self.api.get_score_of_team(self.my_team_id) == min(scores)):
-            self.api.send_chat(random.choice(["喜歡你的第一年我還沒有告白"]))  
+            self.api.send_chat(random.choice(["⁶⁶  ⁶⁶⁶⁶⁶⁶  ⁶⁶66⁶⁶⁶⁶  ₆₆₆刷一整排₆₆₆₆", 
+                                              "E拉過來A接W接外圈刮，五層血怒，一刀劈死。", 
+                                              "你覺得這個遊戲有什麼問題？, ☑我不喜歡自己出現在上面"]))  
                  
         elif (self.api.get_score_of_team(self.my_team_id) == max(scores)):
             self.api.send_chat(random.choice(["我只能永遠讀著對白，讀著我給你的傷害", "發動精神攻擊", "家人們點個讚", "素質真高"]))
