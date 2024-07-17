@@ -9,18 +9,18 @@ import pygame as pg
 from api.prototype import *
 
 
-def assign_random_destination(character: Character, interface: API):
+def assign_random_destination(character: Character, api: API):
     """指定一個還沒有開視野的隨機位置給 character ，且這個位置不是障礙物。"""
-    new_destination = pg.Vector2(random.uniform(0, interface.get_grid_size() - 1),
-                                 random.uniform(0, interface.get_grid_size() - 1))
+    new_destination = pg.Vector2(random.uniform(0, api.get_grid_size() - 1),
+                                 random.uniform(0, api.get_grid_size() - 1))
     i = 0
-    while interface.is_visible(new_destination) or interface.get_terrain(new_destination) is MapTerrain.OBSTACLE:
-        new_destination = pg.Vector2(random.uniform(0, interface.get_grid_size() - 1),
-                                     random.uniform(0, interface.get_grid_size() - 1))
+    while api.is_visible(new_destination) or api.get_terrain(new_destination) is MapTerrain.OBSTACLE:
+        new_destination = pg.Vector2(random.uniform(0, api.get_grid_size() - 1),
+                                     random.uniform(0, api.get_grid_size() - 1))
         i += 1
         if i == 10:  # 最多嘗試 10 次
             break
-    interface.action_move_to(character, new_destination)
+    api.action_move_to(character, new_destination)
 
 
 def every_tick(interface: API):
