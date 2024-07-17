@@ -187,6 +187,11 @@ class EventRangedBulletDamage(BaseEvent):
 
 
 @dataclass(kw_only=True)
+class EventSniperBulletParticle(BaseEvent):
+    bullet: BulletCommon
+
+
+@dataclass(kw_only=True)
 class EventBulletDisappear(BaseEvent):
     bullet: Bullet
 
@@ -197,8 +202,13 @@ class EventViewChangeTeam(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventViewTrajectorySwitch(BaseEvent):
-    """Event to turn on and off trajectory"""
+class EventViewPathSwitch(BaseEvent):
+    """Event to turn on and off path"""
+
+
+@dataclass(kw_only=True)
+class EventViewShowRangeSwitch(BaseEvent):
+    """Event to turn on and off show range"""
 
 
 @dataclass(kw_only=True)
@@ -228,3 +238,28 @@ class EventGetAscendance(BaseEvent):
 class EventLostAscendance(BaseEvent):
     character: Character
     ascendance: const.AscendanceType
+
+
+@dataclass(kw_only=True)
+class EventLoadUpdate(BaseEvent):
+    msg: str
+
+
+@dataclass(kw_only=True)
+class EventResultChoseCharacter(BaseEvent):
+    """ In result, second to fourth place are chosen."""
+
+
+@dataclass(kw_only=True)
+class EventResultWandering(BaseEvent):
+    """ In result, scope left characters and start wandering."""
+
+
+@dataclass(kw_only=True)
+class EventResultChamp(BaseEvent):
+    """ In result, the champion is announced."""
+
+
+@dataclass(kw_only=True)
+class EventNyanCat(BaseEvent):
+    """What is this?"""

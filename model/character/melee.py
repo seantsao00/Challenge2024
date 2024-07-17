@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -74,7 +75,7 @@ class Melee(Character):
         now_time = get_model().get_time()
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
-        log_info("[Melee] Cast ability")
+        log_info(f"[Melee] {self} Cast ability")
         self.abilities_time = now_time
         self.ascendance.add(const.AscendanceType.ARMOR)
         self.ability()
@@ -84,4 +85,5 @@ class Melee(Character):
 
     def ability(self):
         self.__defense = const.MELEE_ATTRIBUTE.ability_variables
-        self.abilities_time = 1e9
+        self.abilities_time = math.inf
+        # ability will disappear after the melee is hit self.__defense times.

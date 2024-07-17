@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from instances_manager import get_model
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
 
@@ -20,8 +21,10 @@ class RangeView(EntityObject):
         self.color = None
 
     def draw(self):
-        position = ScreenInfo.resize_ratio*self.entity.position
-        pg.draw.circle(self.canvas, self.color, position, self.radius, width=2)
+        model = get_model()
+        if model.show_range:
+            position = ScreenInfo.resize_ratio*self.entity.position
+            pg.draw.circle(self.canvas, self.color, position, self.radius, width=2)
 
 
 class AttackRangeView(RangeView):

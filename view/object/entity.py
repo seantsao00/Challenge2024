@@ -54,7 +54,6 @@ class EntityView(EntityObject):
         img, displacement = load_image(const.ENTITY_IMAGE[party][character_type][state], w, h)
         surface.blit(img, displacement)
         for ascendance in ascendance_set:
-            print(party, character_type, state, ascendance, w, h)
             img, displacement = load_image(
                 const.ASCENDANCE_IMAGE[party][character_type][state][ascendance], w, h)
             surface.blit(img, displacement)

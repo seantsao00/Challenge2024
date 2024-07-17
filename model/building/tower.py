@@ -54,6 +54,7 @@ class Tower(LivingEntity):
         ]
         """Grids that can spawn characters for this tower."""
 
+        self.attribute: const.TowerAttribute
         if self.__is_fountain:
             super().__init__(position, const.FOUNTAIN_ATTRIBUTE,
                              team, tower_type, invulnerability=True)
@@ -68,10 +69,12 @@ class Tower(LivingEntity):
         if self.team.party is not const.PartyType.NEUTRAL:
             self.last_generate = get_model().get_time()
             get_event_manager().post(EventTeamGainTower(tower=self), self.team.team_id)
+        else:
+            self.health = const.NEUTRAL_TOWER_ATTRIBUTE.neautral_initial_health
         get_event_manager().post(EventCreateTower(tower=self))
 
     def __str__(self):
-        return f'tower {self.id} (team {self.team.team_id})'
+        return f'tower {self.id} (team {self.team.team_id + 1})'
 
     def update_period(self):
         self.period = const.count_period_ms(len(self.team.character_list))

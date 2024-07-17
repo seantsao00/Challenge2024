@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
+from event_manager import EventLoadUpdate
+from instances_manager import get_event_manager
 from util import crop_image, transform_coordinate
 from view.object.object_base import ObjectBase
 from view.screen_info import ScreenInfo
@@ -25,6 +27,8 @@ class PartySelectorView(ObjectBase):
         super().__init__(canvas, [const.PRIORITY_PARTY_SELECTOR])
         self.__party_selector = party_selector
         self.__font = font_loader.get_font(size=12)
+        self.__msg = 'Press SPACE/ENTER to continue'
+        get_event_manager().register_listener(EventLoadUpdate, self.update_load)
 
     @classmethod
     def init_convert(cls):
@@ -45,6 +49,9 @@ class PartySelectorView(ObjectBase):
 
         cls.image_initialized = True
 
+    def update_load(self, e: EventLoadUpdate):
+        self.__msg = e.msg
+
     def draw(self):
         img = self.bottom_image
         self.canvas.blit(img, (0, 0))
@@ -61,6 +68,5 @@ class PartySelectorView(ObjectBase):
 
         img = self.background_image
         self.canvas.blit(img, (0, 0))
-        if self.__party_selector.is_ready():
-            draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
-                      40, 'Press SPACE to continue', 'white', self.__font)
+        draw_text(self.canvas, ScreenInfo.screen_size[0] / 2, ScreenInfo.screen_size[1] -
+                  40, self.__msg, 'white', self.__font)

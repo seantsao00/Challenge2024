@@ -6,7 +6,7 @@
         [20, 20], [20, 230], [230, 20], [230, 230]
     ],
     "neutral_towers": [
-        [94, 151, "pylon"]
+        [96, 150, "pylon"], [115, 40, "hotel"], [183, 155, "ferris_wheel"]
     ],
     "images": {
         "backgrounds": ["background.png", "buildings/building6.png", "buildings/building7.png"],
@@ -14,7 +14,9 @@
         {
             "buildings/building1.png": 230,
             "buildings/building2.png": 67,
-            "buildings/building3.png": 65,
+            "buildings/building3_left.png": 60,
+            "buildings/building3_center.png": 64,
+            "buildings/building3_right.png": 69,
             "buildings/building4.png": 206,
             "buildings/building5.png": 127,
             "trees/tree1.png": 42,

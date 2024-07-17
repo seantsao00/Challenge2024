@@ -19,7 +19,8 @@ ATTACK_RANGE_COLOR = 'red'
 VIEW_RANGE_COLOR = 'blue'
 CD_BAR_COLOR = 'blue'
 # open for color recommandation
-HEALTH_BAR_COLOR = ['yellow', 'green', 'orange', 'violet', 'red']
+# HEALTH_BAR_COLOR = ['yellow', 'paleturquoise2', 'orange', 'violet']
+HEALTH_BAR_COLOR = [(255, 255, 0), (175, 238, 238), (255, 165, 0), (238, 130, 238)]
 
 HEALTH_BAR_UPPER = pg.Vector2(0, -6)
 CD_BAR_UPPER = pg.Vector2(0, -4)
@@ -164,7 +165,7 @@ structure: ENTITY_SIZE[entity][state]
 # Size for clicking
 CLICK_SIZE: dict[EntityType, dict[EntityState, int]] = {
     **{character: {
-        None: 6.25
+        state: 6.25 for state in CharacterState
     } for character in CharacterType},
     **{tower: {
         None: 20
@@ -178,5 +179,5 @@ structure: CLICK_SIZE[entity][state]
 DRAW_DISPLACEMENT = pg.Vector2(0, -3.125)
 DRAW_DISPLACEMENT_Y = -3.125
 
-TRAJECTORY_WIDTH = 6
+PATH_WIDTH = 6
 DESTINATION_RADIUS = 8
