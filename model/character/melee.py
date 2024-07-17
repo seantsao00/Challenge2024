@@ -54,6 +54,8 @@ class Melee(Character):
             self.__defense -= 1
             if self.__defense == 0:
                 self.abilities_time = get_model().get_time()
+                if const.AscendanceType.ARMOR in self.ascendance:
+                    self.ascendance.remove(const.AscendanceType.ARMOR)
         else:
             new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
@@ -74,6 +76,7 @@ class Melee(Character):
             return
         log_info("[Melee] Cast ability")
         self.abilities_time = now_time
+        self.ascendance.add(const.AscendanceType.ARMOR)
         self.ability()
 
     def manual_cast_ability(self, *args, **kwargs):

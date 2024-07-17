@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventBulletCreate, EventUseRangerAbility
+from event_manager import EventBulletCreate, EventLostAscendance, EventUseRangerAbility
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon, BulletRanger
 from model.character.character import Character
@@ -28,6 +28,7 @@ class Ranger(Character):
                          const.CharacterType.RANGER, const.CharacterState.LEFT)
         get_event_manager().register_listener(EventUseRangerAbility,
                                               listener=self.use_ability, channel_id=self.id)
+        get_event_manager().register_listener(EventLostAscendance, self.handler_lost_ascendance)
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
@@ -85,3 +86,7 @@ class Ranger(Character):
                               team=self.team,
                               attacker=self)
         get_event_manager().post(EventBulletCreate(bullet=bullet))
+
+    def handler_lost_ascendance(self, event: EventLostAscendance):
+        if const.AscendanceType.ARMOR in self.ascendance:
+            self.ascendance.remove(const.AscendanceType.ARMOR)

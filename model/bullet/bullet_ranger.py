@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventEveryTick, EventRangedBulletDamage
+from event_manager import EventEveryTick, EventLostAscendance, EventRangedBulletDamage
 from instances_manager import get_event_manager, get_model
 from model.bullet.bullet import Bullet
 
@@ -39,6 +39,7 @@ class BulletRanger(Bullet):
         model = get_model()
         if (target_pos - original_pos).length() <= self.speed * model.dt:
             get_event_manager().post(EventRangedBulletDamage(bullet=self))
+            get_event_manager().post(EventLostAscendance(character=self.attacker, ascendance=const.AscendanceType.ARMOR))
         else:
             self.position += self.direction * self.speed * model.dt
             self.view_rotate = self.direction.angle_to(pg.Vector2(-1, 0))

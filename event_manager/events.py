@@ -216,3 +216,15 @@ class EventSendChat(BaseEvent):
     type: const.ChatMessageType
     team: Team
     text: str
+
+
+@dataclass(kw_only=True)
+class EventGetAscendance(BaseEvent):
+    character: Character
+    ascendance: const.AscendanceType
+
+
+@dataclass(kw_only=True)
+class EventLostAscendance(BaseEvent):
+    character: Character
+    ascendance: const.AscendanceType
