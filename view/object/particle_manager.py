@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import math
 import random
+from typing import TYPE_CHECKING
 
 import pygame as pg
 
@@ -9,6 +12,9 @@ from instances_manager import get_event_manager
 from util import clamp
 from view.object.particle import Particle
 from view.screen_info import ScreenInfo
+
+if TYPE_CHECKING:
+    from model import Team
 
 
 class ParticleManager:
@@ -41,7 +47,7 @@ class ParticleManager:
                       clamp(color[1] + random.randint(-20, 20), 0, 255),
                       clamp(color[2] + random.randint(-20, 20), 0, 255))
 
-            self.__particles.add(Particle(self.__canvas, _pos, _direction,
+            self.__particles.add(Particle(self.__canvas, pos, _pos, _direction,
                                           _speed, _size, _duration, _color))
 
     def __handle_bullet_explode(self, event: EventBulletExplode):
@@ -72,9 +78,12 @@ class ParticleManager:
                       clamp(color[1] + random.randint(-20, 20), 0, 255),
                       clamp(color[2] + random.randint(-20, 20), 0, 255))
 
-            self.__particles.add(Particle(self.__canvas, _pos, _direction,
+            self.__particles.add(Particle(self.__canvas, pos, _pos, _direction,
                                           _speed, _size, _duration, _color))
 
-    def draw(self):
+    def draw(self, check_vision: bool = False, team: Team | None = None):
         for p in self.__particles:
-            p.draw()
+            if not check_vision:
+                p.draw()
+            elif check_vision and team.vision.entity_inside_vision(p):
+                p.draw()

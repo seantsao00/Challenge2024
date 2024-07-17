@@ -201,8 +201,11 @@ class View:
         self.__chat.update()
         self.__chat.draw()
         self.__clock.draw()
-
-        self.__particle_manager.draw()
+        if self.vision_of == 0:
+            self.__particle_manager.draw()
+        else:
+            team = model.teams[self.vision_of - 1]
+            self.__particle_manager.draw(check_vision=True, team=team)
 
         self.__nyan_view.draw()
 
