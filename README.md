@@ -4,8 +4,7 @@
 
 ## Document
 
-- [遊戲簡介](https://hackmd.io/@shimeming/challenge2024description)
-- [API 文件](https://hackmd.io/@seantsao00/challenge_2024_api)
+- [遊戲簡介](https://hackmd.io/@shimeming/Challenge2024-public)
 
 ## Virtual Environment
 
@@ -50,7 +49,7 @@ VScode 使用者推薦使用這個 [extension](https://marketplace.visualstudio.
 isort .
 ```
 
-## 提醒事項
+## Reminders
 
 - 在 Windows 使用 `python`，在 MacOS/Linux 使用 `python3`。
 

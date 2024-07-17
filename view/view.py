@@ -7,8 +7,8 @@ import os
 import pygame as pg
 
 import const
-from event_manager import (EventCreateEntity, EventInitialize, EventUnconditionalTick,
-                           EventViewChangeTeam, EventViewPathSwitch)
+from event_manager import (EventCreateEntity, EventInitialize, EventLoadUpdate,
+                           EventUnconditionalTick, EventViewChangeTeam, EventViewPathSwitch)
 from instances_manager import get_event_manager, get_model
 from util import load_image
 from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, ChatView, ClockView,
@@ -16,7 +16,6 @@ from view.object import (AbilitiesCDView, AttackRangeView, BackgroundObject, Cha
                          PartySelectorView, PathView, PauseMenuView, ResultView, ScoreboardView,
                          TowerCDView, ViewRangeView)
 from view.screen_info import ScreenInfo
-from view.textutil import font_loader
 
 
 class View:
@@ -128,10 +127,12 @@ class View:
             self.__render_party_selector()
         elif model.state is const.State.PLAY or model.state is const.State.PAUSE:
             self.__render_play()
-        elif model.state is const.State.SELECT_PARTY:
-            self.__render_party_selector()
         elif model.state is const.State.RESULT:
             self.render_result()
+        pg.display.flip()
+
+    def handle_loading(self, _: EventLoadUpdate):
+        self.__render_party_selector()
         pg.display.flip()
 
     def __render_cover(self):
@@ -220,6 +221,7 @@ class View:
         ev_manager.register_listener(EventInitialize, self.initialize)
         ev_manager.register_listener(EventUnconditionalTick, self.handle_unconditional_tick)
         ev_manager.register_listener(EventCreateEntity, self.handle_create_entity)
+        ev_manager.register_listener(EventLoadUpdate, self.handle_loading)
         ev_manager.register_listener(EventViewChangeTeam, self.change_vision_of)
         ev_manager.register_listener(EventViewPathSwitch, self.change_path_enable)
 

@@ -15,7 +15,7 @@ _cache_avatar_img: dict[const.team.PartyType, pg.Surface] = {}
 _cache_avatar: dict[tuple[int, int], pg.Surface] = {}
 
 
-def _getAvatarImage(party: const.team.PartyType):
+def _get_avatar_image(party: const.team.PartyType):
     if party in _cache_avatar_img:
         return _cache_avatar_img[party]
 
@@ -35,11 +35,11 @@ def _getAvatarImage(party: const.team.PartyType):
     return avatar_img
 
 
-def _getTeamAvatar(team: Team, size: int):
+def _get_team_avatar(team: Team, size: int):
     if (team, size) in _cache_avatar:
         return _cache_avatar[(team, size)]
 
-    avatar_img = _getAvatarImage(team.party)
+    avatar_img = _get_avatar_image(team.party)
     avatar = pg.Surface((size, size), pg.SRCALPHA)
 
     # resize and crop unwanted parts
@@ -63,13 +63,13 @@ def _getTeamAvatar(team: Team, size: int):
     return avatar
 
 
-def createTeamAvatar(team: Team, size: int) -> pg.Surface:
+def create_team_avatar(team: Team, size: int) -> pg.Surface:
     if not isinstance(size, int):
         raise ValueError("Avatar size must be a ineteger")
-    return _getTeamAvatar(team, size)
+    return _get_team_avatar(team, size)
 
 
-def createTextBox(text: str, color: pg.Color, font: pg.font.Font, width: float) -> pg.Surface:
+def create_text_box(text: str, color: pg.Color, font: pg.font.Font, width: float) -> pg.Surface:
     line_height = font.get_linesize()
     lines = split_text(text, font, width)
     height = line_height * len(lines)
@@ -85,7 +85,7 @@ _cache_icon_img: dict[str, pg.Surface] = {}
 _cache_icon: dict[tuple[str, float], pg.Surface] = {}
 
 
-def _getIconImage(file_path: str):
+def _get_icon_image(file_path: str):
     if file_path in _cache_icon_img:
         return _cache_icon_img[file_path]
     img = pg.image.load(file_path)
@@ -93,10 +93,10 @@ def _getIconImage(file_path: str):
     return img
 
 
-def _getIcon(file_path: str, icon_height: float):
+def _get_icon(file_path: str, icon_height: float):
     if (file_path, icon_height) in _cache_icon:
         return _cache_icon[(file_path, icon_height)]
-    img = _getIconImage(file_path)
+    img = _get_icon_image(file_path)
     w, h = img.get_size()
     ratio = icon_height / h
     icon = pg.transform.scale(img, (w * ratio, h * ratio))
@@ -104,8 +104,8 @@ def _getIcon(file_path: str, icon_height: float):
     return icon
 
 
-def createIcon(file_path: str, icon_height: float) -> pg.Surface:
+def create_icon(file_path: str, icon_height: float) -> pg.Surface:
     """
     Load and scale an icon to specified height
     """
-    return _getIcon(file_path, icon_height)
+    return _get_icon(file_path, icon_height)

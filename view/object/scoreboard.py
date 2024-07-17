@@ -3,7 +3,7 @@ import pygame as pg
 import const
 from const.visual.scorebox import *
 from instances_manager import get_model
-from model.building.tower import Tower
+# from model.building.tower import Tower
 from model.team import Team
 from view.object import components
 from view.object.animation import LinearAnimation
@@ -20,33 +20,42 @@ class Scorebox:
             name=SCOREBOX_SECONDARY_FONT, size=SCOREBOX_FONT_SIZE_SECONDARY)
         self.__team = team
         self.__team_stats = self.__team.stats
-        self.__team_name_surface = self.font_primary.render(
-            f"{self.__team.team_name}", False, 'black')
-        self.__team_avatar = components.createTeamAvatar(
+        self.__team_avatar = components.create_team_avatar(
             self.__team, int(SI.scale(SCOREBOX_AVATAR_SIZE)))
         self.__position_x = initial_position[0]
         self.__position_y = LinearAnimation(
             initial_position[1], SCOREBOX_ANIMATION_DURATION)
 
+        # team name
+        self.__team_name_surface = self.font_primary.render(
+            f"{self.__team.team_name}", False, 'black')
+        self.team_name_rect = self.__team_name_surface.get_rect(
+            bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
+
+        # background of the team name, fill team name bg surface
+        self.__team_name_bg_surface = pg.Surface(self.__team_name_surface.get_size(), pg.SRCALPHA)
+        team_name_bg_surface = self.__team_name_bg_surface.get_rect()
+        self.__team_name_bg_surface.fill(pg.Color(239, 192, 131, 150))
+
+        # team coler underscore
+        def offset(p):
+            return (p[0], p[1] + self.font_primary.get_descent())
+        pg.draw.line(self.__team_name_bg_surface, const.HEALTH_BAR_COLOR[self.__team.team_id], \
+                    offset(team_name_bg_surface.bottomleft), offset(team_name_bg_surface.bottomright) , width=8)
+
+
     def draw(self, canvas: pg.Surface):
         model = get_model()
         self.__canvas.fill(pg.Color(0, 0, 0, 0))
+
         # avatar
         self.__canvas.blit(self.__team_avatar, self.__team_avatar.get_rect(
             midleft=SI.scale((3, 12))))
-        # team name
-        team_name_rect = self.__team_name_surface.get_rect(
-            bottomright=(SI.scale((SCOREBOX_WIDTH - 5, 12))))
 
-        def offset(p): return (p[0], p[1] + self.font_primary.get_descent())
-        # background of the team name, draw a line of background color
-        pg.draw.line(self.__canvas, (239, 192, 131),
-                     offset((team_name_rect.bottomleft[0], team_name_rect.bottomleft[1] - 9)),
-                     offset((team_name_rect.bottomright[0], team_name_rect.bottomright[1] - 9)), width=27)
-        # team coler underscore
-        pg.draw.line(self.__canvas, const.HEALTH_BAR_COLOR[self.__team.team_id], offset(
-            team_name_rect.bottomleft), offset(team_name_rect.bottomright), width=8)
-        self.__canvas.blit(self.__team_name_surface, team_name_rect)
+        # team name, it's bg and it's underscore
+        self.__canvas.blit(self.__team_name_bg_surface, self.team_name_rect)
+        self.__canvas.blit(self.__team_name_surface, self.team_name_rect)
+
         # score
         if model.frozen:
             score_text = self.font_primary.render('???', False, 'black')
@@ -61,13 +70,13 @@ class Scorebox:
 
         for tower in self.__team.towers:
             if not tower.is_fountain:
-                tower_icon = components.createIcon(
+                tower_icon = components.create_icon(
                     const.ENTITY_IMAGE[self.__team.party][tower.tower_type][None], SI.scale(SCOREBOX_ICON_SIZE))
                 self.__canvas.blit(tower_icon, tower_icon.get_rect(midright=midright))
                 midright = (midright[0] - SI.scale(4), midright[1])
 
-        def blitIconAndText(icon_name: str, text_string: str, bottomleft: list[float, float], width: float):
-            icon = components.createIcon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))
+        def blit_icon_and_text(icon_name: str, text_string: str, bottomleft: list[float, float], width: float):
+            icon = components.create_icon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))
             text = self.font_secondary.render(text_string, True, 'black')
             height = max(icon.get_size()[1], text.get_size()[1])
             self.__canvas.blit(icon, icon.get_rect(
@@ -78,23 +87,23 @@ class Scorebox:
         # unit count
         bottomleft = SI.scale([0, SCOREBOX_HEIGHT])
         if model.frozen:
-            blitIconAndText(SCOREBOX_ICON_UNIT, '???', bottomleft, field_width)
+            blit_icon_and_text(SCOREBOX_ICON_UNIT, '???', bottomleft, field_width)
             # kill count
             bottomleft[0] += field_width
-            blitIconAndText(SCOREBOX_ICON_KILL, '???', bottomleft, field_width)
+            blit_icon_and_text(SCOREBOX_ICON_KILL, '???', bottomleft, field_width)
             # dead count
             bottomleft[0] += field_width
-            blitIconAndText(SCOREBOX_ICON_DEAD, '???', bottomleft, field_width)
+            blit_icon_and_text(SCOREBOX_ICON_DEAD, '???', bottomleft, field_width)
         else:
-            blitIconAndText(SCOREBOX_ICON_UNIT, str(
+            blit_icon_and_text(SCOREBOX_ICON_UNIT, str(
                 self.__team_stats.units_alive), bottomleft, field_width)
             # kill count
             bottomleft[0] += field_width
-            blitIconAndText(SCOREBOX_ICON_KILL, str(
+            blit_icon_and_text(SCOREBOX_ICON_KILL, str(
                 self.__team_stats.units_killed), bottomleft, field_width)
             # dead count
             bottomleft[0] += field_width
-            blitIconAndText(SCOREBOX_ICON_DEAD, str(
+            blit_icon_and_text(SCOREBOX_ICON_DEAD, str(
                 self.__team_stats.units_dead), bottomleft, field_width)
 
         # actually draw the box onto the screen

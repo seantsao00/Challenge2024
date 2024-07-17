@@ -14,8 +14,10 @@
         {
             "mountains/mountain1.png": 162,
             "mountains/mountain2.png": 100,
-            "bridges/bridge1_front.png": 146,
-            "bridges/bridge2_front.png": 139
+            "bridges/bridge1_left.png": 142,
+            "bridges/bridge1_right.png": 147,
+            "bridges/bridge2_left.png": 133,
+            "bridges/bridge2_right.png": 140
         }
     }
 }

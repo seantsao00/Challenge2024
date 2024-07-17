@@ -20,7 +20,8 @@ import model.chat
 import model.path_finder
 from api import prototype
 from const import DECISION_TICKS, FPS, MAX_TEAMS
-from instances_manager import get_model
+from event_manager import EventLoadUpdate
+from instances_manager import get_event_manager, get_model
 from model.character.character import CharacterMovingState
 from util import log_critical, log_warning
 
@@ -672,6 +673,8 @@ ai = [None] * len(helpers)
 
 def load_ai(files: list[str]):
     """Load AI modules."""
+    total = len(files)
+    get_event_manager().post(EventLoadUpdate(msg=f'Loading AI 0/{total}'))
     for i, file in enumerate(files):
         if file == 'human':
             continue
@@ -679,6 +682,7 @@ def load_ai(files: list[str]):
         ai[i] = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(ai[i])
         helpers[i].post_init()
+        get_event_manager().post(EventLoadUpdate(msg=f'Loading AI {i+1}/{total}'))
 
 
 def threading_ai(team_id: int, helper: Internal, timer: Timer):
