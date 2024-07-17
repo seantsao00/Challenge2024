@@ -12,32 +12,40 @@ def extend_transparent(img_path, direction, extension_size):
     if loaded_image.dtype == np.uint16:
         loaded_image = (loaded_image / 256).astype(np.uint8)
     h, w, _ = loaded_image.shape
-    print(f'origin size: ({w}, {h})')
+    print(f'original size: ({w}, {h})')
 
-    if direction == 'up':
+    if direction in ['up', 'down']:
         new_h, new_w = h + extension_size, w
-    elif direction == 'down':
-        new_h, new_w = h + extension_size, w
-    elif direction == 'left':
-        new_h, new_w = h, w + extension_size
-    elif direction == 'right':
+    elif direction in ['left', 'right']:
         new_h, new_w = h, w + extension_size
     else:
         raise ValueError("Direction must be 'up', 'down', 'left', or 'right'")
 
     # Create a new image with the new dimensions, filled with transparent pixels
-    new_image = np.zeros((new_h, new_w, 4), dtype=np.uint8)
 
-    # Place the original image in the new image based on the direction
-    if direction == 'up':
-        new_image[extension_size:, :] = loaded_image
-    elif direction == 'down':
-        new_image[:h, :] = loaded_image
-    elif direction == 'left':
-        new_image[:, extension_size:] = loaded_image
-    elif direction == 'right':
-        new_image[:, :w] = loaded_image
+    if extension_size >= 0:
+        new_image = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+        # Place the original image in the new image based on the direction
+        if direction == 'up':
+            new_image[extension_size:, :] = loaded_image
+        elif direction == 'down':
+            new_image[:h, :] = loaded_image
+        elif direction == 'left':
+            new_image[:, extension_size:] = loaded_image
+        elif direction == 'right':
+            new_image[:, :w] = loaded_image
+    else:
+        if direction == 'up':
+            new_image = loaded_image[-extension_size:]
+        elif direction == 'down':
+            new_image = loaded_image[:h+extension_size, :]
+        elif direction == 'left':
+            new_image = loaded_image[:, -extension_size:]
+        elif direction == 'right':
+            new_image = loaded_image[:, :w+extension_size]
 
+    h, w, _ = new_image.shape
+    print(f'original size: ({w}, {h})')
     return new_image
 
 
