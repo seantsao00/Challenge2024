@@ -114,7 +114,7 @@ class Character(LivingEntity):
         """
         eps = 1e-8
 
-        if self.__move_path is None or len(self.__move_path) == 0:
+        if len(self.__move_path) == 0:
             return True
 
         it = 0
@@ -164,6 +164,7 @@ class Character(LivingEntity):
             path_finder = get_model().path_finder
         self.__move_path = path_finder.find_path(self.position, destination)
         if self.__move_path is None:
+            self.__move_path = []
             return False
         return True
 
@@ -287,13 +288,13 @@ class Character(LivingEntity):
         return self.__move_direction
 
     @property
-    def move_path(self) -> list[pg.Vector2] | None:
+    def move_path(self) -> list[pg.Vector2]:
         return self.__move_path
 
     @property
     def move_destination(self) -> pg.Vector2 | None:
         if self.__move_state == CharacterMovingState.TO_POSITION or self.__move_state == CharacterMovingState.WANDERING:
-            if self.__move_path != None and len(self.__move_path) > 0:
+            if len(self.__move_path) > 0:
                 return self.__move_path[-1]
             return self.position
         return None
