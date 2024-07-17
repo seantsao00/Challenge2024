@@ -229,18 +229,6 @@ class EventSendChat(BaseEvent):
 
 
 @dataclass(kw_only=True)
-class EventGetAscendance(BaseEvent):
-    character: Character
-    ascendance: const.AscendanceType
-
-
-@dataclass(kw_only=True)
-class EventLostAscendance(BaseEvent):
-    character: Character
-    ascendance: const.AscendanceType
-
-
-@dataclass(kw_only=True)
 class EventLoadUpdate(BaseEvent):
     msg: str
 

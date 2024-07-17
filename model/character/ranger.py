@@ -5,10 +5,11 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from event_manager import EventBulletCreate, EventLostAscendance, EventUseRangerAbility
+from event_manager import EventBulletCreate, EventUseRangerAbility
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon, BulletRanger
 from model.character.character import Character
+from model.timer import Timer
 from util import log_info
 
 if TYPE_CHECKING:
@@ -28,7 +29,6 @@ class Ranger(Character):
                          const.CharacterType.RANGER, const.CharacterState.LEFT)
         get_event_manager().register_listener(EventUseRangerAbility,
                                               listener=self.use_ability, channel_id=self.id)
-        get_event_manager().register_listener(EventLostAscendance, self.handler_lost_ascendance)
 
     def attack(self, enemy: Entity):
         now_time = get_model().get_time()
@@ -58,6 +58,9 @@ class Ranger(Character):
         print(f"[Ranger] {self} casted ability")
         self.abilities_time = now_time
         get_event_manager().post(EventUseRangerAbility(position=target), channel_id=self.id)
+        self.ascendance.add(const.AscendanceType.ARMOR)
+        Timer(interval=self.attribute.armor_show_time,
+              function=self.handler_lost_ascendance, once=True)
 
     def manual_cast_ability(self, *args, **kwargs):
         """
@@ -87,6 +90,6 @@ class Ranger(Character):
                               attacker=self)
         get_event_manager().post(EventBulletCreate(bullet=bullet))
 
-    def handler_lost_ascendance(self, event: EventLostAscendance):
+    def handler_lost_ascendance(self):
         if const.AscendanceType.ARMOR in self.ascendance:
             self.ascendance.remove(const.AscendanceType.ARMOR)
