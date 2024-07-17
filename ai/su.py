@@ -37,13 +37,25 @@ class Strategy:
                                      tower.team_id != self.my_team_id]
         
     def send_spam_message(self):
-        self.api.send_chat(random.choice(["鄭詠堯說你是2486", "發動精神攻擊", "家人們點個讚", "素質真高", "點了吧沒意思"]))
+        scores = []
+        for team_id in range(1, 5):
+            scores.append(self.api.get_score_of_team(team_id))
+            
+        if (self.api.get_score_of_team(self.my_team_id) == min(scores)):
+            self.api.send_chat(random.choice(["喜歡你的第一年我還沒有告白"]))  
+                 
+        elif (self.api.get_score_of_team(self.my_team_id) == max(scores)):
+            self.api.send_chat(random.choice(["我只能永遠讀著對白，讀著我給你的傷害", "發動精神攻擊", "家人們點個讚", "素質真高"]))
+        else:
+            self.api.send_chat(random.choice(["未必，確實，這我", "5/21網路二一節 我依然堅守本群 未曾離開 沒有寫作業",
+                                              "沒了你的生活變得 很枯燥😕 像是皮卡丘 他很浮躁🤬"]))
+        
     def print_scores(self):
         scores = []
-        for team_id in range(0, 4):
-            # scores.append(self.api.get_score_of_team(team_id))
-        # print(scores)
-            pass
+        for team_id in range(1, 5):
+            print(team_id)
+            scores.append(self.api.get_score_of_team(team_id))
+        print(scores)
         
     def get_fountain(self, visible_towers: list[Tower], my_team_id: int):
         for tower in visible_towers:
@@ -136,10 +148,11 @@ class Strategy:
         
     def run(self, api: API):
         self.api = api
-        # self.send_spam_message()
+        self.initialize()
+        self.send_spam_message()
+        
         # self.print_scores()
         
-        self.initialize()
         
         self.handle_spawn()
         self.handle_attack()
