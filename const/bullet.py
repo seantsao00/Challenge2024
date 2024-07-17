@@ -2,7 +2,6 @@
 This module defines constants associated with bullets.
 """
 from enum import Enum, auto
-from typing import TYPE_CHECKING, TypeAlias
 
 
 class BulletType(Enum):

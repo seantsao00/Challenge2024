@@ -61,21 +61,21 @@ def allies_near_tower(tower: Tower, interface: API):
     return near_allies
 
 
-def every_tick(interface: API):
+def every_tick(api: API):
     """
     一定要被實作的 function ，會定期被遊戲 call
     在使用 VS Code 寫 code 的時候可以把滑鼠移到變數、函數上方，看它們的詳細解說。
     在使用 VS Code 寫 code 的時候可以按住 Ctrl 再用滑鼠點擊變數、函數，來跳轉到與它們相關的地方。
     在測試的時候可以只放一隻 ai 、在執行時一次加很多 arguments (如 -qrp)。
     """
-    my_towers = interface.get_owned_towers()
+    my_towers = api.get_owned_towers()
 
     for tower in my_towers:
         if tower.spawn_character_type is not CharacterClass.MELEE:
             # 把塔所生的士兵種類改成近戰，因為近戰走得比較快
-            interface.change_spawn_type(tower, CharacterClass.MELEE)
+            api.change_spawn_type(tower, CharacterClass.MELEE)
 
-    my_characters = interface.get_owned_characters()
+    my_characters = api.get_owned_characters()
     for character in my_characters:  # 用 for 迴圈遍歷所有自己的士兵
         if character.id in Information.destinations:  # 這個士兵曾經被指定過要往哪裡走
             # 士兵沒有辦法走到任意的實數座標上，所以如果用以下註解掉的程式碼判斷是否到達目的地，會覺得士兵永遠沒有走到
@@ -83,13 +83,13 @@ def every_tick(interface: API):
             #     assign_random_destination(character, interface)
             if (character.position - Information.destinations[character.id]).length() < 1:
                 print(f'{character.id} 已經夠接近目的地了')
-                assign_random_destination(character, interface)
+                assign_random_destination(character, api)
         else:  # 這個士兵未曾被指定過要往哪裡走
-            assign_random_destination(character, interface)
+            assign_random_destination(character, api)
 
-    current_time = interface.get_current_time()
+    current_time = api.get_current_time()
     if int(current_time) % 30 == 0 and abs(current_time - Information.last_time_report) > 2:
-        interface.send_chat(f'剩下 {str(180 - int(current_time))} 秒！')
+        api.send_chat(f'剩下 {str(180 - int(current_time))} 秒！')
         Information.last_time_report = int(current_time)
 
     chat_information = [
@@ -142,4 +142,4 @@ def every_tick(interface: API):
     chat_choices = chat_information + chat_guide + chat_other
     # 以 Const.CHAT_PROBABILITY 的機率隨便說說話
     if random.uniform(0, 1) < Const.CHAT_PROBABILITY:
-        interface.send_chat(random.choice(chat_choices))
+        api.send_chat(random.choice(chat_choices))
