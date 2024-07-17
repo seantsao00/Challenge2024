@@ -23,9 +23,8 @@ def extend_transparent(img_path, direction, extension_size):
     else:
         raise ValueError('Direction must be "up", "down", "left", or "right"')
 
-    # Create a new image with the new dimensions, filled with transparent pixels
-
     if extension_size >= 0:
+        # Create a new image with the new dimensions, filled with transparent pixels
         new_image = np.zeros((new_h, new_w, 4), dtype=np.uint8)
         # Place the original image in the new image based on the direction
         if direction == 'up':
@@ -61,18 +60,18 @@ if __name__ == '__main__':
                         help='The length you want to extend. Must be a int. A negative number will result in trimming the image',
                         type=int)
     parser.add_argument('-o', '--output',
-                        help='The name of output the file. Can only be specified when the number of images is one.',
+                        help='If this is not specified, the original image will be replaced. The name of output the file. Can only be specified when the number of images is one.',
                         default=None)
     args = parser.parse_args()
     images, direction, extension_size = args.images, args.direction, args.extension_size
     output_name = args.output
-    images = [file for pattern in images for file in glob.glob(pattern)]
+    images = [file for pattern in images for file in glob.iglob(pattern, recursive=True)]
     if len(images) > 1 and output_name is not None:
         raise ValueError('You should not specify output name when extending multiple images.')
-    print(f'input images: {images}')
     for img in images:
         extended_images = extend_transparent(img, direction, extension_size)
         if output_name is None:
-            cv2.imwrite('extended_image.png', extended_images)
+            print(img)
+            cv2.imwrite(img, extended_images)
         else:
             cv2.imwrite(output_name, extended_images)
