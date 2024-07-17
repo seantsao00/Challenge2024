@@ -120,7 +120,7 @@ class Tower:
         """塔的最大血量。"""
 
         self.team_id = _team_id
-        """塔所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
+        """塔所屬的隊伍編號，編號為 1 至 4 的正整數，或者 5 代表中立。"""
 
 
 class MapTerrain(IntEnum):
