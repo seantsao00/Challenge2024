@@ -80,7 +80,7 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     attack_speed=0.5,
     ability_variables=300,  # damage of ability
     crown_ascendance_threshold=3000,
-    armor_show_time=0
+    armor_show_time=1
     # damage per second = 150
 )
 
