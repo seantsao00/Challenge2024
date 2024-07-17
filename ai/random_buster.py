@@ -1,6 +1,6 @@
 """
 This AI does nothing but keep resetting seeds.
-A thing that is more observable is chat keeps showing the same message (as `random.choice` is begin manipulated.) 
+A thing that is more observable is chat keeps showing the same message (as `random.choice` is being manipulated.) 
 """
 
 import time
