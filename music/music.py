@@ -4,7 +4,7 @@ import const
 from event_manager import (EventAttack, EventChangeParty, EventCharacterDied, EventCreateEntity,
                            EventGameOver, EventPauseModel, EventResultChamp,
                            EventResultChoseCharacter, EventResultWandering, EventResumeModel,
-                           EventStartGame)
+                           EventStartGame, EventNyanCat)
 from instances_manager import get_event_manager, get_model
 
 
@@ -21,6 +21,7 @@ class BackgroundMusic:
         self.__default_volume = const.BGM_VOLUME
         pg.mixer.music.set_volume(self.__default_volume / 3)
         self.__sound = {}
+        self.__selected_track = const.BGM_PATH[const.PartyType.NEUTRAL]
         for effect, path in const.EFFECT_PATH.items():
             self.__sound[effect] = pg.mixer.Sound(path)
             self.__sound[effect].set_volume(const.EFFECT_VOLUME[effect])
@@ -35,9 +36,10 @@ class BackgroundMusic:
         parties = [team.party for team in model.teams]
         missing_party = [party for party in const.PartyType
                          if party not in parties and party != const.PartyType.NEUTRAL][0]
+        self.__selected_track = const.BGM_PATH[missing_party]
         pg.mixer.music.fadeout(500)
         pg.mixer.music.unload()
-        pg.mixer.music.load(const.BGM_PATH[missing_party])
+        pg.mixer.music.load(self.__selected_track)
         pg.mixer.music.play(loops=-1)
         pg.mixer.music.set_volume(self.__default_volume)
 
@@ -104,6 +106,12 @@ class BackgroundMusic:
         pg.mixer.music.set_volume(self.__default_volume * 1.5)
         pg.mixer.music.play(loops=0)
 
+    def __handle_nyan(self, _: EventNyanCat):
+        paused_pos = pg.mixer.music.get_pos()
+        pg.mixer.music.load(const.BGM_NYAN_PATH)
+        pg.mixer.music.play(loops=0)
+        pg.mixer.music.queue(self.__selected_track)
+
     def __register_listeners(self):
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
@@ -117,3 +125,4 @@ class BackgroundMusic:
         ev_manager.register_listener(EventResultWandering, self.__handle_result_wandering)
         ev_manager.register_listener(EventResultChoseCharacter, self.__handle_chose_character)
         ev_manager.register_listener(EventResultChamp, self.__handle_result_champ)
+        ev_manager.register_listener(EventNyanCat, self.__handle_nyan)

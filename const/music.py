@@ -24,6 +24,8 @@ BGM_ROLL_PATH = os.path.join(BGM_DIR, 'roll.mp3')
 
 BGM_END_PATH = os.path.join(BGM_DIR, 'end.mp3')
 
+BGM_NYAN_PATH = os.path.join(BGM_DIR, 'nyan.mp3')
+
 BGM_VOLUME = 0.5
 
 EFFECT_DIR = os.path.join(MUSIC_DIR, 'effect')
