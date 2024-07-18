@@ -56,7 +56,7 @@ class PathFinder:
 
     def __get_neighbors(self, cur_cell: tuple[int, int]):
         diff = (
-            (-1, 0, 1.0), (0, -1, 1.0), (0, 1, 1.0), (1, 0, 1.0),
+            (-2, 0, 2.0), (0, -2, 2.0), (0, 2, 2.0), (2, 0, 2.0),
             (-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
             (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951),
         )
@@ -85,6 +85,16 @@ class PathFinder:
 
         cell_begin = self.__map.position_to_cell(position_begin)
         cell_end = self.__map.position_to_cell(position_end)
+
+        if (cell_begin[0] + cell_begin[1]) % 2 != (cell_end[0] + cell_end[1]) % 2:
+            for new_end in [
+                    (cell_end[0] + 1, cell_end[1]),
+                    (cell_end[0] - 1, cell_end[1]),
+                    (cell_end[0], cell_end[1] + 1),
+                    (cell_end[0], cell_end[1] - 1) ]:
+                if self.__is_cell_passable(new_end):
+                    cell_end = new_end
+                    break
 
         run_id = self.__astar_run_id
         self.__astar_run_id += 1
