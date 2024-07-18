@@ -6,11 +6,20 @@ import math
 import random
 
 import pygame as pg
-
 from api.prototype import *
+import const.tower
 
-siege_targets: list[Character | Tower] = []
-"""圍毆的目標"""
+
+class AiInfo:
+    def __init__(self) -> None:
+        self.siege_targets: list[Character | Tower] = []
+        """圍毆的目標"""
+
+        self.melee_attack_tower_range: int = 5
+        """近戰攻擊塔範圍"""
+
+        self.melee_attack_character_range: int = 10
+        """近戰攻擊士兵範圍"""
 
 
 def chat(api: API) -> None:
@@ -28,7 +37,7 @@ def calculate_distance(a: pg.Vector2, b: pg.Vector2) -> float:
 
 
 def get_visible_enemies(api: API) -> tuple[list[Tower], list[Character]]:
-    """找出視野範圍內的可攻擊目標。"""
+    """找出視野範圍內的可攻擊目標。回傳一個`tuple(tower的list, character的list)`"""
     my_team_id = api.get_team_id()
 
     visible_enemy_towers = []
@@ -69,6 +78,7 @@ def get_nearest_friend_melee(api: API, position: pg.Vector2) -> Character | None
     my_melee = api.sort_by_distance(my_melee, position)
     return my_melee[0]
 
+
 def melee_action(api: API, melee: Character) -> None:
     """
     決定近戰兵現在要幹嘛
@@ -78,10 +88,10 @@ def melee_action(api: API, melee: Character) -> None:
     api.action_cast_ability(melee)
     # melee 的技能開了不虧
 
-    if len(siege_targets) != 0:
-        nearest_siege_target = api.sort_by_distance(siege_targets, melee.position)[0]
+    if len(info.siege_targets) != 0:
+        nearest_siege_target = api.sort_by_distance(info.siege_targets, melee.position)[0]
         # sort_by_distance 後第 0 個，也就是離自己最近的圍毆目標
-        if calculate_distance(melee.position, nearest_siege_target.position) < 80:
+        if calculate_distance(melee.position, nearest_siege_target.position) < info.melee_attack_character_range:
             # 圍毆目標離自己夠近就衝過去打
             api.action_move_to(melee, nearest_siege_target.position)
             api.action_attack(melee, nearest_siege_target)
@@ -91,28 +101,33 @@ def melee_action(api: API, melee: Character) -> None:
     for enemy_tower in enemies[0]:
         if enemy_tower.is_fountain:
             # 如果這是敵方的主堡就忽略，因為不能攻擊
-            pass
-        else:
-            if calculate_distance(melee.position, enemy_tower.position) <= enemy_tower.attack_range + 5:
-                # 已經離塔的攻擊距離很近或已經在裡面
-                nearby_fellows = get_nearby_fellows(api, melee.position)
-                if len(nearby_fellows) > 10:
-                    # 周圍有很多友軍的話就叫大家一起上
-                    siege_targets.append(enemy_tower)
-                    api.action_move_to(melee, enemy_tower.position)
-                    api.action_attack(melee, enemy_tower)
-                    return
+            continue
+        
+        api.action_move_to(melee, enemy_tower.position)
+        api.action_attack(melee, enemy_tower)
+        
+        if calculate_distance(melee.position, enemy_tower.position) <= enemy_tower.attack_range + info.melee_attack_tower_range:
+            # 已經離塔的攻擊距離很近或已經在裡面
+            nearby_fellows = get_nearby_fellows(api, melee.position)
+            if len(nearby_fellows) > 10:
+                # 周圍有很多友軍的話就叫大家一起上
+                info.siege_targets.append(enemy_tower)
+                api.action_attack(melee, enemy_tower)
+                return
+
     for enemy_character in enemies[1]:
-        if calculate_distance(melee.position, enemy_character.position) <= enemy_character.attack_range + 5:
+        if calculate_distance(melee.position, enemy_character.position) <= info.melee_attack_character_range:
             # 已經離敵方的攻擊距離很近或已經在裡面
             nearby_fellows = get_nearby_fellows(api, melee.position)
             if len(nearby_fellows) > 10:
                 # 周圍有很多友軍的話就叫大家一起上
-                siege_targets.append(enemy_character)
+                info.siege_targets.append(enemy_character)
                 api.action_move_to(melee, enemy_character.position)
                 api.action_attack(melee, enemy_character)
                 return
-    api.action_wander(melee)
+        
+    if len(enemies[0]) == 0 and random.random() <= 1/12:
+        api.action_wander(melee)
     # 叫近戰兵亂走去探視野
     return
 
@@ -127,14 +142,17 @@ def ranger_action(api: API, ranger: Character):
     api.action_cast_ability(ranger, position=ranger.position+random_displacement)
     # 隨便在 ranger 周圍的某個點放煙火(技能)
 
-    if len(siege_targets) != 0:
-        nearest_siege_target = api.sort_by_distance(siege_targets, ranger.position)[0]
+    # 如果我們有圍毆目標，就去打他
+    if len(info.siege_targets) != 0:
+        nearest_siege_target = api.sort_by_distance(info.siege_targets, ranger.position)[0]
         # sort_by_distance 後第 0 個，也就是離自己最近的圍毆目標
+        print(nearest_siege_target)
         api.action_move_to(ranger, nearest_siege_target.position)
         api.action_attack(ranger, nearest_siege_target)
         # 直接去打最近的圍毆目標
         return
 
+    # 讓遠程兵可以跟著近戰兵走
     nearest_friend_melee = get_nearest_friend_melee(api, ranger.position)
     if nearest_friend_melee is not None:
         api.action_move_to(ranger, get_nearest_friend_melee(api, ranger.position).position)
@@ -149,10 +167,11 @@ def sniper_action(api: API, sniper: Character):
     api.action_cast_ability(sniper)
     # sniper 的技能開了不虧
 
-    if len(siege_targets) != 0:
-        nearest_siege_target = api.sort_by_distance(siege_targets, sniper.position)[0]
+    if len(info.siege_targets) != 0:
+        nearest_siege_target = api.sort_by_distance(info.siege_targets, sniper.position)[0]
         # sort_by_distance 後第 0 個，也就是離自己最近的圍毆目標
         api.action_move_to(sniper, nearest_siege_target.position)
+        print(f"172 {nearest_siege_target}")
         api.action_attack(sniper, nearest_siege_target)
         # 直接去打最近的圍毆目標
         return
@@ -163,6 +182,9 @@ def sniper_action(api: API, sniper: Character):
         # 跟著離自己最近的進戰走
         return
 
+
+info = AiInfo()
+
 def every_tick(api: API):
     """
     一定要被實作的 function ，會定期被遊戲 call
@@ -170,10 +192,19 @@ def every_tick(api: API):
     在使用 VS Code 寫 code 的時候可以按住 Ctrl 再用滑鼠點擊變數、函數，來跳轉到與它們相關的地方。
     在測試的時候可以只放一隻 ai 、在執行時一次加很多 arguments (如 -qrp)。
     """
+    # 更新列表中的目標士兵，如果士兵死了就從列表中刪掉
+    tmp_siege_targets = []
+    for target in info.siege_targets:
+        if isinstance(target, Tower):
+            tmp_siege_targets.append(api.refresh_tower(target))
+        elif api.refresh_character(target) is None:
+            tmp_siege_targets.append(api.refresh_character(target))
+    info.siege_targets = tmp_siege_targets
+
     my_towers = api.get_owned_towers()
     for tower in my_towers:
         draw = random.random()
-        if draw <= 1/3:
+        if draw <= 1.5/3:
             api.change_spawn_type(tower, CharacterClass.MELEE)
         elif draw <= 2/3:
             api.change_spawn_type(tower, CharacterClass.RANGER)
