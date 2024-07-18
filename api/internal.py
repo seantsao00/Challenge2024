@@ -4,13 +4,13 @@ Defines internal API interaction and AI threading.
 
 from __future__ import annotations
 
-import base64
 import ctypes
 import importlib.util
 import os
 import signal
 import threading
 import traceback
+from hashlib import sha256
 from itertools import combinations
 from typing import Iterable
 
@@ -216,23 +216,25 @@ class Internal(prototype.API):
         self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
-    def __access_character(self, extern: prototype.Character) -> model.Character:
+    def __access_character(self, extern: prototype.Character, suppress_warning: bool = False) -> model.Character | None:
         """
         Return registered character. None if it does not exist.
         """
         if id(extern) not in self.__reverse_character_map:
-            log_warning(
-                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
+            if not suppress_warning:
+                log_warning(
+                    f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
             return None
         return self.__reverse_character_map[id(extern)]
 
-    def __access_tower(self, extern: prototype.Tower) -> model.Tower:
+    def __access_tower(self, extern: prototype.Tower, suppress_warning: bool = False) -> model.Tower | None:
         """
         Return registered tower. None if it does not exist.
         """
         if id(extern) not in self.__reverse_tower_map:
-            log_warning(
-                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
+            if not suppress_warning:
+                log_warning(
+                    f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
             return None
         return self.__reverse_tower_map[id(extern)]
 
@@ -282,7 +284,7 @@ class Internal(prototype.API):
         # Should be correct, if model implementation changes this should fail
         if not team.team_id == index:
             log_critical("[API] Team ID mismatch: team.team_id, index")
-            raise GameError("Team ID implement has changed.")
+            raise GameError("Team ID implementation has changed.")
         return team.points
 
     def get_sample_character(self, type_class: prototype.CharacterClass) -> prototype.Character:
@@ -319,7 +321,7 @@ class Internal(prototype.API):
         vision = self.__team().vision
         entities = []
         with get_model().entity_lock:
-            entities = get_model().entities.copy()
+            entities = list(get_model().entities.values())
         character_list: list[prototype.Character] = [
             self.__register_character(entity) for entity in entities
             if (isinstance(entity, model.Character) and
@@ -331,7 +333,7 @@ class Internal(prototype.API):
         vision = self.__team().vision
         entities = []
         with get_model().entity_lock:
-            entities = get_model().entities.copy()
+            entities = list(get_model().entities.values())
         tower_list: list[prototype.Tower] = [
             self.__register_tower(entity) for entity in entities
             if (isinstance(entity, model.Tower) and
@@ -357,17 +359,41 @@ class Internal(prototype.API):
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
         enforce_type('character', character, prototype.Character, type(None))
 
-        internal = self.__access_character(character)
+        internal = self.__access_character(character, suppress_warning=True)
+        if internal is None:
+            # Try refreshing by id
+            enforce_type('character.id', character.id, int)
+            with get_model().entity_lock:
+                if character.id in get_model().entities:
+                    internal = get_model().entities[character.id]
+            # However, that is not trustable as id can be manipulated.
+            # We filter out tower and non-visible characters.
+            if not isinstance(internal, model.Character):
+                internal = None
+            if internal is not None and not self.is_visible(self.__transform(internal.position, is_position=True)):
+                internal = None
         if internal is None or not internal.alive:
             return None
         return self.__register_character(internal)
 
-    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower:
+    def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
         enforce_type('tower', tower, prototype.Tower)
 
-        internal = self.__access_tower(tower)
-        if not internal.alive:
-            raise GameError("Tower died, what?")
+        internal = self.__access_tower(tower, suppress_warning=True)
+        if internal is None:
+            # Try refreshing by id
+            enforce_type('character.id', tower.id, int)
+            with get_model().entity_lock:
+                if tower.id in get_model().entities:
+                    internal = get_model().entities[tower.id]
+            # However, that is not trustable as id can be manipulated.
+            # We filter out character and non-visible towers.
+            if not isinstance(internal, model.Tower):
+                internal = None
+            if internal is not None and not self.is_visible(self.__transform(internal.position, is_position=True)):
+                internal = None
+        if internal is None:
+            return None
         return self.__register_tower(internal)
 
     def get_visibility(self) -> list[list[int]]:
@@ -398,10 +424,14 @@ class Internal(prototype.API):
         return vision_coordinate
 
     def is_visible(self, position: pg.Vector2) -> bool:
+        enforce_type('position', position, pg.Vector2)
+
         return self.__team().vision.position_inside_vision(
             self.__transform(position, is_position=True, inverse=True))
 
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
+        enforce_type('position', position, pg.Vector2)
+
         w = const.ARENA_SIZE[1]
         if position.x < 0 or position.x > w or position.y < 0 or position.x > w:
             return prototype.MapTerrain.OUT_OF_BOUNDS
@@ -488,6 +518,9 @@ class Internal(prototype.API):
             target_internal = self.__access_character(target)
         elif isinstance(target, prototype.Tower):
             target_internal = self.__access_tower(target)
+        # Occationally, the given reference is outside the vision range (or invalid)
+        if target_internal is None:
+            return
 
         internals = [self.__access_character(ch) for ch in characters]
         internals = [inter for inter in internals if self.__is_controllable(inter)]
@@ -593,12 +626,14 @@ class Internal(prototype.API):
         self.__last_chat_time_stamp = time_stamp
         for substring in [msg[x:y] for x, y in sorted(combinations(range(len(msg) + 1), r=2),
                                                       key=lambda x: x[0]-x[1])]:
-            if base64.b64encode(substring.encode()) in const.DIRTY_WORDS:
-                msg = msg.replace(substring.lower(), len(substring)*'*')
+            if sha256(substring.lower().encode()).hexdigest() in const.DIRTY_WORDS:
+                msg = msg.replace(substring, len(substring)*'*')
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
     def get_chat_history(self, num: int = 15) -> list[tuple[int, str]]:
+        enforce_type('num', num, int)
+
         return model.chat.chat.get_comment_history(num)[::-1]
 
     def get_map_name(self) -> str:

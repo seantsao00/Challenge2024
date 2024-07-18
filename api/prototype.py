@@ -8,8 +8,6 @@ from typing import Iterable
 
 import pygame as pg
 
-from util import log_warning
-
 
 class CharacterClass(IntEnum):
     """士兵種類。"""
@@ -122,7 +120,7 @@ class Tower:
         """塔的最大血量。"""
 
         self.team_id = _team_id
-        """塔所屬的隊伍編號，編號為 1 至 4 的正整數，或者 5 代表中立。"""
+        """塔所屬的隊伍編號，編號為 1 至 5 的正整數，超過隊伍數量的數字代表中立，中立塔所屬的 team_id 皆相同。"""
 
 
 class MapTerrain(IntEnum):
@@ -286,14 +284,16 @@ class API:
     @abstractmethod
     def refresh_character(self, character: Character) -> Character | None:
         """
-        更新一個士兵的數值。如果士兵死亡則回傳 None。  
+        更新一個士兵的數值。如果士兵死亡或非法則回傳 None。  
+        不是同一個 `every_tick` 呼叫取得的 Character 可能會需要較多的時間。
         @character: 目標的士兵。
         """
 
     @abstractmethod
     def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個塔的數值。  
+        更新一個塔的數值。如果塔非法則回傳 None。 
+        不是同一個 `every_tick` 呼叫取得的 Tower 可能會需要較多的時間。
         @tower: 目標的塔。
         """
 
