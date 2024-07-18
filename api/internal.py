@@ -382,7 +382,7 @@ class Internal(prototype.API):
         internal = self.__access_tower(tower, suppress_warning=True)
         if internal is None:
             # Try refreshing by id
-            enforce_type('character.id', tower.id, int)
+            enforce_type('tower.id', tower.id, int)
             with get_model().entity_lock:
                 if tower.id in get_model().entities:
                     internal = get_model().entities[tower.id]
