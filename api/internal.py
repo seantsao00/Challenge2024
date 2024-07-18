@@ -2,12 +2,16 @@
 Defines internal API interaction and AI threading.
 """
 
+from __future__ import annotations
+
+import base64
 import ctypes
 import importlib.util
 import os
 import signal
 import threading
 import traceback
+from itertools import combinations
 from typing import Iterable
 
 import numpy as np
@@ -591,13 +595,16 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        get_model().chat.send_comment(team=self.__team(), text=msg)
+        for substring in [msg[x:y] for x, y in sorted(combinations(range(len(msg) + 1), r=2),
+                                                      key=lambda x: x[0]-x[1])]:
+            if base64.b64encode(substring.encode()) in const.DIRTY_WORDS:
+                msg = msg.replace(substring.lower(), len(substring)*'*')
+        model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
-
 
     def get_chat_history(self, num: int = 15) -> list[tuple[int, str]]:
         return get_model().chat.get_comment_history(num)[::-1]
-    
+
     def get_map_name(self) -> str:
         return get_model().map.name
 

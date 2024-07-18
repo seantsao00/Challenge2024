@@ -5,6 +5,7 @@ This package exports all constants used in project.
 from const.ai import *
 from const.bullet import *
 from const.character import *
+from const.chat import *
 from const.controller import *
 from const.entity import *
 from const.grid import *
