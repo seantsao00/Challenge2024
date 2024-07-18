@@ -51,7 +51,7 @@ MELEE_ATTRIBUTE = CharacterAttribute(
     ability_cd=3,
     attack_speed=1,
     ability_variables=3,
-    crown_ascendance_threshold=720,
+    crown_ascendance_threshold=360,
     armor_show_time=None
     # damage per second = 36
 )
@@ -65,7 +65,7 @@ RANGER_ATTRIBUTE = CharacterAttribute(
     ability_cd=2,
     attack_speed=1.2,
     ability_variables=[15, 60],  # [range, damage] of ability
-    crown_ascendance_threshold=1440,
+    crown_ascendance_threshold=1080,
     armor_show_time=1
     # damage per second = 72
 )
@@ -79,7 +79,7 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     ability_cd=4,
     attack_speed=0.5,
     ability_variables=300,  # damage of ability
-    crown_ascendance_threshold=3000,
+    crown_ascendance_threshold=1500,
     armor_show_time=1
     # damage per second = 150
 )
