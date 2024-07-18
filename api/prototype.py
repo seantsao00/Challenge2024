@@ -392,10 +392,10 @@ class API:
     # ==== 輔助函數 ====
 
     @abstractmethod
-    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
+    def sort_by_distance(self, entities: Iterable[Character | Tower], target: pg.Vector2) -> list[Character | Tower]:
         """
-        將各士兵依據其與目標的距離排序，若距離一樣則隨意排序。  
-        @characters: 指定的士兵列表。  
+        將各士兵或塔依據其與目標的距離排序，若距離一樣則隨意排序。  
+        @entities: 指定的士兵或塔的列表。  
         @target: 指定的目標座標。
         """
         raise NotImplementedError
