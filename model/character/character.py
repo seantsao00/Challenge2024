@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import Enum, auto
-from random import uniform
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -151,12 +150,13 @@ class Character(LivingEntity):
         path_finder is the path finder to use. None means it's on the main thread,
         so model.path_finder will be used
         """
-        destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
-                                 uniform(0, const.ARENA_SIZE[1])])
+        rng = get_model().rng
+        destination = pg.Vector2([rng.uniform(0, const.ARENA_SIZE[0]),
+                                 rng.uniform(0, const.ARENA_SIZE[1])])
         cnt = 0
         while (self.team.vision.position_inside_vision(destination) or get_model().map.get_position_type(destination) is const.MAP_OBSTACLE) and cnt < const.MAX_WANDERING:
-            destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
-                                     uniform(0, const.ARENA_SIZE[1])])
+            destination = pg.Vector2([rng.uniform(0, const.ARENA_SIZE[0]),
+                                     rng.uniform(0, const.ARENA_SIZE[1])])
             cnt += 1
         if cnt >= const.MAX_WANDERING:
             return False

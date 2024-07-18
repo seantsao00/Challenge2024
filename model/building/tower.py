@@ -3,7 +3,6 @@ The module defines Building class.
 """
 from __future__ import annotations
 
-import random
 from typing import TYPE_CHECKING
 
 import pygame as pg
@@ -93,8 +92,10 @@ class Tower(LivingEntity):
                 character_type = Sniper
             else:
                 raise TypeError(f'Character type error: {self.__character_type}')
-            new_position = random.choice(self.__spawn_grids) + \
-                pg.Vector2(random.random(), random.random())
+
+            rng = get_model().rng
+            new_position = rng.choice(self.__spawn_grids) + \
+                pg.Vector2(rng.random(), rng.random())
             new_character = character_type(new_position, self.team)
             self.last_generate = get_model().get_time()
             get_event_manager().post(EventSpawnCharacter(character=new_character), self.team.team_id)
