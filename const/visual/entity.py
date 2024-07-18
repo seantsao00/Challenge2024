@@ -150,7 +150,7 @@ structure: ENTITY_IMAGE[party][entity][state]
 # Size for showing
 ENTITY_SIZE: dict[EntityType, dict[EntityState, tuple[float, float]]] = {
     **{character: {
-        state: (9, 12) for state in CharacterState
+        state: (9, 13.2) for state in CharacterState
     } for character in CharacterType},
     **{tower: {
         None: (20, 12)
