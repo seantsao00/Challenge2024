@@ -216,23 +216,25 @@ class Internal(prototype.API):
         self.__reverse_tower_map[id(extern)] = internal
         return self.__tower_map[internal.id]
 
-    def __access_character(self, extern: prototype.Character) -> model.Character | None:
+    def __access_character(self, extern: prototype.Character, suppress_warning: bool = False) -> model.Character | None:
         """
         Return registered character. None if it does not exist.
         """
         if id(extern) not in self.__reverse_character_map:
-            log_warning(
-                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
+            if not suppress_warning:
+                log_warning(
+                    f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Character. Maybe it is already expired.")
             return None
         return self.__reverse_character_map[id(extern)]
 
-    def __access_tower(self, extern: prototype.Tower) -> model.Tower | None:
+    def __access_tower(self, extern: prototype.Tower, suppress_warning: bool = False) -> model.Tower | None:
         """
         Return registered tower. None if it does not exist.
         """
         if id(extern) not in self.__reverse_tower_map:
-            log_warning(
-                f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
+            if not suppress_warning:
+                log_warning(
+                    f"[AI] AI of team {self.__cast_team_id(self.team_id)} used invalid prototype.Tower. Maybe it is already expired.")
             return None
         return self.__reverse_tower_map[id(extern)]
 
@@ -357,7 +359,7 @@ class Internal(prototype.API):
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
         enforce_type('character', character, prototype.Character, type(None))
 
-        internal = self.__access_character(character)
+        internal = self.__access_character(character, suppress_warning=True)
         if internal is None:
             # Try refreshing by id
             enforce_type('character.id', character.id, int)
@@ -368,7 +370,7 @@ class Internal(prototype.API):
             # We filter out tower and non-visible characters.
             if not isinstance(internal, model.Character):
                 internal = None
-            if internal is not None and not self.is_visible(internal.position):
+            if internal is not None and not self.is_visible(self.__transform(internal.position, is_position=True)):
                 internal = None
         if internal is None or not internal.alive:
             return None
@@ -377,10 +379,10 @@ class Internal(prototype.API):
     def refresh_tower(self, tower: prototype.Tower) -> prototype.Tower | None:
         enforce_type('tower', tower, prototype.Tower)
 
-        internal = self.__access_tower(tower)
+        internal = self.__access_tower(tower, suppress_warning=True)
         if internal is None:
             # Try refreshing by id
-            enforce_type('character.id', tower.id, int)
+            enforce_type('tower.id', tower.id, int)
             with get_model().entity_lock:
                 if tower.id in get_model().entities:
                     internal = get_model().entities[tower.id]
@@ -388,7 +390,7 @@ class Internal(prototype.API):
             # We filter out character and non-visible towers.
             if not isinstance(internal, model.Tower):
                 internal = None
-            if internal is not None and not self.is_visible(internal.position):
+            if internal is not None and not self.is_visible(self.__transform(internal.position, is_position=True)):
                 internal = None
         if internal is None:
             return None
