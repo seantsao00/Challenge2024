@@ -66,7 +66,7 @@ RANGER_ATTRIBUTE = CharacterAttribute(
     attack_speed=1.2,
     ability_variables=[15, 60],  # [range, damage] of ability
     crown_ascendance_threshold=1080,
-    armor_show_time=1
+    armor_show_time=0.5
     # damage per second = 72
 )
 
@@ -80,7 +80,7 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     attack_speed=0.5,
     ability_variables=300,  # damage of ability
     crown_ascendance_threshold=1500,
-    armor_show_time=1
+    armor_show_time=0.5
     # damage per second = 150
 )
 
