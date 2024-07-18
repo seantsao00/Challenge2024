@@ -46,9 +46,9 @@ def get_visible_enemies(api: API) -> tuple[list[Tower], list[Character]]:
     return (visible_enemy_towers, visible_enemy_characters)
 
 
-def get_nearby_fellows(api: API, position: pg.Vector2, distance: int = 40) -> list[Character]:
+def get_nearby_fellows(api: API, position: pg.Vector2, distance: int = 50) -> list[Character]:
     """
-    拿到距離某點附近(距離 distance 內)友軍的 list，如果沒有特別指定 distance 的話預設是 40。
+    拿到距離某點附近(距離 distance 內)友軍的 list，如果沒有特別指定 distance 的話預設是 50。
     """
     my_character = api.get_owned_characters()
     nearby_fellows = []
@@ -81,10 +81,11 @@ def melee_action(api: API, melee: Character) -> None:
     if len(siege_targets) != 0:
         nearest_siege_target = api.sort_by_distance(siege_targets, melee.position)[0]
         # sort_by_distance 後第 0 個，也就是離自己最近的圍毆目標
-        if calculate_distance(melee.position, nearest_siege_target.position) < 50:
+        if calculate_distance(melee.position, nearest_siege_target.position) < 80:
             # 圍毆目標離自己夠近就衝過去打
             api.action_move_to(melee, nearest_siege_target.position)
             api.action_attack(melee, nearest_siege_target)
+            return
 
     enemies = get_visible_enemies(api)
     for enemy_tower in enemies[0]:
@@ -98,6 +99,9 @@ def melee_action(api: API, melee: Character) -> None:
                 if len(nearby_fellows) > 10:
                     # 周圍有很多友軍的話就叫大家一起上
                     siege_targets.append(enemy_tower)
+                    api.action_move_to(melee, enemy_tower.position)
+                    api.action_attack(melee, enemy_tower)
+                    return
     for enemy_character in enemies[1]:
         if calculate_distance(melee.position, enemy_character.position) <= enemy_character.attack_range + 5:
             # 已經離敵方的攻擊距離很近或已經在裡面
@@ -105,8 +109,12 @@ def melee_action(api: API, melee: Character) -> None:
             if len(nearby_fellows) > 10:
                 # 周圍有很多友軍的話就叫大家一起上
                 siege_targets.append(enemy_character)
+                api.action_move_to(melee, enemy_character.position)
+                api.action_attack(melee, enemy_character)
+                return
     api.action_wander(melee)
     # 叫近戰兵亂走去探視野
+    return
 
 
 def ranger_action(api: API, ranger: Character):
@@ -125,11 +133,13 @@ def ranger_action(api: API, ranger: Character):
         api.action_move_to(ranger, nearest_siege_target.position)
         api.action_attack(ranger, nearest_siege_target)
         # 直接去打最近的圍毆目標
+        return
 
     nearest_friend_melee = get_nearest_friend_melee(api, ranger.position)
     if nearest_friend_melee is not None:
         api.action_move_to(ranger, get_nearest_friend_melee(api, ranger.position).position)
         # 跟著離自己最近的進戰走
+        return
 
 
 def sniper_action(api: API, sniper: Character):
@@ -145,11 +155,13 @@ def sniper_action(api: API, sniper: Character):
         api.action_move_to(sniper, nearest_siege_target.position)
         api.action_attack(sniper, nearest_siege_target)
         # 直接去打最近的圍毆目標
+        return
 
     nearest_friend_melee = get_nearest_friend_melee(api, sniper.position)
     if nearest_friend_melee is not None:
         api.action_move_to(sniper, get_nearest_friend_melee(api, sniper.position).position)
         # 跟著離自己最近的進戰走
+        return
 
 def every_tick(api: API):
     """
