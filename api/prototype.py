@@ -8,8 +8,6 @@ from typing import Iterable
 
 import pygame as pg
 
-from util import log_warning
-
 
 class CharacterClass(IntEnum):
     """士兵種類。"""
@@ -286,14 +284,14 @@ class API:
     @abstractmethod
     def refresh_character(self, character: Character) -> Character | None:
         """
-        更新一個士兵的數值。如果士兵死亡則回傳 None。  
+        更新一個士兵的數值。如果士兵死亡則回傳 None。只有同一幀內的 Character 可以被傳入。  
         @character: 目標的士兵。
         """
 
     @abstractmethod
     def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個塔的數值。  
+        更新一個塔的數值。只有同一幀內的 Tower 可以被傳入。  
         @tower: 目標的塔。
         """
 
