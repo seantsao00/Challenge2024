@@ -159,7 +159,7 @@ class Strategy:
         self.handle_spawn()
         self.handle_attack()
         
-        
+
 strategy = Strategy()
 
 def every_tick(api: API):
