@@ -43,7 +43,6 @@ class Character(LivingEntity):
        (useful when __move_state == TO_LOCATION).
      - __move_direction: The direction the character is facing and moving toward
        (useful when __move_state == TO_DIRECTION).
-     - __is_wandering: If the character is wandering. Wandering is only used by api methods.
     """
 
     def __init__(self,
@@ -302,7 +301,3 @@ class Character(LivingEntity):
     @property
     def move_state(self) -> CharacterMovingState:
         return self.__move_state
-
-    @property
-    def is_wandering(self) -> bool:
-        return self.__move_state == CharacterMovingState.WANDERING
