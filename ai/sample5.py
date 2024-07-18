@@ -6,8 +6,9 @@ import math
 import random
 
 import pygame as pg
-from api.prototype import *
+
 import const.tower
+from api.prototype import *
 
 
 class AiInfo:
@@ -20,9 +21,9 @@ class AiInfo:
 
         self.melee_attack_character_range: int = 10
         """近戰攻擊士兵範圍"""
-        
-        self.tower_id_to_entity:dict = {}
-        self.character_id_to_entity:dict = {}
+
+        self.tower_id_to_entity: dict = {}
+        self.character_id_to_entity: dict = {}
 
 
 def chat(api: API) -> None:
@@ -69,6 +70,7 @@ def get_nearby_fellows(api: API, position: pg.Vector2, distance: int = 50) -> li
             nearby_fellows.append(character)
     return nearby_fellows
 
+
 def get_nearest_friend_melee(api: API, position: pg.Vector2) -> Character | None:
     """拿到最近的友方進戰士兵，如果完全沒有的話就回傳 None"""
     my_characters = api.get_owned_characters()
@@ -105,10 +107,10 @@ def melee_action(api: API, melee: Character) -> None:
         if enemy_tower.is_fountain:
             # 如果這是敵方的主堡就忽略，因為不能攻擊
             continue
-        
+
         api.action_move_to(melee, enemy_tower.position)
         api.action_attack(melee, enemy_tower)
-        
+
         if calculate_distance(melee.position, enemy_tower.position) <= enemy_tower.attack_range + info.melee_attack_tower_range:
             # 已經離塔的攻擊距離很近或已經在裡面
             nearby_fellows = get_nearby_fellows(api, melee.position)
@@ -128,7 +130,7 @@ def melee_action(api: API, melee: Character) -> None:
                 api.action_move_to(melee, enemy_character.position)
                 api.action_attack(melee, enemy_character)
                 return
-        
+
     if len(enemies[0]) == 0 and random.random() <= 1/12:
         api.action_wander(melee)
     # 叫近戰兵亂走去探視野
@@ -188,6 +190,7 @@ def sniper_action(api: API, sniper: Character):
 
 info = AiInfo()
 
+
 def every_tick(api: API):
     """
     一定要被實作的 function ，會定期被遊戲 call
@@ -197,16 +200,16 @@ def every_tick(api: API):
     """
     # 更新列表中的目標士兵，如果士兵死了就從列表中刪掉
     tmp_siege_targets = []
-    
+
     for tower in api.get_visible_towers():
         info.tower_id_to_entity[tower.id] = tower
     for character in api.get_visible_characters():
         info.character_id_to_entity[character.id] = character
-        
+
     for target in info.siege_targets:
         if isinstance(target, Tower) and target.id in info.tower_id_to_entity:
             tmp_siege_targets.append(info.tower_id_to_entity[target.id])
-        elif target.id in info.character_id_to_entity :
+        elif target.id in info.character_id_to_entity:
             tmp_siege_targets.append(info.character_id_to_entity[target.id])
     info.siege_targets = tmp_siege_targets
 
