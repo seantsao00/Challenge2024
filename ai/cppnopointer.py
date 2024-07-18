@@ -77,6 +77,13 @@ def enemies_near_tower(visible_enemies, tower, api):
             ret.append(enemy)
     return ret
 
+def enemies_defending_tower(visible_enemies, tower, api):
+    ret = []
+    for enemy in visible_enemies:
+        if enemy.position.distance_to(tower.position) <= 20 and enemy.team_id == tower.team_id:
+            ret.append(enemy)
+    return ret
+
 def get_fountain(visible_towers, my_team_id):
     for tower in visible_towers:
         if tower.is_fountain and my_team_id == tower.team_id:
@@ -121,7 +128,9 @@ def every_tick(api: API):
     dispatched_characters_count = len(dispatched_characters)
     contestable_tower = []
     for tower in visible_towers:
-        if not tower.is_fountain and tower.team_id != my_team_id:
+        defenders = enemies_defending_tower(visible_enemy, tower, api)
+        if not tower.is_fountain and tower.team_id != my_team_id and len(defenders) <= 15:
+            print(len(defenders))
             contestable_tower.append(tower)
     contestable_tower_count = len(contestable_tower)
     # print(owned_characters_count, recruited_characters_count, dispatched_characters_count)
@@ -198,8 +207,8 @@ def every_tick(api: API):
                     api.action_attack([character], random_target)
     else: 
         
-        for tower in visible_towers:
-            if not tower.is_fountain and tower.team_id != my_team_id:
+        for tower in contestable_tower:
+            if not tower.is_fountain:
                 if (target_tower != None and len(enemies_near_tower(visible_enemy, tower, api)) < len(enemies_near_tower(visible_enemy, target_tower, api))) or target_tower == None:
                     target_tower = tower
         for tower in owned_tower:
