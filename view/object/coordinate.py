@@ -1,15 +1,17 @@
 import pygame as pg
 
 import const
-from instances_manager import get_event_manager, get_model
 from event_manager import EventShowCoordinate
+from instances_manager import get_event_manager, get_model
+
 
 class Coordinate:
     '''
     The class that handle rendering coordinate.
     '''
+
     def __init__(self, screen, unit: float = 0):
-        self.coordinate_unit = unit # it won't show the coordinate if the variable is set to zero
+        self.coordinate_unit = unit  # it won't show the coordinate if the variable is set to zero
         self.register_listeners()
         self.screen = screen
 

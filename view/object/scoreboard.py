@@ -40,9 +40,8 @@ class Scorebox:
         # team coler underscore
         def offset(p):
             return (p[0], p[1] + self.font_primary.get_descent())
-        pg.draw.line(self.__team_name_bg_surface, const.HEALTH_BAR_COLOR[self.__team.team_id], \
-                    offset(team_name_bg_surface.bottomleft), offset(team_name_bg_surface.bottomright) , width=8)
-
+        pg.draw.line(self.__team_name_bg_surface, const.HEALTH_BAR_COLOR[self.__team.team_id],
+                     offset(team_name_bg_surface.bottomleft), offset(team_name_bg_surface.bottomright), width=8)
 
     def draw(self, canvas: pg.Surface):
         model = get_model()

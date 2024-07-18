@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import Enum, auto
-from random import uniform
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -44,7 +43,6 @@ class Character(LivingEntity):
        (useful when __move_state == TO_LOCATION).
      - __move_direction: The direction the character is facing and moving toward
        (useful when __move_state == TO_DIRECTION).
-     - __is_wandering: If the character is wandering. Wandering is only used by api methods.
     """
 
     def __init__(self,
@@ -114,7 +112,7 @@ class Character(LivingEntity):
         """
         eps = 1e-8
 
-        if self.__move_path is None or len(self.__move_path) == 0:
+        if len(self.__move_path) == 0:
             return True
 
         it = 0
@@ -151,12 +149,13 @@ class Character(LivingEntity):
         path_finder is the path finder to use. None means it's on the main thread,
         so model.path_finder will be used
         """
-        destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
-                                 uniform(0, const.ARENA_SIZE[1])])
+        rng = get_model().rng
+        destination = pg.Vector2([rng.uniform(0, const.ARENA_SIZE[0]),
+                                 rng.uniform(0, const.ARENA_SIZE[1])])
         cnt = 0
         while (self.team.vision.position_inside_vision(destination) or get_model().map.get_position_type(destination) is const.MAP_OBSTACLE) and cnt < const.MAX_WANDERING:
-            destination = pg.Vector2([uniform(0, const.ARENA_SIZE[0]),
-                                     uniform(0, const.ARENA_SIZE[1])])
+            destination = pg.Vector2([rng.uniform(0, const.ARENA_SIZE[0]),
+                                     rng.uniform(0, const.ARENA_SIZE[1])])
             cnt += 1
         if cnt >= const.MAX_WANDERING:
             return False
@@ -164,6 +163,7 @@ class Character(LivingEntity):
             path_finder = get_model().path_finder
         self.__move_path = path_finder.find_path(self.position, destination)
         if self.__move_path is None:
+            self.__move_path = []
             return False
         return True
 
@@ -185,6 +185,7 @@ class Character(LivingEntity):
     def set_move_stop(self) -> bool:
         """Stop movement of the character. Returns True/False on success/failure."""
         self.__move_state = CharacterMovingState.STOPPED
+        self.move_path.clear()
         return True
 
     def set_move_direction(self, direction: pg.Vector2) -> bool:
@@ -286,13 +287,13 @@ class Character(LivingEntity):
         return self.__move_direction
 
     @property
-    def move_path(self) -> list[pg.Vector2] | None:
+    def move_path(self) -> list[pg.Vector2]:
         return self.__move_path
 
     @property
     def move_destination(self) -> pg.Vector2 | None:
         if self.__move_state == CharacterMovingState.TO_POSITION or self.__move_state == CharacterMovingState.WANDERING:
-            if self.__move_path != None and len(self.__move_path) > 0:
+            if len(self.__move_path) > 0:
                 return self.__move_path[-1]
             return self.position
         return None
@@ -300,7 +301,3 @@ class Character(LivingEntity):
     @property
     def move_state(self) -> CharacterMovingState:
         return self.__move_state
-
-    @property
-    def is_wandering(self) -> bool:
-        return self.__move_state == CharacterMovingState.WANDERING

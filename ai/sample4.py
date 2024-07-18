@@ -23,24 +23,24 @@ def assign_random_destination(character: Character, api: API):
     api.action_move_to(character, new_destination)
 
 
-def every_tick(interface: API):
+def every_tick(api: API):
     """
     一定要被實作的 function ，會定期被遊戲 call
     在使用 VS Code 寫 code 的時候可以把滑鼠移到變數、函數上方，看它們的詳細解說。
     在使用 VS Code 寫 code 的時候可以按住 Ctrl 再用滑鼠點擊變數、函數，來跳轉到與它們相關的地方。
     在測試的時候可以只放一隻 ai 、在執行時一次加很多 arguments (如 -qrp)。
     """
-    my_towers = interface.get_owned_towers()
+    my_towers = api.get_owned_towers()
     for tower in my_towers:
         if tower.spawn_character_type is not CharacterClass.MELEE:
             # 把塔所生的士兵種類改成近戰，因為近戰走得比較快
-            interface.change_spawn_type(tower, CharacterClass.MELEE)
-    my_characters = interface.get_owned_characters()
-    interface.action_cast_ability(my_characters)  # 不管三七二十一把技能打開
+            api.change_spawn_type(tower, CharacterClass.MELEE)
+    my_characters = api.get_owned_characters()
+    api.action_cast_ability(my_characters)  # 不管三七二十一把技能打開
     for character in my_characters:  # 用 for 迴圈遍歷所有自己的士兵
-        if interface.get_movement(character).status is MovementStatusClass.STOPPED:  # 這個士兵停止移動了
+        if api.get_movement(character).status is MovementStatusClass.STOPPED:  # 這個士兵停止移動了
             stick = random.random()  # 抽個籤
             if stick < 0.5:  # 讓角色去探索沒有視野的地方
-                assign_random_destination(character, interface)
+                assign_random_destination(character, api)
             else:  # 讓角色開始隨意亂走
-                interface.action_wander(character)
+                api.action_wander(character)

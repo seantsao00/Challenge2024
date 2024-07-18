@@ -21,26 +21,26 @@ class Const:
     """隨便說說話的機率"""
 
 
-def assign_random_destination(character: Character, interface: API):
+def assign_random_destination(character: Character, api: API):
     """指定一個還沒有開視野的隨機位置給 character 。"""
-    new_destination = pg.Vector2(random.uniform(0, interface.get_grid_size() - 1),
-                                 random.uniform(0, interface.get_grid_size() - 1))
+    new_destination = pg.Vector2(random.uniform(0, api.get_grid_size() - 1),
+                                 random.uniform(0, api.get_grid_size() - 1))
     i = 0
-    while interface.is_visible(new_destination):
-        new_destination = pg.Vector2(random.uniform(0, interface.get_grid_size() - 1),
-                                     random.uniform(0, interface.get_grid_size() - 1))
+    while api.is_visible(new_destination):
+        new_destination = pg.Vector2(random.uniform(0, api.get_grid_size() - 1),
+                                     random.uniform(0, api.get_grid_size() - 1))
         i += 1
         if i == 10:  # 最多嘗試 10 次
             break
     Information.destinations[character.id] = new_destination
-    interface.action_move_to(character, new_destination)
+    api.action_move_to(character, new_destination)
 
 
-def enemies_near_tower(tower: Tower, interface: API):
+def enemies_near_tower(tower: Tower, api: API):
     """傳入一座塔，回傳塔附近所有視野可及的敵隊士兵"""
     visible_enemies = []  # 創造空列表，存取所有視野可及的敵隊士兵
-    for character in interface.get_visible_characters():
-        if character.team_id != interface.get_team_id():
+    for character in api.get_visible_characters():
+        if character.team_id != api.get_team_id():
             visible_enemies.append(character)
 
     near_enemies = []  # 創造空列表，存取所有視野可及，且距離塔 20 單位距離以內的敵隊士兵
@@ -50,9 +50,9 @@ def enemies_near_tower(tower: Tower, interface: API):
     return near_enemies
 
 
-def allies_near_tower(tower: Tower, interface: API):
+def allies_near_tower(tower: Tower, api: API):
     """傳入一座塔，回傳塔附近所有己方隊伍的士兵"""
-    allies = interface.get_owned_characters()
+    allies = api.get_owned_characters()
 
     near_allies = []
     for ally in allies:
@@ -80,7 +80,7 @@ def every_tick(api: API):
         if character.id in Information.destinations:  # 這個士兵曾經被指定過要往哪裡走
             # 士兵沒有辦法走到任意的實數座標上，所以如果用以下註解掉的程式碼判斷是否到達目的地，會覺得士兵永遠沒有走到
             # if character.position == Information.destinations[character.id]: # 這個士兵已經走到他的目的地
-            #     assign_random_destination(character, interface)
+            #     assign_random_destination(character, api)
             if (character.position - Information.destinations[character.id]).length() < 1:
                 print(f'{character.id} 已經夠接近目的地了')
                 assign_random_destination(character, api)

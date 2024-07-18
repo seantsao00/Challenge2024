@@ -2,12 +2,16 @@
 Defines internal API interaction and AI threading.
 """
 
+from __future__ import annotations
+
+import base64
 import ctypes
 import importlib.util
 import os
 import signal
 import threading
 import traceback
+from itertools import combinations
 from typing import Iterable
 
 import numpy as np
@@ -338,16 +342,16 @@ class Internal(prototype.API):
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
         if not self.__is_controllable(character):
-            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN, False)
+            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
         with character.moving_lock:
             if character.move_state is CharacterMovingState.STOPPED:
-                return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
+                return prototype.Movement(prototype.MovementStatusClass.STOPPED)
             if character.move_state is CharacterMovingState.TO_DIRECTION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
+                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, self.__transform(character.move_direction.normalize(), is_position=False))
             if character.move_state is CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, False, self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, self.__transform(character.move_destination, is_position=True))
             if character.move_state is CharacterMovingState.WANDERING:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, True, self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.WANDERING, self.__transform(character.move_destination, is_position=True))
             raise ValueError
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
@@ -396,10 +400,6 @@ class Internal(prototype.API):
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(
             self.__transform(position, is_position=True, inverse=True))
-
-    def is_wandering(self, character: prototype.Character) -> bool:
-        enforce_type('character', character, prototype.Character)
-        return self.__access_character(character).is_wandering
 
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
         w = const.ARENA_SIZE[1]
@@ -536,16 +536,16 @@ class Internal(prototype.API):
 
         internal_tower.update_character_type(Internal.__map_character_type(spawn_type))
 
-    def sort_by_distance(self, characters: Iterable[prototype.Character], target: pg.Vector2) -> list[prototype.Character]:
-        enforce_type('characters', characters, Iterable)
+    def sort_by_distance(self, entities: Iterable[prototype.Character | prototype.Tower], target: pg.Vector2) -> list[prototype.Character | prototype.Tower]:
+        enforce_type('entities', entities, Iterable)
         enforce_type('target', target, pg.Vector2)
-        for ch in characters:
-            enforce_type('element of characters', ch, prototype.Character)
+        for ch in entities:
+            enforce_type('element of entities', ch, prototype.Character, prototype.Tower)
 
         # We preform no transform at all, as all transform are just translate and rotate.
         # Length is preserved under these operations.
-        characters = sorted(characters, key=lambda ch: ch.position.distance_to(target))
-        return list(characters)
+        entities = sorted(entities, key=lambda ch: ch.position.distance_to(target))
+        return list(entities)
 
     def within_attacking_range(self, unit: prototype.Character | prototype.Tower,
                                candidates: list[prototype.Character | prototype.Tower] | None = None) -> list[prototype.Character | prototype.Tower]:
@@ -591,8 +591,15 @@ class Internal(prototype.API):
             return False
         self.__chat_sent = True
         self.__last_chat_time_stamp = time_stamp
-        get_model().chat.send_comment(team=self.__team(), text=msg)
+        for substring in [msg[x:y] for x, y in sorted(combinations(range(len(msg) + 1), r=2),
+                                                      key=lambda x: x[0]-x[1])]:
+            if base64.b64encode(substring.encode()) in const.DIRTY_WORDS:
+                msg = msg.replace(substring.lower(), len(substring)*'*')
+        model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
+
+    def get_chat_history(self, num: int = 15) -> list[tuple[int, str]]:
+        return model.chat.chat.get_comment_history(num)[::-1]
 
     def get_map_name(self) -> str:
         return get_model().map.name

@@ -120,7 +120,7 @@ class Tower:
         """塔的最大血量。"""
 
         self.team_id = _team_id
-        """塔所屬的隊伍編號，編號為 1 至 4 的正整數，或者 0 代表中立。"""
+        """塔所屬的隊伍編號，編號為 1 至 4 的正整數，或者 5 代表中立。"""
 
 
 class MapTerrain(IntEnum):
@@ -151,6 +151,12 @@ class MovementStatusClass(IntEnum):
     TO_POSITION = auto()
     """士兵目前朝著某個點為目的地前進。 """
 
+    WANDERING = auto()
+    """
+    士兵正處於遊蕩狀態。
+    一個士兵一旦被設為遊蕩，則除非該士兵無法再遊蕩，或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 STOPPED。
+    """
+
     UNKNOWN = auto()
     """無法得知的狀況，例如無法得知敵隊士兵的移動狀況。"""
 
@@ -158,22 +164,17 @@ class MovementStatusClass(IntEnum):
 class Movement:
     def __init__(self,
                  _status: MovementStatusClass,
-                 _is_wandering: bool,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
         """士兵的移動狀態。 """
-
-        self.is_wandering = _is_wandering
-        """
-        士兵是否在遊蕩狀態。
-        一個士兵一旦被設為遊蕩，則除非該士兵無法再遊蕩，或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
-        """
-
+        self.is_wandering: bool = self.status is MovementStatusClass.WANDERING
+        """Deprecated. Do not use in the future."""
         self.vector = _vector
         """
         當停止時，為 `None`。
-        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
-        當朝著某個點時，為該點的座標。
+        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。  
+        當朝著某個點時，為該點的座標。  
+        當遊蕩中，為下一次遊蕩的目的地。
         """
 
 
@@ -283,14 +284,14 @@ class API:
     @abstractmethod
     def refresh_character(self, character: Character) -> Character | None:
         """
-        更新一個士兵的數值。如果士兵死亡則回傳 None。  
+        更新一個士兵的數值。如果士兵死亡則回傳 None。只有同一幀內的 Character 可以被傳入。  
         @character: 目標的士兵。
         """
 
     @abstractmethod
     def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個塔的數值。  
+        更新一個塔的數值。只有同一幀內的 Tower 可以被傳入。  
         @tower: 目標的塔。
         """
 
@@ -389,10 +390,10 @@ class API:
     # ==== 輔助函數 ====
 
     @abstractmethod
-    def sort_by_distance(self, characters: Iterable[Character], target: pg.Vector2) -> list[Character]:
+    def sort_by_distance(self, entities: Iterable[Character | Tower], target: pg.Vector2) -> list[Character | Tower]:
         """
-        將各士兵依據其與目標的距離排序，若距離一樣則隨意排序。  
-        @characters: 指定的士兵列表。  
+        將各士兵或塔依據其與目標的距離排序，若距離一樣則隨意排序。  
+        @entities: 指定的士兵或塔的列表。  
         @target: 指定的目標座標。
         """
         raise NotImplementedError
@@ -425,5 +426,14 @@ class API:
     def send_chat(self, msg: str) -> bool:
         """
         傳送聊天室訊息，每個 `every_tick` 的呼叫當中只能傳送一次。回傳值為傳送成功或失敗。每一次訊息成功傳送後要等待一秒才能傳送下一則訊息。
-        @msg: 要傳送的訊息，長度如果超過 30 後面的文字會被忽略、不得包含 NULL 字元。部分字元可能會因為字體無法顯示。
+        @msg: 要傳送的訊息，長度如果超過 30 後面的文字會被忽略、不得包含 NULL 字元。部分不雅字詞會以 **** 替換。部分字元可能會因為字體無法顯示。
         """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_chat_history(self, num: int = 15) -> list[tuple[int, str]]:
+        """
+        回傳最近的聊天室訊息。回傳值的`list`存有 `(team.id, msg)`，並從最新排到最舊。
+        @num: 要取得幾則訊息，預設為15。若訊息數量少於指定數目，會回傳所有訊息(可能會是空list)。若 num 為 0，則回傳所有訊息。
+        """
+        raise NotImplementedError
