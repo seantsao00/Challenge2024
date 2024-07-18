@@ -9,10 +9,12 @@ class Yao:
 
     def run(self, api: API):
         self.api = api
-        if self.api.get_current_time() < 20:
+        owned = self.api.get_owned_characters()
+        if self.api.get_current_time() < 10:
             self.api.change_spawn_type(self.api.get_owned_towers()[0], CharacterClass.MELEE)
-            self.api.action_wander(self.api.get_owned_characters())
-
+            self.api.action_wander(self.api.get_owned_characters()[-1])
+        elif self.api.get_current_time() < 30:
+            self.api.change_spawn_type(self.api.get_owned_towers()[0], CharacterClass.MELEE)
 yao = Yao()
 
 def every_tick(interface: API):

@@ -346,7 +346,18 @@ class API:
         """
         將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
         @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
-        @destination: 移動的目的地。
+        @target: 被攻擊的目標。
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def action_move_and_attack(self, characters: Iterable[Character] | Character, target: Character | Tower) -> None:
+        """
+        將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。
+        如果目標不在某士兵的攻擊範圍中，則會讓士兵往該目標的方向移動。
+        這個函數會使用內建的尋路，如果大量士兵無法攻擊、必須移動的話可能會耗費大量時間，使用時請注意。 
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
+        @target: 被攻擊的目標。
         """
         raise NotImplementedError
 

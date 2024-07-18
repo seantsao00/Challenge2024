@@ -29,7 +29,7 @@ class Ranger(Character):
         get_event_manager().register_listener(EventUseRangerAbility,
                                               listener=self.use_ability, channel_id=self.id)
 
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
@@ -43,6 +43,8 @@ class Ranger(Character):
                                   speed=const.BULLET_RANGER_SPEED)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self._last_attack_time = now_time
+            return True
+        return False
 
     def cast_ability(self, *args, **kwargs):
         """`kwargs` should contain position (default to my position)"""

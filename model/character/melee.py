@@ -36,7 +36,7 @@ class Melee(Character):
                          const.CharacterType.MELEE, const.CharacterState.LEFT)
         self.__defense: float = 0
 
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
@@ -45,6 +45,8 @@ class Melee(Character):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy,
                                                  damage=self.attribute.attack_damage), enemy.id)
             self._last_attack_time = now_time
+            return True
+        return False
 
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):

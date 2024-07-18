@@ -44,7 +44,7 @@ class Sniper(Character):
         self.ability_active = True
         log_info(f"[Sniper] {self} Use ability")
 
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
 
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
@@ -69,3 +69,5 @@ class Sniper(Character):
                 self.ability_active = False
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self._last_attack_time = now_time
+            return True
+        return False

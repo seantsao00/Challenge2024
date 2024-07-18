@@ -256,7 +256,7 @@ class Character(LivingEntity):
             self.state = const.CharacterState.RIGHT
 
     @abstractmethod
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
         pass
 
     def die(self):
