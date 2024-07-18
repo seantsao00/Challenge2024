@@ -284,14 +284,16 @@ class API:
     @abstractmethod
     def refresh_character(self, character: Character) -> Character | None:
         """
-        更新一個士兵的數值。如果士兵死亡則回傳 None。只有同一幀內的 Character 可以被傳入。  
+        更新一個士兵的數值。如果士兵死亡或非法則回傳 None。  
+        不是同一個 `every_tick` 呼叫取得的 Character 可能會需要較多的時間。
         @character: 目標的士兵。
         """
 
     @abstractmethod
     def refresh_tower(self, tower: Tower) -> Tower:
         """
-        更新一個塔的數值。只有同一幀內的 Tower 可以被傳入。  
+        更新一個塔的數值。如果塔非法則回傳 None。 
+        不是同一個 `every_tick` 呼叫取得的 Tower 可能會需要較多的時間。
         @tower: 目標的塔。
         """
 
