@@ -59,9 +59,9 @@ def get_visible_enemies(api: API) -> tuple[list[Tower], list[Character]]:
     return (visible_enemy_towers, visible_enemy_characters)
 
 
-def get_nearby_fellows(api: API, position: pg.Vector2, distance: int = 50) -> list[Character]:
+def get_nearby_fellows(api: API, position: pg.Vector2, distance: int = 100) -> list[Character]:
     """
-    拿到距離某點附近(距離 distance 內)友軍的 list，如果沒有特別指定 distance 的話預設是 50。
+    拿到距離某點附近(距離 distance 內)友軍的 list，如果沒有特別指定 distance 的話預設是 100。
     """
     my_character = api.get_owned_characters()
     nearby_fellows = []
@@ -131,8 +131,7 @@ def melee_action(api: API, melee: Character) -> None:
                 api.action_attack(melee, enemy_character)
                 return
 
-    if len(enemies[0]) == 0 and random.random() <= 1/12:
-        api.action_wander(melee)
+    api.action_wander(melee)
     # 叫近戰兵亂走去探視野
     return
 
@@ -151,7 +150,6 @@ def ranger_action(api: API, ranger: Character):
     if len(info.siege_targets) != 0:
         nearest_siege_target = api.sort_by_distance(info.siege_targets, ranger.position)[0]
         # sort_by_distance 後第 0 個，也就是離自己最近的圍毆目標
-        print(nearest_siege_target)
         api.action_move_to(ranger, nearest_siege_target.position)
         api.action_attack(ranger, nearest_siege_target)
         # 直接去打最近的圍毆目標
@@ -176,7 +174,6 @@ def sniper_action(api: API, sniper: Character):
         nearest_siege_target = api.sort_by_distance(info.siege_targets, sniper.position)[0]
         # sort_by_distance 後第 0 個，也就是離自己最近的圍毆目標
         api.action_move_to(sniper, nearest_siege_target.position)
-        print(f"172 {nearest_siege_target}")
         api.action_attack(sniper, nearest_siege_target)
         # 直接去打最近的圍毆目標
         return
