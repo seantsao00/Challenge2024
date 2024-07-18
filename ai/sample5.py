@@ -200,17 +200,11 @@ def every_tick(api: API):
     """
     # 更新列表中的目標士兵，如果士兵死了就從列表中刪掉
     tmp_siege_targets = []
-
-    for tower in api.get_visible_towers():
-        info.tower_id_to_entity[tower.id] = tower
-    for character in api.get_visible_characters():
-        info.character_id_to_entity[character.id] = character
-
     for target in info.siege_targets:
-        if isinstance(target, Tower) and target.id in info.tower_id_to_entity:
-            tmp_siege_targets.append(info.tower_id_to_entity[target.id])
-        elif target.id in info.character_id_to_entity:
-            tmp_siege_targets.append(info.character_id_to_entity[target.id])
+        if isinstance(target, Tower) and api.refresh_tower(target) is not None:
+            tmp_siege_targets.append(api.refresh_tower(target))
+        elif api.refresh_character(target) is not None:
+            tmp_siege_targets.append(api.refresh_character(target))
     info.siege_targets = tmp_siege_targets
 
     my_towers = api.get_owned_towers()
