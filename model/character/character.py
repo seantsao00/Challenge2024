@@ -56,8 +56,8 @@ class Character(LivingEntity):
         self.abilities_time: float = -attribute.ability_cd
         self._last_attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
-        # self.ascendance: set[const.AscendanceType] = set()
-        self.ascendance: set[const.AscendanceType] = set([const.AscendanceType.CROWN])
+        self.ascendance: set[const.AscendanceType] = set()
+        # self.ascendance: set[const.AscendanceType] = set([const.AscendanceType.CROWN])
         self.attack_total: float = 0.0
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
