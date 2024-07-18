@@ -23,8 +23,8 @@ class PathView(EntityObject):
     def draw(self):
         entity = self.entity
         entity_path = entity.move_path
-        if entity_path is not None and len(entity_path) > 1:
-            entity_path = [ScreenInfo.resize_ratio * p for p in entity_path]
+        entity_path = [ScreenInfo.resize_ratio * p for p in entity_path]
+        if len(entity_path) > 1:
             pg.draw.lines(self.canvas, const.HEALTH_BAR_COLOR[entity.team.team_id],
                           False, entity_path, const.PATH_WIDTH)
             pg.draw.lines(self.canvas, (0, 0, 0),
