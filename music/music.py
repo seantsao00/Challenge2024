@@ -2,8 +2,9 @@ import pygame as pg
 
 import const
 from event_manager import (EventAttack, EventChangeParty, EventCharacterDied, EventCreateEntity,
-                           EventGameOver, EventPauseModel, EventResumeModel, EventStartGame,
-                           EventResultWandering, EventResultChoseCharacter, EventResultChamp)
+                           EventGameOver, EventPauseModel, EventResultChamp,
+                           EventResultChoseCharacter, EventResultWandering, EventResumeModel,
+                           EventStartGame)
 from instances_manager import get_event_manager, get_model
 
 
@@ -88,7 +89,7 @@ class BackgroundMusic:
         pg.mixer.music.load(const.BGM_ROLL_PATH)
         pg.mixer.music.set_volume(self.__default_volume / 4)
         pg.mixer.music.play(loops=-1)
-    
+
     def __handle_result_wandering(self, _: EventResultWandering):
         if pg.mixer.music.get_busy():
             pg.mixer.music.set_volume(self.__default_volume)

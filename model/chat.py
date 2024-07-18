@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 class Chat:
     def __init__(self) -> None:
         self.__comment_history: list[tuple[int, str]] = []
+
     def __send_chat(self, message_type: ChatMessageType, team: Team | None, text: str):
         get_event_manager().post(EventSendChat(type=message_type, team=team, text=text))
 
@@ -27,7 +28,7 @@ class Chat:
 
     def send_system(self, text: str):
         self.__send_chat(ChatMessageType.CHAT_SYSTEM, None, text)
-        
+
     def get_comment_history(self, num: int) -> list[tuple[int, str]]:
         return self.__comment_history[-num:].copy()
 
