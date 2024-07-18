@@ -30,8 +30,10 @@ class StageClass(IntEnum):
     # ATTACK_ENEMY = auto()
     # """攻擊敵人階段"""
 
+
 class AiInfo():
     """所有有用到的資料儲存"""
+
     def __init__(self) -> None:
         self.team_id: int
         self.fountain: Tower | None = None
@@ -60,15 +62,17 @@ def update(api: API):
     # 開技能
     api.action_cast_ability(api.get_owned_characters())
 
+
 def change_spawn_by_posibility(api: API, towers: list[Tower], melee_p: float, ranger_p: float, siniper_p: float):
     """
     機率性改變塔生成的兵種
     """
-    assert((melee_p + ranger_p + siniper_p == 1))
-    spawn_type = random.choices([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER], \
+    assert ((melee_p + ranger_p + siniper_p == 1))
+    spawn_type = random.choices([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER],
                                 [melee_p, ranger_p, siniper_p])[0]
     for tower in towers:
         api.change_spawn_type(tower, spawn_type)
+
 
 def stage_start(api: API):
     """
@@ -76,6 +80,7 @@ def stage_start(api: API):
     """
     info.team_id = api.get_team_id()
     info.fountain = api.get_owned_towers()[0]
+
 
 def stage_explore(api: API):
     """
@@ -91,6 +96,7 @@ def stage_explore(api: API):
     if len(others_towers) != 0:
         info.target_tower = api.sort_by_distance(others_towers, info.fountain.position)[0]
 
+
 def stage_attack_tower(api: API):
     """
     攻擊塔階段，會讓所有的士兵都去往某個塔走，進行攻擊。
@@ -101,6 +107,7 @@ def stage_attack_tower(api: API):
     # 攻擊塔
     api.action_move_to(api.get_owned_characters(), info.target_tower.position)
     api.action_attack(api.get_owned_characters(), info.target_tower)
+
 
 def stage_defend_tower(api: API):
     """
@@ -126,6 +133,7 @@ def stage_defend_tower(api: API):
 
 
 info = AiInfo()
+
 
 def every_tick(api: API):
     """
