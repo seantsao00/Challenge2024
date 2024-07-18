@@ -84,7 +84,7 @@ class Model:
         """Real-world-passing time since last tick in second."""
 
         self.entity_lock = threading.Lock()
-        self.entities: list[Entity] = []
+        self.entities: dict[int, Entity] = {}
         self.characters: list[Character] = []
         self.chat = Chat()
         self.towers: list[Tower] = []
@@ -175,7 +175,7 @@ class Model:
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
-            self.entities.append(event.entity)
+            self.entities[event.entity.id] = event.entity
         if isinstance(event.entity, Tower):
             self.towers.append(event.entity)
         elif isinstance(event.entity, Character):
@@ -200,7 +200,7 @@ class Model:
     def ranged_bullet_damage(self, event: EventRangedBulletDamage):
         get_event_manager().unregister_listener(EventEveryTick, event.bullet.judge)
         with self.entity_lock:
-            for entity in self.entities:
+            for entity in self.entities.values():
                 if ((entity.position - event.bullet.target).length() < event.bullet.range
                         and entity.team is not event.bullet.team):
                     get_event_manager().post(EventAttack(victim=entity,
