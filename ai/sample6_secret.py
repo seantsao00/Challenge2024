@@ -38,26 +38,27 @@ def update(api: API):
         info.character_id_to_entity[character.id] = character
 
     if info.target_tower is not None:
-        info.target_tower =info.tower_id_to_entity[info.target_tower.id]
+        info.target_tower = api.refresh_tower(info.target_tower)
     if info.target_enemy is not None:
-        info.target_enemy = info.character_id_to_entity[info.target_enemy.id]
+        info.target_enemy = api.refresh_character(info.target_enemy)
     if info.fountain is not None:
-        info.fountain = info.tower_id_to_entity[info.fountain.id]
+        info.fountain = api.refresh_tower(info.fountain)
     if info.defend_tower is not None:
-        info.defend_tower = info.tower_id_to_entity[info.defend_tower.id]
-    
+        info.defend_tower = api.refresh_tower(info.defend_tower)
+
     api.action_cast_ability(api.get_owned_characters())
 
 def move(api: API, chs: list[Character], des: pg.Vector2):
     for ch in chs:
         if api.get_movement(ch).vector != des:
             api.action_move_to(ch, des)
-            
-def change_by_posibility(api: API, towers: list[Tower], melee_p: float, ranger_p: float, siniper_p: float):
+
+def change_spawn_by_posibility(api: API, towers: list[Tower], melee_p: float, ranger_p: float, siniper_p: float):
     assert(melee_p + ranger_p + siniper_p == 1)
     spawn_type = random.choices([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER], \
                                 [melee_p, ranger_p, siniper_p])[0]
     for tower in towers:
+        print(f"chsapn {tower}")
         api.change_spawn_type(tower, spawn_type)
 
 def stage_start(api: API):
@@ -66,7 +67,7 @@ def stage_start(api: API):
     # print(f"info.fountain {info.fountain}")
 
 def stage_explore(api: API):
-    change_by_posibility(api, [info.fountain], 1, 0, 0)
+    change_spawn_by_posibility(api, [info.fountain], 1, 0, 0)
     for character in api.get_owned_characters():
         api.action_wander(character)
 
@@ -85,12 +86,11 @@ def stage_attack_tower(api: API):
 def stage_defend_tower(api: API):
     for tower in api.get_owned_towers():
         if not tower.is_fountain:
-            change_by_posibility(api, [tower], 0.4, 0, 0.6)
+            change_spawn_by_posibility(api, [tower], 0.4, 0, 0.6)
         else:
-            change_by_posibility(api, [tower], 1, 0, 0)
+            change_spawn_by_posibility(api, [tower], 1, 0, 0)
 
     move(api, api.get_owned_characters(), info.defend_tower.position)
-    # api.action_move_to(api.get_owned_characters(), info.defend_tower.position)
 
 def stage_attack_enemy(api: API):
     enemies = [character for character in api.get_visible_characters() if character.team_id != info.team_id]
@@ -101,10 +101,10 @@ def stage_attack_enemy(api: API):
         move(api, api.get_owned_characters(), info.target_enemy.position)
     # api.action_move_to(api.get_owned_characters(), info.fountain.position)
     elif info.defend_tower is not None:
-        move(api, api.get_owned_characters(), info.defend_tower)
+        move(api, api.get_owned_characters(), info.defend_tower.position)
     else:
         move(api, api.get_owned_characters(), info.fountain)
-        
+
 
 
 info = AiInfo()
@@ -168,7 +168,6 @@ def every_tick(api: API):
         info.stage = StageClass.EXPLORE
 
     for character in api.get_owned_characters():
-        
         enemy = api.within_attacking_range(character)
         if len(enemy) != 0:
             api.action_attack(character, random.choice(enemy))
