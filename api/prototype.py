@@ -120,7 +120,7 @@ class Tower:
         """塔的最大血量。"""
 
         self.team_id = _team_id
-        """塔所屬的隊伍編號，編號為 1 至 5 的正整數，超過隊伍數量的數字代表中立，中立塔所屬的 team_id 皆相同。"""
+        """塔所屬的隊伍編號，編號為 0 至場上隊伍總數（最多為 4）的正整數，其中 0 代表中立塔。"""
 
 
 class MapTerrain(IntEnum):
@@ -196,6 +196,11 @@ class API:
     @abstractmethod
     def get_team_id(self) -> int:
         """回傳自己隊伍的編號（`id`）。"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_number_of_teams(self) -> int:
+        """回傳場上隊伍的總數（不包含中立隊伍）。"""
         raise NotImplementedError
 
     @abstractmethod

@@ -79,6 +79,8 @@ class Internal(prototype.API):
         """
         AI interprets the team as 1, 2, 3, 4 whereas internal naming uses 0, 1, 2, 3.
         """
+        if index == len(get_model().teams):
+            return 0
         return index + 1
 
     @classmethod
@@ -247,10 +249,10 @@ class Internal(prototype.API):
     # ======= Methods defined below are all callable from AI. =======
     # ===============================================================
 
-    def get_current_time(self):
+    def get_current_time(self) -> float:
         return get_model().get_time()
 
-    def get_grid_size(self):
+    def get_grid_size(self) -> float:
         return const.ARENA_SIZE[0]
 
     def get_vision_block_size(self) -> float:
@@ -270,6 +272,9 @@ class Internal(prototype.API):
 
     def get_team_id(self) -> int:
         return Internal.__cast_team_id(self.__team().team_id)
+
+    def get_number_of_teams(self) -> int:
+        return len(get_model().teams)
 
     def get_score_of_team(self, index=None) -> int:
         enforce_type('index', index, int, type(None))
@@ -444,7 +449,7 @@ class Internal(prototype.API):
             return prototype.MapTerrain.OBSTACLE
         raise GameError("Unkown terrain type.")
 
-    def action_move_along(self, characters: Iterable[prototype.Character] | prototype.Character, direction: pg.Vector2):
+    def action_move_along(self, characters: Iterable[prototype.Character] | prototype.Character, direction: pg.Vector2) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('direction', direction, pg.Vector2)
         if isinstance(characters, prototype.Character):
@@ -460,7 +465,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_direction(direction)
 
-    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2):
+    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('destination', destination, pg.Vector2)
         if isinstance(characters, prototype.Character):
@@ -490,7 +495,7 @@ class Internal(prototype.API):
                     inter.set_move_position(path)
         self.__path_finder.batch_end()
 
-    def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character):
+    def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         if isinstance(characters, prototype.Character):
             characters = [characters]
@@ -504,7 +509,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_stop()
 
-    def action_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> bool:
+    def action_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
         if isinstance(characters, prototype.Character):
@@ -527,7 +532,7 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs):
+    def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         if isinstance(characters, prototype.Character):
             characters = [characters]
@@ -544,7 +549,7 @@ class Internal(prototype.API):
         for inter in internals:
             inter.cast_ability(**kwargs)
 
-    def action_wander(self, characters: Iterable[prototype.Character] | prototype.Character):
+    def action_wander(self, characters: Iterable[prototype.Character] | prototype.Character) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         if isinstance(characters, prototype.Character):
             characters = [characters]
@@ -558,7 +563,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_wandering(self.__path_finder)
 
-    def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass):
+    def change_spawn_type(self, tower: prototype.Tower, spawn_type: prototype.CharacterClass) -> None:
         """change the type of character the tower spawns"""
         enforce_type('tower', tower, prototype.Tower)
         enforce_type('spawn_type', spawn_type, prototype.CharacterClass)
@@ -639,7 +644,7 @@ class Internal(prototype.API):
     def get_map_name(self) -> str:
         return get_model().map.name
 
-    def action_move_and_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower):
+    def action_move_and_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
         if isinstance(characters, prototype.Character):
