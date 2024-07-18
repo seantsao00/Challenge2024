@@ -8,6 +8,8 @@ from typing import Iterable
 
 import pygame as pg
 
+from util import log_warning
+
 
 class CharacterClass(IntEnum):
     """士兵種類。"""
@@ -151,6 +153,12 @@ class MovementStatusClass(IntEnum):
     TO_POSITION = auto()
     """士兵目前朝著某個點為目的地前進。 """
 
+    WANDERING = auto()
+    """
+    士兵正處於遊蕩狀態。
+    一個士兵一旦被設為遊蕩，則除非該士兵無法再遊蕩，或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 STOPPED。
+    """
+
     UNKNOWN = auto()
     """無法得知的狀況，例如無法得知敵隊士兵的移動狀況。"""
 
@@ -158,22 +166,17 @@ class MovementStatusClass(IntEnum):
 class Movement:
     def __init__(self,
                  _status: MovementStatusClass,
-                 _is_wandering: bool,
                  _vector: pg.Vector2 | None = None):
         self.status = _status
         """士兵的移動狀態。 """
-
-        self.is_wandering = _is_wandering
-        """
-        士兵是否在遊蕩狀態。
-        一個士兵一旦被設為遊蕩，則除非該士兵無法再遊蕩，或被指定其他移動方式（如：`action_move_along`, `action_move_to`, `action_move_clear`）才會又變為 `False`。
-        """
-
+        self.is_wandering: bool = self.status is MovementStatusClass.WANDERING
+        """Deprecated. Do not use in the future."""
         self.vector = _vector
         """
         當停止時，為 `None`。
-        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。
-        當朝著某個點時，為該點的座標。
+        當朝某個方向時，為朝著的方向，且為一個正規化後（長度為 1）的向量。  
+        當朝著某個點時，為該點的座標。  
+        當遊蕩中，為下一次遊蕩的目的地。
         """
 
 

@@ -67,7 +67,7 @@ class Haruhikage:
         owned_characters = interface.get_owned_characters()
         interface.action_cast_ability(owned_characters)
         for ch in owned_characters:
-            if not interface.get_movement(ch).is_wandering:
+            if interface.get_movement(ch).status is not MovementStatusClass.WANDERING:
                 interface.action_wander([ch])
         visible = [character for character in interface.get_visible_characters()
                 if character.team_id != interface.get_team_id()]

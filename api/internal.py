@@ -342,16 +342,16 @@ class Internal(prototype.API):
     def get_movement(self, character: prototype.Character) -> prototype.Movement:
         character: model.Character = self.__access_character(character)
         if not self.__is_controllable(character):
-            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN, False)
+            return prototype.Movement(prototype.MovementStatusClass.UNKNOWN)
         with character.moving_lock:
             if character.move_state is CharacterMovingState.STOPPED:
-                return prototype.Movement(prototype.MovementStatusClass.STOPPED, False)
+                return prototype.Movement(prototype.MovementStatusClass.STOPPED)
             if character.move_state is CharacterMovingState.TO_DIRECTION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, False, self.__transform(character.move_direction.normalize(), is_position=False))
+                return prototype.Movement(prototype.MovementStatusClass.TO_DIRECTION, self.__transform(character.move_direction.normalize(), is_position=False))
             if character.move_state is CharacterMovingState.TO_POSITION:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, False, self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, self.__transform(character.move_destination, is_position=True))
             if character.move_state is CharacterMovingState.WANDERING:
-                return prototype.Movement(prototype.MovementStatusClass.TO_POSITION, True, self.__transform(character.move_destination, is_position=True))
+                return prototype.Movement(prototype.MovementStatusClass.WANDERING, self.__transform(character.move_destination, is_position=True))
             raise ValueError
 
     def refresh_character(self, character: prototype.Character) -> prototype.Character | None:
@@ -400,10 +400,6 @@ class Internal(prototype.API):
     def is_visible(self, position: pg.Vector2) -> bool:
         return self.__team().vision.position_inside_vision(
             self.__transform(position, is_position=True, inverse=True))
-
-    def is_wandering(self, character: prototype.Character) -> bool:
-        enforce_type('character', character, prototype.Character)
-        return self.__access_character(character).is_wandering
 
     def get_terrain(self, position: pg.Vector2) -> prototype.MapTerrain:
         w = const.ARENA_SIZE[1]
