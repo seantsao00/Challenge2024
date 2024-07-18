@@ -368,7 +368,7 @@ class Internal(prototype.API):
             # We filter out tower and non-visible characters.
             if not isinstance(internal, model.Character):
                 internal = None
-            if internal is not None and not self.is_visible(internal.position):
+            if internal is not None and not self.is_visible(self.__transform(internal.position, is_position=True)):
                 internal = None
         if internal is None or not internal.alive:
             return None
@@ -388,7 +388,7 @@ class Internal(prototype.API):
             # We filter out character and non-visible towers.
             if not isinstance(internal, model.Tower):
                 internal = None
-            if internal is not None and not self.is_visible(internal.position):
+            if internal is not None and not self.is_visible(self.__transform(internal.position, is_position=True)):
                 internal = None
         if internal is None:
             return None
