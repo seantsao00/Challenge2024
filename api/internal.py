@@ -554,7 +554,7 @@ class Internal(prototype.API):
         for substring in [msg[x:y] for x, y in sorted(combinations(range(len(msg) + 1), r=2),
                                                       key=lambda x: x[0]-x[1])]:
             if base64.b64encode(substring.encode()) in const.DIRTY_WORDS:
-                msg = msg.replace(substring, len(substring)*'*')
+                msg = msg.replace(substring.lower(), len(substring)*'*')
         model.chat.chat.send_comment(team=self.__team(), text=msg)
         return True
 
