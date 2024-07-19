@@ -23,11 +23,18 @@ class CharacterType(Enum):
     """狙擊"""
 
 
+class AscendanceType(Enum):
+    ARMOR = auto()
+    CROWN = auto()
+
+
 @dataclass(kw_only=True)
 class CharacterAttribute(LivingEntityAttribute):
     speed: float
     ability_cd: float | None
     ability_variables: Any | None
+    crown_ascendance_threshold: float
+    armor_show_time: float | None
 
 
 class CharacterState(Enum):
@@ -43,7 +50,9 @@ MELEE_ATTRIBUTE = CharacterAttribute(
     vision=20,
     ability_cd=3,
     attack_speed=1,
-    ability_variables=3
+    ability_variables=3,
+    crown_ascendance_threshold=360,
+    armor_show_time=None
     # damage per second = 36
 )
 
@@ -55,7 +64,9 @@ RANGER_ATTRIBUTE = CharacterAttribute(
     vision=15,
     ability_cd=2,
     attack_speed=1.2,
-    ability_variables=[15, 60]  # [range, damage] of ability
+    ability_variables=[15, 60],  # [range, damage] of ability
+    crown_ascendance_threshold=1080,
+    armor_show_time=0.5
     # damage per second = 72
 )
 
@@ -67,7 +78,9 @@ SNIPER_ATTRIBUTE = CharacterAttribute(
     vision=4,
     ability_cd=4,
     attack_speed=0.5,
-    ability_variables=300  # damage of ability
+    ability_variables=300,  # damage of ability
+    crown_ascendance_threshold=1500,
+    armor_show_time=0.8
     # damage per second = 150
 )
 

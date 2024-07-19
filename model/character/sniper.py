@@ -9,6 +9,7 @@ from event_manager import EventBulletCreate
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon
 from model.character import Character
+from model.timer import Timer
 from util import log_info
 
 if TYPE_CHECKING:
@@ -34,6 +35,9 @@ class Sniper(Character):
         if now_time - self.abilities_time < self.attribute.ability_cd:
             return
         self.abilities_time = now_time
+        self.ascendance.add(const.AscendanceType.ARMOR)
+        Timer(interval=self.attribute.armor_show_time,
+              function=self.handler_lost_ascendance, once=True)
         self.ability()
 
     def manual_cast_ability(self, *args, **kwargs):
@@ -72,3 +76,7 @@ class Sniper(Character):
         if dist <= self.attribute.attack_range:
             return True
         return False
+
+    def handler_lost_ascendance(self):
+        if const.AscendanceType.ARMOR in self.ascendance:
+            self.ascendance.remove(const.AscendanceType.ARMOR)

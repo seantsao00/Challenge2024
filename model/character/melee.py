@@ -58,9 +58,15 @@ class Melee(Character):
             self.__defense -= 1
             if self.__defense == 0:
                 self.abilities_time = get_model().get_time()
+                if const.AscendanceType.ARMOR in self.ascendance:
+                    self.ascendance.remove(const.AscendanceType.ARMOR)
         else:
             new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
+        if event.attacker.entity_type is const.CharacterType.MELEE or\
+           event.attacker.entity_type is const.CharacterType.RANGER or\
+           event.attacker.entity_type is const.CharacterType.SNIPER:
+            event.attacker.record_attack(min(self.health, event.damage))
         if self.health <= 0:
             self.die()
             if event.attacker.team.party is not const.PartyType.NEUTRAL:
@@ -74,6 +80,7 @@ class Melee(Character):
             return
         log_info(f"[Melee] {self} Cast ability")
         self.abilities_time = now_time
+        self.ascendance.add(const.AscendanceType.ARMOR)
         self.ability()
 
     def manual_cast_ability(self, *args, **kwargs):
