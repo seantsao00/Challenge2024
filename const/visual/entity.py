@@ -174,7 +174,7 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, tuple[float, float]]] = {
         None: (4, 4),
     } for bullet in BulletType},
     **{vehicle: {
-        state: (9, 13.2) for state in VehicleState
+        state: (12, 9.6) for state in VehicleState
     } for vehicle in VehicleType},
 }
 """
