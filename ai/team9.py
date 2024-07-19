@@ -404,4 +404,4 @@ def every_tick(api: API):
     print(info.target_enemy)
     
     # print(novel[novel_count], novel_count)
-    api.send_chat(info.novel[int(api.get_current_time())])
+    api.send_chat(info.novel[int(api.get_current_time()) % len(info.novel)])
