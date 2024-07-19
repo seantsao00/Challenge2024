@@ -113,7 +113,8 @@ class Model:
         self.skip_reveal_animation: bool = model_arguments.skip_reveal_animation
         self.frozen: bool = False
 
-        self.result: Result = Result(len(model_arguments.team_controls), model_arguments.skip_reveal_animation)
+        self.result: Result = Result(len(model_arguments.team_controls),
+                                     model_arguments.skip_reveal_animation)
         self.pause_menu: PauseMenu = PauseMenu()
         self.nyan = Nyan()
         self.ranger_ability = False

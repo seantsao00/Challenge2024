@@ -83,7 +83,7 @@ class ResultView(ObjectBase):
         img = self.bottom_image
         self.canvas.blit(img, (0, 0))
 
-        max_points = max([ t.points for t in model.teams ])
+        max_points = max([t.points for t in model.teams])
 
         team_icon_position: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
