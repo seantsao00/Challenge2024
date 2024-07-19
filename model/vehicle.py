@@ -9,6 +9,7 @@ import const
 import util
 from event_manager import EventAttack, EventCreateEntity, EventDiscardEntity, EventEveryTick
 from instances_manager import get_event_manager, get_model
+from model.character import Character
 from model.entity import Entity
 
 if TYPE_CHECKING:
@@ -87,7 +88,8 @@ class VehicleManager:
         queries = ([(x, +1, ly, ry) for x, _, ly, ry in boxes] +
                    [(x + 1, -1, ly, ry) for _, x, ly, ry in boxes])
         with get_model().entity_lock:
-            queries += [(e.position.x, 0, e.position.y, e) for e in get_model().entities.values()]
+            queries += [(e.position.x, 0, e.position.y, e)
+                        for e in get_model().entities.values() if isinstance(e, Character)]
         queries.sort(key=lambda x: (x[0], abs(x[1])))
         Y = const.ARENA_SIZE[1]
         counter = [0] * Y
