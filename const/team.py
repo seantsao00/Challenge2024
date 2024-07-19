@@ -32,3 +32,6 @@ class PartyType(Enum):
 
     MOURI = auto()
     """毛利偵探事務所"""
+
+    KIDDO = auto()
+    """基德家族"""

@@ -16,7 +16,7 @@ class PartySelector:
 
     def select_random_party(self, unique: bool):
         self.__selected_party_indices = np.random.choice(
-            5, self.__number_of_teams, not unique).tolist()
+            len(const.PartyType)-1, self.__number_of_teams, not unique).tolist()
 
     def __handle_change_party(self, event: EventChangeParty):
         """
@@ -36,10 +36,10 @@ class PartySelector:
                 if change_direction == 1:
                     self.__selected_party_indices[team_index] = 0
                 else:
-                    self.__selected_party_indices[team_index] = 4
+                    self.__selected_party_indices[team_index] = len(const.PartyType) - 2
             else:
                 self.__selected_party_indices[team_index] = (
-                    self.__selected_party_indices[team_index] + change_direction) % 5
+                    self.__selected_party_indices[team_index] + change_direction) % (len(const.PartyType) - 1)
 
     def selected_parties(self) -> list[const.PartyType]:
         return [None if index is None else self.__party_list[index] for index in self.__selected_party_indices]
