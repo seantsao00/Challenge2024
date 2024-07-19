@@ -79,7 +79,7 @@ class Model:
 
         self.global_clock: pg.time.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock
+        self.__game_clock: Clock | None
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
         self.dt: float
@@ -130,7 +130,7 @@ class Model:
         even for the second or more rounds of the game.
         """
 
-        self.__game_clock = Clock()
+        self.__game_clock = None
         self.teams: list[Team] = []
 
         selected_parties = self.party_selector.selected_parties()
@@ -158,6 +158,7 @@ class Model:
 
     def __post_initialize(self, _: EventPostInitialize):
         load_ai(self.__team_files_names)
+        self.__game_clock = Clock()
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -234,7 +235,7 @@ class Model:
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.__initialize)
-        ev_manager.register_listener(EventInitialize, self.__post_initialize)
+        ev_manager.register_listener(EventPostInitialize, self.__post_initialize)
         ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
         ev_manager.register_listener(EventQuit, self.__handle_quit)
         ev_manager.register_listener(EventPauseModel, self.__handle_pause)
@@ -252,6 +253,8 @@ class Model:
         ev_manager.register_listener(EventViewShowRangeSwitch, self.change_showrange_enable)
 
     def get_time(self):
+        if self.__game_clock is None:
+            return 0
         return self.__game_clock.get_time()
 
     def run(self):
