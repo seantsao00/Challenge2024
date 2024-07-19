@@ -382,7 +382,7 @@ def every_tick(api: API):
     # elif info.stage == StageClass.ATTACK_ENEMY:
     #     print(f"team {info.team_id} is on stage ATTACK_ENEMY")
         # stage_attack_enemy(api)
- 
+
     elif info.stage == StageClass.EXPLORE2_TOWER:
         print(f"team {info.team_id} is on stage EXPLORE")
         explore2_tower(api)
