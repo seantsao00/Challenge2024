@@ -33,7 +33,10 @@ class Vehicle(Entity):
             self.direction = pg.Vector2(const.VEHICLE_SPEED, 0)
         else:
             raise ValueError
-        super().__init__(position, team,  Vehicle.__rng.choice(list(const.VehicleType)), state)
+        super().__init__(position, team,
+                         Vehicle.__rng.choices(list(const.VehicleType),
+                                               [const.VEHICLE_RARITY[color] for color in list(const.VehicleType)], k=1)[0],
+                         state)
 
     def tick_move(self, dt) -> tuple[float, float, float, float]:
         move = self.direction * dt

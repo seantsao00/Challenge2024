@@ -5,7 +5,6 @@ Currently, there is no prorotype defined for special map handling, but this shou
 import random
 from enum import Enum
 
-import numpy as np
 import pygame as pg
 
 import const
@@ -29,7 +28,7 @@ class SpecialMapStation():
     def __init__(self):
         self.generation_sequence: list[tuple[float, pg.Vector2, const.VehicleState]] = []
         self.idx = 0
-        self.rng = random.Random(0)
+        self.rng = random.Random()
         # Phase 1: 10 second of grace period
         # Phase 2: 20 second of traffic
         self.generate_traffic(10, 30, rate=2)
@@ -48,7 +47,7 @@ class SpecialMapStation():
         log_info("Loaded map 'station' special handling.")
 
     def generate_traffic(self, start: float, end: float, rate: float):
-        # Average 5 car per second
+        # Average `rate` car per second
         for _ in range(int((end - start) * rate)):
             position, state = self.rng.choice([e.value for e in SpecialMapStation.Spots])
             self.generation_sequence.append((self.rng.uniform(start, end), position, state))
