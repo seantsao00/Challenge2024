@@ -54,6 +54,7 @@ class ModelArguments:
     show_path: bool
     show_range: bool
     scoreboard_frozen: bool
+    skip_reveal_animation: bool
 
 
 class Model:
@@ -109,9 +110,10 @@ class Model:
         self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
+        self.skip_reveal_animation: bool = model_arguments.skip_reveal_animation
         self.frozen: bool = False
 
-        self.result: Result = Result(len(model_arguments.team_controls))
+        self.result: Result = Result(len(model_arguments.team_controls), model_arguments.skip_reveal_animation)
         self.pause_menu: PauseMenu = PauseMenu()
         self.nyan = Nyan()
         self.ranger_ability = False
