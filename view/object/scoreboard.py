@@ -72,7 +72,7 @@ class Scorebox:
                 tower_icon = components.create_icon(
                     const.ENTITY_IMAGE[self.__team.party][tower.tower_type][None], SI.scale(SCOREBOX_ICON_SIZE))
                 self.__canvas.blit(tower_icon, tower_icon.get_rect(midright=midright))
-                midright = (midright[0] - SI.scale(4), midright[1])
+                midright = (midright[0] - SI.scale(6), midright[1])
 
         def blit_icon_and_text(icon_name: str, text_string: str, bottomleft: list[float, float], width: float):
             icon = components.create_icon(icon_name, SI.scale(SCOREBOX_ICON_SIZE))

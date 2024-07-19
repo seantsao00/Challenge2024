@@ -18,7 +18,8 @@ class AiInfo():
     EXPLORE_TIME_LIMT = 30
     ATTACK_ENEMY_CHARACTER_NUM = 15
     ATTACK_ENEMY_CHARACTER_LOWWER = 7
-    ATTACK_TOWER_CHARACTER_NUM = 16
+
+    ATTACK_TOWER_CHARACTER_NUM = 13
     ATTACK_TOWER_CHARACTER_LOWWER = 4
     
     TOWER_ATTACK_RANGE = 45
@@ -109,14 +110,15 @@ def stage_attack_tower(api: API):
             change_spawn_by_posibility(api, tower, 0.8, 0.2, 0)
         else:
             change_spawn_by_posibility(api, tower, 0.5, 0.3, 0.2)
-
-    if len(api.get_owned_characters()) < info.ATTACK_TOWER_CHARACTER_NUM:
+    if len(api.get_owned_characters()) > info.ATTACK_TOWER_CHARACTER_NUM:
+        move(api, api.get_owned_characters(), info.target_tower.position)
+    elif len(api.get_owned_characters()) < info.ATTACK_TOWER_CHARACTER_LOWWER:
         if info.defend_tower is not None:
             move(api, api.get_owned_characters(), info.defend_tower.position)
         else:
             move(api, api.get_owned_characters(), info.fountain.position)
-    else:
-        move(api, api.get_owned_characters(), info.target_tower.position)
+    # else:
+    #     move(api, api.get_owned_characters(), info.target_tower.position)
 
 
 def stage_defend_tower(api: API):
@@ -137,7 +139,7 @@ def stage_attack_enemy(api: API):
         if tower.is_fountain:
             change_spawn_by_posibility(api, tower, 0.7, 0.3, 0)
         else:
-            change_spawn_by_posibility(api, tower, 0.5, 0.2, 0.3)
+            change_spawn_by_posibility(api, tower, 0.3, 0.2, 0.5)
 
     enemies = [character for character in api.get_visible_characters() if character.team_id != info.team_id]
 
@@ -259,6 +261,7 @@ def every_tick(api: API):
     for ch in api.get_owned_characters():
         for tower in api.get_visible_towers():
             if tower.is_fountain and tower.team_id != info.team_id and \
-                (tower.position - ch.position).length() < info.TOWER_ATTACK_RANGE:
+                (tower.position - ch.position).length() < info.TOWER_ATTACK_RANGE + 5:
                 api.action_move_clear(ch)
+                break
 
