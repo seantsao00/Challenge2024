@@ -23,7 +23,16 @@ class Vehicle(Entity):
     __rng = random.Random()
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, state: const.VehicleState):
-        self.direction = pg.Vector2(0, const.VEHICLE_SPEED)
+        if state is const.VehicleState.BACK:
+            self.direction = pg.Vector2(0, -const.VEHICLE_SPEED)
+        elif state is const.VehicleState.FRONT:
+            self.direction = pg.Vector2(0, const.VEHICLE_SPEED)
+        elif state is const.VehicleState.LEFT:
+            self.direction = pg.Vector2(-const.VEHICLE_SPEED, 0)
+        elif state is const.VehicleState.RIGHT:
+            self.direction = pg.Vector2(const.VEHICLE_SPEED, 0)
+        else:
+            raise ValueError
         super().__init__(position, team,  Vehicle.__rng.choice(list(const.VehicleType)), state)
 
     def tick_move(self, dt) -> tuple[float, float, float, float]:
@@ -41,6 +50,13 @@ class Vehicle(Entity):
         self.position += move
         return (min_x, max_x, min_y, max_y)
 
+    def check_out_of_bounds(self):
+        W = const.ARENA_SIZE[1]
+        if self.position.x < 0 or self.position.x > W or self.position.y < 0 or self.position.y > W:
+            self.discard()
+            return True
+        return False
+
 
 class VehicleManager:
     """Manager for all vehicles. This is used to manage and unify all vehicle. In order to reduce attack check time."""
@@ -48,16 +64,11 @@ class VehicleManager:
     def __init__(self):
         self.vehicle_list: list[Vehicle] = []
         get_event_manager().register_listener(EventCreateEntity, self.append_vehicle)
-        get_event_manager().register_listener(EventDiscardEntity, self.discard_vehice)
         get_event_manager().register_listener(EventEveryTick, self.every_tick)
 
     def append_vehicle(self, event: EventCreateEntity):
         if isinstance(event.entity, Vehicle):
             self.vehicle_list.append(event.entity)
-
-    def discard_vehice(self, event: EventDiscardEntity):
-        if isinstance(event.entity, Vehicle):
-            self.vehicle_list.remove(event.entity)
 
     def every_tick(self, event: EventEveryTick):
         # Do a simple sweep line. Otherwise that might be too slow for O(cars * entities)
@@ -87,3 +98,6 @@ class VehicleManager:
         for entity in hit:
             ev_man.post(EventAttack(
                 attacker=self.vehicle_list[0], victim=entity, damage=const.VEHICLE_DAMAGE), entity.id)
+
+        self.vehicle_list = [
+            vehicle for vehicle in self.vehicle_list if not vehicle.check_out_of_bounds()]

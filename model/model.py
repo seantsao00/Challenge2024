@@ -175,8 +175,8 @@ class Model:
             else:
                 log_critical(
                     f"[API] AI of team {team.team_id + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
-        if self.__ticks == 0:
-            Vehicle(pg.Vector2(50, 0), self.neutral_team, const.VehicleState.FRONT)
+        # if self.__ticks == 0:
+        #     Vehicle(pg.Vector2(50, 0), self.neutral_team, const.VehicleState.FRONT)
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
