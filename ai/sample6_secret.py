@@ -18,8 +18,10 @@ class AiInfo():
     EXPLORE_TIME_LIMT = 30
     ATTACK_ENEMY_CHARACTER_NUM = 15
     ATTACK_ENEMY_CHARACTER_LOWWER = 7
-    ATTACK_TOWER_CHARACTER_NUM = 15
+    ATTACK_TOWER_CHARACTER_NUM = 16
     ATTACK_TOWER_CHARACTER_LOWWER = 4
+    
+    TOWER_ATTACK_RANGE = 45
 
     def __init__(self) -> None:
         self.team_id: int
@@ -33,6 +35,8 @@ class AiInfo():
 
         self.tower_id_to_entity: dict = {}
         self.character_id_to_entity: dict = {}
+        
+
 
 def update(api: API):
     for tower in api.get_visible_towers():
@@ -102,9 +106,9 @@ def stage_attack_tower(api: API):
 
     for tower in api.get_owned_towers():
         if tower.is_fountain:
-            change_spawn_by_posibility(api, tower, 0.6, 0.4, 0)
+            change_spawn_by_posibility(api, tower, 0.8, 0.2, 0)
         else:
-            change_spawn_by_posibility(api, tower, 0.4, 0.2, 0.4)
+            change_spawn_by_posibility(api, tower, 0.5, 0.3, 0.2)
 
     if len(api.get_owned_characters()) < info.ATTACK_TOWER_CHARACTER_NUM:
         if info.defend_tower is not None:
@@ -131,9 +135,9 @@ def stage_defend_tower(api: API):
 def stage_attack_enemy(api: API):
     for tower in api.get_owned_towers():
         if tower.is_fountain:
-            change_spawn_by_posibility(api, tower, 0.6, 0.4, 0)
+            change_spawn_by_posibility(api, tower, 0.7, 0.3, 0)
         else:
-            change_spawn_by_posibility(api, tower, 0.4, 0.2, 0.4)
+            change_spawn_by_posibility(api, tower, 0.5, 0.2, 0.3)
 
     enemies = [character for character in api.get_visible_characters() if character.team_id != info.team_id]
 
@@ -205,7 +209,7 @@ def every_tick(api: API):
     elif info.stage == StageClass.ATTACK_TOWER:
         print(f"team {info.team_id} is on stage ATTACK_TOWER")
         stage_attack_tower(api)
-        
+
         if info.target_tower.team_id == info.team_id:
             info.defend_tower = info.target_tower
             info.target_tower = None
@@ -233,7 +237,28 @@ def every_tick(api: API):
         elif info.target_tower is not None and info.target_tower.team_id != info.team_id:
             info.stage = StageClass.ATTACK_TOWER
 
+        elif info.target_tower is None:
+            min_length: int = 100000
+            min_tower: Tower = None
+            for tower in api.get_visible_towers():
+                if (not tower.is_fountain) and tower.team_id != info.team_id:
+                    if min_length > (tower.position - info.fountain.position).length():
+                        min_length = (tower.position - info.fountain.position).length()
+                        min_tower = tower
+            if min_tower is not None:
+                info.target_tower = min_tower
+                info.stage = StageClass.ATTACK_TOWER
+            else:
+                info.target_tower = None
+
     else:
         print("wrong stage")
         info.stage = StageClass.EXPLORE
+
+
+    for ch in api.get_owned_characters():
+        for tower in api.get_visible_towers():
+            if tower.is_fountain and tower.team_id != info.team_id and \
+                (tower.position - ch.position).length() < info.TOWER_ATTACK_RANGE:
+                api.action_move_clear(ch)
 
