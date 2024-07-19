@@ -186,7 +186,10 @@ def detect_defending_allies(api: API):
     owned_characters = api.get_owned_characters()
     sorted_allies = api.sort_by_distance(owned_characters, info.defend_tower.position)
     for i in sorted_allies:
-        if len(defending_allies) <= 14 and (api.refresh_character(i).position - api.refresh_tower(info.defend_tower).position).length() < 10 :
+        ally = api.refresh_character(i)
+        defended_tower = api.refresh_tower(info.defend_tower)
+        if len(defending_allies) <= 14 and ally is not None and defended_tower is not None and \
+            (ally.position - defended_tower.position).length() < 10 :
             defending_allies.append(i)
         else:
             free_allies.append(i)
