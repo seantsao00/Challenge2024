@@ -5,8 +5,12 @@ import pygame as pg
 
 from api.prototype import *
 
+all_ch_id = set()
+
 def every_tick(api: API):
-    api.send_chat("我要駕著我的 AE86 衝過去囉")
+    api.send_chat(f"我要開著我的 AE86 衝過去了")
+    for character in api.get_owned_characters():
+        all_ch_id.add(character.id)
     def attack_nearest_or_wander(characters: list[Character]):
         for character in characters:
             attackable_characters = api.within_attacking_range(character, api.get_visible_characters())
@@ -39,21 +43,24 @@ def every_tick(api: API):
     for tower in api.get_owned_towers():
         if api.get_current_time() <= 8:
             api.change_spawn_type(tower, CharacterClass.MELEE)
-        elif rand == 1:
-            api.change_spawn_type(tower, CharacterClass.MELEE)
-        elif rand == 2:
-            api.change_spawn_type(tower, CharacterClass.RANGER)
         else:
-            api.change_spawn_type(tower, CharacterClass.SNIPER)
+            total = len(all_ch_id) % 8
+            if total in [0, 1, 2]:
+                api.change_spawn_type(tower, CharacterClass.MELEE)
+            elif total in [4, 5]:
+                api.change_spawn_type(tower, CharacterClass.RANGER)
+            else:
+                api.change_spawn_type(tower, CharacterClass.SNIPER)
         
         
     doing = set()
     for tower in api.get_visible_towers():
         if tower.is_fountain:
             continue
+        
         moved_characters = []
         for character in api.get_owned_characters():
-            rang = 100 if tower.team_id == 5 else 30
+            rang = 80 if tower.team_id == 0 else 50
             if character.position.distance_to(tower.position) <= rang and character.id not in doing:
                 moved_characters.append(character)
                 doing.add(character.id)
@@ -63,7 +70,7 @@ def every_tick(api: API):
                 if character.position.distance_to(tower.position) >= 10:
                     api.action_move_to(moved_characters, tower.position)
                 simple_attack([character])
-        elif tower.team_id == 5 or api.get_current_time() <= 75:
+        elif tower.team_id == 0 or api.get_current_time() <= 75:
             api.action_attack([character for character in api.get_owned_characters() if character.id % 2 == 1], tower)
             api.action_cast_ability([character for character in api.get_owned_characters() if character.id % 2 == 1 and character.type != CharacterClass.RANGER])
             api.action_cast_ability([character for character in api.get_owned_characters() if character.id % 2 == 1 and character.type == CharacterClass.RANGER], position = tower.position)
