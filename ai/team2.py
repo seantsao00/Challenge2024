@@ -298,7 +298,7 @@ def every_tick(api: API):
         print(f"team {info.team_id} is on stage ATTACK_ENEMY")
         stage_attack_enemy(api)
         info.defend_tower = api.refresh_tower(info.defend_tower)
-        if info.defend_tower is not None and info.defend_tower.team_id != api.get_team_id():
+        if info.defend_tower is not None and info.defend_tower.team_id == api.get_team_id():
             info.target_tower = info.defend_tower
             info.stage = StageClass.DEFENSE_TOWER
         #attack enemy階段所要做的事&轉換到其他階段時機
