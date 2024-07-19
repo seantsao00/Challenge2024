@@ -10,6 +10,7 @@ from const.bullet import BulletType
 from const.character import AscendanceType, CharacterState, CharacterType
 from const.team import PartyType
 from const.tower import TowerType
+from const.vehicle import VehicleState, VehicleType
 from const.visual import IMAGE_DIR
 
 if TYPE_CHECKING:
@@ -89,6 +90,14 @@ BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.RANGER: 'ranger.png',
 }
 
+VEHICLE_DIR = 'vehicle/'
+VEHICLE_IMAGE: dict[VehicleState, str] = {
+    VehicleState.BACK: 'back.png',
+    VehicleState.FRONT: 'front.png',
+    VehicleState.LEFT: 'left.png',
+    VehicleState.RIGHT: 'right.png'
+}
+
 ASCENDANCE_DIR = 'ascendance/'
 ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, dict[CharacterType, dict[CharacterState, str]]]] = {
     party: (
@@ -124,6 +133,11 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
                     None: os.path.join(
                         IMAGE_DIR, PARTY_PATH[party], BULLET_DIR, BULLET_IMAGE[BulletType.COMMON])
                 }
+            },
+            **{
+                vehicle: {
+                    state: os.path.join(IMAGE_DIR, PARTY_PATH[party], VEHICLE_DIR, VEHICLE_IMAGE[state]) for state in VehicleState
+                } for vehicle in VehicleType
             }
         } if party is PartyType.NEUTRAL else {
             **{
@@ -158,7 +172,10 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, tuple[float, float]]] = {
     } for tower in TowerType},
     **{bullet: {
         None: (4, 4),
-    } for bullet in BulletType}
+    } for bullet in BulletType},
+    **{vehicle: {
+        state: (9, 13.2) for state in VehicleState
+    } for vehicle in VehicleType},
 }
 """
 structure: ENTITY_SIZE[entity][state]
