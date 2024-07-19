@@ -39,7 +39,7 @@ class CommentBox:
                 text, 'black', font, width - consts.SPACING[0] * 3 - avatar_size[0])
         else:
             text_surf = components.create_text_box(
-                text, (230, 0, 0), font, width - consts.SPACING[0] * 3)
+                text, (230, 0, 0), font, width - consts.SPACING[0] * 3 - avatar_size[0])
 
         text_size = text_surf.get_size()
 
