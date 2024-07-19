@@ -29,19 +29,19 @@ class SpecialMapStation():
         self.generation_sequence: list[tuple[float, pg.Vector2, const.VehicleState]] = []
         self.idx = 0
         self.rng = random.Random()
-        # Phase 1: 10 second of grace period
-        # Phase 2: 20 second of traffic
+        # Phase 1: 10 seconds of grace period
+        # Phase 2: 20 seconds of traffic
         self.generate_traffic(10, 30, rate=2)
-        # Phase 3: 30 second of occational vehical
+        # Phase 3: 30 seconds of occational vehical
         self.generate_traffic(30, 60, rate=0.5)
-        # Phase 4: 30 second of high density traffic
+        # Phase 4: 30 seconds of high density traffic
         self.generate_traffic(60, 90, rate=1)
-        # Phase 5: 30 second of almost no traffic
+        # Phase 5: 90 seconds of increasingly heavy traffic
         self.generate_traffic(90, 120, rate=0.25)
-        # Phase 6: 30 second of occational vehical
-        self.generate_traffic(120, 150, rate=0.5)
-        # Phase 7: 30 second of high density traffic
-        self.generate_traffic(150, 180, rate=5)
+        self.generate_traffic(120, 135, rate=0.5)
+        self.generate_traffic(135, 150, rate=2)
+        self.generate_traffic(150, 165, rate=4)
+        self.generate_traffic(165, 180, rate=7)
         self.generation_sequence.sort(key=lambda x: x[0])
         get_event_manager().register_listener(EventEveryTick, self.handle_every_tick)
         log_info("Loaded map 'station' special handling.")

@@ -85,22 +85,23 @@ class EntityView(EntityObject):
             if entity.state is const.VehicleState.LEFT or entity.state is const.VehicleState.RIGHT:
                 vehicle_displacement = pg.Vector2(0, 5)
 
-            component = pg.Surface((w // 2, h), pg.SRCALPHA)
-            body = pg.Surface((w // 2, h), pg.SRCALPHA)
-            colored_body = pg.Surface((w // 2, h), pg.SRCALPHA)
-            component.blit(raw_img, (0, 0), (0, 0, w // 2, h))
-            body.blit(raw_img, (0, 0), (w // 2, 0, w // 2, h))
-            pg.transform.threshold(dest_surface=colored_body,
-                                   surface=body,
+            img = pg.Surface((raw_img.width, raw_img.height), pg.SRCALPHA)
+            pg.transform.threshold(dest_surface=img,
+                                   surface=raw_img,
                                    threshold=(1, 1, 1, 1),
                                    search_color=(237, 28, 36),
                                    set_color=const.VEHICLE_COLOR[entity.entity_type],
                                    inverse_set=True)  # substitute within
+            pg.transform.threshold(dest_surface=img,
+                                   surface=raw_img,
+                                   threshold=(1, 1, 1, 1),
+                                   search_color=(237, 28, 36),
+                                   set_behavior=2,
+                                   set_color=None,
+                                   inverse_set=False)  # substitute outside
 
-            self.canvas.blit(component, ScreenInfo.resize_ratio * (entity.position + vehicle_displacement) -
-                             pg.Vector2(w/4, h) + displacement)
-            self.canvas.blit(colored_body, ScreenInfo.resize_ratio * (entity.position + vehicle_displacement) -
-                             pg.Vector2(w/4, h) + displacement)
+            self.canvas.blit(img, ScreenInfo.resize_ratio * (entity.position + vehicle_displacement) -
+                             pg.Vector2(w/2, h) + displacement)
         else:
             index = (party, entity_type, state)
             img, displacement = self.__images[index]

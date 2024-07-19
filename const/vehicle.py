@@ -59,5 +59,5 @@ class VehicleState(Enum):
 
 
 VEHICLE_SPEED = 50
-VEHICLE_WIDTH = 10
+VEHICLE_WIDTH = 8
 VEHICLE_DAMAGE = math.inf
