@@ -197,9 +197,9 @@ def stage_defend_tower(api: API):
     ranger = []
     sniper = []
     for character in api.get_owned_characters():
-        if character.type == melee:
+        if character.type == CharacterClass.MELEE:
             melee.append(character)
-        elif character.type == ranger:
+        elif character.type == CharacterClass.RANGER:
             ranger.append(character)
         else:
             sniper.append(character)
@@ -208,7 +208,8 @@ def stage_defend_tower(api: API):
     for i in range(len(ranger)):
         if i >= len(melee):
             api.action_wander(ranger[i])
-        api.action_move_to(ranger[i], melee[i].position)
+        else:
+            api.action_move_to(ranger[i], melee[i].position)
     api.action_move_to(sniper, info.defend_tower.position)
  
     for character in api.get_owned_characters():
@@ -239,9 +240,9 @@ def stage_defend_tower2(api: API):
     ranger = []
     sniper = []
     for character in api.get_owned_characters():
-        if character.type == melee:
+        if character.type == CharacterClass.MELEE:
             melee.append(character)
-        elif character.type == ranger:
+        elif character.type == CharacterClass.RANGER:
             ranger.append(character)
         else:
             sniper.append(character)
@@ -250,7 +251,8 @@ def stage_defend_tower2(api: API):
     for i in range(len(ranger)):
         if i >= len(melee):
             api.action_wander(ranger[i])
-        api.action_move_to(ranger[i], melee[i].position)
+        else:
+            api.action_move_to(ranger[i], melee[i].position)
     api.action_move_to(sniper, info.defend_tower2.position)
  
     for character in api.get_owned_characters():
