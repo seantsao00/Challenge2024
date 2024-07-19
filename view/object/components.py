@@ -28,6 +28,9 @@ def _get_avatar_image(party: const.team.PartyType):
     elif (party is const.team.PartyType.BLACK) or (party is const.team.PartyType.MOURI):
         avatar_img = pg.image.load(
             const.ENTITY_IMAGE[party][const.character.CharacterType.RANGER][const.CharacterState.LEFT])
+    elif (party is const.team.PartyType.BLACK) or (party is const.team.PartyType.KIDDO):
+        avatar_img = pg.image.load(
+            const.ENTITY_IMAGE[party][const.character.CharacterType.SNIPER][const.CharacterState.LEFT])
     else:
         avatar_img = pg.image.load(
             const.ICON_IMAGE)

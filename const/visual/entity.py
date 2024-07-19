@@ -42,7 +42,8 @@ PARTY_PATH: dict[PartyType, str] = {
     PartyType.FBI: 'entity/fbi/',
     PartyType.POLICE: 'entity/police/',
     PartyType.BLACK: 'entity/black/',
-    PartyType.MOURI: 'entity/mouri/'
+    PartyType.MOURI: 'entity/mouri/',
+    PartyType.KIDDO: 'entity/kiddo'
 }
 
 TOWER_DIR = 'tower/'
@@ -68,12 +69,25 @@ CHARACTER_ASCENDED_ARMOR_IMAGE: dict[(CharacterType, CharacterState), str] = {
     (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_ascended_left.png',
     (CharacterType.MELEE, CharacterState.RIGHT): 'melee_ascended_right.png',
     (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_ascended_right.png',
-    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_ascended_right.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_ascended_right.png'
 }
 CHARACTER_ASCENDED_CROWN_IMAGE: dict[CharacterType, str] = {
     CharacterType.MELEE: 'melee_crown.png',
     CharacterType.RANGER: 'ranger_crown.png',
-    CharacterType.SNIPER: 'sniper_crown.png',
+    CharacterType.SNIPER: 'sniper_crown.png'
+}
+TWO_SIDE_ASCENDED_CROWN_IMAGE: dict[(CharacterType, CharacterState), str] = {
+    (CharacterType.MELEE, CharacterState.LEFT): 'melee_crown_left.png',
+    (CharacterType.RANGER, CharacterState.LEFT): 'ranger_crown_left.png',
+    (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_crown_left.png',
+    (CharacterType.MELEE, CharacterState.RIGHT): 'melee_crown_right.png',
+    (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_crown_right.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_crown_right.png'
+}
+KIDDO_ASCENDED_CROWN_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: 'melee_crown.png',
+    CharacterType.RANGER: 'ranger_crown.png',
+    CharacterType.SNIPER: 'sniper_crown.png'
 }
 
 WEAPON_DIR = 'weapon/'
@@ -87,7 +101,7 @@ BULLET_DIR = 'bullet/'
 BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.COMMON: 'common.png',
     BulletType.SNIPER: 'sniper.png',
-    BulletType.RANGER: 'ranger.png',
+    BulletType.RANGER: 'ranger.png'
 }
 
 VEHICLE_DIR = 'vehicle/'
@@ -108,8 +122,15 @@ ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, dict[CharacterType, dict[
                         IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_ARMOR_IMAGE[(
                             character, state)]
                     ),
-                    AscendanceType.CROWN: os.path.join(
-                        IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character]
+                    AscendanceType.CROWN: (
+                        os.path.join(
+                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, TWO_SIDE_ASCENDED_CROWN_IMAGE[(
+                                character, state)]
+                        )
+                    ) if party is PartyType.KIDDO else (
+                        os.path.join(
+                            IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character]
+                        )
                     )
                 } for state in CharacterState
             } for character in CharacterType
