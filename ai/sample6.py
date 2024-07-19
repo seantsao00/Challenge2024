@@ -36,13 +36,19 @@ class AiInfo():
 
     def __init__(self) -> None:
         self.team_id: int
+        """自己的team id"""
         self.fountain: Tower | None = None
+        """主堡"""
 
         self.stage: StageClass = StageClass.START
+        """現在的階段"""
 
         self.target_tower: Tower | None = None
+        """要打的塔"""
+
         # self.target_enemy: Character | None = None
         self.defend_tower: Tower | None = None
+        """要防守的塔"""
 
 
 def update(api: API):
@@ -86,13 +92,13 @@ def stage_explore(api: API):
     """
     探索地圖階段，會讓所有的士兵在地圖上亂走。
     """
-    # 讓主堡生成
+    # 讓所有的塔生成近戰士兵（近戰士兵的生成機率為1）
     change_spawn_by_posibility(api, api.get_owned_towers(), 1, 0, 0)
     for character in api.get_owned_characters():
         api.action_wander(character)
 
-    # 如果找到不屬於自己的塔，就存起來
-    others_towers = [tower for tower in api.get_visible_towers() if not tower.is_fountain]
+    # 如果找到不屬於自己的中立塔，就從中選一個離主堡（fountain）最近的存起來
+    others_towers = [tower for tower in api.get_visible_towers() if not tower.is_fountain and tower.team_id != info.team_id]
     if len(others_towers) != 0:
         info.target_tower = api.sort_by_distance(others_towers, info.fountain.position)[0]
 
@@ -111,7 +117,7 @@ def stage_attack_tower(api: API):
 
 def stage_defend_tower(api: API):
     """
-    防禦塔階段，會讓所有的士兵都往某個塔走，進行攻擊。
+    防禦塔階段，會讓所有的士兵都往某個塔走。
     """
     # 改變塔生成的兵種，讓我們更容易把塔守好！
     for tower in api.get_owned_towers():
@@ -120,7 +126,6 @@ def stage_defend_tower(api: API):
         else:
             change_spawn_by_posibility(api, [tower], 0.4, 0, 0.6)
 
-    # move(api, api.get_owned_characters(), info.defend_tower.position)
     # 往我們要守的塔移動！
     api.action_move_to(api.get_owned_characters(), info.defend_tower.position)
 

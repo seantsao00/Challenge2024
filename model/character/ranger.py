@@ -9,6 +9,7 @@ from event_manager import EventBulletCreate, EventUseRangerAbility
 from instances_manager import get_event_manager, get_model
 from model.bullet import BulletCommon, BulletRanger
 from model.character.character import Character
+from model.timer import Timer
 from util import log_info
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ class Ranger(Character):
         get_event_manager().register_listener(EventUseRangerAbility,
                                               listener=self.use_ability, channel_id=self.id)
 
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
@@ -43,6 +44,9 @@ class Ranger(Character):
                                   speed=const.BULLET_RANGER_SPEED)
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self._last_attack_time = now_time
+        if dist <= self.attribute.attack_range:
+            return True
+        return False
 
     def cast_ability(self, *args, **kwargs):
         """`kwargs` should contain position (default to my position)"""
@@ -57,6 +61,9 @@ class Ranger(Character):
         print(f"[Ranger] {self} casted ability")
         self.abilities_time = now_time
         get_event_manager().post(EventUseRangerAbility(position=target), channel_id=self.id)
+        self.ascendance.add(const.AscendanceType.ARMOR)
+        Timer(interval=self.attribute.armor_show_time,
+              function=self.handler_lost_ascendance, once=True)
 
     def manual_cast_ability(self, *args, **kwargs):
         """
@@ -85,3 +92,7 @@ class Ranger(Character):
                               team=self.team,
                               attacker=self)
         get_event_manager().post(EventBulletCreate(bullet=bullet))
+
+    def handler_lost_ascendance(self):
+        if const.AscendanceType.ARMOR in self.ascendance:
+            self.ascendance.remove(const.AscendanceType.ARMOR)

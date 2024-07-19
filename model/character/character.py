@@ -54,6 +54,9 @@ class Character(LivingEntity):
         self.abilities_time: float = -attribute.ability_cd
         self._last_attack_time: float = -1 / attribute.attack_speed
         self.moving_lock = Lock()
+        self.ascendance: set[const.AscendanceType] = set()
+        # self.ascendance: set[const.AscendanceType] = set([const.AscendanceType.CROWN])
+        self.attack_total: float = 0.0
         self.__move_state: CharacterMovingState = CharacterMovingState.STOPPED
         self.__move_path: list[pg.Vector2] = []
         self.__move_direction: pg.Vector2 = pg.Vector2(0, 0)
@@ -212,10 +215,18 @@ class Character(LivingEntity):
         self.__move_state = CharacterMovingState.WANDERING
         return True
 
+    def record_attack(self, damage: float):
+        self.attack_total += damage
+        if (const.AscendanceType.CROWN not in self.ascendance
+                and self.attack_total >= self.attribute.crown_ascendance_threshold):
+            self.ascendance.add(const.AscendanceType.CROWN)
+
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
             return
 
+        if isinstance(event.attacker, Character):
+            event.attacker.record_attack(min(self.health, event.damage))
         self.health -= event.damage
         if self.health <= 0:
             self.die()
@@ -255,8 +266,9 @@ class Character(LivingEntity):
         else:
             self.state = const.CharacterState.RIGHT
 
+    # Return false for too far
     @abstractmethod
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
         pass
 
     def die(self):
