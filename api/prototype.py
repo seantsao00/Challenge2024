@@ -321,7 +321,7 @@ class API:
         raise NotImplementedError
 
     @abstractmethod
-    def action_move_to(self, characters: Iterable[Character] | Character, destination: pg.Vector2) -> None:
+    def action_move_to(self, characters: Iterable[Character] | Character, destination: pg.Vector2) -> Iterable[bool] | bool:
         """
         將所有列表中的士兵，設定為朝著某個目的地移動。如果目的地不是可行走的位置則不會生效。
         這個函數會使用內建的尋路，可能會耗費大量時間，使用時請注意。  
@@ -356,7 +356,7 @@ class API:
         raise NotImplementedError
 
     @abstractmethod
-    def action_move_and_attack(self, characters: Iterable[Character] | Character, target: Character | Tower) -> None:
+    def action_move_and_attack(self, characters: Iterable[Character] | Character, target: Character | Tower) -> Iterable[bool] | bool:
         """
         將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。
         如果目標不在某士兵的攻擊範圍中，則會讓士兵往該目標的方向移動。
