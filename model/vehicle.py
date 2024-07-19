@@ -23,6 +23,10 @@ class Vehicle(Entity):
     __rng = random.Random()
 
     def __init__(self, position: pg.Vector2 | tuple[float, float], team: Team, state: const.VehicleState):
+        super().__init__(position, team,
+                         Vehicle.__rng.choices(list(const.VehicleType),
+                                               [const.VEHICLE_RARITY[color] for color in list(const.VehicleType)], k=1)[0],
+                         state)
         if state is const.VehicleState.BACK:
             self.direction = pg.Vector2(0, -const.VEHICLE_SPEED)
         elif state is const.VehicleState.FRONT:
@@ -33,13 +37,16 @@ class Vehicle(Entity):
             self.direction = pg.Vector2(const.VEHICLE_SPEED, 0)
         else:
             raise ValueError
-        super().__init__(position, team,
-                         Vehicle.__rng.choices(list(const.VehicleType),
-                                               [const.VEHICLE_RARITY[color] for color in list(const.VehicleType)], k=1)[0],
-                         state)
 
     def tick_move(self, dt) -> tuple[float, float, float, float]:
         move = self.direction * dt
+        if self.entity_type is const.VehicleType.SCOOTER:
+            if self.direction.x > 0:
+                self.state = const.VehicleState.SCOOTER_RIGHT
+            else:
+                self.state = const.VehicleState.SCOOTER_LEFT
+        if self.entity_type == const.VehicleType.SCOOTER:
+            self.direction.rotate_ip(self.__rng.uniform(-5, 7))
         left = self.direction.normalize() * const.VEHICLE_WIDTH
         # Orthogonal vector
         left.x, left.y = left.y, -left.x

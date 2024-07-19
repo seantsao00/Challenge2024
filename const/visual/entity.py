@@ -109,7 +109,9 @@ VEHICLE_IMAGE: dict[VehicleState, str] = {
     VehicleState.BACK: 'back.png',
     VehicleState.FRONT: 'front.png',
     VehicleState.LEFT: 'left.png',
-    VehicleState.RIGHT: 'right.png'
+    VehicleState.RIGHT: 'right.png',
+    VehicleState.SCOOTER_LEFT: 'scooter_left.png',
+    VehicleState.SCOOTER_RIGHT: 'scooter_right.png'
 }
 
 ASCENDANCE_DIR = 'ascendance/'
@@ -195,7 +197,7 @@ ENTITY_SIZE: dict[EntityType, dict[EntityState, tuple[float, float]]] = {
         None: (4, 4),
     } for bullet in BulletType},
     **{vehicle: {
-        state: (12, 9.6) for state in VehicleState
+        state: (12, 9.6) if vehicle is not VehicleType.SCOOTER else (15, 15) for state in VehicleState
     } for vehicle in VehicleType},
 }
 """

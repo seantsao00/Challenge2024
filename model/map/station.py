@@ -32,7 +32,7 @@ class SpecialMapStation():
         # Phase 1: 10 seconds of grace period
         # Phase 2: 20 seconds of traffic
         self.generate_traffic(10, 30, rate=2)
-        # Phase 3: 30 seconds of occational vehical
+        # Phase 3: 30 second of occational vehicle
         self.generate_traffic(30, 60, rate=0.5)
         # Phase 4: 30 seconds of high density traffic
         self.generate_traffic(60, 90, rate=1)

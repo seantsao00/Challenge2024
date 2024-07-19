@@ -18,6 +18,7 @@ class VehicleType(Enum):
     ORANGE = auto()  # D26701
     PURPLE = auto()  # 8D1D8C
     GLITCH = auto()
+    SCOOTER = auto()
 
 
 VEHICLE_RARITY = {
@@ -32,7 +33,8 @@ VEHICLE_RARITY = {
     VehicleType.DARK_CYAN: 1,
     VehicleType.ORANGE: 1,
     VehicleType.PURPLE: 1,
-    VehicleType.GLITCH: 0.01
+    VehicleType.GLITCH: 0.01,
+    VehicleType.SCOOTER: 3
 }
 
 VEHICLE_COLOR = {
@@ -47,7 +49,8 @@ VEHICLE_COLOR = {
     VehicleType.DARK_CYAN: (0x0C, 0x57, 0x5B, 0xFF),
     VehicleType.ORANGE: (0xD2, 0x67, 0x01, 0xFF),
     VehicleType.PURPLE: (0x8D, 0x1D, 0x8C, 0xFF),
-    VehicleType.GLITCH: (0xFF, 0xFF, 0xFF, 0x66)
+    VehicleType.GLITCH: (0xFF, 0xFF, 0xFF, 0x66),
+    VehicleType.SCOOTER: (0xFF, 0xFF, 0xFF)
 }
 
 
@@ -56,6 +59,8 @@ class VehicleState(Enum):
     BACK = auto()
     LEFT = auto()
     RIGHT = auto()
+    SCOOTER_LEFT = auto()
+    SCOOTER_RIGHT = auto()
 
 
 VEHICLE_SPEED = 50

@@ -86,19 +86,22 @@ class EntityView(EntityObject):
                 vehicle_displacement = pg.Vector2(0, 5)
 
             img = pg.Surface((raw_img.width, raw_img.height), pg.SRCALPHA)
-            pg.transform.threshold(dest_surface=img,
-                                   surface=raw_img,
-                                   threshold=(1, 1, 1, 1),
-                                   search_color=(237, 28, 36),
-                                   set_color=const.VEHICLE_COLOR[entity.entity_type],
-                                   inverse_set=True)  # substitute within
-            pg.transform.threshold(dest_surface=img,
-                                   surface=raw_img,
-                                   threshold=(1, 1, 1, 1),
-                                   search_color=(237, 28, 36),
-                                   set_behavior=2,
-                                   set_color=None,
-                                   inverse_set=False)  # substitute outside
+            if entity_type is not const.VehicleType.SCOOTER:
+                pg.transform.threshold(dest_surface=img,
+                                       surface=raw_img,
+                                       threshold=(1, 1, 1, 1),
+                                       search_color=(237, 28, 36),
+                                       set_color=const.VEHICLE_COLOR[entity.entity_type],
+                                       inverse_set=True)  # substitute within
+                pg.transform.threshold(dest_surface=img,
+                                       surface=raw_img,
+                                       threshold=(1, 1, 1, 1),
+                                       search_color=(237, 28, 36),
+                                       set_behavior=2,
+                                       set_color=None,
+                                       inverse_set=False)  # substitute outside
+            else:
+                img = raw_img
 
             self.canvas.blit(img, ScreenInfo.resize_ratio * (entity.position + vehicle_displacement) -
                              pg.Vector2(w/2, h) + displacement)
