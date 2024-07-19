@@ -290,9 +290,9 @@ def every_tick(api: API):
 
         # 塔被人打下了，打回來！
         info.defend_tower = api.refresh_tower(info.defend_tower)
-        if info.target_tower is not None and info.target_tower.team_id == api.get_team_id():
+        if info.target_tower is not None and info.target_tower.team_id != api.get_team_id():
             info.target_tower = info.defend_tower
-            info.stage = StageClass.DEFENSE_TOWER
+            info.stage = StageClass.ATTACK_ENEMY_TOWER
 
     elif info.stage == StageClass.ATTACK_ENEMY_TOWER:
         print(f"team {info.team_id} is on stage ATTACK_ENEMY")
@@ -300,7 +300,7 @@ def every_tick(api: API):
         info.defend_tower = api.refresh_tower(info.defend_tower)
         if info.defend_tower is not None and info.defend_tower.team_id != api.get_team_id():
             info.target_tower = info.defend_tower
-            info.stage = StageClass.ATTACK_ENEMY_TOWER
+            info.stage = StageClass.DEFENSE_TOWER
         #attack enemy階段所要做的事&轉換到其他階段時機
     else:
         print("wrong stage")
