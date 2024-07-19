@@ -165,8 +165,7 @@ def stage_attack_tower(api: API):
     for character in api.get_visible_characters():
         if character.team_id != api.get_team_id() and calculate_distance(info.target_tower.position,character.position)<=25:
             enemy_list.append(character)
-        api.action_move_to(api.get_owned_characters(), info.target_tower.position)
-        api.action_attack(api.get_owned_characters(), info.target_tower)
+        api.action_move_and_attack(api.get_owned_characters(), info.target_tower)
 
 def get_visible_enemies(api: API) -> tuple[list[Tower], list[Character]]:
     """找出視野範圍內的可攻擊目標。回傳一個`tuple(tower的list, character的list)`"""
