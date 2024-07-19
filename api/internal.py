@@ -532,6 +532,37 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
+    def action_move_and_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> None:
+        enforce_type('characters', characters, Iterable | prototype.Character)
+        enforce_type('target', target, prototype.Character, prototype.Tower)
+        if isinstance(characters, prototype.Character):
+            characters = [characters]
+
+        for ch in characters:
+            enforce_type('element of characters', ch, prototype.Character)
+
+        target_internal = None
+        if isinstance(target, prototype.Character):
+            target_internal = self.__access_character(target)
+        elif isinstance(target, prototype.Tower):
+            target_internal = self.__access_tower(target)
+        # Occationally, the given reference is outside the vision range (or invalid)
+        if target_internal is None:
+            return
+
+        internals = [self.__access_character(ch) for ch in characters]
+        chars = []
+        internals_copy = []
+        for i, ch in enumerate(characters):
+            if self.__is_controllable(internals[i]):
+                chars.append(ch)
+                internals_copy.append(internals[i])
+        moving = []
+        for i, inter in enumerate(internals_copy):
+            if not inter.attack(target_internal):
+                moving.append(chars[i])
+        self.action_move_to(chars, target.position)
+
     def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
         if isinstance(characters, prototype.Character):
@@ -643,32 +674,6 @@ class Internal(prototype.API):
 
     def get_map_name(self) -> str:
         return get_model().map.name
-
-    def action_move_and_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> None:
-        enforce_type('characters', characters, Iterable | prototype.Character)
-        enforce_type('target', target, prototype.Character, prototype.Tower)
-        if isinstance(characters, prototype.Character):
-            characters = [characters]
-
-        for ch in characters:
-            enforce_type('element of characters', ch, prototype.Character)
-
-        target_internal = None
-        if isinstance(target, prototype.Character):
-            target_internal = self.__access_character(target)
-        elif isinstance(target, prototype.Tower):
-            target_internal = self.__access_tower(target)
-        # Occationally, the given reference is outside the vision range (or invalid)
-        if target_internal is None:
-            return
-
-        internals = [self.__access_character(ch) for ch in characters]
-        internals = [inter for inter in internals if self.__is_controllable(inter)]
-        moving = []
-        for internal in internals:
-            if not internal.attack(target_internal):
-                moving.append(target_internal)
-        self.action_move_to(moving, target_internal.position)
 
 
 class TimeoutException(BaseException):

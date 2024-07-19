@@ -45,6 +45,7 @@ class Melee(Character):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy,
                                                  damage=self.attribute.attack_damage), enemy.id)
             self._last_attack_time = now_time
+        if dist <= self.attribute.attack_range:
             return True
         return False
 

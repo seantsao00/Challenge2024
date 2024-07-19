@@ -266,6 +266,7 @@ class Character(LivingEntity):
         else:
             self.state = const.CharacterState.RIGHT
 
+    # Return false for too far
     @abstractmethod
     def attack(self, enemy: Entity) -> bool:
         pass
