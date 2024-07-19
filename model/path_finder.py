@@ -155,6 +155,7 @@ class PathFinder:
                 assert visited[cur_cell[0]][cur_cell[1]] == run_id
                 path.append(self.__map.cell_to_position(cur_cell))
                 cur_cell = src[cur_cell[0]][cur_cell[1]]
+            path.append(self.__map.cell_to_position(cell_begin))
             return path
         # no need to reverse the path since begin and end have already been swapped
         return restore_path()
