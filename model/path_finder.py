@@ -60,7 +60,7 @@ class PathFinder:
         for dx, dy, dd in ((-2, 0, 2.0), (0, -2, 2.0), (0, 2, 2.0), (2, 0, 2.0)):
             nx0, ny0 = cur_cell[0] + dx // 2, cur_cell[1] + dy // 2
             nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
-            if self.__is_cell_passable((nx0, ny0)) and self.__is_cell_passable((nx0, ny0)):
+            if self.__is_cell_passable((nx0, ny0)) and self.__is_cell_passable((nx, ny)):
                 nd = dd / speed_ratio
                 yield (nx, ny, nd)
         for dx, dy, dd in ((-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
