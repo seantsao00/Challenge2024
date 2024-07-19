@@ -465,7 +465,7 @@ class Internal(prototype.API):
             with inter.moving_lock:
                 inter.set_move_direction(direction)
 
-    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2) -> None:
+    def action_move_to(self, characters: Iterable[prototype.Character] | prototype.Character, destination: pg.Vector2) -> Iterable[bool] | bool:
         enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('destination', destination, pg.Vector2)
         if isinstance(characters, prototype.Character):
@@ -477,23 +477,36 @@ class Internal(prototype.API):
         destination = self.__transform(destination, is_position=True, inverse=True)
         destination_cell = get_model().map.position_to_cell(destination)
         internals = [self.__access_character(ch) for ch in characters]
-        internals = [inter for inter in internals if self.__is_controllable(inter)]
 
         def must_move(inter: prototype.Character):
-            old_destination = inter.move_destination
-            if old_destination is not None and get_model().map.position_to_cell(inter.move_destination) == destination_cell:
+            if inter.move_destination is None:
+                return True
+            old_dest = get_model().map.position_to_cell(inter.move_destination)
+            def dist(a, b): return (abs(a[0] - b[0]) + abs(a[1] - b[1]))
+            if dist(old_dest, destination_cell) <= 1:
                 return False
             return True
-        internals = filter(must_move, internals)
 
+        success = []
         self.__path_finder.batch_begin()
         for inter in internals:
-            with inter.moving_lock:
-                inter.set_move_stop()
-                path = self.__path_finder.find_path(inter.position, destination)
-                if path is not None and len(path) > 0:
-                    inter.set_move_position(path)
+            if self.__is_controllable(inter) and must_move(inter):
+                with inter.moving_lock:
+                    inter.set_move_stop()
+                    path = self.__path_finder.find_path(inter.position, destination)
+                    if path is not None and len(path) > 0:
+                        inter.set_move_position(path)
+                    if path is None:
+                        success.append(False)
+                    else:
+                        success.append(True)
+            else:
+                success.append(False)
         self.__path_finder.batch_end()
+
+        if len(success) == 1:
+            return success[0]
+        return success
 
     def action_move_clear(self, characters: Iterable[prototype.Character] | prototype.Character) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
@@ -532,7 +545,7 @@ class Internal(prototype.API):
         for internal in internals:
             internal.attack(target_internal)
 
-    def action_move_and_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> None:
+    def action_move_and_attack(self, characters: Iterable[prototype.Character] | prototype.Character, target: prototype.Character | prototype.Tower) -> Iterable[bool] | bool:
         enforce_type('characters', characters, Iterable | prototype.Character)
         enforce_type('target', target, prototype.Character, prototype.Tower)
         if isinstance(characters, prototype.Character):
@@ -542,26 +555,25 @@ class Internal(prototype.API):
             enforce_type('element of characters', ch, prototype.Character)
 
         target_internal = None
+        success = [False for ch in characters]
         if isinstance(target, prototype.Character):
             target_internal = self.__access_character(target)
         elif isinstance(target, prototype.Tower):
             target_internal = self.__access_tower(target)
         # Occationally, the given reference is outside the vision range (or invalid)
         if target_internal is None:
-            return
+            return success
 
         internals = [self.__access_character(ch) for ch in characters]
-        chars = []
-        internals_copy = []
+
         for i, ch in enumerate(characters):
-            if self.__is_controllable(internals[i]):
-                chars.append(ch)
-                internals_copy.append(internals[i])
-        moving = []
-        for i, inter in enumerate(internals_copy):
-            if not inter.attack(target_internal):
-                moving.append(chars[i])
-        self.action_move_to(chars, target.position)
+            if self.__is_controllable(internals[i]) and not internals[i].attack(target_internal):
+                self.action_move_to(ch, target.position)
+                success[i] = True
+
+        if len(success) == 1:
+            return success[0]
+        return success
 
     def action_cast_ability(self, characters: Iterable[prototype.Character] | prototype.Character, **kwargs) -> None:
         enforce_type('characters', characters, Iterable | prototype.Character)
