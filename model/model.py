@@ -36,6 +36,7 @@ from model.path_finder import PathFinder
 from model.pause_menu import PauseMenu
 from model.result import Result
 from model.team import NeutralTeam, Team
+from model.vehicle import Vehicle, VehicleManager
 from util import log_critical, log_info
 
 if TYPE_CHECKING:
@@ -88,6 +89,8 @@ class Model:
         self.characters: list[Character] = []
         self.chat = Chat()
         self.towers: list[Tower] = []
+        self.vehicle_manager = VehicleManager()
+
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
@@ -172,6 +175,8 @@ class Model:
             else:
                 log_critical(
                     f"[API] AI of team {team.team_id + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
+        # if self.__ticks == 0:
+        #     Vehicle(pg.Vector2(50, 0), self.neutral_team, const.VehicleState.FRONT)
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:

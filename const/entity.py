@@ -8,9 +8,10 @@ if TYPE_CHECKING:
     from const.bullet import BulletState, BulletType
     from const.character import CharacterState, CharacterType
     from const.tower import TowerState, TowerType
+    from const.vehicle import VehicleState, VehicleType
 
-    EntityType: TypeAlias = CharacterType | TowerType | BulletType
-    EntityState: TypeAlias = CharacterState | TowerState | BulletState
+    EntityType: TypeAlias = CharacterType | TowerType | BulletType | VehicleType
+    EntityState: TypeAlias = CharacterState | TowerState | BulletState | VehicleState
 
 
 @dataclass(kw_only=True)

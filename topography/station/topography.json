@@ -1,0 +1,15 @@
+{
+    "name": "station",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [50, 50], [50, 200], [200, 50], [200, 200]
+    ],
+    "neutral_towers": [
+        [125, 128, "hotel"]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": {}
+    }
+}

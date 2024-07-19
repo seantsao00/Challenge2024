@@ -11,6 +11,7 @@ from instances_manager import get_event_manager
 from model.building import Tower
 from model.bullet import Bullet
 from model.character import Character
+from model.vehicle import Vehicle
 
 if TYPE_CHECKING:
     from model.entity import Entity
@@ -37,7 +38,7 @@ class Cell:
             self.characters.add(entity)
         elif isinstance(entity, Tower):
             self.towers.add(entity)
-        elif isinstance(entity, Bullet):
+        elif isinstance(entity, (Bullet, Vehicle)):
             pass
         else:
             raise NotImplementedError
