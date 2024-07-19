@@ -95,7 +95,7 @@ class Model:
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
-        self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
+        self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls), model_arguments.team_controls)
         if model_arguments.skip_party_selecting:
             self.party_selector.select_random_party(True)
         self.teams: list[Team] = []

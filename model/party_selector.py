@@ -7,11 +7,29 @@ from instances_manager import get_event_manager
 
 class PartySelector:
 
-    def __init__(self, number_of_teams: int):
+    def __init__(self, number_of_teams: int, team_names: list[int]):
         self.__number_of_teams: int = number_of_teams
         self.__party_list: list[const.PartyType] =\
             [party for party in const.PartyType if party is not const.PartyType.NEUTRAL]
-        self.__selected_party_indices: tuple[None | int] = [None for _ in range(number_of_teams)]
+        def get_index(party: const.PartyType):
+            for i in range(len(const.PartyType)):
+                if party is self.__party_list[i]:
+                    return i
+            raise ValueError
+        def get_team_party(name: str):
+            if name == "team1" or name == "team2":
+                return get_index(const.PartyType.POLICE)
+            elif name == "team3" or name == "team5":
+                return get_index(const.PartyType.FBI)
+            elif name == "team4" or name == "team7":
+                return get_index(const.PartyType.BLACK)
+            elif name == "team6" or name == "team8":
+                return get_index(const.PartyType.JUNIOR)
+            elif name == "team9" or name == "team10":
+                return get_index(const.PartyType.MOURI)
+            else:
+                return None
+        self.__selected_party_indices: tuple[None | int] = [get_team_party(team_names[i]) for i in range(number_of_teams)]
         get_event_manager().register_listener(EventChangeParty, self.__handle_change_party)
 
     def select_random_party(self, unique: bool):
