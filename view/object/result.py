@@ -83,7 +83,7 @@ class ResultView(ObjectBase):
         img = self.bottom_image
         self.canvas.blit(img, (0, 0))
 
-        max_points = max([ t.points for t in model.teams ])
+        max_points = max([t.points for t in model.teams])
 
         team_icon_position: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
@@ -118,7 +118,7 @@ class ResultView(ObjectBase):
 
             if self.__team_out[team.team_id] == True:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 370 / 2) * self.ratio, (
-                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.0f}", 'white', self.__font)
+                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.0f}/{team.stats.units_killed:d}", 'white', self.__font)
 
                 if team.points < max_points:
                     img = self.out_image

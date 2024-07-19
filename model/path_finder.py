@@ -64,7 +64,7 @@ class PathFinder:
                 nd = dd / speed_ratio
                 yield (nx, ny, nd)
         for dx, dy, dd in ((-1, -1, 1.4142135623730951), (-1, 1, 1.4142135623730951),
-            (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951)):
+                           (1, -1, 1.4142135623730951), (1, 1, 1.4142135623730951)):
             nx, ny = cur_cell[0] + dx, cur_cell[1] + dy
             if self.__is_cell_passable((nx, ny)):
                 nd = dd / speed_ratio
@@ -93,7 +93,7 @@ class PathFinder:
                     (cell_end[0] + 1, cell_end[1]),
                     (cell_end[0] - 1, cell_end[1]),
                     (cell_end[0], cell_end[1] + 1),
-                    (cell_end[0], cell_end[1] - 1) ]:
+                    (cell_end[0], cell_end[1] - 1)]:
                 if self.__is_cell_passable(new_end):
                     cell_end = new_end
                     break

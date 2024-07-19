@@ -14,5 +14,6 @@ PARTY_SELECTOR_IMAGE: dict[None | PartyType, str] = {
     PartyType.FBI: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'fbi.png'),
     PartyType.POLICE: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'police.png'),
     PartyType.BLACK: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'black.png'),
-    PartyType.MOURI: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'mouri.png')
+    PartyType.MOURI: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'mouri.png'),
+    PartyType.KIDDO: os.path.join(IMAGE_DIR, PARTY_SELECTOR_DIR, 'kiddo.png')
 }

@@ -5,8 +5,8 @@
 
 # from challenge 2023
 
-
 import argparse
+import sys
 
 import cv2
 
@@ -23,6 +23,8 @@ def gen_map_file_from_image(img_path: str, width: int, height: int, margin: int,
     assert image_height >= height and image_width >= width
 
     map_list = [[0 for _ in range(height)] for _ in range(width)]
+    visited = [[None for _ in range(height)] for _ in range(width)]
+
     for x in range(width):
         for y in range(height):
             obstacle = 0
@@ -47,9 +49,45 @@ def gen_map_file_from_image(img_path: str, width: int, height: int, margin: int,
                 map_list[x][y] = MAP_OBSTACLE
 
     transpose = [[0 for j in range(width)] for i in range(height)]
+
+    connected = {}
+
+    def BFS(start):
+        idx = 0
+        queue = [start]
+        visited[start[0]][start[1]] = start
+        while idx < len(queue):
+            def check_unvisited(x, y):
+                if map_list[x][y] != MAP_OBSTACLE and not visited[x][y]:
+                    visited[x][y] = start
+                    queue.append((x, y))
+            x, y = queue[idx]
+            check_unvisited(x, y + 1)
+            check_unvisited(x, y - 1)
+            check_unvisited(x + 1, y)
+            check_unvisited(x - 1, y)
+            idx += 1
+        connected[start] = len(queue)
+
+    start = (0, 0)
+    for i in range(int(width)):
+        for j in range(int(height)):
+            if map_list[i][j] != MAP_OBSTACLE and visited[i][j] is None:
+                BFS((i, j))
+    max_connected = max(connected.values())
+
+    count = 0
+    for i in range(int(width)):
+        for j in range(int(height)):
+            if map_list[i][j] != MAP_OBSTACLE and connected[visited[i][j]] != max_connected:
+                map_list[i][j] = MAP_OBSTACLE
+                count += 1
+    print(f"Smart converted {count} obstacles", file=sys.stderr)
+
     for i in range(int(width)):
         for j in range(int(height)):
             transpose[j][i] = map_list[i][j]
+
     for i in transpose:
         print(','.join([str(j) for j in i]))
 
@@ -70,4 +108,4 @@ args = parser.parse_args()
 
 path, width, height = args.layout_path, args.width, args.height
 margin, threshold, distance = args.margin, args.threshold, args.distance
-gen_map_file_from_image(path, width, height, margin, threshold, height)
+gen_map_file_from_image(path, width, height, margin, threshold, distance)
