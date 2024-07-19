@@ -69,5 +69,6 @@ class Sniper(Character):
                 self.ability_active = False
             get_event_manager().post(EventBulletCreate(bullet=bullet))
             self._last_attack_time = now_time
+        if dist <= self.attribute.attack_range:
             return True
         return False
