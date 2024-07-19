@@ -1,0 +1,36 @@
+{
+    "name": "desert",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [14, 83], [128, 240], [143, 21], [234, 128]
+    ],
+    "neutral_towers": [
+        [88, 73, "pylon"],
+        [142, 168, "ferris_wheel"],
+        [225, 231, "hotel"]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": 
+        {
+            "obs/cactus1.png": 149,
+            "obs/cactus2.png": 89,
+            "obs/cactus3.png": 235,
+            "obs/cactus4.png": 213,
+            "obs/cactus5.png": 41,
+            "obs/grass1.png": 42,
+            "obs/grass2.png": 184,
+            "obs/grass3.png": 96,
+            "obs/grass4.png": 60,
+            "obs/grass5.png": 199,
+            "obs/grass6.png": 20,
+            "obs/pyramid.png": 102,
+            "obs/sphinx.png": 203,
+            "obs/stone1.png": 115,
+            "obs/stone2.png": 163,
+            "obs/stone3.png": 99,
+            "obs/stone4.png": 50
+        }
+    }
+}

@@ -1,0 +1,41 @@
+{
+    "name": "ruins",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [20, 20], [20, 230], [230, 20], [230, 230]
+    ],
+    "neutral_towers": [
+        [96, 150, "pylon"], [115, 40, "hotel"], [183, 155, "ferris_wheel"]
+    ],
+    "images": {
+        "backgrounds": ["background.png", "buildings/building6.png", "buildings/building7.png"],
+        "objects": 
+        {
+            "buildings/building1.png": 230,
+            "buildings/building2.png": 67,
+            "buildings/building3_left.png": 60,
+            "buildings/building3_center.png": 64,
+            "buildings/building3_right.png": 69,
+            "buildings/building4.png": 206,
+            "buildings/building5.png": 127,
+            "trees/tree1.png": 42,
+            "trees/tree2.png": 16,
+            "trees/tree3.png": 36,
+            "trees/tree4.png": 41,
+            "trees/tree5.png": 30,
+            "trees/tree6.png": 36,
+            "trees/tree7.png": 25,
+            "trees/tree8.png": 118,
+            "trees/tree9.png": 124,
+            "trees/tree10.png": 90,
+            "trees/tree11.png": 90,
+            "trees/tree12.png": 149,
+            "trees/tree13.png": 143,
+            "trees/tree14.png": 230,
+            "trees/tree15.png": 204,
+            "trees/tree16.png": 217,
+            "trees/tree17.png": 236
+        }
+    }
+}

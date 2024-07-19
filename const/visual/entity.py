@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 from const.bullet import BulletType
-from const.character import CharacterState, CharacterType
+from const.character import AscendanceType, CharacterState, CharacterType
 from const.team import PartyType
 from const.tower import TowerType
 from const.visual import IMAGE_DIR
@@ -23,8 +23,8 @@ CD_BAR_COLOR = 'blue'
 # HEALTH_BAR_COLOR = [(255, 255, 0), (175, 238, 238), (255, 165, 0), (238, 130, 238)]
 HEALTH_BAR_COLOR = [(255, 255, 0), (175, 238, 238), (255, 128, 0), (204, 0, 204)]
 
-HEALTH_BAR_UPPER = 5
-CD_BAR_UPPER = 6
+HEALTH_BAR_UPPER = pg.Vector2(0, -6)
+CD_BAR_UPPER = pg.Vector2(0, -4)
 TEAM_VISION_BLOCK = 8
 VISION_BLOCK_SIZE = 2
 
@@ -59,7 +59,20 @@ CHARACTER_IMAGE: dict[(CharacterType, CharacterState), str] = {
     (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_left.png',
     (CharacterType.MELEE, CharacterState.RIGHT): 'melee_right.png',
     (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_right.png',
-    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png'
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_right.png',
+}
+CHARACTER_ASCENDED_ARMOR_IMAGE: dict[(CharacterType, CharacterState), str] = {
+    (CharacterType.MELEE, CharacterState.LEFT): 'melee_ascended_left.png',
+    (CharacterType.RANGER, CharacterState.LEFT): 'ranger_ascended_left.png',
+    (CharacterType.SNIPER, CharacterState.LEFT): 'sniper_ascended_left.png',
+    (CharacterType.MELEE, CharacterState.RIGHT): 'melee_ascended_right.png',
+    (CharacterType.RANGER, CharacterState.RIGHT): 'ranger_ascended_right.png',
+    (CharacterType.SNIPER, CharacterState.RIGHT): 'sniper_ascended_right.png',
+}
+CHARACTER_ASCENDED_CROWN_IMAGE: dict[CharacterType, str] = {
+    CharacterType.MELEE: 'melee_crown.png',
+    CharacterType.RANGER: 'ranger_crown.png',
+    CharacterType.SNIPER: 'sniper_crown.png',
 }
 
 WEAPON_DIR = 'weapon/'
@@ -75,6 +88,28 @@ BULLET_IMAGE: dict[BulletType, str] = {
     BulletType.SNIPER: 'sniper.png',
     BulletType.RANGER: 'ranger.png',
 }
+
+ASCENDANCE_DIR = 'ascendance/'
+ASCENDANCE_IMAGE: dict[PartyType, dict[AscendanceType, dict[CharacterType, dict[CharacterState, str]]]] = {
+    party: (
+        {
+            character: {
+                state: {
+                    AscendanceType.ARMOR: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_ARMOR_IMAGE[(
+                            character, state)]
+                    ),
+                    AscendanceType.CROWN: os.path.join(
+                        IMAGE_DIR, PARTY_PATH[party], ASCENDANCE_DIR, CHARACTER_ASCENDED_CROWN_IMAGE[character]
+                    )
+                } for state in CharacterState
+            } for character in CharacterType
+        }
+    ) for party in PartyType if party is not PartyType.NEUTRAL
+}
+"""
+structure: ASCENDANCE_IMAGE[party][character][state][ascendance]
+"""
 
 ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
     party: (
@@ -114,15 +149,15 @@ ENTITY_IMAGE: dict[PartyType, dict[EntityType, dict[EntityState, str]]] = {
 structure: ENTITY_IMAGE[party][entity][state]
 """
 # Size for showing
-ENTITY_SIZE: dict[EntityType, dict[EntityState, int]] = {
+ENTITY_SIZE: dict[EntityType, dict[EntityState, tuple[float, float]]] = {
     **{character: {
-        state: 6.25 for state in CharacterState
+        state: (9, 13.2) for state in CharacterState
     } for character in CharacterType},
     **{tower: {
-        None: 10
+        None: (20, 12)
     } for tower in TowerType},
     **{bullet: {
-        None: 2,
+        None: (4, 4),
     } for bullet in BulletType}
 }
 """

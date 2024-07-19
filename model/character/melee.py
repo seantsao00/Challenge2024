@@ -36,7 +36,7 @@ class Melee(Character):
                          const.CharacterType.MELEE, const.CharacterState.LEFT)
         self.__defense: float = 0
 
-    def attack(self, enemy: Entity):
+    def attack(self, enemy: Entity) -> bool:
         now_time = get_model().get_time()
         dist = self.position.distance_to(enemy.position)
         if (self.team != enemy.team
@@ -45,6 +45,9 @@ class Melee(Character):
             get_event_manager().post(EventAttack(attacker=self, victim=enemy,
                                                  damage=self.attribute.attack_damage), enemy.id)
             self._last_attack_time = now_time
+        if dist <= self.attribute.attack_range:
+            return True
+        return False
 
     def take_damage(self, event: EventAttack):
         if not self.vulnerable(event.attacker):
@@ -55,9 +58,15 @@ class Melee(Character):
             self.__defense -= 1
             if self.__defense == 0:
                 self.abilities_time = get_model().get_time()
+                if const.AscendanceType.ARMOR in self.ascendance:
+                    self.ascendance.remove(const.AscendanceType.ARMOR)
         else:
             new_damage = event.attacker.attribute.attack_damage
         self.health -= new_damage
+        if event.attacker.entity_type is const.CharacterType.MELEE or\
+           event.attacker.entity_type is const.CharacterType.RANGER or\
+           event.attacker.entity_type is const.CharacterType.SNIPER:
+            event.attacker.record_attack(min(self.health, event.damage))
         if self.health <= 0:
             self.die()
             if event.attacker.team.party is not const.PartyType.NEUTRAL:
@@ -71,6 +80,7 @@ class Melee(Character):
             return
         log_info(f"[Melee] {self} Cast ability")
         self.abilities_time = now_time
+        self.ascendance.add(const.AscendanceType.ARMOR)
         self.ability()
 
     def manual_cast_ability(self, *args, **kwargs):

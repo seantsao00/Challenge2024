@@ -120,7 +120,7 @@ class Tower:
         """塔的最大血量。"""
 
         self.team_id = _team_id
-        """塔所屬的隊伍編號，編號為 1 至 5 的正整數，超過隊伍數量的數字代表中立，中立塔所屬的 team_id 皆相同。"""
+        """塔所屬的隊伍編號，編號為 0 至場上隊伍總數（最多為 4）的正整數，其中 0 代表中立塔。"""
 
 
 class MapTerrain(IntEnum):
@@ -196,6 +196,11 @@ class API:
     @abstractmethod
     def get_team_id(self) -> int:
         """回傳自己隊伍的編號（`id`）。"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_number_of_teams(self) -> int:
+        """回傳場上隊伍的總數（不包含中立隊伍）。"""
         raise NotImplementedError
 
     @abstractmethod
@@ -346,7 +351,18 @@ class API:
         """
         將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。  
         @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
-        @destination: 移動的目的地。
+        @target: 被攻擊的目標。
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def action_move_and_attack(self, characters: Iterable[Character] | Character, target: Character | Tower) -> None:
+        """
+        將所有列表中的士兵設定為攻擊某個目標。如果是己方傷害、攻擊冷卻還未結束或者是不在攻擊範圍內則不會攻擊。
+        如果目標不在某士兵的攻擊範圍中，則會讓士兵往該目標的方向移動。
+        這個函數會使用內建的尋路，如果大量士兵無法攻擊、必須移動的話可能會耗費大量時間，使用時請注意。 
+        @characters: 士兵的 `list` 或者 `tuple`（任意 `Iterable`）或是一個 Character。  
+        @target: 被攻擊的目標。
         """
         raise NotImplementedError
 
