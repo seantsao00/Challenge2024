@@ -95,7 +95,8 @@ class Model:
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
-        self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls), model_arguments.team_controls)
+        self.party_selector: PartySelector = PartySelector(
+            len(model_arguments.team_controls), model_arguments.team_controls)
         if model_arguments.skip_party_selecting:
             self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
@@ -274,6 +275,7 @@ class Model:
                 if not self.frozen and self.scoreboard_frozen and running_time > const.FROZEN_TIME:
                     self.frozen = True
                     self.chat.send_system("Scoreboard is now frozen!")
+                print([t.points for t in self.teams])
                 # if running_time >= 1:
                 #     ev_manager.post(EventGameOver())
             fps = const.FPS
