@@ -10,7 +10,7 @@
     ],
     "neutral_towers": [
         [136, 231, "ferris_wheel"],
-        [67, 119, "hotel"],
+        [70, 119, "hotel"],
         [202, 118, "pylon"]
     ],
     "images": {
