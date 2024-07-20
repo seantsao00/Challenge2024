@@ -66,6 +66,7 @@ def main(reset):
 
 
 if __name__ == '__main__':
+    random.seed(time.time())
     parser = argparse.ArgumentParser(description='JSON dictionary manager')
     parser.add_argument('-r', '--reset', action='store_true', help='reset', )
     args = parser.parse_args()
