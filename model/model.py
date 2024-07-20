@@ -36,6 +36,7 @@ from model.path_finder import PathFinder
 from model.pause_menu import PauseMenu
 from model.result import Result
 from model.team import NeutralTeam, Team
+from model.vehicle import Vehicle, VehicleManager
 from util import log_critical, log_info
 
 if TYPE_CHECKING:
@@ -53,6 +54,7 @@ class ModelArguments:
     show_path: bool
     show_range: bool
     scoreboard_frozen: bool
+    skip_reveal_animation: bool
 
 
 class Model:
@@ -77,7 +79,7 @@ class Model:
 
         self.global_clock: pg.time.Clock = pg.time.Clock()
         """The clock since program start."""
-        self.__game_clock: Clock
+        self.__game_clock: Clock | None
         """The clock since game start(since player hit START_BUTTON), and will be paused when the game is paused."""
         self.__ticks: int = 0
         self.dt: float
@@ -88,10 +90,12 @@ class Model:
         self.characters: list[Character] = []
         self.chat = Chat()
         self.towers: list[Tower] = []
+        self.vehicle_manager = VehicleManager()
+
         self.map: Map = load_map(os.path.join(const.MAP_DIR, model_arguments.topography))
         self.path_finder: PathFinder = PathFinder(self.map)
         self.grid: Grid = Grid(250, 250)
-        self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls))
+        self.party_selector: PartySelector = PartySelector(len(model_arguments.team_controls), model_arguments.team_controls)
         if model_arguments.skip_party_selecting:
             self.party_selector.select_random_party(True)
         self.teams: list[Team] = []
@@ -106,9 +110,11 @@ class Model:
         self.show_path: bool = model_arguments.show_path
         self.show_range: bool = model_arguments.show_range
         self.scoreboard_frozen: bool = model_arguments.scoreboard_frozen
+        self.skip_reveal_animation: bool = model_arguments.skip_reveal_animation
         self.frozen: bool = False
 
-        self.result: Result = Result(len(model_arguments.team_controls))
+        self.result: Result = Result(len(model_arguments.team_controls),
+                                     model_arguments.skip_reveal_animation)
         self.pause_menu: PauseMenu = PauseMenu()
         self.nyan = Nyan()
         self.ranger_ability = False
@@ -125,7 +131,7 @@ class Model:
         even for the second or more rounds of the game.
         """
 
-        self.__game_clock = Clock()
+        self.__game_clock = None
         self.teams: list[Team] = []
 
         selected_parties = self.party_selector.selected_parties()
@@ -153,6 +159,7 @@ class Model:
 
     def __post_initialize(self, _: EventPostInitialize):
         load_ai(self.__team_files_names)
+        self.__game_clock = Clock()
 
     def __handle_every_tick(self, _: EventEveryTick):
         """
@@ -172,6 +179,8 @@ class Model:
             else:
                 log_critical(
                     f"[API] AI of team {team.team_id + 1} occurs a hard-to-kill timeout. New thread is NOT started.")
+        # if self.__ticks == 0:
+        #     Vehicle(pg.Vector2(50, 0), self.neutral_team, const.VehicleState.FRONT)
 
     def __register_entity(self, event: EventCreateEntity):
         with self.entity_lock:
@@ -227,7 +236,7 @@ class Model:
         """Register every listeners of this object into the event manager."""
         ev_manager = get_event_manager()
         ev_manager.register_listener(EventInitialize, self.__initialize)
-        ev_manager.register_listener(EventInitialize, self.__post_initialize)
+        ev_manager.register_listener(EventPostInitialize, self.__post_initialize)
         ev_manager.register_listener(EventEveryTick, self.__handle_every_tick)
         ev_manager.register_listener(EventQuit, self.__handle_quit)
         ev_manager.register_listener(EventPauseModel, self.__handle_pause)
@@ -245,6 +254,8 @@ class Model:
         ev_manager.register_listener(EventViewShowRangeSwitch, self.change_showrange_enable)
 
     def get_time(self):
+        if self.__game_clock is None:
+            return 0
         return self.__game_clock.get_time()
 
     def run(self):

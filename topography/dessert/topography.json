@@ -1,0 +1,35 @@
+{
+    "name": "dessert",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [22,99],
+        [213, 20],
+        [26,234],
+        [234,228]
+    ],
+    "neutral_towers": [
+        [136, 231, "ferris_wheel"],
+        [70, 119, "hotel"],
+        [202, 118, "pylon"]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": 
+        {
+            "lollipop/lollipop1.png": 63,
+            "lollipop/lollipop2.png": 34,
+            "lollipop/lollipop3.png": 37,
+            "lollipop/lollipop4.png": 117,
+            "lollipop/lollipop5.png": 21,
+            "lollipop/lollipop6.png": 130,
+            "lollipop/lollipop7.png": 244,
+            "lollipop/lollipop8.png": 244,
+            "lollipop/lollipop9.png": 235,
+            "cake_roll.png": 86,
+            "fence.png": 201,
+            "icecream.png": 140,
+            "jello.png": 35
+        }
+    }
+}

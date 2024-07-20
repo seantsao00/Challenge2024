@@ -1,0 +1,22 @@
+{
+    "name": "graph",
+    "width": 250,
+    "height": 250,
+    "fountains": [
+        [54,233],
+        [72,86],
+        [170,50],
+        [238,144]
+    ],
+    "neutral_towers": [
+        [12, 83, "ferris_wheel"],
+        [128, 127, "hotel"],
+        [237, 207, "pylon"]
+    ],
+    "images": {
+        "backgrounds": ["background.png"],
+        "objects": 
+        {
+        }
+    }
+}

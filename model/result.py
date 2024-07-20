@@ -12,19 +12,21 @@ from model.timer import Timer
 
 class Result:
 
-    def __init__(self, number_of_teams: int):
+    def __init__(self, number_of_teams: int, skip_reveal_animation: bool):
+        model = get_model()
         self.__number_of_teams: int = number_of_teams
         self.__rank_of_teams: list = [Team]
         self.__scope_position = const.RESULT_INITIAL_POSITION
         self.__scope_target_index: int = 0  # The index of target team
         self.__scope_target_position: pg.Vector2 = const.RESULT_INITIAL_POSITION
         self.__team_position: pg.Vector2 = const.RESULT_TEAM_POSITION
-        self.__scope_speed: int = const.SCOPE_SPEED
+        self.__scope_speed: int = const.SCOPE_SPEED_FAST if skip_reveal_animation else const.SCOPE_SPEED
         self.__scope_status: const.ScopeStatus = const.ScopeStatus.WAITING_INPUT
         self.__parameter_wandering: float = 0
         self.__final_wandering_parameter: bool = const.is_final_wandering(number_of_teams)
         self.__champion_runnerup_position: pg.Vector2 = None
         self.__champion_runnerup_used: bool = False
+        self.__skip_reveal_animation: bool = skip_reveal_animation
 
     def ranking(self):
         model = get_model()
@@ -62,7 +64,7 @@ class Result:
                     get_event_manager().post(EventResultChoseCharacter())
                 self.__scope_status = const.ScopeStatus.WAITING
                 self.__scope_target_index += 1
-                Timer(interval=const.INTERVAL_WAITING,
+                Timer(interval=const.INTERVAL_WAITING_FAST if self.__skip_reveal_animation else const.INTERVAL_WAITING,
                       function=self.set_toward_wandering, music=True, once=True)
         elif self.__scope_status is const.ScopeStatus.FINAL_WANDERING:
             if self.arrived():
@@ -83,8 +85,11 @@ class Result:
             target_team: Team = self.__rank_of_teams[self.__scope_target_index]
             self.__scope_target_position = self.__team_position[target_team.team_id]
             return
-        if music:
+        if not self.__skip_reveal_animation and music:
             get_event_manager().post(EventResultWandering())
+        if self.__skip_reveal_animation:
+            self.set_toward_target()
+            return
         self.__scope_status = const.ScopeStatus.TOWARD_WANDERING
         self.__parameter_wandering = 0
         self.__scope_target_position = const.wandering_formula(self.__parameter_wandering)

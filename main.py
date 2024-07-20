@@ -79,6 +79,8 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--show-attack-view-range', action='store_true',
                         help='Combination of --show-view-range and --show-attack-range. '
                              'Press key R to toggle this function during games.')
+    parser.add_argument('-s', '--skip-reveal-animation', action='store_true',
+                        help='Skip score reveal animation.')
     parser.add_argument('-v', '--verbose', action='count', default=0,
                         help='Controls verbosity: 0 for critical messages, 1 for warnings, '
                              '2 for informational messages.')
@@ -113,7 +115,8 @@ if __name__ == "__main__":
         skip_party_selecting=args.skip_party_selecting,
         show_path=args.show_path,
         show_range=args.show_attack_view_range or args.show_attack_range or args.show_view_range,
-        scoreboard_frozen=args.frozen
+        scoreboard_frozen=args.frozen,
+        skip_reveal_animation=args.skip_reveal_animation
     ))
     instances_manager.register_model(model)
 

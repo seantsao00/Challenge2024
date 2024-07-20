@@ -83,6 +83,8 @@ class ResultView(ObjectBase):
         img = self.bottom_image
         self.canvas.blit(img, (0, 0))
 
+        max_points = max([t.points for t in model.teams])
+
         team_icon_position: list = [(284, 100), (33, 420), (851, 100), (600, 420)]
         for team in model.teams:
             if self.hit(self.__result.scope_position, self.__scope_destination[team.team_id]) and self.__team_out[team.team_id] == False:
@@ -90,7 +92,7 @@ class ResultView(ObjectBase):
                 self.__team_index += 1
                 self.__team_rank[team.team_id] = self.__team_index
 
-            if self.__team_out[team.team_id] == True and self.__team_rank[team.team_id] < self.__number_of_teams:
+            if self.__team_out[team.team_id] == True and team.points < max_points:
                 img = self.party_images_gray[team.party]
             else:
                 img = self.party_images_nomal[team.party]
@@ -116,13 +118,14 @@ class ResultView(ObjectBase):
 
             if self.__team_out[team.team_id] == True:
                 draw_text(self.canvas, (team_icon_position[team.team_id][0] + 370 / 2) * self.ratio, (
-                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.0f}", 'white', self.__font)
+                    team_icon_position[team.team_id][1] + 305) * self.ratio, f"{team.points:.0f}/{team.stats.units_killed:d}", 'white', self.__font)
 
-                if self.__team_rank[team.team_id] < self.__number_of_teams:
+                if team.points < max_points:
                     img = self.out_image
                     self.canvas.blit(img, transform_coordinate(
                         (team_icon_position[team.team_id][0], team_icon_position[team.team_id][1] + 120), self.ratio))
-                elif self.__team_rank[team.team_id] == self.__number_of_teams:
+                else:
+                    # elif team.points == max_points:
                     img = self.gold_circle_image
                     self.canvas.blit(img, transform_coordinate(
                         (team_icon_position[team.team_id][0] - 102, team_icon_position[team.team_id][1] - 64), self.ratio))

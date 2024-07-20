@@ -16,5 +16,6 @@ from const.pause_menu import *
 from const.score import *
 from const.team import *
 from const.tower import *
+from const.vehicle import *
 from const.visual import *
 from const.window import *

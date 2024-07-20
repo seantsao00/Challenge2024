@@ -489,20 +489,22 @@ class Internal(prototype.API):
 
         success = []
         self.__path_finder.batch_begin()
-        for inter in internals:
-            if self.__is_controllable(inter) and must_move(inter):
-                with inter.moving_lock:
-                    inter.set_move_stop()
-                    path = self.__path_finder.find_path(inter.position, destination)
-                    if path is not None and len(path) > 0:
-                        inter.set_move_position(path)
-                    if path is None:
-                        success.append(False)
-                    else:
-                        success.append(True)
-            else:
-                success.append(False)
-        self.__path_finder.batch_end()
+        try:
+            for inter in internals:
+                if self.__is_controllable(inter) and must_move(inter):
+                    with inter.moving_lock:
+                        inter.set_move_stop()
+                        path = self.__path_finder.find_path(inter.position, destination)
+                        if path is not None and len(path) > 0:
+                            inter.set_move_position(path)
+                        if path is None:
+                            success.append(False)
+                        else:
+                            success.append(True)
+                else:
+                    success.append(False)
+        finally:
+            self.__path_finder.batch_end()
 
         if len(success) == 1:
             return success[0]

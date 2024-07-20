@@ -3,11 +3,13 @@ import json
 import os
 import random
 from dataclasses import dataclass
+from typing import Any
 
 import pygame as pg
 
 import const
 import util
+from model.map.station import SpecialMapStation
 
 
 @dataclass
@@ -20,6 +22,7 @@ class Map:
     fountains: list[tuple[int, int]]
     neutral_towers: list[tuple[tuple[int, int], const.TowerType]]
     map_dir: str
+    special_handler: Any | None
 
     def __post_init__(self):
         self.__rng = random.Random()
@@ -144,6 +147,11 @@ def load_map(map_dir):
         for y, row in enumerate(rows):
             for x, _ in enumerate(row):
                 map_list[x][y] = int(row[x])
+
+    special_handler = None
+    if name == 'station':
+        special_handler = SpecialMapStation()
+
     return Map(
-        name, size, map_list, backgrounds, objects, fountains, neutral_towers, map_dir
+        name, size, map_list, backgrounds, objects, fountains, neutral_towers, map_dir, special_handler
     )

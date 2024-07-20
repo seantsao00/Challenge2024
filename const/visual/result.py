@@ -22,14 +22,16 @@ RESULT_IMAGE_NOMAL: dict[PartyType, str] = {
     PartyType.FBI: os.path.join(IMAGE_DIR, RESULT_DIR, 'fbi.png'),
     PartyType.POLICE: os.path.join(IMAGE_DIR, RESULT_DIR, 'police.png'),
     PartyType.BLACK: os.path.join(IMAGE_DIR, RESULT_DIR, 'black.png'),
-    PartyType.MOURI: os.path.join(IMAGE_DIR, RESULT_DIR, 'mouri.png')
+    PartyType.MOURI: os.path.join(IMAGE_DIR, RESULT_DIR, 'mouri.png'),
+    PartyType.KIDDO: os.path.join(IMAGE_DIR, RESULT_DIR, 'kiddo.png')
 }
 RESULT_IMAGE_GRAY: dict[PartyType, str] = {
     PartyType.JUNIOR: os.path.join(IMAGE_DIR, RESULT_DIR, 'junior_gray.png'),
     PartyType.FBI: os.path.join(IMAGE_DIR, RESULT_DIR, 'fbi_gray.png'),
     PartyType.POLICE: os.path.join(IMAGE_DIR, RESULT_DIR, 'police_gray.png'),
     PartyType.BLACK: os.path.join(IMAGE_DIR, RESULT_DIR, 'black_gray.png'),
-    PartyType.MOURI: os.path.join(IMAGE_DIR, RESULT_DIR, 'mouri_gray.png')
+    PartyType.MOURI: os.path.join(IMAGE_DIR, RESULT_DIR, 'mouri_gray.png'),
+    PartyType.KIDDO: os.path.join(IMAGE_DIR, RESULT_DIR, 'kiddo_gray.png')
 }
 RESULT_TEAM_POSITION: list[pg.Vector2] = [pg.Vector2(
     287, 110), pg.Vector2(36, 430), pg.Vector2(859, 110), pg.Vector2(610, 430)]  # only for scope
@@ -52,7 +54,9 @@ class ScopeStatus(Enum):
 
 
 SCOPE_SPEED = 450
+SCOPE_SPEED_FAST = 1000
 INTERVAL_WAITING = 1
+INTERVAL_WAITING_FAST = 0.1
 WANDERING_PERIOD = 1219 / SCOPE_SPEED
 POSITION_EPSILON = 0.3
 WANDERING_SHIFT: pg.Vector2 = (3, 6)

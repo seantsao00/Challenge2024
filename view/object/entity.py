@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pygame as pg
 
 import const
-from model import Bullet, Character
+from model import Bullet, Character, Vehicle
 from util import load_image
 from view.object.entity_object import EntityObject
 from view.screen_info import ScreenInfo
@@ -77,6 +77,34 @@ class EntityView(EntityObject):
             img = pg.transform.rotate(img, entity.view_rotate)
             self.canvas.blit(img, img.get_rect(center=ScreenInfo.resize_ratio *
                                                (entity.position + const.DRAW_DISPLACEMENT)))
+        elif isinstance(entity, Vehicle):
+            index = (party, entity_type, state)
+            raw_img, displacement = self.__images[index]
+
+            vehicle_displacement = pg.Vector2(0, 0)
+            if entity.state is const.VehicleState.LEFT or entity.state is const.VehicleState.RIGHT:
+                vehicle_displacement = pg.Vector2(0, 5)
+
+            img = pg.Surface((raw_img.width, raw_img.height), pg.SRCALPHA)
+            if entity_type is not const.VehicleType.SCOOTER:
+                pg.transform.threshold(dest_surface=img,
+                                       surface=raw_img,
+                                       threshold=(1, 1, 1, 1),
+                                       search_color=(237, 28, 36),
+                                       set_color=const.VEHICLE_COLOR[entity.entity_type],
+                                       inverse_set=True)  # substitute within
+                pg.transform.threshold(dest_surface=img,
+                                       surface=raw_img,
+                                       threshold=(1, 1, 1, 1),
+                                       search_color=(237, 28, 36),
+                                       set_behavior=2,
+                                       set_color=None,
+                                       inverse_set=False)  # substitute outside
+            else:
+                img = raw_img
+
+            self.canvas.blit(img, ScreenInfo.resize_ratio * (entity.position + vehicle_displacement) -
+                             pg.Vector2(w/2, h) + displacement)
         else:
             index = (party, entity_type, state)
             img, displacement = self.__images[index]

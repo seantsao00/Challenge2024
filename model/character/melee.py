@@ -54,14 +54,14 @@ class Melee(Character):
             return
 
         if self.__defense > 0:
-            new_damage = 0.5 * event.attacker.attribute.attack_damage
+            new_damage = 0.5 * event.damage
             self.__defense -= 1
             if self.__defense == 0:
                 self.abilities_time = get_model().get_time()
                 if const.AscendanceType.ARMOR in self.ascendance:
                     self.ascendance.remove(const.AscendanceType.ARMOR)
         else:
-            new_damage = event.attacker.attribute.attack_damage
+            new_damage = event.damage
         self.health -= new_damage
         if event.attacker.entity_type is const.CharacterType.MELEE or\
            event.attacker.entity_type is const.CharacterType.RANGER or\
