@@ -143,6 +143,7 @@ def every_tick(interface: API):
                 else:
                     interface.action_move_to(unit, visible_character[0].position)
     if len(sniper_list) > 5:
-        set_character_type(interface, info.character_type, info.my_tower[1], 30, 30, 40)
+        if len(info.my_tower) > 1:
+            set_character_type(interface, info.character_type, info.my_tower[1], 30, 30, 40)
         for _ in range(5, len(sniper_list)):
             interface.action_wander(sniper_list[_])
