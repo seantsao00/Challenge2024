@@ -16,13 +16,21 @@ class StageClass(IntEnum):
 
 class AiInfo():
     EXPLORE_TIME_LIMT = 30
-    ATTACK_ENEMY_CHARACTER_NUM = 15
+    
+    ATTACK_ENEMY_CHARACTER_NUM = 17
     ATTACK_ENEMY_CHARACTER_LOWWER = 7
 
-    ATTACK_TOWER_CHARACTER_NUM = 13
+    ATTACK_TOWER_CHARACTER_NUM = 10
     ATTACK_TOWER_CHARACTER_LOWWER = 4
     
+    ATTACK_TOWER_CHARACTER_NUM_SECOND = 14
+    
+    
     TOWER_ATTACK_RANGE = 45
+    
+    WANDERING_CHARACTER_NUM = 25
+    
+    
 
     def __init__(self) -> None:
         self.team_id: int
@@ -77,7 +85,7 @@ def move(api: API, chs: list[Character], des: pg.Vector2):
             api.action_move_to(ch, des)
 
 def change_spawn_by_posibility(api: API, towers: list[Tower] | Tower, melee_p: float, ranger_p: float, siniper_p: float):
-    assert(melee_p + ranger_p + siniper_p == 1)
+    # assert((melee_p + ranger_p + siniper_p))
     if isinstance(towers, Tower):
             towers = [towers]
     spawn_type = random.choices([CharacterClass.MELEE, CharacterClass.RANGER, CharacterClass.SNIPER], \
@@ -92,8 +100,8 @@ def stage_start(api: API):
 
 def stage_explore(api: API):
     change_spawn_by_posibility(api, api.get_owned_towers(), 1, 0, 0)
-
-    for character in api.get_owned_characters():
+    
+    for character in api.get_owned_characters()[3:]:
         api.action_wander(character)
 
     others_towers = [tower for tower in api.get_visible_towers() if not tower.is_fountain]
@@ -137,9 +145,9 @@ def stage_defend_tower(api: API):
 def stage_attack_enemy(api: API):
     for tower in api.get_owned_towers():
         if tower.is_fountain:
-            change_spawn_by_posibility(api, tower, 0.7, 0.3, 0)
+            change_spawn_by_posibility(api, tower, 0.6, 0.3, 0.1)
         else:
-            change_spawn_by_posibility(api, tower, 0.3, 0.2, 0.5)
+            change_spawn_by_posibility(api, tower, 0.2, 0.2, 0.6)
 
     enemies = [character for character in api.get_visible_characters() if character.team_id != info.team_id]
 
@@ -168,7 +176,7 @@ def stage_attack_enemy(api: API):
             #         api.action_attack(ch, nearest_enemy)
             #     else:
             #         move(api, api.get_owned_characters(), info.target_enemy.position)
-    elif len(api.get_owned_characters()) > 20:
+    elif len(api.get_owned_characters()) > info.WANDERING_CHARACTER_NUM:
         api.action_wander(api.get_owned_characters()[:10])
     elif info.defend_tower is not None:
         move(api, api.get_owned_characters(), info.defend_tower.position)
@@ -239,19 +247,19 @@ def every_tick(api: API):
         elif info.target_tower is not None and info.target_tower.team_id != info.team_id:
             info.stage = StageClass.ATTACK_TOWER
 
-        elif info.target_tower is None:
-            min_length: int = 100000
-            min_tower: Tower = None
-            for tower in api.get_visible_towers():
-                if (not tower.is_fountain) and tower.team_id != info.team_id:
-                    if min_length > (tower.position - info.fountain.position).length():
-                        min_length = (tower.position - info.fountain.position).length()
-                        min_tower = tower
-            if min_tower is not None:
-                info.target_tower = min_tower
-                info.stage = StageClass.ATTACK_TOWER
-            else:
-                info.target_tower = None
+        # elif info.target_tower is None:
+        #     min_length: int = 100000
+        #     min_tower: Tower = None
+        #     for tower in api.get_visible_towers():
+        #         if (not tower.is_fountain) and tower.team_id != info.team_id:
+        #             if min_length > (tower.position - info.fountain.position).length():
+        #                 min_length = (tower.position - info.fountain.position).length()
+        #                 min_tower = tower
+        #     if min_tower is not None and len(api.get_owned_characters()) > info.ATTACK_TOWER_CHARACTER_NUM_SECOND:
+        #         info.target_tower = min_tower
+        #         info.stage = StageClass.ATTACK_TOWER
+        #     else:
+        #         info.target_tower = None
 
     else:
         print("wrong stage")
