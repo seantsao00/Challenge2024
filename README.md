@@ -1,4 +1,5 @@
 # Challenge2024
+## CSIE Camp Challenge 2024 幻影的競技場
 
 台大資訊系 2024 資訊營所使用的教學用遊戲原始碼。
 
@@ -56,3 +57,55 @@ isort .
 ## Challenge 2023
 
 [Challenge 2023 repo](https://github.com/Ccucumber12/Challenge2023)
+
+## Credit
+### Game Design & Game Programming
+- 王淇 littlecube8152
+- 李瑞恩 LEbullient
+- 周昀蓉 miachou1225
+- 官毓韋 Achi-kyw
+- 林映辰 MiriamLin
+- 邱翊均 PixelCat31415
+- 洪銘德 shimeming
+- 胡祐誠 HyperSoWeak
+- 高嘉泓 victor0206
+- 常洧丞 WeberChange-dev
+- 張閔堯 Yao1004
+- 曹紹洵 seantsao00
+- 笪瑜庭 iazzenma
+- 陳愷欣 kxcathy
+- 黃睿加 rueijiahuang
+- 楊翔宇 racercode
+- 蔡朝暐 JerryTsai12
+- 鄭又齊 Dandan489
+- 鄭詠堯 yungyaoc
+- 蘇翊軒 brizxz
+
+### Art
+- 李佩恆 pei-heng-li
+- 周昀蓉 miachou1225
+- 邱子芹 cthziun
+- 胡祐誠 HyperSoWeak
+- 笪瑜庭 iazzenma
+- 陳柏靜 ldOwObl
+- 陳愷欣 kxcathy
+- 陳嘉翎 ChiaLingChen
+### Composition & Sound Design
+- 黃睿加 rueijiahuang
+### AI Design & Game Testing
+- 王淇 littlecube8152
+- 王褕立 FHVirus
+- 高嘉泓 victor0206
+- 劉丞浩 CppNoPointer
+- 蔡朝暐 JerryTsai12
+- 鄭詠堯 yungyaoc
+- 蘇翊軒 brizxz
+### Project Management & Quality Assurance
+- 洪銘德 shimeming
+- 曹紹洵 seantsao00
+### Special Thanks
+- 學術負責人　段蓉杉 tuanrongshan
+- 主辦　資工系系學會
+- 一起籌備資訊營的人們與參加資訊營的所有人
+
+以上名字以中文筆畫數排序
